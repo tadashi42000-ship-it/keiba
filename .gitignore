@@ -1,0 +1,22 @@
+# 機密情報 - 絶対にコミットしないこと
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+venv/
+.venv/
+env/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# その他
+*.csv
+!february_s_info.csv
+*.log
+.DS_Store
