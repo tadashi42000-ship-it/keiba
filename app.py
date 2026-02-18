@@ -77,6 +77,69 @@ HORSE_NAME_ALIASES = {
     "ハートボンド": "ダブルハートボンド",  # ハートボンドは本レース未出走。同名言及はダブルハートボンドを指す
 }
 
+# フェブラリーステークス 過去データ・傾向（ドキュメントから抽出・固定データ）
+# レース特徴タブに起動時から表示するためのベースデータ
+RACE_INFO_FROM_DOC = {
+    "コース特徴": (
+        "東京ダート1600m。向こう正面の芝コース内からスタートし、ダートへ進入する「芝スタート」が特徴。"
+        "内枠(1枠)は約97mの芝走行、外枠(8枠)は約127mの芝走行で約30mの差がある。"
+        "外枠ほど高い初速を維持してダートに突入でき、先行争いで戦略的優位に立てる。"
+        "内枠は加速が不十分になりやすく、砂かぶり（キックバック）リスクも高い。直線が長く瞬発力も必要。"
+        "\n\n良馬場平均勝ちタイム約1分35秒4。稍重で1分34秒台と約1秒短縮。"
+        "道悪では逃げ・先行馬が止まりにくく、芝に近い瞬発力勝負になりやすい。"
+    ),
+    "過去の傾向": (
+        "【枠順】1枠は過去10年【0-0-0-19】で0勝。消去候補。"
+        "7枠は単勝回収率207%、8枠153%と外枠人気薄が激走。"
+        "4枠・5枠は複勝率30%と安定した「安全地帯」。\n"
+        "【年齢】5歳馬が【4-4-5-28】と最多勝。7歳以上は【0-4-2-53】で勝利なし。\n"
+        "【ステップ】根岸S組【5-2-3-38】が最多勝。チャンピオンズC組は複勝率47.1%と最高効率。\n"
+        "【血統】過去10年の優勝馬7頭が父ミスタープロスペクター系。\n"
+        "【人気薄】外枠(5〜8枠)の4番人気以下は複勝回収率118%と投資妙味大。"
+        "内枠(1〜4枠)の人気薄は複勝回収率38%と妙味なし。"
+    ),
+    "勝ちやすい馬のタイプ": (
+        "・父ミスタープロスペクター系（エーピーインディ系、ストームキャット系含む配合）\n"
+        "・ゴールドアリュール産駒（コパノリッキー、ゴールドドリームなど実績多数）\n"
+        "・過去に3連勝以上の経験がある馬（過去10年優勝馬9頭に共通）\n"
+        "・4コーナーで5番手以内に位置できる先行馬\n"
+        "・1800m以上からの距離短縮組（全3着以内馬の約7割）\n"
+        "・4〜7枠に入った馬（特に中〜外枠）\n"
+        "・道悪時：芝スタートを得意とする馬、芝勝利経験あり、母系にSS系を持つ馬"
+    ),
+    "苦手な馬のタイプ": (
+        "・1枠の馬（過去10年0勝、消去候補）\n"
+        "・7歳以上の高齢馬（0勝。連対はあるが勝ち切れない）\n"
+        "・1200〜1400mからの距離延長組（東京マイルの直線は甘くない）\n"
+        "・サンデーサイレンス系単体（勝ち切れない傾向、2着が多く連軸向き）\n"
+        "・良馬場時：パワー不足の軽量型"
+    ),
+    "枠順有利": (
+        "4〜7枠が中心。特に7枠・8枠の人気薄は常に警戒が必要（単勝回収率207%・153%）。"
+        "外枠は芝スタートで初速優位、馬群に包まれるリスクも低い。"
+        "人気薄の馬(4番人気以下)は外枠(5〜8枠)の複勝回収率118%と投資効率も高い。"
+        "2014年コパノリッキー(16番人気1着・13番枠)、2020年ケイティブレイブ(16番人気2着・16番枠)など大波乱も外枠から。"
+    ),
+    "枠順不利": (
+        "1枠は過去10年0勝で明確に不利。内枠は芝走行距離が短く加速不十分になりやすい。"
+        "外から被せられると砂かぶり（キックバック）で心理的ストレスとスタミナ浪費のリスク。"
+        "人気薄の馬が1〜4枠に入ると複勝回収率38%と投資妙味も低下。"
+    ),
+    "騎手厩舎傾向": (
+        "東京ダートは直線が長く、瞬発力を引き出す騎乗が重要。"
+        "戸崎圭太騎手はコース攻略法に精通し、脚を溜めた直線勝負を得意とする。"
+        "ルメールら外国人騎手も大舞台で安定した成績を残す傾向。"
+        "ゴールドアリュール産駒を管理する厩舎（美浦・栗東問わず）はこのレースへの適性を熟知。"
+    ),
+    "注目ポイント": (
+        "【馬場状態で評価をシフト】\n"
+        "良馬場→パワー型・実力馬中心（砂が深くスタミナ勝負）。\n"
+        "道悪→芝適性・SS系のスピードタイプが浮上（前が止まりにくく波乱多発）。\n\n"
+        "当日の雨量・馬場状態を必ず確認すること。\n"
+        "また、前走根岸S連対馬か、チャンピオンズC・地方交流G1実績馬の「距離短縮組」を軸とするのが王道。"
+    ),
+}
+
 # ====================
 # YouTube関連関数
 # ====================
@@ -314,10 +377,99 @@ def analyze_video_with_gemini(video):
         return []
 
 
+def analyze_all_videos_with_gemini(videos):
+    """
+    全YouTube動画を1回のGemini API呼び出しでまとめて解析する関数
+    N回→1回に削減することでレート制限を回避し、大幅に高速化する
+
+    引数:
+        videos (list): 動画情報のリスト
+
+    戻り値:
+        list: 抽出された情報のリスト（馬名、プラス情報、マイナス情報、video_url、video_titleを含む辞書）
+    """
+    if not videos or not GEMINI_API_KEY:
+        return []
+
+    # 全動画情報をまとめたテキストを構築
+    videos_text = ""
+    for i, v in enumerate(videos, 1):
+        desc = v.get('description', '') or ''
+        videos_text += f"\n## 動画{i}\nタイトル: {v['title']}\n概要欄: {desc[:600]}\nURL: {v['video_url']}\n"
+
+    try:
+        client = google_genai.Client(api_key=GEMINI_API_KEY)
+
+        prompt = f"""
+あなたは競馬予想の専門家です。以下の{len(videos)}本のYouTube動画それぞれのタイトルと概要欄を読み、
+各馬の詳細な評価情報を抽出してください。
+
+{videos_text}
+
+# 注目すべき有力馬（これら以外の馬名が登場しても抽出してください）
+- ダブルハートボンド（※「ハートボンド」と表記された場合も同じ馬として扱ってください）
+- コスタノヴァ
+- ラムジェット
+
+# 抽出してほしい情報（各馬について）
+プラス情報: 前走・近走の成績、調教・追切の様子、体調・調子、コース・距離適性、騎手・厩舎の強み
+マイナス情報: 前走・近走での敗因、調教不安、コース・距離の不安、枠順・展開の不安
+
+# 出力形式
+以下のJSON形式で**必ず**出力してください（説明文は一切不要）：
+
+```json
+[
+  {{
+    "動画番号": 1,
+    "馬名": "馬の名前",
+    "プラス情報": "具体的な好材料を2～3文で記載",
+    "マイナス情報": "具体的な懸念点を記載（なければ「特になし」）"
+  }}
+]
+```
+
+# 注意事項
+- 各動画につき1馬以上抽出すること（情報がなければタイトルから推測）
+- 1本の動画に複数の馬が登場する場合は複数エントリーを出力（動画番号は同じでOK）
+- 馬名が全く見当たらない動画のみ「全体的な予想」として1件だけ出力
+- JSONのみ出力し、前後に説明文を付けないこと
+"""
+
+        response = client.models.generate_content(
+            model='gemini-2.0-flash',
+            contents=prompt
+        )
+        response_text = response.text or ""
+
+        json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
+        json_text = json_match.group(1) if json_match else response_text.strip()
+        analysis_results = json.loads(json_text)
+
+        # 動画番号に基づいてURLとタイトルを付与
+        video_map = {i + 1: v for i, v in enumerate(videos)}
+        for result in analysis_results:
+            video_num = result.pop("動画番号", 1)
+            video = video_map.get(video_num, videos[0])
+            result['video_url'] = video['video_url']
+            result['video_title'] = video['title']
+
+        return analysis_results
+
+    except json.JSONDecodeError:
+        return []
+    except Exception as e:
+        error_msg = str(e)
+        if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+            raise
+        st.warning(f"⚠️ 動画の一括解析に失敗しました: {type(e).__name__}")
+        return []
+
+
 def create_summary_dataframe(videos):
     """
     YouTube動画情報から馬名ごとに整理したデータフレームを作成する関数
-    Gemini APIを使って動画内容を解析します
+    全動画を1回のGemini API呼び出しで解析（高速化版）
 
     引数:
         videos (list): 動画情報のリスト
@@ -325,61 +477,38 @@ def create_summary_dataframe(videos):
     戻り値:
         tuple: (DataFrame, list) — 動画別整理済みDF と 生の分析結果リスト
     """
-    # データフレーム用のデータを格納するリスト
-    df_data = []
-    all_analysis_results = []  # 馬別集計用に生データも蓄積
-
-    # プログレスバーを表示
-    progress_bar = st.progress(0)
     status_text = st.empty()
+    status_text.info(f"🤖 {len(videos)}本の動画をGeminiで一括解析中...（約20〜30秒）")
 
-    # 各動画を解析
-    for idx, video in enumerate(videos, 1):
-        # 進捗を更新
-        progress = idx / len(videos)
-        progress_bar.progress(progress)
-        status_text.info(f"🤖 動画 {idx}/{len(videos)} を Gemini で解析中...")
+    # 全動画を1回のAPIコールでまとめて解析
+    all_analysis_results = []
+    for retry in range(3):
+        try:
+            all_analysis_results = analyze_all_videos_with_gemini(videos)
+            break
+        except Exception:
+            if retry < 2:
+                wait_sec = (retry + 1) * 10
+                status_text.info(f"⏳ レート制限のため待機中... ({wait_sec}秒後に再試行)")
+                time.sleep(wait_sec)
 
-        # Gemini APIで動画を解析（429レート制限時は画面に出さず最大3回リトライ）
-        analysis_results = []
-        for retry in range(3):
-            try:
-                analysis_results = analyze_video_with_gemini(video)
-                if analysis_results:
-                    break
-            except Exception:
-                # 429エラー（レート制限）→ 待機してリトライ
-                if retry < 2:
-                    wait_sec = (retry + 1) * 8  # 8秒 → 16秒 と段階的に待機
-                    status_text.info(f"⏳ 動画 {idx}/{len(videos)} 待機中... ({wait_sec}秒)")
-                    time.sleep(wait_sec)
-
-        # 生データを蓄積
-        all_analysis_results.extend(analysis_results)
-
-        # 次の動画リクエストまで2秒待機（レート制限を避けるため）
-        if idx < len(videos):
-            time.sleep(2)
-
-        # 解析結果をデータフレーム形式に変換
-        for result in analysis_results:
-            row = {
-                '馬名': result.get('馬名', '不明'),
-                'プラス情報': result.get('プラス情報', '特になし'),
-                'プラス出典': f"[{result['video_title'][:40]}...]({result['video_url']})",
-                'マイナス情報': result.get('マイナス情報', '特になし'),
-                'マイナス出典': f"[{result['video_title'][:40]}...]({result['video_url']})"
-            }
-            df_data.append(row)
-
-    # プログレスバーをクリア
-    progress_bar.empty()
     status_text.empty()
 
-    # データフレームを作成
+    # 解析結果をデータフレーム形式に変換
+    df_data = []
+    for result in all_analysis_results:
+        row = {
+            '馬名': result.get('馬名', '不明'),
+            'プラス情報': result.get('プラス情報', '特になし'),
+            'プラス出典': f"[{result.get('video_title', '')[:40]}...]({result.get('video_url', '')})",
+            'マイナス情報': result.get('マイナス情報', '特になし'),
+            'マイナス出典': f"[{result.get('video_title', '')[:40]}...]({result.get('video_url', '')})"
+        }
+        df_data.append(row)
+
     if df_data:
         df = pd.DataFrame(df_data)
-        st.success(f"✅ 全ての動画の解析が完了しました！（合計 {len(df_data)} 件の情報を抽出）")
+        st.success(f"✅ {len(videos)}本の動画の解析が完了しました！（合計 {len(df_data)} 件の情報を抽出）")
     else:
         df = pd.DataFrame(columns=['馬名', 'プラス情報', 'プラス出典', 'マイナス情報', 'マイナス出典'])
         st.warning("⚠️ 解析結果が空です。Gemini APIキーが設定されているか確認してください。")
@@ -1460,35 +1589,12 @@ def display_main_content(df):
 
         st.markdown("---")
 
-        # ===== Section 3: Gemini Web検索でレース特徴を取得 =====
-        st.markdown("#### 🏟️ Gemini レース特徴分析（Web検索）")
-
-        col_race_btn1, col_race_btn2 = st.columns(2)
-        with col_race_btn1:
-            if st.button("🔍 Geminiでレース特徴を分析", type="primary", key="btn_race_gemini"):
-                extra = ""
-                if 'race_characteristics' in st.session_state:
-                    for v in st.session_state['race_characteristics'].values():
-                        extra += v + "\n"
-                with st.spinner("フェブラリーステークスの特徴をWeb検索・分析中...（1〜2分かかります）"):
-                    for retry in range(3):
-                        try:
-                            race_info = get_race_characteristics_with_gemini(extra[:2000])
-                            break
-                        except Exception:
-                            if retry < 2:
-                                time.sleep((retry + 1) * 8)
-                            else:
-                                race_info = {}
-                if race_info:
-                    st.session_state['race_characteristics'] = race_info
-                    st.success("✅ レース特徴の分析が完了しました。「レース特徴・傾向」タブで確認できます。")
-                else:
-                    st.warning("⚠️ レース特徴の取得に失敗しました")
-        with col_race_btn2:
-            if st.button("🗑️ レース特徴をリセット", key="btn_race_reset"):
-                st.session_state.pop('race_characteristics', None)
-                st.rerun()
+        # ===== Section 3: レース特徴リセット =====
+        st.markdown("#### 🏟️ レース特徴・傾向")
+        st.info("💡 レース特徴はアプリ起動時に自動表示されます。「レース特徴・傾向」タブで確認してください。")
+        if st.button("🔄 レース特徴をWeb再取得", key="btn_race_refresh"):
+            st.session_state.pop('race_characteristics', None)
+            st.rerun()
 
     # ===== タブ4: 総合予想（馬別） =====
     with tab4:
@@ -1825,6 +1931,18 @@ def main():
     if not check_password():
         st.stop()
         return
+
+    # レース特徴を自動初期化（初回のみ）
+    # まずドキュメントデータで即時表示し、その後Web検索で2026年情報を補完
+    if 'race_characteristics' not in st.session_state:
+        st.session_state['race_characteristics'] = RACE_INFO_FROM_DOC.copy()
+        try:
+            with st.spinner("📡 レース特徴をWeb検索で補完中...（初回のみ）"):
+                web_info = get_race_characteristics_with_gemini()
+            if web_info:
+                st.session_state['race_characteristics'].update(web_info)
+        except Exception:
+            pass  # 失敗してもドキュメントデータは表示される
 
     # サイドバーを表示
     display_sidebar()
