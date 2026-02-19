@@ -1277,6 +1277,81 @@ def display_main_content(df):
     引数:
         df (DataFrame): 競馬データ
     """
+    # カスタムCSS
+    st.markdown("""
+<style>
+.merit-card {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    border-left: 5px solid #28a745;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 6px 0;
+    color: #155724;
+    font-size: 0.93rem;
+    line-height: 1.6;
+}
+.demerit-card {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    border-left: 5px solid #dc3545;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 6px 0;
+    color: #721c24;
+    font-size: 0.93rem;
+    line-height: 1.6;
+}
+.verdict-buy {
+    background: linear-gradient(90deg, #28a745, #34ce57);
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.15rem;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+}
+.verdict-pass {
+    background: linear-gradient(90deg, #dc3545, #e85d6a);
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 1.15rem;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+}
+.verdict-watch {
+    background: linear-gradient(90deg, #e6a817, #f0c040);
+    border-radius: 10px;
+    padding: 10px 20px;
+    color: #333;
+    font-weight: bold;
+    font-size: 1.15rem;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+}
+.section-header-merit {
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #155724;
+    border-bottom: 2px solid #28a745;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+}
+.section-header-demerit {
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #721c24;
+    border-bottom: 2px solid #dc3545;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+}
+</style>
+""", unsafe_allow_html=True)
+
     # タイトル
     st.title("🏆 第43回 フェブラリーステークス（G1）")
     st.subheader("2026年2月22日 東京競馬場 ダート1600m")
@@ -1623,45 +1698,57 @@ def display_main_content(df):
             for i, htab in enumerate(horse_tabs):
                 row = horse_df.iloc[i]
                 with htab:
+                    merit_text = row.get('メリット', '（情報なし）')
+                    demerit_text = row.get('デメリット', '（情報なし）')
                     source_count = row.get('情報源数', 0)
-                    st.caption(f"情報源数: {source_count}件")
 
+                    # メリット・デメリットの件数を数えてバナー判定
+                    merit_items = [x.strip() for x in re.split(r'\n\n(?=\[\d+\])', merit_text.strip()) if x.strip() and x.strip() != '（情報なし）']
+                    demerit_items = [x.strip() for x in re.split(r'\n\n(?=\[\d+\])', demerit_text.strip()) if x.strip() and x.strip() != '（情報なし）']
+                    m_cnt = len(merit_items)
+                    d_cnt = len(demerit_items)
+
+                    # 買い/様子見/消し 判定バナー
+                    col_v, col_src = st.columns([3, 1])
+                    with col_v:
+                        if m_cnt >= 3 and d_cnt <= 1:
+                            st.markdown('<div class="verdict-buy">🟢 買い材料多数 — 有力候補</div>', unsafe_allow_html=True)
+                        elif d_cnt >= 3 and m_cnt <= 1:
+                            st.markdown('<div class="verdict-pass">🔴 消し材料多数 — 評価注意</div>', unsafe_allow_html=True)
+                        else:
+                            st.markdown('<div class="verdict-watch">🟡 様子見 — 情報を確認して判断</div>', unsafe_allow_html=True)
+                    with col_src:
+                        st.metric("情報源数", f"{source_count}件", label_visibility="visible")
+
+                    st.markdown("---")
                     col_merit, col_demerit = st.columns(2)
 
                     with col_merit:
-                        st.markdown("### ✅ メリット（好材料）")
-                        merit_text = row.get('メリット', '（情報なし）')
-                        if merit_text and merit_text != '（情報なし）':
-                            items = re.split(r'\n\n(?=\[\d+\])', merit_text.strip())
-                            for item in items:
-                                item = item.strip()
-                                if item:
-                                    clean = re.sub(r'^\[\d+\]\s*', '', item)
-                                    st.success(clean)
+                        st.markdown('<div class="section-header-merit">✅ 買い材料（好材料）</div>', unsafe_allow_html=True)
+                        if merit_items:
+                            for idx_m, item in enumerate(merit_items, 1):
+                                clean = re.sub(r'^\[\d+\]\s*', '', item)
+                                st.markdown(f'<div class="merit-card"><b>#{idx_m}</b>　{clean}</div>', unsafe_allow_html=True)
                         else:
                             st.info("情報がありませんでした")
 
                         merit_src = row.get('メリット出典', '（なし）')
                         if merit_src and merit_src != '（なし）':
-                            with st.expander("📎 メリットの出典"):
+                            with st.expander("📎 出典を見る"):
                                 st.markdown(merit_src)
 
                     with col_demerit:
-                        st.markdown("### ⚠️ デメリット（懸念点）")
-                        demerit_text = row.get('デメリット', '（情報なし）')
-                        if demerit_text and demerit_text != '（情報なし）':
-                            items = re.split(r'\n\n(?=\[\d+\])', demerit_text.strip())
-                            for item in items:
-                                item = item.strip()
-                                if item:
-                                    clean = re.sub(r'^\[\d+\]\s*', '', item)
-                                    st.error(clean)
+                        st.markdown('<div class="section-header-demerit">⚠️ 消し材料（懸念点）</div>', unsafe_allow_html=True)
+                        if demerit_items:
+                            for idx_d, item in enumerate(demerit_items, 1):
+                                clean = re.sub(r'^\[\d+\]\s*', '', item)
+                                st.markdown(f'<div class="demerit-card"><b>#{idx_d}</b>　{clean}</div>', unsafe_allow_html=True)
                         else:
                             st.info("懸念点の情報がありませんでした")
 
                         demerit_src = row.get('デメリット出典', '（なし）')
                         if demerit_src and demerit_src != '（なし）':
-                            with st.expander("📎 デメリットの出典"):
+                            with st.expander("📎 出典を見る"):
                                 st.markdown(demerit_src)
 
             st.markdown("---")
@@ -1679,7 +1766,6 @@ def display_main_content(df):
     # ===== タブ5: レース特徴・傾向 =====
     with tab5:
         st.markdown("### 🏟️ フェブラリーステークス レース特徴・傾向")
-        st.info("💡 「情報入力」タブでGemini分析またはドキュメント分析を実行すると、ここに結果が表示されます。")
 
         if 'race_characteristics' in st.session_state and st.session_state['race_characteristics']:
             race_info = st.session_state['race_characteristics']
