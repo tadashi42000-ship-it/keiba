@@ -188,7 +188,7 @@ def search_youtube_videos(keyword, max_results=5):
             part='id,snippet',  # 取得する情報（IDとスニペット）
             maxResults=max_results,  # 最大取得件数
             type='video',  # 動画のみ検索
-            order='date',  # 新しい順に並べる
+            order='viewCount',  # 再生回数が多い順に並べる
             regionCode='JP',  # 日本向けの結果を優先
             relevanceLanguage='ja'  # 日本語の動画を優先
         ).execute()
