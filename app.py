@@ -1946,7 +1946,7 @@ def display_main_content(df):
             )
 
         # 検索ボタン
-        if st.button("🔍 YouTube検索", type="primary", key="yt_detail_search"):
+        if st.button("🔍 YouTube検索＋Gemini解析", type="primary", key="yt_detail_search"):
             with st.spinner("YouTube動画を検索中..."):
                 videos = search_youtube_videos(search_keyword, max_videos)
                 before_filter = len(videos)
@@ -1958,6 +1958,26 @@ def display_main_content(df):
                 if filtered_out > 0:
                     msg += f"（{filtered_out}件は無関係として除外）"
                 st.success(msg)
+                # バッチ解析（ページ再描画のたびにAPIを呼ばないよう検索時に一括実行）
+                horse_names = get_all_horse_names()
+                _status = st.empty()
+                _status.info(f"📄 {len(videos)}本の字幕を取得中...")
+                for v in videos:
+                    v['transcript'] = fetch_video_transcript(v['video_id'])
+                tc = sum(1 for v in videos if v.get('transcript'))
+                _status.info(f"🤖 {tc}/{len(videos)}本の字幕取得完了。Geminiで解析中...")
+                raw = analyze_all_videos_with_gemini(videos, horse_names=horse_names)
+                # video_id → 解析結果リスト のマップに変換
+                yt_analysis_map = {}
+                for res in raw:
+                    vid = res.get('video_url', '')
+                    for v in videos:
+                        if v['video_url'] == vid:
+                            yt_analysis_map.setdefault(v['video_id'], []).append(res)
+                            break
+                st.session_state['yt_detail_analysis'] = yt_analysis_map
+                _status.empty()
+                st.success(f"✅ Gemini解析完了（{len(raw)}件の馬情報を抽出）")
             else:
                 st.error("❌ 動画を取得できませんでした")
 
@@ -2030,9 +2050,8 @@ def display_main_content(df):
                         st.write(video['description'] if video['description'] else "（概要なし）")
 
                 st.markdown("#### 🔍 Gemini 馬別分析（字幕・概要欄から抽出）")
-                with st.spinner("Geminiで解析中..."):
-                    analysis_results = analyze_video_with_gemini(video)
-
+                yt_map = st.session_state.get('yt_detail_analysis', {})
+                analysis_results = yt_map.get(video['video_id'], [])
                 if analysis_results:
                     for res in analysis_results:
                         horse_name = res.get('馬名', '')
@@ -2054,7 +2073,7 @@ def display_main_content(df):
                             else:
                                 st.caption("（抽出なし）")
                 else:
-                    st.caption("（この動画からは情報を抽出できませんでした）")
+                    st.caption("（🔍 YouTube検索＋Gemini解析 ボタンを押すと分析結果が表示されます）")
 
         else:
             st.info("👆 上の「🔍 YouTube検索」ボタンをクリックして動画を取得してください（または「総合予想（馬別）」タブで一括検索すると動画も取得されます）")
