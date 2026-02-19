@@ -242,11 +242,13 @@ def fetch_video_transcript(video_id, max_chars=2000):
     YouTube動画の字幕（自動生成含む）を取得して文字列で返す。
     日本語字幕を優先し、なければ英語を試みる。
     取得失敗時は空文字列を返す（descriptionにフォールバック）。
+    youtube-transcript-api v1.x 対応（api.fetch() / s.text を使用）。
     """
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
-        segments = YouTubeTranscriptApi.get_transcript(video_id, languages=['ja', 'en'])
-        text = ' '.join(s['text'] for s in segments)
+        api = YouTubeTranscriptApi()
+        fetched = api.fetch(video_id, languages=['ja', 'en'])
+        text = ' '.join(s.text for s in fetched)
         return text[:max_chars]
     except Exception:
         return ""
@@ -326,19 +328,28 @@ def analyze_video_with_gemini(video):
         return []
 
     try:
+        # 字幕を取得して使用（概要欄よりも豊富な情報が含まれる）
+        transcript = fetch_video_transcript(video['video_id'])
+        if transcript:
+            content_label = "字幕（音声内容）"
+            content = transcript
+        else:
+            content_label = "概要欄"
+            content = video.get('description', '') or ''
+
         # 新しいSDK（google-genai）でクライアントを作成
         # 古いSDK（google-generativeai）とは書き方が異なります
         client = google_genai.Client(api_key=GEMINI_API_KEY)
 
         # Gemini に送るプロンプトを作成（前走成績・調教・調子を具体的に抽出）
         prompt = f"""
-あなたは競馬予想の専門家です。以下のYouTube動画のタイトルと概要欄を読み、各馬の詳細な評価情報を抽出してください。
+あなたは競馬予想の専門家です。以下のYouTube動画のタイトルと{content_label}を読み、各馬の詳細な評価情報を抽出してください。
 
 # 動画タイトル
 {video['title']}
 
-# 概要欄
-{video['description']}
+# {content_label}
+{content}
 
 # 注目すべき有力馬（これら以外の馬名が登場しても抽出してください）
 - ダブルハートボンド（※「ハートボンド」と表記された場合も同じ馬として扱ってください）
@@ -1622,8 +1633,8 @@ def display_main_content(df):
             combined_max_videos = st.number_input(
                 "YouTube件数",
                 min_value=1,
-                max_value=20,
-                value=10,
+                max_value=30,
+                value=15,
                 key="combined_max_videos"
             )
         with col_s3:
