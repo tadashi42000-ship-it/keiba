@@ -491,7 +491,7 @@ def analyze_all_videos_with_gemini(videos, horse_names=None):
 def create_summary_dataframe(videos):
     """
     YouTube動画情報から馬名ごとに整理したデータフレームを作成する関数
-    全動画を1回のGemini API呼び出しで解析（高速化版）
+    動画を10件ずつのバッチに分割してGemini APIを呼び出す（タイムアウト防止）
 
     引数:
         videos (list): 動画情報のリスト
@@ -499,19 +499,28 @@ def create_summary_dataframe(videos):
     戻り値:
         tuple: (DataFrame, list) — 動画別整理済みDF と 生の分析結果リスト
     """
+    BATCH_SIZE = 10
     status_text = st.empty()
-    status_text.info(f"🤖 {len(videos)}本の動画をGeminiで一括解析中...（約20〜30秒）")
+    total = len(videos)
+    num_batches = (total + BATCH_SIZE - 1) // BATCH_SIZE
+    status_text.info(f"🤖 {total}本の動画をGeminiで解析中...（{num_batches}バッチ、約{num_batches * 20}〜{num_batches * 30}秒）")
 
-    # 全動画を1回のAPIコールでまとめて解析
+    # 動画を10件ずつのバッチに分割して解析
     all_analysis_results = []
-    for retry in range(3):
-        try:
-            all_analysis_results = analyze_all_videos_with_gemini(videos)
-            break
-        except Exception:
-            if retry < 2:
-                status_text.info(f"⏳ リトライ中...")
-                time.sleep(2)
+    horse_names = get_all_horse_names()
+    for batch_idx in range(num_batches):
+        batch_start = batch_idx * BATCH_SIZE
+        batch = videos[batch_start:batch_start + BATCH_SIZE]
+        status_text.info(f"🤖 バッチ {batch_idx + 1}/{num_batches}を解析中...（動画{batch_start + 1}〜{batch_start + len(batch)}件目）")
+        for retry in range(3):
+            try:
+                results = analyze_all_videos_with_gemini(batch, horse_names=horse_names)
+                all_analysis_results.extend(results)
+                break
+            except Exception:
+                if retry < 2:
+                    status_text.info(f"⏳ バッチ {batch_idx + 1} リトライ中...")
+                    time.sleep(2)
 
     status_text.empty()
 
