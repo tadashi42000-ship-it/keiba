@@ -1949,9 +1949,15 @@ def display_main_content(df):
         if st.button("🔍 YouTube検索", type="primary", key="yt_detail_search"):
             with st.spinner("YouTube動画を検索中..."):
                 videos = search_youtube_videos(search_keyword, max_videos)
+                before_filter = len(videos)
+                videos = filter_relevant_videos(videos)
             if videos:
                 st.session_state['youtube_videos'] = videos
-                st.success(f"✅ {len(videos)}件の動画を取得しました")
+                filtered_out = before_filter - len(videos)
+                msg = f"✅ {len(videos)}件の動画を取得しました"
+                if filtered_out > 0:
+                    msg += f"（{filtered_out}件は無関係として除外）"
+                st.success(msg)
             else:
                 st.error("❌ 動画を取得できませんでした")
 
@@ -2023,28 +2029,32 @@ def display_main_content(df):
                     with st.expander("📝 概要欄を表示"):
                         st.write(video['description'] if video['description'] else "（概要なし）")
 
-                st.markdown("#### 🔍 重要ポイント抽出")
-                combined_text = video['title'] + "\n" + video['description']
-                plus_keywords = ['プラス', '好材料', '強い', '期待', '注目', '有利', '良化', '好調', '推奨', '本命', '◎', '○']
-                plus_points = extract_key_points(combined_text, plus_keywords)
-                minus_keywords = ['マイナス', '懸念', '不安', '課題', '弱点', '不利', '悪化', '不調', '△', '▲']
-                minus_points = extract_key_points(combined_text, minus_keywords)
+                st.markdown("#### 🔍 Gemini 馬別分析（字幕・概要欄から抽出）")
+                with st.spinner("Geminiで解析中..."):
+                    analysis_results = analyze_video_with_gemini(video)
 
-                col_plus, col_minus = st.columns(2)
-                with col_plus:
-                    st.markdown("**✅ プラス材料**")
-                    if plus_points:
-                        for point in plus_points[:3]:
-                            st.success(f"• {point}")
-                    else:
-                        st.caption("（抽出なし）")
-                with col_minus:
-                    st.markdown("**⚠️ マイナス材料**")
-                    if minus_points:
-                        for point in minus_points[:3]:
-                            st.warning(f"• {point}")
-                    else:
-                        st.caption("（抽出なし）")
+                if analysis_results:
+                    for res in analysis_results:
+                        horse_name = res.get('馬名', '')
+                        plus_info = res.get('プラス情報', '特になし')
+                        minus_info = res.get('マイナス情報', '特になし')
+                        if horse_name and horse_name != '全体的な予想':
+                            st.markdown(f"**🐴 {horse_name}**")
+                        col_plus, col_minus = st.columns(2)
+                        with col_plus:
+                            st.markdown("**✅ プラス材料**")
+                            if plus_info and plus_info != '特になし':
+                                st.success(plus_info)
+                            else:
+                                st.caption("（抽出なし）")
+                        with col_minus:
+                            st.markdown("**⚠️ マイナス材料**")
+                            if minus_info and minus_info != '特になし':
+                                st.warning(minus_info)
+                            else:
+                                st.caption("（抽出なし）")
+                else:
+                    st.caption("（この動画からは情報を抽出できませんでした）")
 
         else:
             st.info("👆 上の「🔍 YouTube検索」ボタンをクリックして動画を取得してください（または「総合予想（馬別）」タブで一括検索すると動画も取得されます）")
