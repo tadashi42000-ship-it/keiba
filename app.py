@@ -141,6 +141,23 @@ RACE_INFO_FROM_DOC = {
 }
 
 # ====================
+# 全出走馬名取得
+# ====================
+
+@st.cache_data
+def get_all_horse_names():
+    """CSVから全出走馬名リストを取得する（キャッシュ付き）"""
+    try:
+        if os.path.exists(CSV_FILE):
+            df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
+            if '馬名' in df.columns:
+                return df['馬名'].dropna().tolist()
+    except Exception:
+        pass
+    return [h['name'] for h in FEATURED_HORSES]
+
+
+# ====================
 # YouTube関連関数
 # ====================
 
@@ -377,13 +394,14 @@ def analyze_video_with_gemini(video):
         return []
 
 
-def analyze_all_videos_with_gemini(videos):
+def analyze_all_videos_with_gemini(videos, horse_names=None):
     """
     全YouTube動画を1回のGemini API呼び出しでまとめて解析する関数
     N回→1回に削減することでレート制限を回避し、大幅に高速化する
 
     引数:
         videos (list): 動画情報のリスト
+        horse_names (list): 全出走馬名リスト（Noneの場合はCSVから自動取得）
 
     戻り値:
         list: 抽出された情報のリスト（馬名、プラス情報、マイナス情報、video_url、video_titleを含む辞書）
@@ -391,11 +409,17 @@ def analyze_all_videos_with_gemini(videos):
     if not videos or not GEMINI_API_KEY:
         return []
 
+    if horse_names is None:
+        horse_names = get_all_horse_names()
+
     # 全動画情報をまとめたテキストを構築
     videos_text = ""
     for i, v in enumerate(videos, 1):
         desc = v.get('description', '') or ''
         videos_text += f"\n## 動画{i}\nタイトル: {v['title']}\n概要欄: {desc[:600]}\nURL: {v['video_url']}\n"
+
+    # 全馬名リストを文字列化
+    all_horses_str = "\n".join([f"- {name}{'（※「ハートボンド」という表記はこの馬を指す）' if name == 'ダブルハートボンド' else ''}" for name in horse_names])
 
     try:
         client = google_genai.Client(api_key=GEMINI_API_KEY)
@@ -406,10 +430,8 @@ def analyze_all_videos_with_gemini(videos):
 
 {videos_text}
 
-# 注目すべき有力馬（これら以外の馬名が登場しても抽出してください）
-- ダブルハートボンド（※「ハートボンド」と表記された場合も同じ馬として扱ってください）
-- コスタノヴァ
-- ラムジェット
+# フェブラリーステークス2026 全出走馬リスト（これら全馬について情報を探してください）
+{all_horses_str}
 
 # 抽出してほしい情報（各馬について）
 プラス情報: 前走・近走の成績、調教・追切の様子、体調・調子、コース・距離適性、騎手・厩舎の強み
@@ -535,14 +557,17 @@ def search_web_articles(query, max_articles=5):
         grounding_tool = genai_types.Tool(google_search=genai_types.GoogleSearch())
         config = genai_types.GenerateContentConfig(tools=[grounding_tool])
 
+        all_horse_names = get_all_horse_names()
+        horses_str = "、".join(all_horse_names)
         prompt = f"""
 フェブラリーステークス2026の予想・各馬分析記事を検索してください。
 クエリ: {query}
 
-各馬について、競馬評論家やメディアはどのような評価をしていますか？
+出走馬: {horses_str}
+
+上記全馬について、競馬評論家やメディアはどのような評価をしていますか？
 プラス材料（好材料・強み）とマイナス材料（懸念点・不安材料）を中心に、
-各馬の評価を日本語で詳しくまとめてください。
-特に以下の馬について詳しく：ダブルハートボンド、コスタノヴァ、ラムジェット
+できるだけ多くの馬について評価を日本語で詳しくまとめてください。
 """
         response = client.models.generate_content(
             model='gemini-2.0-flash',
@@ -608,7 +633,8 @@ def analyze_web_article_with_gemini(article_info):
     if not GEMINI_API_KEY:
         return []
 
-    horse_list_str = "\n".join([f"- {h['name']}" for h in FEATURED_HORSES])
+    all_horse_names = get_all_horse_names()
+    horse_list_str = "\n".join([f"- {name}" for name in all_horse_names])
 
     try:
         client = google_genai.Client(api_key=GEMINI_API_KEY)
@@ -824,6 +850,7 @@ def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
 def fetch_and_analyze_web_articles(queries):
     """
     複数クエリでWeb記事を検索・解析するオーケストレーター関数
+    全出走馬を4頭ずつグループ化した馬別クエリを自動追加し、全頭分の情報を収集する
 
     引数:
         queries (list): 検索クエリのリスト
@@ -831,6 +858,14 @@ def fetch_and_analyze_web_articles(queries):
     戻り値:
         tuple: (articles_metadata, raw_analysis_results)
     """
+    # 全馬名を4頭ずつグループ化した馬別クエリを自動追加
+    all_horse_names = get_all_horse_names()
+    batch_size = 4
+    for i in range(0, len(all_horse_names), batch_size):
+        batch = all_horse_names[i:i + batch_size]
+        horses_str = " ".join(batch)
+        queries = list(queries) + [f"フェブラリーステークス 2026 {horses_str} 予想 評価 分析"]
+
     all_articles = []
     all_web_raw = []
 
@@ -1053,7 +1088,8 @@ def analyze_document_for_horses(text, source_name):
     if not GEMINI_API_KEY or not text:
         return []
 
-    horse_list_str = "\n".join([f"- {h['name']}" for h in FEATURED_HORSES])
+    all_horse_names = get_all_horse_names()
+    horse_list_str = "\n".join([f"- {name}" for name in all_horse_names])
 
     try:
         client = google_genai.Client(api_key=GEMINI_API_KEY)
