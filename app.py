@@ -510,9 +510,8 @@ def create_summary_dataframe(videos):
             break
         except Exception:
             if retry < 2:
-                wait_sec = (retry + 1) * 10
-                status_text.info(f"⏳ レート制限のため待機中... ({wait_sec}秒後に再試行)")
-                time.sleep(wait_sec)
+                status_text.info(f"⏳ リトライ中...")
+                time.sleep(2)
 
     status_text.empty()
 
@@ -881,9 +880,8 @@ def fetch_and_analyze_web_articles(queries):
                 break
             except Exception:
                 if retry < 2:
-                    wait_sec = (retry + 1) * 8
-                    status_text.info(f"⏳ Web検索待機中... ({wait_sec}秒)")
-                    time.sleep(wait_sec)
+                    status_text.info(f"⏳ Web検索リトライ中...")
+                    time.sleep(2)
 
         # 同じsnippetを複数回解析しないよう最初の1件だけ解析する
         unique_articles = articles[:1] if articles else []
@@ -899,14 +897,10 @@ def fetch_and_analyze_web_articles(queries):
                     break
                 except Exception:
                     if retry < 2:
-                        time.sleep((retry + 1) * 8)
+                        time.sleep(2)
             all_web_raw.extend(results)
-            if a_idx < len(unique_articles) - 1:
-                time.sleep(2)
 
         progress_bar.progress((q_idx + 1) / len(queries))
-        if q_idx < len(queries) - 1:
-            time.sleep(2)
 
     progress_bar.empty()
     status_text.empty()
