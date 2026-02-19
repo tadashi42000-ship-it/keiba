@@ -222,6 +222,36 @@ def search_youtube_videos(keyword, max_results=5):
         return []
 
 
+def filter_relevant_videos(videos):
+    """
+    フェブラリーステークス関連の動画のみに絞り込む関数。
+    タイトルまたは概要欄の先頭200文字に「フェブラリー」を含むものだけを残す。
+    フィルタ後に0件になった場合はフォールバックとして全件返す。
+    """
+    relevant = [
+        v for v in videos
+        if 'フェブラリー' in v['title']
+        or 'フェブラリー' in (v.get('description', '') or '')[:200]
+    ]
+    return relevant if relevant else videos
+
+
+@st.cache_data(ttl=3600)
+def fetch_video_transcript(video_id, max_chars=2000):
+    """
+    YouTube動画の字幕（自動生成含む）を取得して文字列で返す。
+    日本語字幕を優先し、なければ英語を試みる。
+    取得失敗時は空文字列を返す（descriptionにフォールバック）。
+    """
+    try:
+        from youtube_transcript_api import YouTubeTranscriptApi
+        segments = YouTubeTranscriptApi.get_transcript(video_id, languages=['ja', 'en'])
+        text = ' '.join(s['text'] for s in segments)
+        return text[:max_chars]
+    except Exception:
+        return ""
+
+
 def extract_key_points(text, keywords):
     """
     テキストから指定したキーワードを含む文を抽出する関数
@@ -416,7 +446,19 @@ def analyze_all_videos_with_gemini(videos, horse_names=None):
     videos_text = ""
     for i, v in enumerate(videos, 1):
         desc = v.get('description', '') or ''
-        videos_text += f"\n## 動画{i}\nタイトル: {v['title']}\n概要欄: {desc[:600]}\nURL: {v['video_url']}\n"
+        transcript = v.get('transcript', '') or ''
+        if transcript:
+            content_label = "字幕（音声内容）"
+            content = transcript  # 最大2000文字
+        else:
+            content_label = "概要欄"
+            content = desc[:600]
+        videos_text += (
+            f"\n## 動画{i}\n"
+            f"タイトル: {v['title']}\n"
+            f"{content_label}: {content}\n"
+            f"URL: {v['video_url']}\n"
+        )
 
     # 全馬名リストを文字列化
     all_horses_str = "\n".join([f"- {name}{'（※「ハートボンド」という表記はこの馬を指す）' if name == 'ダブルハートボンド' else ''}" for name in horse_names])
@@ -425,7 +467,7 @@ def analyze_all_videos_with_gemini(videos, horse_names=None):
         client = google_genai.Client(api_key=GEMINI_API_KEY)
 
         prompt = f"""
-あなたは競馬予想の専門家です。以下の{len(videos)}本のYouTube動画それぞれのタイトルと概要欄を読み、
+あなたは競馬予想の専門家です。以下の{len(videos)}本のYouTube動画それぞれのタイトルと内容（字幕または概要欄）を読み、
 各馬の詳細な評価情報を抽出してください。
 
 {videos_text}
@@ -503,7 +545,13 @@ def create_summary_dataframe(videos):
     status_text = st.empty()
     total = len(videos)
     num_batches = (total + BATCH_SIZE - 1) // BATCH_SIZE
-    status_text.info(f"🤖 {total}本の動画をGeminiで解析中...（{num_batches}バッチ、約{num_batches * 20}〜{num_batches * 30}秒）")
+
+    # 字幕（トランスクリプト）を事前取得（キャッシュ付き）
+    status_text.info(f"📄 {total}本の字幕を取得中...（初回のみ）")
+    for v in videos:
+        v['transcript'] = fetch_video_transcript(v['video_id'])
+    transcript_count = sum(1 for v in videos if v.get('transcript'))
+    status_text.info(f"📄 {transcript_count}/{total}本の字幕を取得しました。Gemini解析を開始します...")
 
     # 動画を10件ずつのバッチに分割して解析
     all_analysis_results = []
@@ -1590,10 +1638,16 @@ def display_main_content(df):
         if st.button("🔍 YouTube + Web 一括検索", type="primary", key="combined_search"):
             st.info("⏳ YouTube + Web の解析には1〜2分程度かかります。しばらくお待ちください。")
 
-            # Phase 1: YouTube検索
+            # Phase 1: YouTube検索 + ノイズ除去
             with st.spinner("YouTube動画を検索中..."):
                 videos = search_youtube_videos(combined_keyword, combined_max_videos)
-            st.metric("YouTube動画", f"{len(videos)}件取得")
+                before_filter = len(videos)
+                videos = filter_relevant_videos(videos)
+            filtered_out = before_filter - len(videos)
+            label = f"{len(videos)}件取得"
+            if filtered_out > 0:
+                label += f"（{filtered_out}件は無関係として除外）"
+            st.metric("YouTube動画", label)
 
             # Phase 2: YouTube動画解析
             st.markdown("#### YouTube動画を解析中...")
