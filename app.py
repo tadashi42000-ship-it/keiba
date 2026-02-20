@@ -945,13 +945,28 @@ def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
         """馬名の表記揺れをHORSE_NAME_ALIASESで正規化する"""
         return HORSE_NAME_ALIASES.get(name, name)
 
+    def as_text(value):
+        """Geminiの出力揺れ（str/list/None）を安全に文字列化する。"""
+        if value is None:
+            return ""
+        if isinstance(value, str):
+            return value.strip()
+        if isinstance(value, list):
+            parts = [str(v).strip() for v in value if str(v).strip()]
+            return " / ".join(parts).strip()
+        if isinstance(value, dict):
+            return json.dumps(value, ensure_ascii=False).strip()
+        return str(value).strip()
+
     # YouTube結果を処理
     for item in youtube_results:
-        horse = normalize_horse_name(item.get("馬名", "不明"))
-        plus = item.get("プラス情報", "").strip()
-        minus = item.get("マイナス情報", "").strip()
-        url = item.get("video_url", "")
-        title = item.get("video_title", "YouTube動画")
+        if not isinstance(item, dict):
+            continue
+        horse = normalize_horse_name(as_text(item.get("馬名", "不明")) or "不明")
+        plus = as_text(item.get("プラス情報", ""))
+        minus = as_text(item.get("マイナス情報", ""))
+        url = as_text(item.get("video_url", ""))
+        title = as_text(item.get("video_title", "YouTube動画")) or "YouTube動画"
 
         if plus and plus not in ("特になし", ""):
             horse_data[horse]["メリット_items"].append(plus)
@@ -962,11 +977,13 @@ def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
 
     # Web記事結果を処理
     for item in web_results:
-        horse = normalize_horse_name(item.get("馬名", "不明"))
-        plus = item.get("プラス情報", "").strip()
-        minus = item.get("マイナス情報", "").strip()
-        url = item.get("source_url", "")
-        title = item.get("source_title", "Web記事")
+        if not isinstance(item, dict):
+            continue
+        horse = normalize_horse_name(as_text(item.get("馬名", "不明")) or "不明")
+        plus = as_text(item.get("プラス情報", ""))
+        minus = as_text(item.get("マイナス情報", ""))
+        url = as_text(item.get("source_url", ""))
+        title = as_text(item.get("source_title", "Web記事")) or "Web記事"
 
         if plus and plus not in ("特になし", ""):
             horse_data[horse]["メリット_items"].append(plus)
@@ -977,10 +994,12 @@ def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
 
     # ドキュメント結果を処理
     for item in doc_results:
-        horse = normalize_horse_name(item.get("馬名", "不明"))
-        plus = item.get("プラス情報", "").strip()
-        minus = item.get("マイナス情報", "").strip()
-        title = item.get("source_title", "アップロードドキュメント")
+        if not isinstance(item, dict):
+            continue
+        horse = normalize_horse_name(as_text(item.get("馬名", "不明")) or "不明")
+        plus = as_text(item.get("プラス情報", ""))
+        minus = as_text(item.get("マイナス情報", ""))
+        title = as_text(item.get("source_title", "アップロードドキュメント")) or "アップロードドキュメント"
 
         if plus and plus not in ("特になし", ""):
             horse_data[horse]["メリット_items"].append(plus)
@@ -2033,6 +2052,28 @@ div[data-testid="metric-container"] {
 </div>
 """, unsafe_allow_html=True)
 
+    def get_active_race_df(source_df: pd.DataFrame) -> pd.DataFrame:
+        """
+        出走取消馬を除外したDataFrameを返す。
+        馬番が1頭でも確定している場合のみ、馬番欠損行を除外する。
+        """
+        if source_df is None or source_df.empty:
+            return source_df
+        if '馬番' not in source_df.columns:
+            return source_df.copy()
+
+        umaban_num = pd.to_numeric(source_df['馬番'], errors='coerce')
+        # 出走確定前（全行欠損）では除外しない
+        if not umaban_num.notna().any():
+            return source_df.copy()
+
+        return source_df[umaban_num.notna()].copy().reset_index(drop=True)
+
+    df_active = get_active_race_df(df)
+    active_horse_names = set(df_active['馬名'].astype(str).tolist()) if (
+        df_active is not None and not df_active.empty and '馬名' in df_active.columns
+    ) else set()
+
     # タブを作成
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📋 出馬表",
@@ -2047,9 +2088,9 @@ div[data-testid="metric-container"] {
         st.markdown("### 📊 出走予定馬一覧")
 
         # データが空でないか確認
-        if df is not None and not df.empty:
+        if df_active is not None and not df_active.empty:
             # 馬番（CSV保存済み）でソート → 枠順と一致
-            df_display = df.copy()
+            df_display = df_active.copy()
             if '馬番' in df_display.columns:
                 df_display['_馬番_num'] = pd.to_numeric(df_display['馬番'], errors='coerce')
                 df_display = df_display.sort_values('_馬番_num', na_position='last')
@@ -2093,16 +2134,16 @@ div[data-testid="metric-container"] {
             col1, col2, col3 = st.columns(3)
 
             with col1:
-                st.metric("出走頭数", f"{len(df)}頭")
+                st.metric("出走頭数", f"{len(df_active)}頭")
 
             with col2:
                 # オッズが数値の場合の最低オッズ（存在する場合）
-                if 'オッズ' in df.columns:
+                if 'オッズ' in df_active.columns:
                     st.metric("データ取得日", datetime.now().strftime("%Y年%m月%d日"))
 
             with col3:
-                if '騎手' in df.columns:
-                    unique_jockeys = df['騎手'].nunique()
+                if '騎手' in df_active.columns:
+                    unique_jockeys = df_active['騎手'].nunique()
                     st.metric("参加騎手数", f"{unique_jockeys}名")
 
         else:
@@ -2160,6 +2201,8 @@ div[data-testid="metric-container"] {
             doc_horse_raw = st.session_state.get('doc_horse_raw', [])
             youtube_raw = []
             horse_df = aggregate_horse_analysis(youtube_raw, web_raw, doc_horse_raw)
+            if active_horse_names and not horse_df.empty and '馬名' in horse_df.columns:
+                horse_df = horse_df[horse_df['馬名'].astype(str).isin(active_horse_names)].reset_index(drop=True)
 
             # セッションステートに保存
             st.session_state['horse_df'] = horse_df
@@ -2224,6 +2267,10 @@ div[data-testid="metric-container"] {
                         st.session_state.get('web_raw', []),
                         st.session_state.get('doc_horse_raw', [])
                     )
+                    if active_horse_names and not updated_horse_df.empty and '馬名' in updated_horse_df.columns:
+                        updated_horse_df = updated_horse_df[
+                            updated_horse_df['馬名'].astype(str).isin(active_horse_names)
+                        ].reset_index(drop=True)
                     st.session_state['horse_df'] = updated_horse_df
                     st.success(f"✅ {uploaded_file.name} から {len(new_doc_raw)}件の馬別情報を抽出しました。「総合予想（馬別）」タブで確認できます。")
             else:
@@ -2259,6 +2306,8 @@ div[data-testid="metric-container"] {
 
         if 'horse_df' in st.session_state and not st.session_state['horse_df'].empty:
             horse_df = st.session_state['horse_df']
+            if active_horse_names and '馬名' in horse_df.columns:
+                horse_df = horse_df[horse_df['馬名'].astype(str).isin(active_horse_names)].reset_index(drop=True)
             st.success(f"✅ 集計完了: {len(horse_df)}頭分の情報")
 
             # CSVダウンロード
@@ -2274,63 +2323,66 @@ div[data-testid="metric-container"] {
             st.markdown("#### 🐴 馬を選んで詳細を確認")
 
             horse_names = horse_df['馬名'].tolist()
-            horse_tabs = st.tabs(horse_names)
+            if not horse_names:
+                st.info("⚠️ 出走取消馬を除外したため、表示対象の馬がありません。")
+            else:
+                horse_tabs = st.tabs(horse_names)
 
-            for i, htab in enumerate(horse_tabs):
-                row = horse_df.iloc[i]
-                with htab:
-                    merit_text = row.get('メリット', '（情報なし）')
-                    demerit_text = row.get('デメリット', '（情報なし）')
-                    source_count = row.get('情報源数', 0)
+                for i, htab in enumerate(horse_tabs):
+                    row = horse_df.iloc[i]
+                    with htab:
+                        merit_text = row.get('メリット', '（情報なし）')
+                        demerit_text = row.get('デメリット', '（情報なし）')
+                        source_count = row.get('情報源数', 0)
 
-                    # メリット・デメリットの件数を数えてバナー判定
-                    merit_items = [x.strip() for x in re.split(r'\n\n(?=\[\d+\])', merit_text.strip()) if x.strip() and x.strip() != '（情報なし）']
-                    demerit_items = [x.strip() for x in re.split(r'\n\n(?=\[\d+\])', demerit_text.strip()) if x.strip() and x.strip() != '（情報なし）']
-                    m_cnt = len(merit_items)
-                    d_cnt = len(demerit_items)
+                        # メリット・デメリットの件数を数えてバナー判定
+                        merit_items = [x.strip() for x in re.split(r'\n\n(?=\[\d+\])', merit_text.strip()) if x.strip() and x.strip() != '（情報なし）']
+                        demerit_items = [x.strip() for x in re.split(r'\n\n(?=\[\d+\])', demerit_text.strip()) if x.strip() and x.strip() != '（情報なし）']
+                        m_cnt = len(merit_items)
+                        d_cnt = len(demerit_items)
 
-                    # 買い/様子見/消し 判定バナー
-                    col_v, col_src = st.columns([3, 1])
-                    with col_v:
-                        if m_cnt >= 3 and d_cnt <= 1:
-                            st.markdown('<div class="verdict-buy">🟢 買い材料多数 — 有力候補</div>', unsafe_allow_html=True)
-                        elif d_cnt >= 3 and m_cnt <= 1:
-                            st.markdown('<div class="verdict-pass">🔴 消し材料多数 — 評価注意</div>', unsafe_allow_html=True)
-                        else:
-                            st.markdown('<div class="verdict-watch">🟡 様子見 — 情報を確認して判断</div>', unsafe_allow_html=True)
-                    with col_src:
-                        st.metric("情報源数", f"{source_count}件", label_visibility="visible")
+                        # 買い/様子見/消し 判定バナー
+                        col_v, col_src = st.columns([3, 1])
+                        with col_v:
+                            if m_cnt >= 3 and d_cnt <= 1:
+                                st.markdown('<div class="verdict-buy">🟢 買い材料多数 — 有力候補</div>', unsafe_allow_html=True)
+                            elif d_cnt >= 3 and m_cnt <= 1:
+                                st.markdown('<div class="verdict-pass">🔴 消し材料多数 — 評価注意</div>', unsafe_allow_html=True)
+                            else:
+                                st.markdown('<div class="verdict-watch">🟡 様子見 — 情報を確認して判断</div>', unsafe_allow_html=True)
+                        with col_src:
+                            st.metric("情報源数", f"{source_count}件", label_visibility="visible")
 
-                    st.markdown("---")
-                    col_merit, col_demerit = st.columns(2)
+                        st.markdown("---")
+                        col_merit, col_demerit = st.columns(2)
 
-                    with col_merit:
-                        st.markdown('<div class="section-header-merit">✅ 買い材料（好材料）</div>', unsafe_allow_html=True)
-                        if merit_items:
-                            for idx_m, item in enumerate(merit_items, 1):
-                                clean = re.sub(r'^\[\d+\]\s*', '', item)
-                                st.markdown(f'<div class="merit-card"><b>#{idx_m}</b>　{clean}</div>', unsafe_allow_html=True)
-                        else:
-                            st.info("情報がありませんでした")
+                        with col_merit:
+                            st.markdown('<div class="section-header-merit">✅ 買い材料（好材料）</div>', unsafe_allow_html=True)
+                            if merit_items:
+                                for idx_m, item in enumerate(merit_items, 1):
+                                    clean = re.sub(r'^\[\d+\]\s*', '', item)
+                                    st.markdown(f'<div class="merit-card"><b>#{idx_m}</b>　{clean}</div>', unsafe_allow_html=True)
+                            else:
+                                st.info("情報がありませんでした")
 
-                        merit_src = row.get('メリット出典', '（なし）')
-                        if merit_src and merit_src != '（なし）':
-                            with st.expander("📎 出典を見る"):
-                                st.markdown(merit_src)
+                            merit_src = row.get('メリット出典', '（なし）')
+                            if merit_src and merit_src != '（なし）':
+                                with st.expander("📎 出典を見る"):
+                                    st.markdown(merit_src)
 
-                    with col_demerit:
-                        st.markdown('<div class="section-header-demerit">⚠️ 消し材料（懸念点）</div>', unsafe_allow_html=True)
-                        if demerit_items:
-                            for idx_d, item in enumerate(demerit_items, 1):
-                                clean = re.sub(r'^\[\d+\]\s*', '', item)
-                                st.markdown(f'<div class="demerit-card"><b>#{idx_d}</b>　{clean}</div>', unsafe_allow_html=True)
-                        else:
-                            st.info("懸念点の情報がありませんでした")
+                        with col_demerit:
+                            st.markdown('<div class="section-header-demerit">⚠️ 消し材料（懸念点）</div>', unsafe_allow_html=True)
+                            if demerit_items:
+                                for idx_d, item in enumerate(demerit_items, 1):
+                                    clean = re.sub(r'^\[\d+\]\s*', '', item)
+                                    st.markdown(f'<div class="demerit-card"><b>#{idx_d}</b>　{clean}</div>', unsafe_allow_html=True)
+                            else:
+                                st.info("懸念点の情報がありませんでした")
 
-                        demerit_src = row.get('デメリット出典', '（なし）')
-                        if demerit_src and demerit_src != '（なし）':
-                            with st.expander("📎 出典を見る"):
-                                st.markdown(demerit_src)
+                            demerit_src = row.get('デメリット出典', '（なし）')
+                            if demerit_src and demerit_src != '（なし）':
+                                with st.expander("📎 出典を見る"):
+                                    st.markdown(demerit_src)
 
             st.markdown("---")
             if 'web_articles' in st.session_state and st.session_state['web_articles']:
