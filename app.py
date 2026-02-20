@@ -1421,6 +1421,78 @@ def display_sidebar():
 # メインコンテンツ表示関数
 # ====================
 
+def render_horse_table_html(df: pd.DataFrame) -> str:
+    """出馬表をリッチなHTMLテーブルとして生成する。"""
+    WAKU_COLORS = {
+        '1': 'waku-1', '2': 'waku-2', '3': 'waku-3', '4': 'waku-4',
+        '5': 'waku-5', '6': 'waku-6', '7': 'waku-7', '8': 'waku-8',
+    }
+
+    def odds_class(odds_str: str) -> str:
+        try:
+            v = float(str(odds_str).replace(',', ''))
+            if v < 5:     return 'odds-hot'
+            if v < 15:    return 'odds-warm'
+            if v < 50:    return 'odds-normal'
+            return 'odds-long'
+        except Exception:
+            return 'odds-long'
+
+    def safe(val, as_int: bool = False) -> str:
+        s = str(val).strip()
+        if s in ('', 'None', 'nan', 'NaN', '---.-'):
+            return '-'
+        if as_int:
+            try:
+                return str(int(float(s)))
+            except (ValueError, OverflowError):
+                pass
+        return s
+
+    rows_html = []
+    for _, row in df.iterrows():
+        waku  = safe(row.get('枠番', ''), as_int=True)
+        umaban = safe(row.get('馬番', ''), as_int=True)
+        name  = safe(row.get('馬名', ''))
+        seage = safe(row.get('性齢', ''))
+        kin   = safe(row.get('斤量', ''))
+        jockey = safe(row.get('騎手', ''))
+        trainer = safe(row.get('調教師', ''))
+        odds  = safe(row.get('オッズ', ''))
+
+        waku_cls = WAKU_COLORS.get(waku, 'waku-x')
+        waku_cell = f'<span class="waku-badge {waku_cls}">{waku if waku != "-" else "?"}</span>'
+        odds_cell = f'<span class="odds-badge {odds_class(odds)}">{odds if odds != "-" else "---"}</span>'
+
+        rows_html.append(f"""
+<tr>
+  <td>{waku_cell}</td>
+  <td class="umaban-cell">{umaban}</td>
+  <td class="horse-name-cell">{name}</td>
+  <td>{seage}</td>
+  <td>{kin}</td>
+  <td>{jockey}</td>
+  <td>{trainer}</td>
+  <td>{odds_cell}</td>
+</tr>""")
+
+    table = f"""
+<div class="horse-table-wrap">
+<table class="horse-table">
+<thead>
+<tr>
+  <th>枠</th><th>番</th><th>馬名</th><th>性齢</th>
+  <th>斤量</th><th>騎手</th><th>調教師</th><th>単勝オッズ</th>
+</tr>
+</thead>
+<tbody>
+{''.join(rows_html)}
+</tbody>
+</table>
+</div>"""
+    return table
+
+
 def display_main_content(df):
     """
     メインエリアに出馬表と予想シミュレーターを表示する関数
@@ -1428,9 +1500,137 @@ def display_main_content(df):
     引数:
         df (DataFrame): 競馬データ
     """
-    # カスタムCSS
+    # カスタムCSS（グローバルテーマ）
     st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+
+/* ============ 全体テーマ ============ */
+html, body, [class*="css"] { font-family: 'Noto Sans JP', sans-serif; }
+
+/* ============ ヒーローバナー ============ */
+.race-hero {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 40%, #1a3a5c 100%);
+    padding: 28px 36px 22px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.08);
+    position: relative;
+    overflow: hidden;
+}
+.race-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(212,160,23,.18) 0%, transparent 70%);
+}
+.race-hero-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: #d4a017;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.race-hero-title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #f5e6a3;
+    line-height: 1.2;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 8px rgba(0,0,0,.5);
+}
+.race-hero-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    padding: 3px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(231,76,60,.4);
+}
+.race-hero-info {
+    font-size: 0.98rem;
+    color: rgba(220,220,220,.9);
+    letter-spacing: 0.04em;
+}
+.race-hero-info span { margin: 0 8px; opacity: .6; }
+
+/* ============ 出馬表テーブル ============ */
+.horse-table-wrap { overflow-x: auto; border-radius: 12px; }
+.horse-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 5px;
+    font-size: 0.9rem;
+}
+.horse-table thead th {
+    background: #1b263b;
+    color: rgba(255,255,255,.75);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 10px 12px;
+    text-align: center;
+    white-space: nowrap;
+}
+.horse-table thead th:first-child { border-radius: 8px 0 0 8px; }
+.horse-table thead th:last-child  { border-radius: 0 8px 8px 0; }
+.horse-table tbody tr {
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.07);
+    transition: box-shadow .15s, transform .15s;
+}
+.horse-table tbody tr:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,.14);
+    transform: translateY(-1px);
+}
+.horse-table tbody td {
+    padding: 10px 12px;
+    text-align: center;
+    vertical-align: middle;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.horse-table tbody td:first-child { border-left: 1px solid #f0f0f0; border-radius: 8px 0 0 8px; }
+.horse-table tbody td:last-child  { border-right: 1px solid #f0f0f0; border-radius: 0 8px 8px 0; }
+.horse-name-cell { text-align: left !important; font-weight: 700; font-size: 0.95rem; color: #1a1a2e; }
+.umaban-cell { font-weight: 700; color: #333; font-size: 1rem; }
+
+/* 枠番バッジ（日本競馬の伝統的な枠色） */
+.waku-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 50%;
+    font-weight: 900; font-size: 0.85rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+.waku-1 { background:#ffffff; color:#333; border:2px solid #bbb; }
+.waku-2 { background:#2c2c2c; color:#fff; border:2px solid #000; }
+.waku-3 { background:#e74c3c; color:#fff; }
+.waku-4 { background:#2980b9; color:#fff; }
+.waku-5 { background:#f1c40f; color:#333; }
+.waku-6 { background:#27ae60; color:#fff; }
+.waku-7 { background:#e67e22; color:#fff; }
+.waku-8 { background:#e91e8c; color:#fff; }
+.waku-x { background:#95a5a6; color:#fff; }
+
+/* オッズバッジ */
+.odds-badge {
+    display: inline-block; padding: 3px 10px;
+    border-radius: 14px; font-weight: 700; font-size: 0.85rem;
+}
+.odds-hot   { background:#fff0f0; color:#c0392b; border:1px solid #f5c6cb; }
+.odds-warm  { background:#fff8e1; color:#d68910; border:1px solid #fde3a7; }
+.odds-normal{ background:#f0f7ff; color:#2471a3; border:1px solid #bdd7f5; }
+.odds-long  { background:#f5f5f5; color:#7f8c8d; border:1px solid #ddd; }
+
+/* ============ 馬別予想カード ============ */
 .merit-card {
     background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
     border-left: 5px solid #28a745;
@@ -1500,12 +1700,35 @@ def display_main_content(df):
     padding-bottom: 4px;
     margin-bottom: 8px;
 }
+
+/* ============ 勝率ランキングバー ============ */
+.rank-bar-wrap { margin: 4px 0 12px; }
+.rank-bar-label { font-size: 0.8rem; color: #666; margin-bottom: 3px; display: flex; justify-content: space-between; }
+.rank-bar-bg { background: #eee; border-radius: 6px; height: 10px; overflow: hidden; }
+.rank-bar-fill { height: 10px; border-radius: 6px; }
+
+/* ============ メトリクスカード ============ */
+div[data-testid="metric-container"] {
+    background: linear-gradient(135deg, #f8f9fe 0%, #eef1fb 100%);
+    border: 1px solid #dde2f5;
+    border-radius: 12px;
+    padding: 14px 18px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
 </style>
 """, unsafe_allow_html=True)
 
-    # タイトル
-    st.title("🏆 第43回 フェブラリーステークス（G1）")
-    st.subheader("2026年2月22日 東京競馬場 ダート1600m")
+    # ヒーローバナー
+    st.markdown("""
+<div class="race-hero">
+  <div class="race-hero-label">🏇 JRA GⅠ ダート競走</div>
+  <div class="race-hero-title">🏆 第43回 フェブラリーステークス</div>
+  <div style="margin-bottom:10px;"><span class="race-hero-badge">G1</span></div>
+  <div class="race-hero-info">
+    2026年2月22日（日）<span>｜</span>東京競馬場<span>｜</span>ダート1600m
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
     # タブを作成
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
@@ -1537,13 +1760,8 @@ def display_main_content(df):
                     if horse in st.session_state['latest_odds']:
                         df_display.at[idx, 'オッズ'] = st.session_state['latest_odds'][horse]
 
-            # 出馬表を表示（全幅で表示）
-            st.dataframe(
-                df_display,
-                use_container_width=True,  # コンテナ幅いっぱいに表示
-                hide_index=True,  # インデックス列を非表示
-                height=400  # 高さを指定
-            )
+            # 出馬表を HTML カードテーブルで表示
+            st.markdown(render_horse_table_html(df_display), unsafe_allow_html=True)
 
             # オッズ取得ボタン
             st.markdown("---")
@@ -1627,8 +1845,12 @@ def display_main_content(df):
                     # 馬番情報を取得（ある場合）
                     horse_number = ""
                     if '馬番' in df.columns:
-                        umaban = df[df['馬名'] == horse]['馬番'].values[0]
-                        horse_number = f"({umaban}番) "
+                        umaban_raw = df[df['馬名'] == horse]['馬番'].values[0]
+                        try:
+                            umaban_disp = int(float(umaban_raw))
+                        except (ValueError, TypeError):
+                            umaban_disp = umaban_raw
+                        horse_number = f"({umaban_disp}番) "
 
                     # スライダーで勝率を設定
                     rate = st.slider(
@@ -1677,23 +1899,44 @@ def display_main_content(df):
                 reverse=True
             )
 
-            # トップ5を表示
-            ranking_df = pd.DataFrame(sorted_predictions, columns=['馬名', '予想勝率(%)'])
-            ranking_df['順位'] = range(1, len(ranking_df) + 1)
-            ranking_df = ranking_df[['順位', '馬名', '予想勝率(%)']]
-
-            # 勝率でバーチャートを表示
-            st.dataframe(
-                ranking_df.head(10),
-                use_container_width=True,
-                hide_index=True
-            )
-
             # 勝率が最も高い馬を本命として表示
             if sorted_predictions:
                 top_horse = sorted_predictions[0]
                 if top_horse[1] > 0:
-                    st.success(f"🎯 **本命**: {top_horse[0]} ({top_horse[1]:.1f}%)")
+                    st.markdown(f"""
+<div style="background:linear-gradient(90deg,#1b4332,#2d6a4f);border-radius:12px;
+padding:14px 22px;color:#fff;font-size:1.05rem;font-weight:700;
+box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
+🎯 本命: {top_horse[0]}　<span style="font-size:1.3rem;color:#95f5b4;">{top_horse[1]:.1f}%</span>
+</div>""", unsafe_allow_html=True)
+
+            # ビジュアルバーランキング（上位16頭）
+            max_rate = max((v for _, v in sorted_predictions), default=1) or 1
+            RANK_COLORS = ['#d4a017','#adb5bd','#cd7f32','#4c9be8','#4c9be8',
+                           '#4c9be8','#6c757d','#6c757d','#6c757d','#6c757d',
+                           '#6c757d','#6c757d','#6c757d','#6c757d','#6c757d','#6c757d']
+            bars_html = []
+            for rank_i, (horse_name, rate) in enumerate(sorted_predictions[:16]):
+                pct = rate / max_rate * 100
+                color = RANK_COLORS[rank_i] if rank_i < len(RANK_COLORS) else '#6c757d'
+                medal = ['🥇','🥈','🥉'][rank_i] if rank_i < 3 else f"{rank_i+1}."
+                bars_html.append(f"""
+<div style="margin-bottom:10px;">
+  <div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:3px;">
+    <span><b>{medal}</b> {horse_name}</span>
+    <span style="color:#555;font-weight:700;">{rate:.1f}%</span>
+  </div>
+  <div style="background:#e9ecef;border-radius:6px;height:12px;overflow:hidden;">
+    <div style="background:{color};width:{pct:.1f}%;height:12px;border-radius:6px;
+    transition:width .4s ease;"></div>
+  </div>
+</div>""")
+            st.markdown(
+                '<div style="background:#fff;border-radius:12px;padding:18px 22px;'
+                'border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.06);">'
+                + ''.join(bars_html) + '</div>',
+                unsafe_allow_html=True
+            )
 
         else:
             st.warning("⚠️ シミュレーター用のデータがありません")
