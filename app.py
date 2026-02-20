@@ -435,14 +435,15 @@ def analyze_video_with_gemini(video):
         return []
 
 
-def analyze_all_videos_with_gemini(videos, horse_names=None):
+def analyze_all_videos_with_gemini(videos, horse_names=None, status_placeholder=None):
     """
-    全YouTube動画を1回のGemini API呼び出しでまとめて解析する関数
-    N回→1回に削減することでレート制限を回避し、大幅に高速化する
+    YouTube動画リストをGemini APIで解析する。
+    各動画のURLをGeminiに直接渡して動画を視聴・解析させる（1動画1APIコール）。
 
     引数:
         videos (list): 動画情報のリスト
         horse_names (list): 全出走馬名リスト（Noneの場合はCSVから自動取得）
+        status_placeholder: st.empty()のプレースホルダー（進捗表示用、省略可）
 
     戻り値:
         list: 抽出された情報のリスト（馬名、プラス情報、マイナス情報、video_url、video_titleを含む辞書）
@@ -453,37 +454,15 @@ def analyze_all_videos_with_gemini(videos, horse_names=None):
     if horse_names is None:
         horse_names = get_all_horse_names()
 
-    # 全動画情報をまとめたテキストを構築
-    videos_text = ""
-    for i, v in enumerate(videos, 1):
-        desc = v.get('description', '') or ''
-        transcript = v.get('transcript', '') or ''
-        if transcript:
-            content_label = "字幕（音声内容）"
-            content = transcript  # 最大2000文字
-        else:
-            content_label = "概要欄"
-            content = desc[:600]
-        videos_text += (
-            f"\n## 動画{i}\n"
-            f"タイトル: {v['title']}\n"
-            f"{content_label}: {content}\n"
-            f"URL: {v['video_url']}\n"
-        )
+    all_horses_str = "\n".join([
+        f"- {name}{'（※「ハートボンド」という表記はこの馬を指す）' if name == 'ダブルハートボンド' else ''}"
+        for name in horse_names
+    ])
 
-    # 全馬名リストを文字列化
-    all_horses_str = "\n".join([f"- {name}{'（※「ハートボンド」という表記はこの馬を指す）' if name == 'ダブルハートボンド' else ''}" for name in horse_names])
+    prompt_template = f"""この動画はフェブラリーステークス2026の競馬予想動画です。
+動画の内容を視聴し、以下の出走馬について評価情報を抽出してください。
 
-    try:
-        client = google_genai.Client(api_key=GEMINI_API_KEY)
-
-        prompt = f"""
-あなたは競馬予想の専門家です。以下の{len(videos)}本のYouTube動画それぞれのタイトルと内容（字幕または概要欄）を読み、
-各馬の詳細な評価情報を抽出してください。
-
-{videos_text}
-
-# フェブラリーステークス2026 全出走馬リスト（これら全馬について情報を探してください）
+# フェブラリーステークス2026 全出走馬リスト
 {all_horses_str}
 
 # 抽出してほしい情報（各馬について）
@@ -491,12 +470,9 @@ def analyze_all_videos_with_gemini(videos, horse_names=None):
 マイナス情報: 前走・近走での敗因、調教不安、コース・距離の不安、枠順・展開の不安
 
 # 出力形式
-以下のJSON形式で**必ず**出力してください（説明文は一切不要）：
-
 ```json
 [
   {{
-    "動画番号": 1,
     "馬名": "馬の名前",
     "プラス情報": "具体的な好材料を2～3文で記載",
     "マイナス情報": "具体的な懸念点を記載（なければ「特になし」）"
@@ -505,46 +481,71 @@ def analyze_all_videos_with_gemini(videos, horse_names=None):
 ```
 
 # 注意事項
-- 各動画につき1馬以上抽出すること（情報がなければタイトルから推測）
-- 1本の動画に複数の馬が登場する場合は複数エントリーを出力（動画番号は同じでOK）
-- 馬名が全く見当たらない動画のみ「全体的な予想」として1件だけ出力
+- 動画で言及されている馬のみ出力（言及のない馬は出力しない）
+- 1本の動画に複数の馬が登場する場合は複数エントリーを出力
 - JSONのみ出力し、前後に説明文を付けないこと
 """
 
-        response = client.models.generate_content(
-            model='gemini-2.0-flash',
-            contents=prompt
-        )
-        response_text = response.text or ""
+    client = google_genai.Client(api_key=GEMINI_API_KEY)
+    total = len(videos)
+    all_results = []
 
-        json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
-        json_text = json_match.group(1) if json_match else response_text.strip()
-        analysis_results = json.loads(json_text)
+    for i, video in enumerate(videos, 1):
+        if status_placeholder:
+            status_placeholder.info(f"🎬 動画 {i}/{total} を解析中: {video['title'][:40]}...")
 
-        # 動画番号に基づいてURLとタイトルを付与
-        video_map = {i + 1: v for i, v in enumerate(videos)}
-        for result in analysis_results:
-            video_num = result.pop("動画番号", 1)
-            video = video_map.get(video_num, videos[0])
-            result['video_url'] = video['video_url']
-            result['video_title'] = video['title']
+        for retry in range(3):
+            try:
+                response = client.models.generate_content(
+                    model='gemini-2.0-flash',
+                    contents=[
+                        genai_types.Part(
+                            file_data=genai_types.FileData(
+                                file_uri=video['video_url'],
+                                mime_type='video/mp4'
+                            )
+                        ),
+                        prompt_template
+                    ]
+                )
+                response_text = response.text or ""
 
-        return analysis_results
+                json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
+                json_text = json_match.group(1) if json_match else response_text.strip()
+                results = json.loads(json_text)
 
-    except json.JSONDecodeError:
-        return []
-    except Exception as e:
-        error_msg = str(e)
-        if "429" in error_msg or "resource_exhausted" in error_msg.lower():
-            raise
-        st.warning(f"⚠️ 動画の一括解析に失敗しました: {type(e).__name__}")
-        return []
+                for result in results:
+                    result['video_url'] = video['video_url']
+                    result['video_title'] = video['title']
+
+                all_results.extend(results)
+                break
+
+            except json.JSONDecodeError:
+                break
+            except Exception as e:
+                error_msg = str(e)
+                if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+                    if retry < 2:
+                        wait = 30 * (retry + 1)
+                        if status_placeholder:
+                            status_placeholder.warning(f"⏳ レート制限中。{wait}秒待機後にリトライ... ({retry + 1}/3)")
+                        time.sleep(wait)
+                    else:
+                        if status_placeholder:
+                            status_placeholder.warning(f"⚠️ 動画 {i} をスキップしました（レート制限）")
+                else:
+                    if status_placeholder:
+                        status_placeholder.warning(f"⚠️ 動画 {i} の解析をスキップしました: {type(e).__name__}: {str(e)[:80]}")
+                    break
+
+    return all_results
 
 
 def create_summary_dataframe(videos):
     """
     YouTube動画情報から馬名ごとに整理したデータフレームを作成する関数
-    動画を10件ずつのバッチに分割してGemini APIを呼び出す（タイムアウト防止）
+    各動画のURLをGeminiに直接渡して動画を視聴・解析させる（1動画1APIコール）
 
     引数:
         videos (list): 動画情報のリスト
@@ -552,34 +553,13 @@ def create_summary_dataframe(videos):
     戻り値:
         tuple: (DataFrame, list) — 動画別整理済みDF と 生の分析結果リスト
     """
-    BATCH_SIZE = 10
     status_text = st.empty()
-    total = len(videos)
-    num_batches = (total + BATCH_SIZE - 1) // BATCH_SIZE
-
-    # 字幕（トランスクリプト）を事前取得（キャッシュ付き）
-    status_text.info(f"📄 {total}本の字幕を取得中...（初回のみ）")
-    for v in videos:
-        v['transcript'] = fetch_video_transcript(v['video_id'])
-    transcript_count = sum(1 for v in videos if v.get('transcript'))
-    status_text.info(f"📄 {transcript_count}/{total}本の字幕を取得しました。Gemini解析を開始します...")
-
-    # 動画を10件ずつのバッチに分割して解析
-    all_analysis_results = []
     horse_names = get_all_horse_names()
-    for batch_idx in range(num_batches):
-        batch_start = batch_idx * BATCH_SIZE
-        batch = videos[batch_start:batch_start + BATCH_SIZE]
-        status_text.info(f"🤖 バッチ {batch_idx + 1}/{num_batches}を解析中...（動画{batch_start + 1}〜{batch_start + len(batch)}件目）")
-        for retry in range(3):
-            try:
-                results = analyze_all_videos_with_gemini(batch, horse_names=horse_names)
-                all_analysis_results.extend(results)
-                break
-            except Exception:
-                if retry < 2:
-                    status_text.info(f"⏳ バッチ {batch_idx + 1} リトライ中...")
-                    time.sleep(2)
+
+    # 各動画のURLをGeminiに直接渡して解析（1動画1APIコール）
+    all_analysis_results = analyze_all_videos_with_gemini(
+        videos, horse_names=horse_names, status_placeholder=status_text
+    )
 
     status_text.empty()
 
@@ -1958,15 +1938,12 @@ def display_main_content(df):
                 if filtered_out > 0:
                     msg += f"（{filtered_out}件は無関係として除外）"
                 st.success(msg)
-                # バッチ解析（ページ再描画のたびにAPIを呼ばないよう検索時に一括実行）
+                # Gemini解析（ページ再描画のたびにAPIを呼ばないよう検索時に一括実行）
                 horse_names = get_all_horse_names()
                 _status = st.empty()
-                _status.info(f"📄 {len(videos)}本の字幕を取得中...")
-                for v in videos:
-                    v['transcript'] = fetch_video_transcript(v['video_id'])
-                tc = sum(1 for v in videos if v.get('transcript'))
-                _status.info(f"🤖 {tc}/{len(videos)}本の字幕取得完了。Geminiで解析中...")
-                raw = analyze_all_videos_with_gemini(videos, horse_names=horse_names)
+                raw = analyze_all_videos_with_gemini(
+                    videos, horse_names=horse_names, status_placeholder=_status
+                )
                 # video_id → 解析結果リスト のマップに変換
                 yt_analysis_map = {}
                 for res in raw:
