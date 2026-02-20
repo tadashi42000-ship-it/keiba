@@ -1289,15 +1289,16 @@ def style_dataframe(df):
 # ====================
 
 @st.cache_data
-def load_race_data(file_path):
+def load_race_data(file_path, mtime=None):  # noqa: ARG001
     """
     CSVファイルから競馬データを読み込む関数
 
-    @st.cache_data デコレータにより、一度読み込んだデータは
-    キャッシュされ、再読み込みが不要になります
+    @st.cache_data + mtime引数によりファイルが更新されると自動的に
+    キャッシュが無効化され、最新データを再読み込みします。
 
     引数:
         file_path (str): CSVファイルのパス
+        mtime (float): ファイル更新時刻（キャッシュキー用、直接使用しない）
 
     戻り値:
         DataFrame: 読み込んだデータ（エラー時はNone）
@@ -2272,8 +2273,9 @@ def main():
     # サイドバーを表示
     display_sidebar()
 
-    # データを読み込み
-    df = load_race_data(CSV_FILE)
+    # データを読み込み（ファイル更新時刻をキャッシュキーに含めて常に最新CSVを反映）
+    _csv_mtime = os.path.getmtime(CSV_FILE) if os.path.exists(CSV_FILE) else 0
+    df = load_race_data(CSV_FILE, mtime=_csv_mtime)
 
     # メインコンテンツを表示
     if df is not None:
