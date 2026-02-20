@@ -1318,23 +1318,26 @@ def load_race_data(file_path):
         st.error(f"❌ データ読み込みエラー: {e}")
         return None
 
-@st.cache_data(ttl=300)
 def fetch_odds_and_gates():
     """
     netkeiba.com から最新の枠番・馬番・オッズを取得する。
-    5分キャッシュ（オッズは頻繁に変わるため短め）。
+    netkeiba はJS描画のため Playwright を使用。
     取得失敗時は空辞書を返す（呼び出し元でフォールバック）。
 
     戻り値:
         dict: {馬名: {'枠番': str, '馬番': str, 'オッズ': str}}
     """
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-        response = requests.get(RACE_URL, headers=headers, timeout=10)
-        response.encoding = 'EUC-JP'
-        if response.status_code != 200:
-            return {}
-        soup = BeautifulSoup(response.text, 'html.parser')
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(RACE_URL, wait_until='domcontentloaded')
+            page.wait_for_timeout(3000)  # JS描画待ち
+            content = page.content()
+            browser.close()
+
+        soup = BeautifulSoup(content, 'html.parser')
         shutuba_table = soup.find('table', class_='Shutuba_Table')
         if not shutuba_table:
             return {}
@@ -1347,13 +1350,19 @@ def fetch_odds_and_gates():
             if not horse_link:
                 continue
             horse_name = horse_link.text.strip()
-            waku = row.find('td', class_='Waku')
-            umaban = row.find('td', class_='Umaban')
-            odds = row.find('td', class_='Popular')
+            # 枠番: class="Waku1 Txt_C" などパターン（re.compile でマッチ）
+            waku_td = row.find('td', class_=re.compile(r'Waku\d'))
+            waku = waku_td.text.strip() if waku_td else ''
+            # 馬番: class="Umaban1 Txt_C" などパターン
+            umaban_td = row.find('td', class_=re.compile(r'Umaban\d'))
+            umaban = umaban_td.text.strip() if umaban_td else ''
+            # オッズ: class="Txt_R Popular"（人気順位の "Popular Popular_Ninki..." とは別）
+            odds_td = row.select_one('td.Txt_R.Popular')
+            odds = odds_td.text.strip() if odds_td else '---.-'
             result[horse_name] = {
-                '枠番': waku.text.strip() if waku else '',
-                '馬番': umaban.text.strip() if umaban else '',
-                'オッズ': odds.text.strip() if odds else '---.-'
+                '枠番': waku,
+                '馬番': umaban,
+                'オッズ': odds
             }
         return result
     except Exception:
@@ -1513,21 +1522,19 @@ def display_main_content(df):
 
         # データが空でないか確認
         if df is not None and not df.empty:
-            # netkeiba から取得した枠番・馬番・オッズをマージ
+            # 馬番（CSV保存済み）でソート → 枠順と一致
             df_display = df.copy()
-            odds_gate = st.session_state.get('odds_gate_data', {})
-            if odds_gate:
-                for idx, row in df_display.iterrows():
-                    horse = row.get('馬名', '')
-                    if horse in odds_gate:
-                        df_display.at[idx, '枠番'] = odds_gate[horse]['枠番']
-                        df_display.at[idx, '馬番'] = odds_gate[horse]['馬番']
-                        df_display.at[idx, 'オッズ'] = odds_gate[horse]['オッズ']
-            # 馬番（数値）でソート → 枠順と一致
             if '馬番' in df_display.columns:
                 df_display['_馬番_num'] = pd.to_numeric(df_display['馬番'], errors='coerce')
                 df_display = df_display.sort_values('_馬番_num', na_position='last')
                 df_display = df_display.drop(columns=['_馬番_num']).reset_index(drop=True)
+
+            # セッション内のオッズを反映（ボタン取得後）
+            if 'latest_odds' in st.session_state and 'オッズ' in df_display.columns:
+                for idx, row in df_display.iterrows():
+                    horse = str(row.get('馬名', ''))
+                    if horse in st.session_state['latest_odds']:
+                        df_display.at[idx, 'オッズ'] = st.session_state['latest_odds'][horse]
 
             # 出馬表を表示（全幅で表示）
             st.dataframe(
@@ -1536,6 +1543,24 @@ def display_main_content(df):
                 hide_index=True,  # インデックス列を非表示
                 height=400  # 高さを指定
             )
+
+            # オッズ取得ボタン
+            st.markdown("---")
+            col_btn, col_info = st.columns([1, 4])
+            with col_btn:
+                if st.button("🔄 最新オッズを取得", key="fetch_odds_btn"):
+                    with st.spinner("netkeiba からオッズを取得中..."):
+                        odds_data = fetch_odds_and_gates()
+                    if odds_data:
+                        st.session_state['latest_odds'] = {
+                            h: v['オッズ'] for h, v in odds_data.items()
+                        }
+                        st.rerun()
+                    else:
+                        st.error("❌ オッズの取得に失敗しました")
+            with col_info:
+                if 'latest_odds' in st.session_state:
+                    st.caption(f"✅ オッズ取得済み（{len(st.session_state['latest_odds'])}頭）")
 
             # 統計情報
             st.markdown("---")
@@ -2222,13 +2247,27 @@ def main():
         except Exception:
             pass  # 失敗してもドキュメントデータは表示される
 
-    # 枠番・馬番・オッズを自動取得（初回のみ、5分キャッシュ）
-    if 'odds_gate_data' not in st.session_state:
-        with st.spinner("🏇 最新の枠番・馬番・オッズを取得中..."):
-            st.session_state['odds_gate_data'] = fetch_odds_and_gates()
-        n = len(st.session_state['odds_gate_data'])
-        if n > 0:
-            st.toast(f"✅ {n}頭の枠番・オッズを取得しました", icon="🏇")
+    # 枠番・馬番が未取得の場合は自動取得してCSVに保存（初回のみ）
+    # 枠番・馬番はレース確定後は変わらないためCSVに永続保存する
+    if 'gates_saved' not in st.session_state:
+        try:
+            csv_df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
+            needs_update = csv_df['枠番'].isna().all() or (csv_df['枠番'].astype(str).str.strip() == '').all()
+            if needs_update:
+                with st.spinner("🏇 枠番・馬番を取得してCSVに保存中...（初回のみ）"):
+                    gate_data = fetch_odds_and_gates()
+                if gate_data:
+                    for idx, row in csv_df.iterrows():
+                        horse = str(row.get('馬名', ''))
+                        if horse in gate_data:
+                            csv_df.at[idx, '枠番'] = gate_data[horse]['枠番']
+                            csv_df.at[idx, '馬番'] = gate_data[horse]['馬番']
+                    csv_df.to_csv(CSV_FILE, index=False, encoding='utf-8-sig')
+                    load_race_data.clear()  # キャッシュをクリアして再読み込み
+                    st.toast(f"✅ {len(gate_data)}頭の枠番・馬番をCSVに保存しました", icon="🏇")
+        except Exception:
+            pass
+        st.session_state['gates_saved'] = True
 
     # サイドバーを表示
     display_sidebar()

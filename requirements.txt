@@ -7,3 +7,4 @@ google-genai
 python-dotenv
 PyPDF2
 youtube-transcript-api
+playwright
