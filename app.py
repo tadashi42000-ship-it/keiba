@@ -8,14 +8,18 @@ Streamlitを使用して、CSVファイルから競馬情報を読み込み、
 import streamlit as st
 import pandas as pd
 import os
+import sys
+import subprocess
 from datetime import datetime
 import re
 import json
 import time  # 待機時間のために追加
+import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 from collections import defaultdict
 from bs4 import BeautifulSoup
+import requests
 from dotenv import load_dotenv
 try:
     import PyPDF2
@@ -1319,30 +1323,32 @@ def load_race_data(file_path, mtime=None):  # noqa: ARG001
         st.error(f"❌ データ読み込みエラー: {e}")
         return None
 
-def fetch_odds_and_gates():
+def fetch_odds_and_gates(max_retries: int = 3, require_odds: bool = True):
     """
     netkeiba.com から最新の枠番・馬番・オッズを取得する。
     netkeiba はJS描画のため Playwright を使用。
-    取得失敗時は空辞書を返す（呼び出し元でフォールバック）。
+    取得失敗時は空辞書とエラーメッセージを返す（呼び出し元でフォールバック）。
 
     戻り値:
-        dict: {馬名: {'枠番': str, '馬番': str, 'オッズ': str}}
+        tuple[dict, str]: ({馬名: {'枠番': str, '馬番': str, 'オッズ': str}}, error_message)
     """
-    try:
-        from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(RACE_URL, wait_until='domcontentloaded')
-            page.wait_for_timeout(3000)  # JS描画待ち
-            content = page.content()
-            browser.close()
+    errors = []
 
+    def _find_td_by_class_prefix(row, prefix: str):
+        for td in row.find_all('td'):
+            classes = td.get('class') or []
+            if any(str(c).startswith(prefix) for c in classes):
+                return td
+        return None
+
+    def _extract_from_html(content: str, require_odds_in_result: bool):
         soup = BeautifulSoup(content, 'html.parser')
         shutuba_table = soup.find('table', class_='Shutuba_Table')
         if not shutuba_table:
-            return {}
+            raise RuntimeError("Shutuba_Table が見つかりませんでした")
+
         result = {}
+        numeric_odds_count = 0
         for row in shutuba_table.find_all('tr'):
             horse_info = row.find('td', class_='HorseInfo')
             if not horse_info:
@@ -1350,24 +1356,158 @@ def fetch_odds_and_gates():
             horse_link = horse_info.find('a')
             if not horse_link:
                 continue
+
             horse_name = horse_link.text.strip()
-            # 枠番: class="Waku1 Txt_C" などパターン（re.compile でマッチ）
-            waku_td = row.find('td', class_=re.compile(r'Waku\d'))
-            waku = waku_td.text.strip() if waku_td else ''
-            # 馬番: class="Umaban1 Txt_C" などパターン
-            umaban_td = row.find('td', class_=re.compile(r'Umaban\d'))
-            umaban = umaban_td.text.strip() if umaban_td else ''
-            # オッズ: class="Txt_R Popular"（人気順位の "Popular Popular_Ninki..." とは別）
-            odds_td = row.select_one('td.Txt_R.Popular')
-            odds = odds_td.text.strip() if odds_td else '---.-'
+
+            # class が "Waku1"/"Umaban1" 形式でも "Waku"/"Umaban" 形式でも拾えるようにする
+            waku_td = _find_td_by_class_prefix(row, "Waku")
+            umaban_td = _find_td_by_class_prefix(row, "Umaban")
+            odds_td = row.select_one('td.Txt_R.Popular') or row.select_one('td.Popular')
+
+            waku = waku_td.get_text(strip=True) if waku_td else ''
+            umaban = umaban_td.get_text(strip=True) if umaban_td else ''
+            odds = odds_td.get_text(strip=True) if odds_td else '---.-'
+            if re.match(r'^\d+(\.\d+)?$', odds):
+                numeric_odds_count += 1
+
             result[horse_name] = {
                 '枠番': waku,
                 '馬番': umaban,
                 'オッズ': odds
             }
+
+        if len(result) < 8:
+            raise RuntimeError(f"抽出頭数が少なすぎます: {len(result)}頭")
+        if require_odds_in_result:
+            min_required = max(5, len(result) // 2)
+            if numeric_odds_count < min_required:
+                raise RuntimeError(
+                    f"オッズが十分取得できませんでした: {numeric_odds_count}/{len(result)}頭"
+                )
         return result
-    except Exception:
-        return {}
+
+    def _fetch_with_playwright_subprocess():
+        py_code = r'''
+import json
+import re
+from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
+
+RACE_URL = "''' + RACE_URL + r'''"
+
+def _find_td_by_class_prefix(row, prefix):
+    for td in row.find_all('td'):
+        classes = td.get('class') or []
+        if any(str(c).startswith(prefix) for c in classes):
+            return td
+    return None
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto(RACE_URL, wait_until='domcontentloaded', timeout=30000)
+    page.wait_for_selector('table.Shutuba_Table', timeout=15000)
+    page.wait_for_timeout(2500)
+    content = page.content()
+    browser.close()
+
+soup = BeautifulSoup(content, 'html.parser')
+table = soup.find('table', class_='Shutuba_Table')
+if not table:
+    raise RuntimeError("Shutuba_Table が見つかりませんでした")
+
+result = {}
+for row in table.find_all('tr'):
+    horse_info = row.find('td', class_='HorseInfo')
+    if not horse_info:
+        continue
+    horse_link = horse_info.find('a')
+    if not horse_link:
+        continue
+    horse_name = horse_link.text.strip()
+    waku_td = _find_td_by_class_prefix(row, "Waku")
+    umaban_td = _find_td_by_class_prefix(row, "Umaban")
+    odds_td = row.select_one('td.Txt_R.Popular') or row.select_one('td.Popular')
+    result[horse_name] = {
+        "枠番": waku_td.get_text(strip=True) if waku_td else "",
+        "馬番": umaban_td.get_text(strip=True) if umaban_td else "",
+        "オッズ": odds_td.get_text(strip=True) if odds_td else "---.-"
+    }
+
+print(json.dumps(result, ensure_ascii=False))
+'''
+        proc = subprocess.run(
+            [sys.executable, "-c", py_code],
+            capture_output=True,
+            text=True,
+            timeout=70
+        )
+        if proc.returncode != 0:
+            raise RuntimeError(f"subprocess failed: {proc.stderr.strip() or proc.stdout.strip()}")
+        payload = (proc.stdout or "").strip()
+        if not payload:
+            raise RuntimeError("subprocess returned empty output")
+        return json.loads(payload)
+
+    for attempt in range(1, max_retries + 1):
+        browser = None
+        try:
+            from playwright.sync_api import sync_playwright
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page()
+                page.goto(RACE_URL, wait_until='domcontentloaded', timeout=30000)
+                page.wait_for_selector('table.Shutuba_Table', timeout=15000)
+                page.wait_for_timeout(2500)  # オッズ描画待ち
+                content = page.content()
+                browser.close()
+                browser = None
+
+            result = _extract_from_html(content, require_odds)
+            return result, ""
+
+        except Exception as e:
+            errors.append(f"[{attempt}/{max_retries}] Playwright {type(e).__name__}: {e}")
+            if attempt < max_retries:
+                time.sleep(1.2 * attempt)
+        finally:
+            if browser:
+                try:
+                    browser.close()
+                except Exception:
+                    pass
+
+    # Streamlitの実行スレッドでPlaywrightが動かない環境向け（別プロセスで実行）
+    try:
+        result = _fetch_with_playwright_subprocess()
+        if require_odds:
+            numeric_odds_count = sum(
+                1 for v in result.values()
+                if re.match(r'^\d+(\.\d+)?$', str(v.get('オッズ', '')).strip())
+            )
+            min_required = max(5, len(result) // 2)
+            if numeric_odds_count < min_required:
+                raise RuntimeError(
+                    f"subprocess Playwright: オッズが十分取得できませんでした: {numeric_odds_count}/{len(result)}頭"
+                )
+        return result, ""
+    except Exception as e:
+        errors.append(f"[subprocess] Playwright {type(e).__name__}: {e}")
+
+    # Playwrightが使えない環境向けフォールバック（Windowsイベントループ差異の回避）
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        resp = requests.get(RACE_URL, headers=headers, timeout=20)
+        resp.encoding = 'EUC-JP'
+        result = _extract_from_html(resp.text, require_odds)
+        return result, ""
+    except Exception as e:
+        errors.append(f"[fallback] requests {type(e).__name__}: {e}")
+        errors.append(traceback.format_exc(limit=2))
+
+    return {}, "\n".join(errors)
 
 
 # ====================
@@ -1495,7 +1635,7 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
 
 def display_main_content(df):
     """
-    メインエリアに出馬表と予想シミュレーターを表示する関数
+    メインエリアに出馬表と分析結果を表示する関数
 
     引数:
         df (DataFrame): 競馬データ
@@ -1701,12 +1841,6 @@ html, body, [class*="css"] { font-family: 'Noto Sans JP', sans-serif; }
     margin-bottom: 8px;
 }
 
-/* ============ 勝率ランキングバー ============ */
-.rank-bar-wrap { margin: 4px 0 12px; }
-.rank-bar-label { font-size: 0.8rem; color: #666; margin-bottom: 3px; display: flex; justify-content: space-between; }
-.rank-bar-bg { background: #eee; border-radius: 6px; height: 10px; overflow: hidden; }
-.rank-bar-fill { height: 10px; border-radius: 6px; }
-
 /* ============ メトリクスカード ============ */
 div[data-testid="metric-container"] {
     background: linear-gradient(135deg, #f8f9fe 0%, #eef1fb 100%);
@@ -1731,13 +1865,12 @@ div[data-testid="metric-container"] {
 """, unsafe_allow_html=True)
 
     # タブを作成
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📋 出馬表",
-        "🎲 勝率シミュレーター",
         "📥 情報入力",
         "🏇 総合予想（馬別）",
         "🏟️ レース特徴・傾向",
-        "🎥 YouTube詳細"
+        "YOUTUBEから情報入手"
     ])
 
     # ===== タブ1: 出馬表 =====
@@ -1769,17 +1902,22 @@ div[data-testid="metric-container"] {
             with col_btn:
                 if st.button("🔄 最新オッズを取得", key="fetch_odds_btn"):
                     with st.spinner("netkeiba からオッズを取得中..."):
-                        odds_data = fetch_odds_and_gates()
+                        odds_data, odds_error = fetch_odds_and_gates()
                     if odds_data:
                         st.session_state['latest_odds'] = {
                             h: v['オッズ'] for h, v in odds_data.items()
                         }
+                        st.session_state.pop('latest_odds_error', None)
                         st.rerun()
                     else:
                         st.error("❌ オッズの取得に失敗しました")
+                        st.session_state['latest_odds_error'] = odds_error
             with col_info:
                 if 'latest_odds' in st.session_state:
                     st.caption(f"✅ オッズ取得済み（{len(st.session_state['latest_odds'])}頭）")
+                elif st.session_state.get('latest_odds_error'):
+                    with st.expander("⚠️ 取得失敗の詳細"):
+                        st.code(st.session_state['latest_odds_error'])
 
             # 統計情報
             st.markdown("---")
@@ -1801,169 +1939,21 @@ div[data-testid="metric-container"] {
         else:
             st.warning("⚠️ 表示するデータがありません")
 
-    # ===== タブ2: 勝率シミュレーター =====
+    # ===== タブ2: 情報入力 =====
     with tab2:
-        st.markdown("### 🎯 勝率予想シミュレーター")
-        st.info("💡 各馬の勝率をスライダーで調整して、自分なりの予想を立ててみましょう！")
-
-        if df is not None and not df.empty and '馬名' in df.columns:
-            # セッションステートの初期化（スライダーの値を保持するため）
-            if 'win_rates' not in st.session_state:
-                # 初期値として、全馬に均等な確率を設定
-                initial_rate = 100 / len(df)
-                st.session_state.win_rates = {
-                    horse: initial_rate for horse in df['馬名'].tolist()
-                }
-
-            # リセットボタン
-            col_reset1, col_reset2 = st.columns([1, 5])
-            with col_reset1:
-                if st.button("🔄 リセット", help="全ての勝率を均等に戻します"):
-                    initial_rate = 100 / len(df)
-                    st.session_state.win_rates = {
-                        horse: initial_rate for horse in df['馬名'].tolist()
-                    }
-                    st.rerun()
-
-            st.markdown("---")
-
-            # 各馬のスライダーを表示（2列レイアウト）
-            horses = df['馬名'].tolist()
-
-            # 馬番がある場合は馬番順にソート
-            if '馬番' in df.columns:
-                df_sorted = df.sort_values('馬番')
-                horses = df_sorted['馬名'].tolist()
-
-            # 2列に分けて表示
-            cols = st.columns(2)
-
-            for idx, horse in enumerate(horses):
-                col_idx = idx % 2
-
-                with cols[col_idx]:
-                    # 馬番情報を取得（ある場合）
-                    horse_number = ""
-                    if '馬番' in df.columns:
-                        umaban_raw = df[df['馬名'] == horse]['馬番'].values[0]
-                        try:
-                            umaban_disp = int(float(umaban_raw))
-                        except (ValueError, TypeError):
-                            umaban_disp = umaban_raw
-                        horse_number = f"({umaban_disp}番) "
-
-                    # スライダーで勝率を設定
-                    rate = st.slider(
-                        f"🐴 {horse_number}{horse}",
-                        min_value=0.0,
-                        max_value=100.0,
-                        value=float(st.session_state.win_rates[horse]),
-                        step=0.5,
-                        key=f"slider_{horse}",
-                        help=f"{horse}の勝率を調整"
-                    )
-
-                    # セッションステートに保存
-                    st.session_state.win_rates[horse] = rate
-
-            # 合計勝率を計算
-            st.markdown("---")
-            total_rate = sum(st.session_state.win_rates.values())
-
-            # 合計が100%からどれだけ離れているかを表示
-            col_total1, col_total2, col_total3 = st.columns(3)
-
-            with col_total1:
-                st.metric("合計勝率", f"{total_rate:.1f}%")
-
-            with col_total2:
-                difference = abs(100 - total_rate)
-                st.metric("100%との差", f"{difference:.1f}%")
-
-            with col_total3:
-                if total_rate == 100.0:
-                    st.success("✅ 完璧！")
-                elif 99.0 <= total_rate <= 101.0:
-                    st.info("📊 ほぼ100%")
-                else:
-                    st.warning("⚠️ 要調整")
-
-            # 予想ランキングを表示
-            st.markdown("---")
-            st.markdown("### 🏆 あなたの予想ランキング")
-
-            # 勝率の高い順にソート
-            sorted_predictions = sorted(
-                st.session_state.win_rates.items(),
-                key=lambda x: x[1],
-                reverse=True
-            )
-
-            # 勝率が最も高い馬を本命として表示
-            if sorted_predictions:
-                top_horse = sorted_predictions[0]
-                if top_horse[1] > 0:
-                    st.markdown(f"""
-<div style="background:linear-gradient(90deg,#1b4332,#2d6a4f);border-radius:12px;
-padding:14px 22px;color:#fff;font-size:1.05rem;font-weight:700;
-box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
-🎯 本命: {top_horse[0]}　<span style="font-size:1.3rem;color:#95f5b4;">{top_horse[1]:.1f}%</span>
-</div>""", unsafe_allow_html=True)
-
-            # ビジュアルバーランキング（上位16頭）
-            max_rate = max((v for _, v in sorted_predictions), default=1) or 1
-            RANK_COLORS = ['#d4a017','#adb5bd','#cd7f32','#4c9be8','#4c9be8',
-                           '#4c9be8','#6c757d','#6c757d','#6c757d','#6c757d',
-                           '#6c757d','#6c757d','#6c757d','#6c757d','#6c757d','#6c757d']
-            bars_html = []
-            for rank_i, (horse_name, rate) in enumerate(sorted_predictions[:16]):
-                pct = rate / max_rate * 100
-                color = RANK_COLORS[rank_i] if rank_i < len(RANK_COLORS) else '#6c757d'
-                medal = ['🥇','🥈','🥉'][rank_i] if rank_i < 3 else f"{rank_i+1}."
-                bars_html.append(f"""
-<div style="margin-bottom:10px;">
-  <div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:3px;">
-    <span><b>{medal}</b> {horse_name}</span>
-    <span style="color:#555;font-weight:700;">{rate:.1f}%</span>
-  </div>
-  <div style="background:#e9ecef;border-radius:6px;height:12px;overflow:hidden;">
-    <div style="background:{color};width:{pct:.1f}%;height:12px;border-radius:6px;
-    transition:width .4s ease;"></div>
-  </div>
-</div>""")
-            st.markdown(
-                '<div style="background:#fff;border-radius:12px;padding:18px 22px;'
-                'border:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.06);">'
-                + ''.join(bars_html) + '</div>',
-                unsafe_allow_html=True
-            )
-
-        else:
-            st.warning("⚠️ シミュレーター用のデータがありません")
-
-    # ===== タブ3: 情報入力 =====
-    with tab3:
         st.markdown("### 📥 情報入力")
-        st.info("💡 YouTube・Web・ドキュメントから情報を収集します。収集後、「総合予想（馬別）」「レース特徴・傾向」タブで結果を確認できます。")
+        st.info("💡 Web・ドキュメントから情報を収集します。収集後、「総合予想（馬別）」「レース特徴・傾向」タブで結果を確認できます。")
 
-        # ===== Section 1: YouTube + Web 一括検索 =====
-        st.markdown("#### 🔍 YouTube + Web 一括検索")
+        # ===== Section 1: Web 一括検索 =====
+        st.markdown("#### 🔍 Web 一括検索")
 
-        col_s1, col_s2, col_s3 = st.columns([3, 1, 1])
+        col_s1, col_s3 = st.columns([3, 1])
         with col_s1:
             combined_keyword = st.text_input(
                 "検索キーワード",
                 value="フェブラリーステークス 2026 予想",
-                help="YouTubeおよびWeb検索に使用するキーワード",
+                help="Web検索に使用するキーワード",
                 key="combined_keyword"
-            )
-        with col_s2:
-            combined_max_videos = st.number_input(
-                "YouTube件数",
-                min_value=1,
-                max_value=30,
-                value=15,
-                key="combined_max_videos"
             )
         with col_s3:
             combined_max_web = st.number_input(
@@ -1974,25 +1964,10 @@ box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
                 key="combined_max_web"
             )
 
-        if st.button("🔍 YouTube + Web 一括検索", type="primary", key="combined_search"):
-            st.info("⏳ YouTube + Web の解析には1〜2分程度かかります。しばらくお待ちください。")
+        if st.button("🔍 Web 一括検索", type="primary", key="combined_search"):
+            st.info("⏳ Web の解析には30秒〜1分程度かかります。しばらくお待ちください。")
 
-            # Phase 1: YouTube検索 + ノイズ除去
-            with st.spinner("YouTube動画を検索中..."):
-                videos = search_youtube_videos(combined_keyword, combined_max_videos)
-                before_filter = len(videos)
-                videos = filter_relevant_videos(videos)
-            filtered_out = before_filter - len(videos)
-            label = f"{len(videos)}件取得"
-            if filtered_out > 0:
-                label += f"（{filtered_out}件は無関係として除外）"
-            st.metric("YouTube動画", label)
-
-            # Phase 2: YouTube動画解析
-            st.markdown("#### YouTube動画を解析中...")
-            summary_df, youtube_raw = create_summary_dataframe(videos)
-
-            # Phase 3: Web検索・解析
+            # Phase 1: Web検索・解析
             st.markdown("#### Web記事を検索・解析中...")
             web_queries = [
                 combined_keyword,
@@ -2009,16 +1984,18 @@ box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
             web_articles, web_raw = fetch_and_analyze_web_articles(web_queries)
             st.metric("Web記事", f"{len(web_articles)}件取得")
 
-            # Phase 4: 馬別集計（ドキュメントから抽出した馬別情報も統合）
+            # Phase 2: 馬別集計（ドキュメントから抽出した馬別情報も統合）
             doc_horse_raw = st.session_state.get('doc_horse_raw', [])
+            youtube_raw = []
             horse_df = aggregate_horse_analysis(youtube_raw, web_raw, doc_horse_raw)
 
             # セッションステートに保存
             st.session_state['horse_df'] = horse_df
-            st.session_state['youtube_videos'] = videos
+            st.session_state['youtube_videos'] = []
             st.session_state['youtube_raw'] = youtube_raw
             st.session_state['web_raw'] = web_raw
-            st.session_state['youtube_summary_df'] = summary_df
+            st.session_state['youtube_summary_df'] = pd.DataFrame()
+            st.session_state.pop('yt_detail_analysis', None)
             st.session_state['web_articles'] = web_articles
             st.success("✅ 検索・解析が完了しました！「総合予想（馬別）」タブで結果を確認してください。")
 
@@ -2103,10 +2080,10 @@ box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
             st.session_state.pop('race_characteristics', None)
             st.rerun()
 
-    # ===== タブ4: 総合予想（馬別） =====
-    with tab4:
+    # ===== タブ3: 総合予想（馬別） =====
+    with tab3:
         st.markdown("### 🏇 馬名別 総合予想情報")
-        st.info("💡 「情報入力」タブで YouTube + Web 一括検索またはドキュメント分析を実行すると、ここに馬別の分析結果が表示されます。")
+        st.info("💡 「情報入力」タブで Web 一括検索またはドキュメント分析を実行すると、ここに馬別の分析結果が表示されます。")
 
         if 'horse_df' in st.session_state and not st.session_state['horse_df'].empty:
             horse_df = st.session_state['horse_df']
@@ -2193,10 +2170,10 @@ box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
                             st.markdown(f"- {art['title']} — {art['source_name']}")
 
         else:
-            st.info("👆 「情報入力」タブで「🔍 YouTube + Web 一括検索」を実行してください")
+            st.info("👆 「情報入力」タブで「🔍 Web 一括検索」を実行してください")
 
-    # ===== タブ5: レース特徴・傾向 =====
-    with tab5:
+    # ===== タブ4: レース特徴・傾向 =====
+    with tab4:
         st.markdown("### 🏟️ フェブラリーステークス レース特徴・傾向")
 
         if 'race_characteristics' in st.session_state and st.session_state['race_characteristics']:
@@ -2247,8 +2224,8 @@ box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
         else:
             st.info("👆 「情報入力」タブで「🔍 Geminiでレース特徴を分析」を実行するか、ドキュメントをアップロードしてください")
 
-    # ===== タブ6: YouTube詳細 =====
-    with tab6:
+    # ===== タブ5: YouTube詳細 =====
+    with tab5:
         st.markdown("### 🎥 YouTube予想動画から情報収集")
         st.info("💡 YouTubeの予想動画から、プラス材料・マイナス材料を自動抽出します")
 
@@ -2273,39 +2250,20 @@ box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
                 key="yt_detail_max"
             )
 
-        # 検索ボタン
-        if st.button("🔍 YouTube検索＋Gemini解析", type="primary", key="yt_detail_search"):
+        # 検索ボタン（検索のみ）
+        if st.button("🔍 YouTube検索", type="primary", key="yt_detail_search"):
             with st.spinner("YouTube動画を検索中..."):
                 videos = search_youtube_videos(search_keyword, max_videos)
                 before_filter = len(videos)
                 videos = filter_relevant_videos(videos)
             if videos:
                 st.session_state['youtube_videos'] = videos
+                st.session_state['yt_detail_analysis'] = {}
                 filtered_out = before_filter - len(videos)
                 msg = f"✅ {len(videos)}件の動画を取得しました"
                 if filtered_out > 0:
                     msg += f"（{filtered_out}件は無関係として除外）"
                 st.success(msg)
-                # Gemini解析（ページ再描画のたびにAPIを呼ばないよう検索時に一括実行）
-                horse_names = get_all_horse_names()
-                _status = st.empty()
-                n = len(videos)
-                est_min = max(1, (n + 1) // 2) * 3
-                _status.info(f"⏱️ {n}件を2並列で解析します（推定 {est_min}〜{est_min + 3} 分）")
-                raw = analyze_all_videos_with_gemini(
-                    videos, horse_names=horse_names, status_placeholder=_status
-                )
-                # video_id → 解析結果リスト のマップに変換
-                yt_analysis_map = {}
-                for res in raw:
-                    vid = res.get('video_url', '')
-                    for v in videos:
-                        if v['video_url'] == vid:
-                            yt_analysis_map.setdefault(v['video_id'], []).append(res)
-                            break
-                st.session_state['yt_detail_analysis'] = yt_analysis_map
-                _status.empty()
-                st.success(f"✅ Gemini解析完了（{len(raw)}件の馬情報を抽出）")
             else:
                 st.error("❌ 動画を取得できませんでした")
 
@@ -2368,6 +2326,20 @@ box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
                 col_video1, col_video2 = st.columns([1, 2])
                 with col_video1:
                     st.image(video['thumbnail_url'], use_container_width=True)
+                    if st.button("読み込み+概要取得", key=f"yt_load_{video['video_id']}", use_container_width=True):
+                        with st.spinner("動画を解析中..."):
+                            try:
+                                analysis_results = analyze_video_with_gemini(video)
+                            except Exception as e:
+                                st.error(f"❌ 解析に失敗しました: {type(e).__name__}")
+                                analysis_results = []
+                        yt_map = st.session_state.get('yt_detail_analysis', {})
+                        yt_map[video['video_id']] = analysis_results
+                        st.session_state['yt_detail_analysis'] = yt_map
+                        if analysis_results:
+                            st.success(f"✅ {len(analysis_results)}件の馬情報を抽出しました")
+                        else:
+                            st.warning("⚠️ 抽出結果がありませんでした")
                     st.link_button("▶️ YouTubeで視聴", video['video_url'], use_container_width=True)
 
                 with col_video2:
@@ -2401,7 +2373,7 @@ box-shadow:0 4px 12px rgba(0,0,0,.2);margin-bottom:16px;">
                             else:
                                 st.caption("（抽出なし）")
                 else:
-                    st.caption("（🔍 YouTube検索＋Gemini解析 ボタンを押すと分析結果が表示されます）")
+                    st.caption("（サムネイル下の「読み込み+概要取得」を押すと分析結果が表示されます）")
 
         else:
             st.info("👆 上の「🔍 YouTube検索」ボタンをクリックして動画を取得してください（または「総合予想（馬別）」タブで一括検索すると動画も取得されます）")
@@ -2499,7 +2471,7 @@ def main():
             needs_update = csv_df['枠番'].isna().all() or (csv_df['枠番'].astype(str).str.strip() == '').all()
             if needs_update:
                 with st.spinner("🏇 枠番・馬番を取得してCSVに保存中...（初回のみ）"):
-                    gate_data = fetch_odds_and_gates()
+                    gate_data, gate_error = fetch_odds_and_gates(require_odds=False)
                 if gate_data:
                     for idx, row in csv_df.iterrows():
                         horse = str(row.get('馬名', ''))
@@ -2509,6 +2481,8 @@ def main():
                     csv_df.to_csv(CSV_FILE, index=False, encoding='utf-8-sig')
                     load_race_data.clear()  # キャッシュをクリアして再読み込み
                     st.toast(f"✅ {len(gate_data)}頭の枠番・馬番をCSVに保存しました", icon="🏇")
+                elif gate_error:
+                    st.session_state['latest_odds_error'] = gate_error
         except Exception:
             pass
         st.session_state['gates_saved'] = True

@@ -48,8 +48,9 @@ GEMINI_API_KEY=AIza...
 | タブ | 内容 |
 |---|---|
 | 📋 出馬表 | CSVから読み込んだ出走馬一覧 |
-| 🎲 勝率シミュレーター | 各馬の勝率をスライダーで調整 |
+| 📥 情報入力 | YouTube + Web一括検索、ドキュメント分析の実行 |
 | 🏇 総合予想（馬別） | YouTube + Web を一括検索し、馬ごとにメリット・デメリットを表示 |
+| 🏟️ レース特徴・傾向 | コース特徴・枠順傾向・注目ポイントの表示 |
 | 🎥 YouTube詳細 | YouTube動画のサムネイル・概要欄の詳細 |
 
 ## 主要関数（app.py）
@@ -105,7 +106,6 @@ GEMINI_API_KEY=AIza...
 | `youtube_raw` | YouTube分析の生データリスト |
 | `youtube_summary_df` | YouTube動画別集計DataFrame |
 | `web_articles` | Web記事メタデータリスト |
-| `win_rates` | 勝率シミュレーターの各馬スライダー値 |
 
 ## Gemini API 使用モデル
 
