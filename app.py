@@ -54,11 +54,23 @@ st.set_page_config(
 # キーは .env ファイルに記載。絶対にコードに直書きしないこと。
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+try:
+    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "") or st.secrets.get("TAVILY_API_KEY", "")
+except Exception:
+    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
 
 # CSVファイルのパス
 CSV_FILE = "february_s_info.csv"
 RACE_ID = "202605010811"  # フェブラリーS 2026（netkeiba.com）
 RACE_URL = f"https://race.netkeiba.com/race/shutuba.html?race_id={RACE_ID}"
+
+WEB_SEARCH_ALLOWLIST = [
+    "netkeiba.com",
+    "keibalab.jp",
+    "umanity.jp",
+    "spaia-keiba.com",
+    "sports.yahoo.co.jp",
+]
 
 # 注目馬のリスト
 FEATURED_HORSES = [
@@ -191,12 +203,13 @@ def search_youtube_videos(keyword, max_results=5):
         youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
 
         # 検索リクエストを実行
+        # viewCount順は公式動画・レース映像が上位化しやすいため、relevance順を優先
         search_response = youtube.search().list(
             q=keyword,  # 検索キーワード
             part='id,snippet',  # 取得する情報（IDとスニペット）
             maxResults=max_results,  # 最大取得件数
             type='video',  # 動画のみ検索
-            order='viewCount',  # 再生回数が多い順に並べる
+            order='relevance',  # 関連度順
             regionCode='JP',  # 日本向けの結果を優先
             relevanceLanguage='ja'  # 日本語の動画を優先
         ).execute()
@@ -232,16 +245,66 @@ def search_youtube_videos(keyword, max_results=5):
 
 def filter_relevant_videos(videos):
     """
-    フェブラリーステークス関連の動画のみに絞り込む関数。
-    タイトルまたは概要欄の先頭200文字に「フェブラリー」を含むものだけを残す。
-    フィルタ後に0件になった場合はフォールバックとして全件返す。
+    予想に関係する動画を優先し、公式映像・レース中継系を除外する。
+    スコア順で並べ替えた結果を返し、0件の場合のみ緩い条件でフォールバックする。
     """
-    relevant = [
-        v for v in videos
-        if 'フェブラリー' in v['title']
-        or 'フェブラリー' in (v.get('description', '') or '')[:200]
+    if not videos:
+        return []
+
+    include_keywords = [
+        "予想", "本命", "対抗", "穴", "買い目", "印", "展開", "見解", "考察", "馬券"
     ]
-    return relevant if relevant else videos
+    race_keywords = [
+        "フェブラリー", "フェブラリーs", "フェブラリーステークス", "東京1600", "ダート1600"
+    ]
+    exclude_keywords = [
+        "jra公式", "公式", "ライブ", "生中継", "レース映像", "レース動画",
+        "ハイライト", "cm", "pv", "出走馬紹介", "パドック", "払戻", "結果速報"
+    ]
+    exclude_channel_tokens = [
+        "jra", "日本中央競馬会", "netkeiba", "グリーンチャンネル", "tbs", "フジ"
+    ]
+
+    scored = []
+    for v in videos:
+        title = (v.get('title') or '').lower()
+        desc = (v.get('description') or '')[:300].lower()
+        channel = (v.get('channel_title') or '').lower()
+        text = f"{title} {desc}"
+
+        # レース名すらない動画は除外
+        if not any(k in text for k in [rk.lower() for rk in race_keywords]):
+            continue
+
+        # 公式/メディア系チャンネルは除外
+        if any(token in channel for token in [t.lower() for t in exclude_channel_tokens]):
+            continue
+
+        score = 0
+        for k in include_keywords:
+            if k.lower() in text:
+                score += 2
+        for k in race_keywords:
+            if k.lower() in text:
+                score += 1
+        for k in exclude_keywords:
+            if k.lower() in text:
+                score -= 3
+
+        if score >= 2:
+            scored.append((score, v))
+
+    if scored:
+        scored.sort(key=lambda x: x[0], reverse=True)
+        return [v for _, v in scored]
+
+    # フォールバック: 条件を緩めてレース関連だけ返す
+    relaxed = [
+        v for v in videos
+        if any(k in ((v.get('title', '') + ' ' + (v.get('description', '') or '')[:300]).lower())
+               for k in [rk.lower() for rk in race_keywords])
+    ]
+    return relaxed if relaxed else videos
 
 
 @st.cache_data(ttl=3600)
@@ -692,6 +755,70 @@ def search_web_articles(query, max_articles=5):
         return []
 
 
+def normalize_tavily_results(results, query):
+    """
+    Tavily検索結果を既存articleスキーマへ正規化する。
+    """
+    articles = []
+    seen_urls = set()
+
+    for item in results or []:
+        url = (item.get("url") or "").strip()
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+
+        title = (item.get("title") or "").strip() or url
+        snippet = (
+            (item.get("content") or "").strip()
+            or (item.get("raw_content") or "").strip()[:1200]
+            or f"Tavily検索結果: {query}"
+        )
+        domain = urlparse(url).netloc.replace("www.", "") if url else "tavily"
+
+        articles.append({
+            "title": title,
+            "url": url,
+            "source_name": domain,
+            "snippet": snippet,
+            "source_type": "web"
+        })
+
+    return articles
+
+
+@st.cache_data(ttl=1800)
+def search_web_articles_with_tavily(query, max_articles=5, include_domains=None):
+    """
+    Tavily APIでWeb記事を検索する関数。
+    """
+    if not TAVILY_API_KEY:
+        raise RuntimeError("TAVILY_API_KEY is not configured")
+
+    payload = {
+        "api_key": TAVILY_API_KEY,
+        "query": query,
+        "max_results": max_articles,
+        "search_depth": "advanced",
+        "include_answer": False,
+        "include_raw_content": False,
+        "topic": "news",
+    }
+    if include_domains:
+        payload["include_domains"] = include_domains
+
+    response = requests.post(
+        "https://api.tavily.com/search",
+        json=payload,
+        timeout=25
+    )
+    if response.status_code != 200:
+        raise RuntimeError(f"Tavily API error: {response.status_code} {response.text[:200]}")
+
+    data = response.json()
+    return normalize_tavily_results(data.get("results", []), query)
+
+
 def analyze_web_article_with_gemini(article_info):
     """
     Web記事情報からGeminiで馬別のプラス/マイナス情報を抽出する関数
@@ -919,13 +1046,14 @@ def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
     return df
 
 
-def fetch_and_analyze_web_articles(queries):
+def fetch_and_analyze_web_articles(queries, total_article_limit=20):
     """
     複数クエリでWeb記事を検索・解析するオーケストレーター関数
     全出走馬を4頭ずつグループ化した馬別クエリを自動追加し、全頭分の情報を収集する
 
     引数:
         queries (list): 検索クエリのリスト
+        total_article_limit (int): 最終的に取得するWeb記事の上限件数
 
     戻り値:
         tuple: (articles_metadata, raw_analysis_results)
@@ -943,23 +1071,64 @@ def fetch_and_analyze_web_articles(queries):
 
     progress_bar = st.progress(0)
     status_text = st.empty()
+    total_queries = len(queries)
+    tavily_warned = False
 
     for q_idx, query in enumerate(queries):
+        if len(all_articles) >= total_article_limit:
+            break
+
         status_text.info(f"🌐 Web検索中... ({q_idx+1}/{len(queries)}): {query[:30]}")
         articles = []
-        for retry in range(3):
-            try:
-                articles = search_web_articles(query)
-                break
-            except Exception:
-                if retry < 2:
-                    status_text.info(f"⏳ Web検索リトライ中...")
-                    time.sleep(2)
+        remaining = max(0, total_article_limit - len(all_articles))
+        if remaining == 0:
+            break
+
+        # 1) Tavily優先
+        tavily_error = None
+        if TAVILY_API_KEY:
+            for retry in range(3):
+                try:
+                    status_text.info(f"🌐 Tavily検索中... ({q_idx+1}/{len(queries)}): {query[:30]}")
+                    articles = search_web_articles_with_tavily(
+                        query,
+                        max_articles=min(5, remaining),
+                        include_domains=WEB_SEARCH_ALLOWLIST
+                    )
+                    if articles:
+                        break
+                except Exception as e:
+                    tavily_error = e
+                    if retry < 2:
+                        status_text.info("⏳ Tavily検索リトライ中...")
+                        time.sleep(2)
+        else:
+            if not tavily_warned:
+                st.warning("⚠️ TAVILY_API_KEYが未設定のため、Gemini検索へフォールバック中です。")
+                tavily_warned = True
+
+        # 2) Tavily失敗/空時はGemini検索へフォールバック
+        if not articles:
+            if TAVILY_API_KEY:
+                msg = "↪ Tavily失敗 → Gemini検索へ切替"
+                if tavily_error:
+                    msg += f"（{type(tavily_error).__name__}）"
+                status_text.info(msg)
+
+            for retry in range(3):
+                try:
+                    articles = search_web_articles(query, max_articles=min(5, remaining))
+                    break
+                except Exception:
+                    if retry < 2:
+                        status_text.info("⏳ Gemini検索リトライ中...")
+                        time.sleep(2)
 
         # 同じsnippetを複数回解析しないよう最初の1件だけ解析する
+        articles = articles[:remaining]
         unique_articles = articles[:1] if articles else []
         all_articles.extend(articles)
-        progress_bar.progress((q_idx + 0.5) / len(queries))
+        progress_bar.progress((q_idx + 0.5) / total_queries)
 
         for a_idx, article in enumerate(unique_articles):
             status_text.info(f"🤖 Web記事を解析中... {article['title'][:30]}...")
@@ -973,7 +1142,7 @@ def fetch_and_analyze_web_articles(queries):
                         time.sleep(2)
             all_web_raw.extend(results)
 
-        progress_bar.progress((q_idx + 1) / len(queries))
+        progress_bar.progress((q_idx + 1) / total_queries)
 
     progress_bar.empty()
     status_text.empty()
@@ -1957,10 +2126,11 @@ div[data-testid="metric-container"] {
             )
         with col_s3:
             combined_max_web = st.number_input(
-                "Web検索数",
+                "Web記事上限数",
                 min_value=1,
-                max_value=10,
-                value=5,
+                max_value=100,
+                value=20,
+                help="最終的に取得するWeb記事件数の上限",
                 key="combined_max_web"
             )
 
@@ -1980,8 +2150,10 @@ div[data-testid="metric-container"] {
                 "フェブラリーステークス 2026 馬券 買い方 狙い目",
                 "フェブラリーステークス 2026 ダブルハートボンド コスタノヴァ ラムジェット",
                 "フェブラリーステークス 2026 出走予定馬 戦力分析",
-            ][:combined_max_web]
-            web_articles, web_raw = fetch_and_analyze_web_articles(web_queries)
+            ]
+            web_articles, web_raw = fetch_and_analyze_web_articles(
+                web_queries, total_article_limit=int(combined_max_web)
+            )
             st.metric("Web記事", f"{len(web_articles)}件取得")
 
             # Phase 2: 馬別集計（ドキュメントから抽出した馬別情報も統合）

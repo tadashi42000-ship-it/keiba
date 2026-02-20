@@ -38,6 +38,7 @@ APIキーは `.env` ファイルで管理する。コードへの直書き禁止
 # .env ファイルの内容
 YOUTUBE_API_KEY=AIza...
 GEMINI_API_KEY=AIza...
+TAVILY_API_KEY=tvly-...
 ```
 
 - **YouTube Data API v3**: Google Cloud Console > APIとサービス > 認証情報
@@ -60,9 +61,10 @@ GEMINI_API_KEY=AIza...
 | `search_youtube_videos(keyword, max_results)` | YouTube Data API v3 で動画検索（1時間キャッシュ） |
 | `analyze_video_with_gemini(video)` | 動画タイトル・概要欄をGeminiで解析、馬別JSON返却 |
 | `create_summary_dataframe(videos)` | 全動画を解析して `(df, raw_results)` タプルを返す |
+| `search_web_articles_with_tavily(query, max_articles, include_domains)` | Tavily APIでWeb検索（競馬系ドメイン優先） |
 | `search_web_articles(query, max_articles)` | Gemini Google SearchグラウンディングでWeb検索（1時間キャッシュ） |
 | `analyze_web_article_with_gemini(article_info)` | Web記事スニペットをGeminiで解析、馬別JSON返却 |
-| `fetch_and_analyze_web_articles(queries)` | 複数クエリのWeb検索・解析オーケストレーター、`(articles, raw)` 返却 |
+| `fetch_and_analyze_web_articles(queries, total_article_limit)` | Tavily優先・GeminiフォールバックでWeb検索/解析、`(articles, raw)` 返却 |
 | `aggregate_horse_analysis(youtube_raw, web_raw)` | YouTube + Web の生データを馬名ごとに集約、DataFrame返却 |
 
 ## データフロー（総合予想タブ）
@@ -71,8 +73,9 @@ GEMINI_API_KEY=AIza...
 [🔍 一括検索ボタン]
 ├── search_youtube_videos() → 動画リスト
 │   └── create_summary_dataframe() → (summary_df, youtube_raw)
-├── fetch_and_analyze_web_articles(queries[0:max_web]) → (web_articles, web_raw)
-│   ├── search_web_articles()  ← Gemini Google Search grounding
+├── fetch_and_analyze_web_articles(queries, total_article_limit) → (web_articles, web_raw)
+│   ├── search_web_articles_with_tavily()  ← Tavily API（優先）
+│   ├── search_web_articles()  ← Gemini Google Search grounding（フォールバック）
 │   └── analyze_web_article_with_gemini()
 └── aggregate_horse_analysis(youtube_raw, web_raw) → horse_df
         └── 馬名タブ形式で表示（✅ メリット | ⚠️ デメリット）

@@ -5,6 +5,21 @@
 
 ## 2026-02-20
 
+### 2026-02-20 15:23:26 +09:00
+- 担当: Codex
+- 変更概要:
+  - Web検索を Tavily 優先 + Gemini フォールバック構成に変更
+  - `TAVILY_API_KEY` 読み込みを追加（`.env`/Secrets対応）
+  - 競馬系ドメイン allowlist（`WEB_SEARCH_ALLOWLIST`）を追加
+  - `search_web_articles_with_tavily()` / `normalize_tavily_results()` を追加
+  - `fetch_and_analyze_web_articles()` に検索エンジン切替ロジックと進捗メッセージを追加
+- 対象ファイル:
+  - `app.py`
+  - `CLAUDE.md`
+  - `DEV_CHANGELOG.md`（このファイル）
+- 検証:
+  - `python -c "import ast, pathlib; ast.parse(...)"` による構文確認 `OK`
+
 ### 2026-02-20 14:26:50 +09:00
 - 担当: Codex
 - 変更概要:
@@ -38,4 +53,3 @@
 - 検証:
   - 
 ```
-
