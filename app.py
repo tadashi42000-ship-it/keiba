@@ -15,6 +15,7 @@ import time  # 待機時間のために追加
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 from collections import defaultdict
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 try:
     import PyPDF2
@@ -52,6 +53,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # CSVファイルのパス
 CSV_FILE = "february_s_info.csv"
+RACE_ID = "202605010811"  # フェブラリーS 2026（netkeiba.com）
+RACE_URL = f"https://race.netkeiba.com/race/shutuba.html?race_id={RACE_ID}"
 
 # 注目馬のリスト
 FEATURED_HORSES = [
@@ -1315,6 +1318,48 @@ def load_race_data(file_path):
         st.error(f"❌ データ読み込みエラー: {e}")
         return None
 
+@st.cache_data(ttl=300)
+def fetch_odds_and_gates():
+    """
+    netkeiba.com から最新の枠番・馬番・オッズを取得する。
+    5分キャッシュ（オッズは頻繁に変わるため短め）。
+    取得失敗時は空辞書を返す（呼び出し元でフォールバック）。
+
+    戻り値:
+        dict: {馬名: {'枠番': str, '馬番': str, 'オッズ': str}}
+    """
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        response = requests.get(RACE_URL, headers=headers, timeout=10)
+        response.encoding = 'EUC-JP'
+        if response.status_code != 200:
+            return {}
+        soup = BeautifulSoup(response.text, 'html.parser')
+        shutuba_table = soup.find('table', class_='Shutuba_Table')
+        if not shutuba_table:
+            return {}
+        result = {}
+        for row in shutuba_table.find_all('tr'):
+            horse_info = row.find('td', class_='HorseInfo')
+            if not horse_info:
+                continue
+            horse_link = horse_info.find('a')
+            if not horse_link:
+                continue
+            horse_name = horse_link.text.strip()
+            waku = row.find('td', class_='Waku')
+            umaban = row.find('td', class_='Umaban')
+            odds = row.find('td', class_='Popular')
+            result[horse_name] = {
+                '枠番': waku.text.strip() if waku else '',
+                '馬番': umaban.text.strip() if umaban else '',
+                'オッズ': odds.text.strip() if odds else '---.-'
+            }
+        return result
+    except Exception:
+        return {}
+
+
 # ====================
 # サイドバー表示関数
 # ====================
@@ -1468,9 +1513,25 @@ def display_main_content(df):
 
         # データが空でないか確認
         if df is not None and not df.empty:
+            # netkeiba から取得した枠番・馬番・オッズをマージ
+            df_display = df.copy()
+            odds_gate = st.session_state.get('odds_gate_data', {})
+            if odds_gate:
+                for idx, row in df_display.iterrows():
+                    horse = row.get('馬名', '')
+                    if horse in odds_gate:
+                        df_display.at[idx, '枠番'] = odds_gate[horse]['枠番']
+                        df_display.at[idx, '馬番'] = odds_gate[horse]['馬番']
+                        df_display.at[idx, 'オッズ'] = odds_gate[horse]['オッズ']
+            # 馬番（数値）でソート → 枠順と一致
+            if '馬番' in df_display.columns:
+                df_display['_馬番_num'] = pd.to_numeric(df_display['馬番'], errors='coerce')
+                df_display = df_display.sort_values('_馬番_num', na_position='last')
+                df_display = df_display.drop(columns=['_馬番_num']).reset_index(drop=True)
+
             # 出馬表を表示（全幅で表示）
             st.dataframe(
-                df,
+                df_display,
                 use_container_width=True,  # コンテナ幅いっぱいに表示
                 hide_index=True,  # インデックス列を非表示
                 height=400  # 高さを指定
@@ -2160,6 +2221,14 @@ def main():
                 st.session_state['race_characteristics'].update(web_info)
         except Exception:
             pass  # 失敗してもドキュメントデータは表示される
+
+    # 枠番・馬番・オッズを自動取得（初回のみ、5分キャッシュ）
+    if 'odds_gate_data' not in st.session_state:
+        with st.spinner("🏇 最新の枠番・馬番・オッズを取得中..."):
+            st.session_state['odds_gate_data'] = fetch_odds_and_gates()
+        n = len(st.session_state['odds_gate_data'])
+        if n > 0:
+            st.toast(f"✅ {n}頭の枠番・オッズを取得しました", icon="🏇")
 
     # サイドバーを表示
     display_sidebar()
