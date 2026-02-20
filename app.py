@@ -12,6 +12,7 @@ from datetime import datetime
 import re
 import json
 import time  # 待機時間のために追加
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse
 from collections import defaultdict
 from dotenv import load_dotenv
@@ -435,6 +436,48 @@ def analyze_video_with_gemini(video):
         return []
 
 
+def _analyze_one_video_worker(video, prompt_template):
+    """
+    1動画を解析するワーカー関数。ThreadPoolExecutorから呼ばれる。
+    Streamlit APIは呼ばない（スレッドアンセーフのため）。
+    """
+    client = google_genai.Client(api_key=GEMINI_API_KEY)
+    for retry in range(3):
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=[
+                    genai_types.Part(
+                        file_data=genai_types.FileData(
+                            file_uri=video['video_url'],
+                            mime_type='video/mp4'
+                        )
+                    ),
+                    prompt_template
+                ]
+            )
+            response_text = response.text or ""
+            json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
+            json_text = json_match.group(1) if json_match else response_text.strip()
+            results = json.loads(json_text)
+            for r in results:
+                r['video_url'] = video['video_url']
+                r['video_title'] = video['title']
+            return results
+        except json.JSONDecodeError:
+            return []
+        except Exception as e:
+            error_msg = str(e)
+            if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+                if retry < 2:
+                    time.sleep(60 * (retry + 1))  # 60秒、120秒と待機
+                else:
+                    return []
+            else:
+                return []
+    return []
+
+
 def analyze_all_videos_with_gemini(videos, horse_names=None, status_placeholder=None):
     """
     YouTube動画リストをGemini APIで解析する。
@@ -486,58 +529,29 @@ def analyze_all_videos_with_gemini(videos, horse_names=None, status_placeholder=
 - JSONのみ出力し、前後に説明文を付けないこと
 """
 
-    client = google_genai.Client(api_key=GEMINI_API_KEY)
+    MAX_WORKERS = 2  # 2並列（レート制限リスクと速度のバランス）
     total = len(videos)
     all_results = []
+    completed = 0
 
-    for i, video in enumerate(videos, 1):
-        if status_placeholder:
-            status_placeholder.info(f"🎬 動画 {i}/{total} を解析中: {video['title'][:40]}...")
-
-        for retry in range(3):
-            try:
-                response = client.models.generate_content(
-                    model='gemini-2.0-flash',
-                    contents=[
-                        genai_types.Part(
-                            file_data=genai_types.FileData(
-                                file_uri=video['video_url'],
-                                mime_type='video/mp4'
-                            )
-                        ),
-                        prompt_template
-                    ]
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        future_to_video = {
+            executor.submit(_analyze_one_video_worker, v, prompt_template): v
+            for v in videos
+        }
+        for future in as_completed(future_to_video):
+            completed += 1
+            video = future_to_video[future]
+            if status_placeholder:
+                status_placeholder.info(
+                    f"🎬 {completed}/{total}件完了 | 最新: {video['title'][:35]}..."
                 )
-                response_text = response.text or ""
-
-                json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
-                json_text = json_match.group(1) if json_match else response_text.strip()
-                results = json.loads(json_text)
-
-                for result in results:
-                    result['video_url'] = video['video_url']
-                    result['video_title'] = video['title']
-
-                all_results.extend(results)
-                break
-
-            except json.JSONDecodeError:
-                break
-            except Exception as e:
-                error_msg = str(e)
-                if "429" in error_msg or "resource_exhausted" in error_msg.lower():
-                    if retry < 2:
-                        wait = 30 * (retry + 1)
-                        if status_placeholder:
-                            status_placeholder.warning(f"⏳ レート制限中。{wait}秒待機後にリトライ... ({retry + 1}/3)")
-                        time.sleep(wait)
-                    else:
-                        if status_placeholder:
-                            status_placeholder.warning(f"⚠️ 動画 {i} をスキップしました（レート制限）")
-                else:
-                    if status_placeholder:
-                        status_placeholder.warning(f"⚠️ 動画 {i} の解析をスキップしました: {type(e).__name__}: {str(e)[:80]}")
-                    break
+            try:
+                results = future.result()
+                if results:
+                    all_results.extend(results)
+            except Exception:
+                pass
 
     return all_results
 
@@ -556,7 +570,11 @@ def create_summary_dataframe(videos):
     status_text = st.empty()
     horse_names = get_all_horse_names()
 
-    # 各動画のURLをGeminiに直接渡して解析（1動画1APIコール）
+    n = len(videos)
+    est_min = max(1, (n + 1) // 2) * 3  # 2並列、1動画3分として計算
+    status_text.info(f"⏱️ {n}件を2並列で解析します（推定 {est_min}〜{est_min + 3} 分）")
+
+    # 各動画のURLをGeminiに直接渡して2並列解析（1動画1APIコール）
     all_analysis_results = analyze_all_videos_with_gemini(
         videos, horse_names=horse_names, status_placeholder=status_text
     )
@@ -1941,6 +1959,9 @@ def display_main_content(df):
                 # Gemini解析（ページ再描画のたびにAPIを呼ばないよう検索時に一括実行）
                 horse_names = get_all_horse_names()
                 _status = st.empty()
+                n = len(videos)
+                est_min = max(1, (n + 1) // 2) * 3
+                _status.info(f"⏱️ {n}件を2並列で解析します（推定 {est_min}〜{est_min + 3} 分）")
                 raw = analyze_all_videos_with_gemini(
                     videos, horse_names=horse_names, status_placeholder=_status
                 )
