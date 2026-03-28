@@ -1,8 +1,9 @@
 """
-フェブラリーステークス（2026年2月22日）情報表示Webアプリ
+重賞レース予想Webアプリ
 
-Streamlitを使用して、CSVファイルから競馬情報を読み込み、
-インタラクティブに表示するWebアプリケーション
+Streamlitを使用して、netkeiba.comから出馬表を取得し、
+YouTube・Web検索から予想情報を収集・表示するWebアプリケーション。
+サイドバーから直近の重賞レースを選択可能。
 """
 
 import streamlit as st
@@ -10,7 +11,7 @@ import pandas as pd
 import os
 import sys
 import subprocess
-from datetime import datetime
+from datetime import datetime, date
 import re
 import json
 import time  # 待機時間のために追加
@@ -31,6 +32,16 @@ from googleapiclient.errors import HttpError
 from google import genai as google_genai
 from google.genai import types as genai_types
 
+from race_catalog import (
+    RaceInfo,
+    get_upcoming_races,
+    resolve_race_id,
+    ensure_data_dir,
+    clear_fetch_graded_races_cache,
+    clear_resolve_race_id_cache,
+)
+from get_keiba_info import fetch_race_csv
+
 # .env ファイルからAPIキーを読み込む（app.py と同じフォルダに .env を置くこと）
 load_dotenv()
 
@@ -40,7 +51,7 @@ load_dotenv()
 
 # ページの基本設定（タイトル、アイコン、レイアウト）
 st.set_page_config(
-    page_title="フェブラリーステークス 2026",
+    page_title="重賞予想アプリ",
     page_icon="🏇",
     layout="wide",  # ワイドレイアウトで表示
     initial_sidebar_state="expanded"  # サイドバーを最初から開く
@@ -54,15 +65,11 @@ st.set_page_config(
 # キーは .env ファイルに記載。絶対にコードに直書きしないこと。
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 try:
     TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "") or st.secrets.get("TAVILY_API_KEY", "")
 except Exception:
     TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
-
-# CSVファイルのパス
-CSV_FILE = "february_s_info.csv"
-RACE_ID = "202605010811"  # フェブラリーS 2026（netkeiba.com）
-RACE_URL = f"https://race.netkeiba.com/race/shutuba.html?race_id={RACE_ID}"
 
 WEB_SEARCH_ALLOWLIST = [
     "netkeiba.com",
@@ -71,110 +78,175 @@ WEB_SEARCH_ALLOWLIST = [
     "spaia-keiba.com",
     "sports.yahoo.co.jp",
 ]
+MAX_ANALYZE_ARTICLES_PER_QUERY = 3
 
-# 注目馬のリスト
-FEATURED_HORSES = [
-    {
-        "name": "ダブルハートボンド",
-        "description": "2025年JBCクラシック優勝。パワフルな末脚が武器。",
-        "icon": "⭐"
-    },
-    {
-        "name": "コスタノヴァ",
-        "description": "連勝街道を突き進む実力馬。スピードと持続力を兼ね備える。",
-        "icon": "🌟"
-    },
-    {
-        "name": "ラムジェット",
-        "description": "ダート界のスピードスター。先行力が持ち味。",
-        "icon": "⚡"
-    }
+# レース切替時にクリアするセッションステートキー
+RACE_SESSION_KEYS = [
+    'horse_df', 'youtube_videos', 'youtube_raw', 'youtube_summary_df',
+    'web_articles', 'web_raw', 'race_characteristics', 'gates_saved',
+    'yt_detail_analysis', 'doc_horse_raw', 'win_rates', 'latest_odds_error',
+    'latest_odds', 'combined_keyword', 'yt_detail_keyword',
 ]
 
-# 馬名の表記揺れ・別名を正規名に統一するマッピング
-# （例: AIが略称を抽出した場合に正しい馬名に寄せる）
-HORSE_NAME_ALIASES = {
-    "ハートボンド": "ダブルハートボンド",  # ハートボンドは本レース未出走。同名言及はダブルハートボンドを指す
-}
 
-# フェブラリーステークス 過去データ・傾向（ドキュメントから抽出・固定データ）
-# レース特徴タブに起動時から表示するためのベースデータ
-RACE_INFO_FROM_DOC = {
-    "コース特徴": (
-        "東京ダート1600m。向こう正面の芝コース内からスタートし、ダートへ進入する「芝スタート」が特徴。"
-        "内枠(1枠)は約97mの芝走行、外枠(8枠)は約127mの芝走行で約30mの差がある。"
-        "外枠ほど高い初速を維持してダートに突入でき、先行争いで戦略的優位に立てる。"
-        "内枠は加速が不十分になりやすく、砂かぶり（キックバック）リスクも高い。直線が長く瞬発力も必要。"
-        "\n\n良馬場平均勝ちタイム約1分35秒4。稍重で1分34秒台と約1秒短縮。"
-        "道悪では逃げ・先行馬が止まりにくく、芝に近い瞬発力勝負になりやすい。"
-    ),
-    "過去の傾向": (
-        "【枠順】1枠は過去10年【0-0-0-19】で0勝。消去候補。"
-        "7枠は単勝回収率207%、8枠153%と外枠人気薄が激走。"
-        "4枠・5枠は複勝率30%と安定した「安全地帯」。\n"
-        "【年齢】5歳馬が【4-4-5-28】と最多勝。7歳以上は【0-4-2-53】で勝利なし。\n"
-        "【ステップ】根岸S組【5-2-3-38】が最多勝。チャンピオンズC組は複勝率47.1%と最高効率。\n"
-        "【血統】過去10年の優勝馬7頭が父ミスタープロスペクター系。\n"
-        "【人気薄】外枠(5〜8枠)の4番人気以下は複勝回収率118%と投資妙味大。"
-        "内枠(1〜4枠)の人気薄は複勝回収率38%と妙味なし。"
-    ),
-    "勝ちやすい馬のタイプ": (
-        "・父ミスタープロスペクター系（エーピーインディ系、ストームキャット系含む配合）\n"
-        "・ゴールドアリュール産駒（コパノリッキー、ゴールドドリームなど実績多数）\n"
-        "・過去に3連勝以上の経験がある馬（過去10年優勝馬9頭に共通）\n"
-        "・4コーナーで5番手以内に位置できる先行馬\n"
-        "・1800m以上からの距離短縮組（全3着以内馬の約7割）\n"
-        "・4〜7枠に入った馬（特に中〜外枠）\n"
-        "・道悪時：芝スタートを得意とする馬、芝勝利経験あり、母系にSS系を持つ馬"
-    ),
-    "苦手な馬のタイプ": (
-        "・1枠の馬（過去10年0勝、消去候補）\n"
-        "・7歳以上の高齢馬（0勝。連対はあるが勝ち切れない）\n"
-        "・1200〜1400mからの距離延長組（東京マイルの直線は甘くない）\n"
-        "・サンデーサイレンス系単体（勝ち切れない傾向、2着が多く連軸向き）\n"
-        "・良馬場時：パワー不足の軽量型"
-    ),
-    "枠順有利": (
-        "4〜7枠が中心。特に7枠・8枠の人気薄は常に警戒が必要（単勝回収率207%・153%）。"
-        "外枠は芝スタートで初速優位、馬群に包まれるリスクも低い。"
-        "人気薄の馬(4番人気以下)は外枠(5〜8枠)の複勝回収率118%と投資効率も高い。"
-        "2014年コパノリッキー(16番人気1着・13番枠)、2020年ケイティブレイブ(16番人気2着・16番枠)など大波乱も外枠から。"
-    ),
-    "枠順不利": (
-        "1枠は過去10年0勝で明確に不利。内枠は芝走行距離が短く加速不十分になりやすい。"
-        "外から被せられると砂かぶり（キックバック）で心理的ストレスとスタミナ浪費のリスク。"
-        "人気薄の馬が1〜4枠に入ると複勝回収率38%と投資妙味も低下。"
-    ),
-    "騎手厩舎傾向": (
-        "東京ダートは直線が長く、瞬発力を引き出す騎乗が重要。"
-        "戸崎圭太騎手はコース攻略法に精通し、脚を溜めた直線勝負を得意とする。"
-        "ルメールら外国人騎手も大舞台で安定した成績を残す傾向。"
-        "ゴールドアリュール産駒を管理する厩舎（美浦・栗東問わず）はこのレースへの適性を熟知。"
-    ),
-    "注目ポイント": (
-        "【馬場状態で評価をシフト】\n"
-        "良馬場→パワー型・実力馬中心（砂が深くスタミナ勝負）。\n"
-        "道悪→芝適性・SS系のスピードタイプが浮上（前が止まりにくく波乱多発）。\n\n"
-        "当日の雨量・馬場状態を必ず確認すること。\n"
-        "また、前走根岸S連対馬か、チャンピオンズC・地方交流G1実績馬の「距離短縮組」を軸とするのが王道。"
-    ),
-}
+# ====================
+# レース設定ヘルパー関数
+# ====================
+
+def get_race_config() -> RaceInfo | None:
+    """現在選択中のレースを取得する"""
+    return st.session_state.get('selected_race')
+
+
+def format_date_with_weekday(value: date) -> str:
+    """YYYY/MM/DD(曜) 形式へ整形する。"""
+    weekdays = ("月", "火", "水", "木", "金", "土", "日")
+    return f"{value:%Y/%m/%d}({weekdays[value.weekday()]})"
+
+
+def get_race_display_name() -> str:
+    """'レース名 年' 形式の表示名を返す"""
+    r = get_race_config()
+    return f"{r.race_name} {r.date.year}" if r else "レース未選択"
+
+
+def get_csv_path() -> str:
+    """選択中レースのCSVパスを返す"""
+    r = get_race_config()
+    return r.csv_file if r else ""
+
+
+def get_race_url() -> str:
+    """選択中レースのnetkeiba出馬表URLを返す"""
+    r = get_race_config()
+    if r and r.race_id:
+        return f"https://race.netkeiba.com/race/shutuba.html?race_id={r.race_id}"
+    return ""
+
+
+def get_minimal_race_characteristics() -> dict:
+    """Gemini失敗時のフォールバック: RaceInfoから最小限のレース特徴を組み立て"""
+    r = get_race_config()
+    if not r:
+        return {}
+    return {
+        "コース特徴": f"{r.venue}競馬場 {r.surface}{r.distance}",
+        "注目ポイント": f"{r.grade}レース",
+    }
+
+
+def _to_text(value) -> str:
+    """任意の値を表示/連結向けに安全に文字列化する。"""
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        return value.strip()
+    if isinstance(value, (list, tuple)):
+        parts = [str(v).strip() for v in value if str(v).strip()]
+        return "\n".join(parts).strip()
+    if isinstance(value, dict):
+        return json.dumps(value, ensure_ascii=False).strip()
+    return str(value).strip()
+
+
+def _find_balanced_json_block(text: str, opening: str, closing: str) -> str:
+    """文字列中から最初のバランスしたJSONブロックを抽出する。"""
+    if not text:
+        return ""
+
+    start = text.find(opening)
+    while start != -1:
+        depth = 0
+        in_string = False
+        escaped = False
+        for idx in range(start, len(text)):
+            ch = text[idx]
+
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif ch == "\\":
+                    escaped = True
+                elif ch == '"':
+                    in_string = False
+                continue
+
+            if ch == '"':
+                in_string = True
+                continue
+
+            if ch == opening:
+                depth += 1
+            elif ch == closing:
+                depth -= 1
+                if depth == 0:
+                    return text[start:idx + 1]
+
+        start = text.find(opening, start + 1)
+
+    return ""
+
+
+def _parse_gemini_json_response(response_text: str, expected: str = "list"):
+    """
+    GeminiレスポンスからJSONを頑健に抽出・パースする。
+    expected: 'list' or 'dict'
+    """
+    text = (response_text or "").strip()
+    if not text:
+        raise ValueError("Gemini response is empty")
+
+    candidates: list[str] = []
+
+    for pattern in (r"```json\s*(.*?)\s*```", r"```\s*(.*?)\s*```"):
+        for match in re.finditer(pattern, text, re.DOTALL):
+            body = (match.group(1) or "").strip()
+            if body:
+                candidates.append(body)
+
+    candidates.append(text)
+
+    if expected == "dict":
+        block = _find_balanced_json_block(text, "{", "}")
+    else:
+        block = _find_balanced_json_block(text, "[", "]")
+    if block:
+        candidates.append(block)
+
+    seen = set()
+    for candidate in candidates:
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        try:
+            parsed = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+
+        if expected == "dict" and isinstance(parsed, dict):
+            return parsed
+        if expected == "list" and isinstance(parsed, list):
+            return parsed
+
+    raise ValueError(f"Could not parse {expected} JSON from Gemini response")
 
 # ====================
 # 全出走馬名取得
 # ====================
 
 @st.cache_data
-def get_all_horse_names():
+def get_all_horse_names(csv_path=None):
     """CSVから全出走馬名リストを取得する（キャッシュ付き）"""
+    if csv_path is None:
+        csv_path = get_csv_path()
     try:
-        if os.path.exists(CSV_FILE):
-            df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
+        if csv_path and os.path.exists(csv_path):
+            df = pd.read_csv(csv_path, encoding='utf-8-sig')
             if '馬名' in df.columns:
                 return df['馬名'].dropna().tolist()
     except Exception:
         pass
-    return [h['name'] for h in FEATURED_HORSES]
+    return []
 
 
 # ====================
@@ -254,9 +326,15 @@ def filter_relevant_videos(videos):
     include_keywords = [
         "予想", "本命", "対抗", "穴", "買い目", "印", "展開", "見解", "考察", "馬券"
     ]
-    race_keywords = [
-        "フェブラリー", "フェブラリーs", "フェブラリーステークス", "東京1600", "ダート1600"
-    ]
+    # レースメタデータから動的にキーワード生成
+    r = get_race_config()
+    if r:
+        race_keywords = [
+            r.race_name, r.race_name[:4] if len(r.race_name) > 4 else r.race_name,
+            f"{r.venue}{r.distance}", f"{r.surface}{r.distance}",
+        ]
+    else:
+        race_keywords = ["競馬", "予想"]
     exclude_keywords = [
         "jra公式", "公式", "ライブ", "生中継", "レース映像", "レース動画",
         "ハイライト", "cm", "pv", "出走馬紹介", "パドック", "払戻", "結果速報"
@@ -376,10 +454,10 @@ def extract_horse_names_from_text(text):
 
     found_horses = []
 
-    # 注目馬リストから馬名を検索
-    for horse in FEATURED_HORSES:
-        if horse['name'] in text:
-            found_horses.append(horse['name'])
+    # CSVの全出走馬名から検索
+    for name in get_all_horse_names():
+        if name in text:
+            found_horses.append(name)
 
     return found_horses
 
@@ -422,10 +500,8 @@ def analyze_video_with_gemini(video):
 # {content_label}
 {content}
 
-# 注目すべき有力馬（これら以外の馬名が登場しても抽出してください）
-- ダブルハートボンド（※「ハートボンド」と表記された場合も同じ馬として扱ってください）
-- コスタノヴァ
-- ラムジェット
+# 注目すべき出走馬（これら以外の馬名が登場しても抽出してください）
+{chr(10).join(['- ' + name for name in get_all_horse_names()[:10]])}
 
 # 抽出してほしい情報（各馬について）
 プラス情報として以下を重点的に探してください：
@@ -465,7 +541,7 @@ def analyze_video_with_gemini(video):
 
         # Gemini 2.0 Flash を使用（従量課金・最新モデル）
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model=GEMINI_MODEL,
             contents=prompt
         )
 
@@ -476,15 +552,8 @@ def analyze_video_with_gemini(video):
         if not response_text:
             return []
 
-        # JSONブロックを抽出（```json ... ``` の中身を取得）
-        json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
-        if json_match:
-            json_text = json_match.group(1)
-        else:
-            json_text = response_text.strip()
-
-        # JSONをパース
-        analysis_results = json.loads(json_text)
+        # JSONを頑健にパース
+        analysis_results = _parse_gemini_json_response(response_text, expected="list")
 
         # 動画URLを各結果に追加
         for result in analysis_results:
@@ -493,13 +562,13 @@ def analyze_video_with_gemini(video):
 
         return analysis_results
 
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, ValueError):
         # JSON解析失敗は静かに無視（概要欄が短すぎる動画など）
         return []
     except Exception as e:
         error_msg = str(e)
         # 429 レート制限は呼び出し元でリトライするため、ここでは例外をそのまま投げる
-        if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+        if _is_transient_gemini_error(error_msg):
             raise  # create_summary_dataframe 側でキャッチしてリトライ
         # それ以外の予期しないエラーのみ表示
         st.warning(f"⚠️ 動画の解析をスキップしました: {type(e).__name__}")
@@ -515,7 +584,7 @@ def _analyze_one_video_worker(video, prompt_template):
     for retry in range(3):
         try:
             response = client.models.generate_content(
-                model='gemini-2.0-flash',
+                model=GEMINI_MODEL,
                 contents=[
                     genai_types.Part(
                         file_data=genai_types.FileData(
@@ -527,18 +596,16 @@ def _analyze_one_video_worker(video, prompt_template):
                 ]
             )
             response_text = response.text or ""
-            json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
-            json_text = json_match.group(1) if json_match else response_text.strip()
-            results = json.loads(json_text)
+            results = _parse_gemini_json_response(response_text, expected="list")
             for r in results:
                 r['video_url'] = video['video_url']
                 r['video_title'] = video['title']
             return results
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, ValueError):
             return []
         except Exception as e:
             error_msg = str(e)
-            if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+            if _is_transient_gemini_error(error_msg):
                 if retry < 2:
                     time.sleep(60 * (retry + 1))  # 60秒、120秒と待機
                 else:
@@ -567,15 +634,13 @@ def analyze_all_videos_with_gemini(videos, horse_names=None, status_placeholder=
     if horse_names is None:
         horse_names = get_all_horse_names()
 
-    all_horses_str = "\n".join([
-        f"- {name}{'（※「ハートボンド」という表記はこの馬を指す）' if name == 'ダブルハートボンド' else ''}"
-        for name in horse_names
-    ])
+    race_name = get_race_display_name()
+    all_horses_str = "\n".join([f"- {name}" for name in horse_names])
 
-    prompt_template = f"""この動画はフェブラリーステークス2026の競馬予想動画です。
+    prompt_template = f"""この動画は{race_name}の競馬予想動画です。
 動画の内容を視聴し、以下の出走馬について評価情報を抽出してください。
 
-# フェブラリーステークス2026 全出走馬リスト
+# {race_name} 全出走馬リスト
 {all_horses_str}
 
 # 抽出してほしい情報（各馬について）
@@ -692,10 +757,11 @@ def search_web_articles(query, max_articles=5):
         grounding_tool = genai_types.Tool(google_search=genai_types.GoogleSearch())
         config = genai_types.GenerateContentConfig(tools=[grounding_tool])
 
+        race_name = get_race_display_name()
         all_horse_names = get_all_horse_names()
         horses_str = "、".join(all_horse_names)
         prompt = f"""
-フェブラリーステークス2026の予想・各馬分析記事を検索してください。
+{race_name}の予想・各馬分析記事を検索してください。
 クエリ: {query}
 
 出走馬: {horses_str}
@@ -705,7 +771,7 @@ def search_web_articles(query, max_articles=5):
 できるだけ多くの馬について評価を日本語で詳しくまとめてください。
 """
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model=GEMINI_MODEL,
             contents=prompt,
             config=config,
         )
@@ -749,9 +815,9 @@ def search_web_articles(query, max_articles=5):
 
     except Exception as e:
         error_msg = str(e)
-        if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+        if _is_transient_gemini_error(error_msg):
             raise
-        st.warning(f"⚠️ Web記事の取得に失敗しました: {type(e).__name__}")
+        st.warning(f"⚠️ Web記事の取得に失敗しました: {type(e).__name__} ({error_msg[:120]})")
         return []
 
 
@@ -770,10 +836,11 @@ def normalize_tavily_results(results, query):
 
         title = (item.get("title") or "").strip() or url
         snippet = (
-            (item.get("content") or "").strip()
-            or (item.get("raw_content") or "").strip()[:1200]
+            (item.get("raw_content") or "").strip()[:3500]
+            or (item.get("content") or "").strip()
             or f"Tavily検索結果: {query}"
         )
+        snippet = re.sub(r'\s+', ' ', snippet).strip()
         domain = urlparse(url).netloc.replace("www.", "") if url else "tavily"
 
         articles.append({
@@ -785,6 +852,69 @@ def normalize_tavily_results(results, query):
         })
 
     return articles
+
+
+def _is_transient_gemini_error(error_msg: str) -> bool:
+    """Geminiの一時障害とみなせるエラーかを判定する。"""
+    msg = (error_msg or "").lower()
+    transient_tokens = (
+        "429",
+        "resource_exhausted",
+        "503",
+        "unavailable",
+        "high demand",
+        "deadline exceeded",
+        "timed out",
+        "internal",
+    )
+    return any(token in msg for token in transient_tokens)
+
+
+def _select_articles_for_analysis(
+    articles,
+    race_name: str,
+    horse_names: list[str],
+    max_items: int = MAX_ANALYZE_ARTICLES_PER_QUERY,
+):
+    """
+    解析候補記事を関連度で選別する。
+    トップページ等より、レース/馬名言及のある記事を優先。
+    """
+    if not articles:
+        return []
+
+    race_tokens = [race_name, race_name.replace(" 2026", "").strip(), race_name.replace(" 2025", "").strip()]
+    race_tokens = [t for t in race_tokens if t]
+    horse_tokens = [h for h in (horse_names or [])[:12] if h]
+
+    scored = []
+    for article in articles:
+        title = str(article.get("title", "") or "")
+        snippet = str(article.get("snippet", "") or "")
+        url = str(article.get("url", "") or "")
+        text = f"{title} {snippet}"
+        parsed = urlparse(url) if url else None
+        path = (parsed.path or "/") if parsed else "/"
+
+        score = 0
+        score += sum(1 for token in race_tokens if token in text) * 3
+        score += sum(1 for horse in horse_tokens if horse in text) * 2
+        if "/db/race/" in url or "/race/" in url:
+            score += 2
+        if path in ("", "/"):
+            score -= 4
+        if "日本最大の競馬情報サービス" in title:
+            score -= 3
+        if len(snippet) < 120:
+            score -= 1
+
+        scored.append((score, article))
+
+    scored.sort(key=lambda x: x[0], reverse=True)
+    selected = [article for score, article in scored if score >= 0][:max_items]
+    if not selected:
+        selected = [scored[0][1]]
+    return selected
 
 
 @st.cache_data(ttl=1800)
@@ -801,8 +931,8 @@ def search_web_articles_with_tavily(query, max_articles=5, include_domains=None)
         "max_results": max_articles,
         "search_depth": "advanced",
         "include_answer": False,
-        "include_raw_content": False,
-        "topic": "news",
+        "include_raw_content": True,
+        "topic": "general",
     }
     if include_domains:
         payload["include_domains"] = include_domains
@@ -832,6 +962,13 @@ def analyze_web_article_with_gemini(article_info):
     if not GEMINI_API_KEY:
         return []
 
+    title = _to_text(article_info.get('title', '')) if isinstance(article_info, dict) else ""
+    snippet = _to_text(article_info.get('snippet', '')) if isinstance(article_info, dict) else ""
+    source_url = _to_text(article_info.get('url', '')) if isinstance(article_info, dict) else ""
+    source_title = title or "Web記事"
+    if not title and not snippet:
+        return []
+
     all_horse_names = get_all_horse_names()
     horse_list_str = "\n".join([f"- {name}" for name in all_horse_names])
 
@@ -842,18 +979,13 @@ def analyze_web_article_with_gemini(article_info):
 あなたは競馬予想の専門家です。以下のWeb記事の情報を読み、各馬の詳細な評価情報を抽出してください。
 
 # 記事タイトル
-{article_info['title']}
+{source_title}
 
 # 記事内容（要約）
-{article_info['snippet']}
+{snippet}
 
-# 注目すべき有力馬（これら以外の馬名が登場しても抽出してください）
+# 注目すべき出走馬（これら以外の馬名が登場しても抽出してください）
 {horse_list_str}
-
-# 重要な注意（馬名の表記について）
-「ハートボンド」という名前が記事に登場した場合、本レースには「ダブルハートボンド」が出走しており
-「ハートボンド」単体は出走していません。「ハートボンド」の言及は「ダブルハートボンド」として扱い、
-馬名を必ず「ダブルハートボンド」で出力してください。
 
 # 抽出してほしい情報（各馬について）
 プラス情報として以下を重点的に探してください：
@@ -890,7 +1022,7 @@ def analyze_web_article_with_gemini(article_info):
 - JSONのみ出力し、前後に説明文を付けないこと
 """
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model=GEMINI_MODEL,
             contents=prompt
         )
 
@@ -898,25 +1030,22 @@ def analyze_web_article_with_gemini(article_info):
         if not response_text:
             return []
 
-        json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
-        json_text = json_match.group(1) if json_match else response_text.strip()
-
-        analysis_results = json.loads(json_text)
+        analysis_results = _parse_gemini_json_response(response_text, expected="list")
 
         for result in analysis_results:
-            result['source_url'] = article_info.get('url', '')
-            result['source_title'] = article_info['title']
+            result['source_url'] = source_url
+            result['source_title'] = source_title
             result['source_type'] = 'web'
 
         return analysis_results
 
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, ValueError):
         return []
     except Exception as e:
         error_msg = str(e)
-        if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+        if _is_transient_gemini_error(error_msg):
             raise
-        st.warning(f"⚠️ Web記事の解析をスキップしました: {type(e).__name__}")
+        st.warning(f"⚠️ Web記事の解析をスキップしました: {type(e).__name__} ({error_msg[:120]})")
         return []
 
 
@@ -942,8 +1071,8 @@ def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
     })
 
     def normalize_horse_name(name):
-        """馬名の表記揺れをHORSE_NAME_ALIASESで正規化する"""
-        return HORSE_NAME_ALIASES.get(name, name)
+        """馬名をそのまま返す（将来的にエイリアス対応可）"""
+        return name
 
     def as_text(value):
         """Geminiの出力揺れ（str/list/None）を安全に文字列化する。"""
@@ -1053,14 +1182,8 @@ def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
 
     df = pd.DataFrame(rows)
 
-    featured_names = [h["name"] for h in FEATURED_HORSES]
-    def sort_key(name):
-        if name in featured_names:
-            return (0, featured_names.index(name))
-        return (1, name)
-
-    df["_sort"] = df["馬名"].apply(sort_key)
-    df = df.sort_values("_sort").drop(columns=["_sort"]).reset_index(drop=True)
+    # 情報源数の多い馬を上位にソート
+    df = df.sort_values("情報源数", ascending=False).reset_index(drop=True)
 
     return df
 
@@ -1078,12 +1201,13 @@ def fetch_and_analyze_web_articles(queries, total_article_limit=20):
         tuple: (articles_metadata, raw_analysis_results)
     """
     # 全馬名を4頭ずつグループ化した馬別クエリを自動追加
+    race_name = get_race_display_name()
     all_horse_names = get_all_horse_names()
     batch_size = 4
     for i in range(0, len(all_horse_names), batch_size):
         batch = all_horse_names[i:i + batch_size]
         horses_str = " ".join(batch)
-        queries = list(queries) + [f"フェブラリーステークス 2026 {horses_str} 予想 評価 分析"]
+        queries = list(queries) + [f"{race_name} {horses_str} 予想 評価 分析"]
 
     all_articles = []
     all_web_raw = []
@@ -1134,31 +1258,47 @@ def fetch_and_analyze_web_articles(queries, total_article_limit=20):
                     msg += f"（{type(tavily_error).__name__}）"
                 status_text.info(msg)
 
+            gemini_search_error = None
             for retry in range(3):
                 try:
                     articles = search_web_articles(query, max_articles=min(5, remaining))
                     break
-                except Exception:
+                except Exception as e:
+                    gemini_search_error = e
                     if retry < 2:
                         status_text.info("⏳ Gemini検索リトライ中...")
                         time.sleep(2)
+            if not articles and gemini_search_error:
+                msg = str(gemini_search_error)
+                st.warning(f"⚠️ Gemini検索に失敗しました: {type(gemini_search_error).__name__} ({msg[:120]})")
 
-        # 同じsnippetを複数回解析しないよう最初の1件だけ解析する
+        # レース/馬名との関連が高い記事を優先して複数件解析する
         articles = articles[:remaining]
-        unique_articles = articles[:1] if articles else []
+        unique_articles = _select_articles_for_analysis(
+            articles,
+            race_name=race_name,
+            horse_names=all_horse_names,
+            max_items=min(MAX_ANALYZE_ARTICLES_PER_QUERY, remaining),
+        )
         all_articles.extend(articles)
         progress_bar.progress((q_idx + 0.5) / total_queries)
 
         for a_idx, article in enumerate(unique_articles):
-            status_text.info(f"🤖 Web記事を解析中... {article['title'][:30]}...")
+            article_title = _to_text(article.get('title', '')) if isinstance(article, dict) else ""
+            status_text.info(f"🤖 Web記事を解析中... {(article_title or '無題')[:30]}...")
             results = []
+            analyze_error = None
             for retry in range(3):
                 try:
                     results = analyze_web_article_with_gemini(article)
                     break
-                except Exception:
+                except Exception as e:
+                    analyze_error = e
                     if retry < 2:
                         time.sleep(2)
+            if not results and analyze_error:
+                msg = str(analyze_error)
+                st.warning(f"⚠️ Web記事解析に失敗しました: {type(analyze_error).__name__} ({msg[:120]})")
             all_web_raw.extend(results)
 
         progress_bar.progress((q_idx + 1) / total_queries)
@@ -1206,11 +1346,12 @@ def extract_text_from_uploaded_file(uploaded_file):
 
 
 @st.cache_data(ttl=3600)
-def get_race_characteristics_with_gemini(extra_context=""):
+def get_race_characteristics_with_gemini(race_name="", grade="", venue="", distance="", surface="", date_str="", extra_context=""):
     """
-    GeminiのWeb検索グラウンディングでフェブラリーステークスの特徴・傾向を取得する関数
+    GeminiのWeb検索グラウンディングでレース特徴・傾向を取得する関数
 
     引数:
+        race_name, grade, venue, distance, surface, date_str: レースメタデータ
         extra_context (str): ユーザー提供のドキュメントテキスト（補足情報）
 
     戻り値:
@@ -1224,13 +1365,14 @@ def get_race_characteristics_with_gemini(extra_context=""):
         config = genai_types.GenerateContentConfig(tools=[grounding_tool])
 
         extra_section = f"\n# 参考資料（ユーザー提供ドキュメント）\n{extra_context[:3000]}\n" if extra_context else ""
+        race_label = f"{race_name}（{venue}競馬場 {surface}{distance} {grade}）"
 
         prompt = f"""
-フェブラリーステークス（東京競馬場 ダート1600m G1）について、過去のデータと傾向を詳しく調査してください。
+{race_label}について、過去のデータと傾向を詳しく調査してください。
 以下の観点で分析してください。
 {extra_section}
 # 分析観点
-1. コースの特徴（東京ダート1600mの特性、スタート位置、直線の長さ等）
+1. コースの特徴（{venue}{surface}{distance}の特性、スタート位置、直線の長さ等）
 2. 過去10年の傾向（勝ち馬のパターン、人気別成績、年齢別成績など）
 3. 勝ちやすい馬のタイプ（脚質、血統、前走条件、ローテーション等）
 4. 苦手な馬のタイプ（不向きな条件、注意すべき馬のパターン）
@@ -1242,34 +1384,31 @@ def get_race_characteristics_with_gemini(extra_context=""):
 
 ```json
 {{
-  "コース特徴": "東京ダート1600mの特性を詳しく（スタートから直線まで）",
-  "過去の傾向": "過去のフェブラリーSのデータ・傾向を具体的に（人気別・年齢別・脚質別など）",
+  "コース特徴": "{venue}{surface}{distance}の特性を詳しく（スタートから直線まで）",
+  "過去の傾向": "過去の{race_name}のデータ・傾向を具体的に（人気別・年齢別・脚質別など）",
   "勝ちやすい馬のタイプ": "勝ちやすい馬の条件を箇条書きで詳しく",
   "苦手な馬のタイプ": "不向きな馬の条件を箇条書きで詳しく",
   "枠順有利": "有利な枠順とその理由を具体的に",
   "枠順不利": "不利な枠順とその理由を具体的に",
   "騎手厩舎傾向": "このレースで注目すべき騎手・厩舎の傾向",
-  "注目ポイント": "今年2026年のフェブラリーSで特に注意すべきポイント"
+  "注目ポイント": "{date_str}の{race_name}で特に注意すべきポイント"
 }}
 ```
 """
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model=GEMINI_MODEL,
             contents=prompt,
             config=config,
         )
 
         response_text = response.text or ""
-        json_match = re.search(r'```json\s*(\{.*?\})\s*```', response_text, re.DOTALL)
-        if json_match:
-            return json.loads(json_match.group(1))
-        return json.loads(response_text.strip())
+        return _parse_gemini_json_response(response_text, expected="dict")
 
-    except (json.JSONDecodeError, Exception) as e:
+    except (json.JSONDecodeError, ValueError, Exception) as e:
         error_msg = str(e)
-        if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+        if _is_transient_gemini_error(error_msg):
             raise
-        st.warning(f"⚠️ レース特徴の取得に失敗しました: {type(e).__name__}")
+        st.warning(f"⚠️ レース特徴の取得に失敗しました: {type(e).__name__} ({error_msg[:120]})")
         return {}
 
 
@@ -1289,8 +1428,10 @@ def analyze_document_for_race_characteristics(text, source_name):
     try:
         client = google_genai.Client(api_key=GEMINI_API_KEY)
 
+        r = get_race_config()
+        race_label = f"{r.race_name}（{r.venue}{r.surface}{r.distance} {r.grade}）" if r else "対象レース"
         prompt = f"""
-あなたは競馬の専門家です。以下のドキュメントを読み、フェブラリーステークス（東京ダート1600m G1）の
+あなたは競馬の専門家です。以下のドキュメントを読み、{race_label}の
 特徴・傾向に関する情報を抽出・整理してください。
 
 # ドキュメント（{source_name}）
@@ -1312,20 +1453,17 @@ def analyze_document_for_race_characteristics(text, source_name):
 ```
 """
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model=GEMINI_MODEL,
             contents=prompt
         )
         response_text = response.text or ""
-        json_match = re.search(r'```json\s*(\{.*?\})\s*```', response_text, re.DOTALL)
-        if json_match:
-            return json.loads(json_match.group(1))
-        return json.loads(response_text.strip())
+        return _parse_gemini_json_response(response_text, expected="dict")
 
-    except (json.JSONDecodeError, Exception) as e:
+    except (json.JSONDecodeError, ValueError, Exception) as e:
         error_msg = str(e)
-        if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+        if _is_transient_gemini_error(error_msg):
             raise
-        st.warning(f"⚠️ ドキュメントのレース特徴抽出に失敗しました: {type(e).__name__}")
+        st.warning(f"⚠️ ドキュメントのレース特徴抽出に失敗しました: {type(e).__name__} ({error_msg[:120]})")
         return {}
 
 
@@ -1355,13 +1493,8 @@ def analyze_document_for_horses(text, source_name):
 # ドキュメント（{source_name}）
 {text[:4000]}
 
-# 注目すべき有力馬（これら以外の馬名が登場しても抽出してください）
+# 注目すべき出走馬（これら以外の馬名が登場しても抽出してください）
 {horse_list_str}
-
-# 重要な注意（馬名の表記について）
-「ハートボンド」という名前が記事に登場した場合、本レースには「ダブルハートボンド」が出走しており
-「ハートボンド」単体は出走していません。「ハートボンド」の言及は「ダブルハートボンド」として扱い、
-馬名を必ず「ダブルハートボンド」で出力してください。
 
 # 抽出してほしい情報（各馬について）
 プラス情報: 前走成績・調教・体調・コース適性・騎手厩舎の強みなど
@@ -1381,13 +1514,11 @@ def analyze_document_for_horses(text, source_name):
 記事に情報がない馬は出力しない。JSONのみ出力すること。
 """
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model=GEMINI_MODEL,
             contents=prompt
         )
         response_text = response.text or ""
-        json_match = re.search(r'```json\s*(\[.*?\])\s*```', response_text, re.DOTALL)
-        json_text = json_match.group(1) if json_match else response_text.strip()
-        analysis_results = json.loads(json_text)
+        analysis_results = _parse_gemini_json_response(response_text, expected="list")
 
         for result in analysis_results:
             result['source_url'] = ""
@@ -1396,13 +1527,13 @@ def analyze_document_for_horses(text, source_name):
 
         return analysis_results
 
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, ValueError):
         return []
     except Exception as e:
         error_msg = str(e)
-        if "429" in error_msg or "resource_exhausted" in error_msg.lower():
+        if _is_transient_gemini_error(error_msg):
             raise
-        st.warning(f"⚠️ ドキュメントの馬情報抽出に失敗しました: {type(e).__name__}")
+        st.warning(f"⚠️ ドキュメントの馬情報抽出に失敗しました: {type(e).__name__} ({error_msg[:120]})")
         return []
 
 
@@ -1424,7 +1555,7 @@ def check_password():
     """シンプルなパスワード認証。Streamlit Secrets の PASSWORD キーを使用。"""
     if st.session_state.get('authenticated'):
         return True
-    st.markdown("## 🏇 フェブラリーステークス 2026 予想アプリ")
+    st.markdown("## 🏇 重賞予想アプリ")
     pw = st.text_input("パスワードを入力してください", type="password", key="pw_input")
     if st.button("ログイン", type="primary"):
         correct = st.secrets.get("PASSWORD", "7777")
@@ -1581,7 +1712,7 @@ import re
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
-RACE_URL = "''' + RACE_URL + r'''"
+RACE_URL = "''' + get_race_url() + r'''"
 
 def _find_td_by_class_prefix(row, prefix):
     for td in row.find_all('td'):
@@ -1644,7 +1775,7 @@ print(json.dumps(result, ensure_ascii=False))
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 page = browser.new_page()
-                page.goto(RACE_URL, wait_until='domcontentloaded', timeout=30000)
+                page.goto(get_race_url(), wait_until='domcontentloaded', timeout=30000)
                 page.wait_for_selector('table.Shutuba_Table', timeout=15000)
                 page.wait_for_timeout(2500)  # オッズ描画待ち
                 content = page.content()
@@ -1687,7 +1818,7 @@ print(json.dumps(result, ensure_ascii=False))
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
-        resp = requests.get(RACE_URL, headers=headers, timeout=20)
+        resp = requests.get(get_race_url(), headers=headers, timeout=20)
         resp.encoding = 'EUC-JP'
         result = _extract_from_html(resp.text, require_odds)
         return result, ""
@@ -1704,42 +1835,50 @@ print(json.dumps(result, ensure_ascii=False))
 
 def display_sidebar():
     """
-    サイドバーに応援メッセージと注目馬情報を表示する関数
+    サイドバーにレース選択・レース情報・注目馬情報を表示する関数
     """
+    r = get_race_config()
+    race_name = get_race_display_name() if r else "レース未選択"
+
     # サイドバーのタイトル
-    st.sidebar.title("🏇 フェブラリーステークス 2026")
+    st.sidebar.title(f"🏇 {race_name}")
 
     # レース情報
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("📅 レース情報")
-    st.sidebar.write("**開催日**: 2026年2月22日（日）")
-    st.sidebar.write("**開催場**: 東京競馬場")
-    st.sidebar.write("**距離**: ダート1600m")
-    st.sidebar.write("**グレード**: G1")
+    if r:
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("📅 レース情報")
+        st.sidebar.write(f"**開催日**: {r.date_str}")
+        st.sidebar.write(f"**開催場**: {r.venue}競馬場")
+        st.sidebar.write(f"**距離**: {r.surface}{r.distance}")
+        st.sidebar.write(f"**グレード**: {r.grade}")
 
-    # 応援メッセージ
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("💪 応援メッセージ")
-    st.sidebar.success(
-        """
-        ダート最高峰の激戦、フェブラリーステークス！
+        # 応援メッセージ
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("💪 応援メッセージ")
+        st.sidebar.success(
+            f"""
+            {r.grade}レース、{r.race_name}！
 
-        冬の東京で繰り広げられる、
-        スピードとパワーの頂上決戦。
+            {r.venue}競馬場で繰り広げられる、
+            {r.surface}{r.distance}の激戦。
 
-        どの馬も優勝のチャンスあり！
-        熱い戦いに期待しましょう！🔥
-        """
-    )
+            どの馬も優勝のチャンスあり！
+            熱い戦いに期待しましょう！
+            """
+        )
 
-    # 注目馬セクション
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("⭐ 注目馬")
-
-    # 各注目馬の情報を表示
-    for horse in FEATURED_HORSES:
-        with st.sidebar.expander(f"{horse['icon']} {horse['name']}"):
-            st.write(horse['description'])
+    # 注目馬セクション（horse_df がある場合は情報源数上位3馬を表示）
+    horse_df = st.session_state.get('horse_df')
+    if horse_df is not None and not horse_df.empty and '馬名' in horse_df.columns:
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("⭐ 注目馬（情報源数上位）")
+        top_horses = horse_df.nlargest(3, '情報源数') if '情報源数' in horse_df.columns else horse_df.head(3)
+        icons = ["⭐", "🌟", "⚡"]
+        for i, (_, row) in enumerate(top_horses.iterrows()):
+            icon = icons[i] if i < len(icons) else "🏇"
+            with st.sidebar.expander(f"{icon} {row['馬名']}"):
+                merit = str(row.get('メリット', ''))[:100]
+                st.write(merit if merit and merit != '（情報なし）' else "詳細は「総合予想」タブを確認")
 
     # フッター
     st.sidebar.markdown("---")
@@ -2041,13 +2180,24 @@ div[data-testid="metric-container"] {
 """, unsafe_allow_html=True)
 
     # ヒーローバナー
-    st.markdown("""
+    r = get_race_config()
+    if r:
+        hero_label = f"🏇 JRA {r.grade} {r.surface}競走"
+        hero_title = f"🏆 {r.race_name}"
+        hero_badge = r.grade
+        hero_info = f"{r.date_str}<span>｜</span>{r.venue}競馬場<span>｜</span>{r.surface}{r.distance}"
+    else:
+        hero_label = "🏇 JRA 重賞競走"
+        hero_title = "🏆 レース未選択"
+        hero_badge = ""
+        hero_info = "サイドバーからレースを選択してください"
+    st.markdown(f"""
 <div class="race-hero">
-  <div class="race-hero-label">🏇 JRA GⅠ ダート競走</div>
-  <div class="race-hero-title">🏆 第43回 フェブラリーステークス</div>
-  <div style="margin-bottom:10px;"><span class="race-hero-badge">G1</span></div>
+  <div class="race-hero-label">{hero_label}</div>
+  <div class="race-hero-title">{hero_title}</div>
+  <div style="margin-bottom:10px;"><span class="race-hero-badge">{hero_badge}</span></div>
   <div class="race-hero-info">
-    2026年2月22日（日）<span>｜</span>東京競馬場<span>｜</span>ダート1600m
+    {hero_info}
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -2073,6 +2223,7 @@ div[data-testid="metric-container"] {
     active_horse_names = set(df_active['馬名'].astype(str).tolist()) if (
         df_active is not None and not df_active.empty and '馬名' in df_active.columns
     ) else set()
+    race_widget_scope = r.race_key if r else "default"
 
     # タブを作成
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -2161,9 +2312,9 @@ div[data-testid="metric-container"] {
         with col_s1:
             combined_keyword = st.text_input(
                 "検索キーワード",
-                value="フェブラリーステークス 2026 予想",
+                value=f"{get_race_display_name()} 予想",
                 help="Web検索に使用するキーワード",
-                key="combined_keyword"
+                key=f"combined_keyword::{race_widget_scope}"
             )
         with col_s3:
             combined_max_web = st.number_input(
@@ -2180,18 +2331,22 @@ div[data-testid="metric-container"] {
 
             # Phase 1: Web検索・解析
             st.markdown("#### Web記事を検索・解析中...")
+            rl = get_race_display_name()
             web_queries = [
                 combined_keyword,
-                "フェブラリーステークス 2026 各馬評価 分析",
-                "フェブラリーステークス 2026 本命 穴馬 予想",
-                "フェブラリーステークス 2026 調教 追切 状態",
-                "フェブラリーステークス 2026 過去データ 傾向 コース適性",
-                "フェブラリーステークス 2026 騎手 厩舎 評価",
-                "フェブラリーステークス 2026 前走 近走 成績",
-                "フェブラリーステークス 2026 馬券 買い方 狙い目",
-                "フェブラリーステークス 2026 ダブルハートボンド コスタノヴァ ラムジェット",
-                "フェブラリーステークス 2026 出走予定馬 戦力分析",
+                f"{rl} 各馬評価 分析",
+                f"{rl} 本命 穴馬 予想",
+                f"{rl} 調教 追切 状態",
+                f"{rl} 過去データ 傾向 コース適性",
+                f"{rl} 騎手 厩舎 評価",
+                f"{rl} 前走 近走 成績",
+                f"{rl} 馬券 買い方 狙い目",
+                f"{rl} 出走予定馬 戦力分析",
             ]
+            # CSVから上位馬名を動的に追加
+            _top_horses = get_all_horse_names()[:5]
+            if _top_horses:
+                web_queries.append(f"{rl} {' '.join(_top_horses)} 予想")
             web_articles, web_raw = fetch_and_analyze_web_articles(
                 web_queries, total_article_limit=int(combined_max_web)
             )
@@ -2251,9 +2406,16 @@ div[data-testid="metric-container"] {
                         doc_race_info = analyze_document_for_race_characteristics(doc_text, uploaded_file.name)
                     if doc_race_info:
                         existing = st.session_state.get('race_characteristics', {})
+                        if not isinstance(existing, dict):
+                            existing = {}
                         for k, v in doc_race_info.items():
-                            if v and v != "資料に記載なし":
-                                existing[k] = existing.get(k, "") + f"\n\n【{uploaded_file.name}より】\n{v}"
+                            value_text = _to_text(v)
+                            if value_text and value_text != "資料に記載なし":
+                                prev_text = _to_text(existing.get(k, ""))
+                                if prev_text:
+                                    existing[k] = f"{prev_text}\n\n【{uploaded_file.name}より】\n{value_text}"
+                                else:
+                                    existing[k] = f"【{uploaded_file.name}より】\n{value_text}"
                         st.session_state['race_characteristics'] = existing
                         st.success(f"✅ {uploaded_file.name} からレース特徴を抽出しました。「レース特徴・傾向」タブで確認できます。")
 
@@ -2388,20 +2550,41 @@ div[data-testid="metric-container"] {
             if 'web_articles' in st.session_state and st.session_state['web_articles']:
                 with st.expander("🌐 参照したWeb記事一覧"):
                     for art in st.session_state['web_articles']:
-                        if art['url']:
-                            st.markdown(f"- [{art['title']}]({art['url']}) — {art['source_name']}")
+                        title = _to_text(art.get('title', '')) if isinstance(art, dict) else ""
+                        url = _to_text(art.get('url', '')) if isinstance(art, dict) else ""
+                        source_name = _to_text(art.get('source_name', '')) if isinstance(art, dict) else ""
+                        title = title or "無題"
+                        source_name = source_name or "unknown"
+                        if url:
+                            st.markdown(f"- [{title}]({url}) — {source_name}")
                         else:
-                            st.markdown(f"- {art['title']} — {art['source_name']}")
+                            st.markdown(f"- {title} — {source_name}")
 
         else:
             st.info("👆 「情報入力」タブで「🔍 Web 一括検索」を実行してください")
 
     # ===== タブ4: レース特徴・傾向 =====
     with tab4:
-        st.markdown("### 🏟️ フェブラリーステークス レース特徴・傾向")
+        st.markdown(f"### 🏟️ {get_race_display_name()} レース特徴・傾向")
 
         if 'race_characteristics' in st.session_state and st.session_state['race_characteristics']:
             race_info = st.session_state['race_characteristics']
+
+            def _as_lines(value):
+                """race_info値の揺れ（str/list/dict）を行リストへ正規化する。"""
+                if value is None:
+                    return []
+                if isinstance(value, list):
+                    lines = []
+                    for item in value:
+                        text = str(item).strip()
+                        if text:
+                            lines.extend([ln.strip() for ln in text.split('\n') if ln.strip()])
+                    return lines
+                if isinstance(value, dict):
+                    value = json.dumps(value, ensure_ascii=False)
+                text = str(value).strip()
+                return [ln.strip() for ln in text.split('\n') if ln.strip()]
 
             if race_info.get('コース特徴'):
                 st.markdown("#### 🏁 コース特徴")
@@ -2411,17 +2594,13 @@ div[data-testid="metric-container"] {
             with col_win:
                 if race_info.get('勝ちやすい馬のタイプ'):
                     st.markdown("#### ✅ 勝ちやすい馬のタイプ")
-                    for line in race_info['勝ちやすい馬のタイプ'].strip().split('\n'):
-                        line = line.strip()
-                        if line:
-                            st.success(line)
+                    for line in _as_lines(race_info.get('勝ちやすい馬のタイプ')):
+                        st.success(line)
             with col_lose:
                 if race_info.get('苦手な馬のタイプ'):
                     st.markdown("#### ❌ 苦手な馬のタイプ")
-                    for line in race_info['苦手な馬のタイプ'].strip().split('\n'):
-                        line = line.strip()
-                        if line:
-                            st.error(line)
+                    for line in _as_lines(race_info.get('苦手な馬のタイプ')):
+                        st.error(line)
 
             col_inner, col_outer = st.columns(2)
             with col_inner:
@@ -2459,9 +2638,9 @@ div[data-testid="metric-container"] {
         with col_search1:
             search_keyword = st.text_input(
                 "検索キーワード",
-                value="フェブラリーステークス 2026 予想",
+                value=f"{get_race_display_name()} 予想",
                 help="YouTubeで検索したいキーワードを入力",
-                key="yt_detail_keyword"
+                key=f"yt_detail_keyword::{race_widget_scope}"
             )
 
         with col_search2:
@@ -2666,6 +2845,130 @@ div[data-testid="metric-container"] {
 # メイン処理
 # ====================
 
+def _on_race_change():
+    """レース切替時にセッションステートをクリアする"""
+    for key in RACE_SESSION_KEYS:
+        st.session_state.pop(key, None)
+    # Race-scoped widget keys (e.g. combined_keyword::<race_key>) も掃除する
+    for prefix in ("combined_keyword::", "yt_detail_keyword::"):
+        for key in list(st.session_state.keys()):
+            if str(key).startswith(prefix):
+                st.session_state.pop(key, None)
+    get_all_horse_names.clear()
+    load_race_data.clear()
+
+
+def _display_race_selector():
+    """サイドバーにレースセレクターを表示し、選択されたレースをセッションに保存する"""
+    st.sidebar.subheader("🏇 レース選択")
+    if st.sidebar.button("🔄 重賞一覧を再取得", key="refresh_upcoming_races"):
+        clear_fetch_graded_races_cache()
+        st.rerun()
+
+    # 重賞一覧を取得
+    with st.spinner("重賞一覧を取得中..."):
+        races = get_upcoming_races(months_ahead=2, days_ahead=14)
+
+    if not races:
+        st.sidebar.warning("重賞一覧を取得できませんでした")
+        # 手動入力フォールバック
+        manual_id = st.sidebar.text_input("レースIDを手動入力", placeholder="例: 202605010811")
+        manual_name = st.sidebar.text_input("レース名", placeholder="例: フェブラリーステークス")
+        if manual_id and manual_name and st.sidebar.button("このレースを使用"):
+            from datetime import date as _date
+            today = _date.today()
+            ensure_data_dir()
+            race = RaceInfo(
+                race_name=manual_name,
+                grade="G1",
+                date_str=format_date_with_weekday(today),
+                date=today,
+                venue="",
+                distance="",
+                surface="",
+                race_id=manual_id,
+                race_key=f"manual_{manual_id}",
+                csv_file=f"data/race_{manual_id}.csv",
+            )
+            _on_race_change()
+            st.session_state['selected_race'] = race
+            st.session_state['_pending_race_key'] = race.race_key
+            st.session_state['_prev_race_key'] = race.race_key
+            st.rerun()
+        return
+
+    # セレクトボックスで表示（選択だけでは読み込まない）
+    labels = [r.display_label for r in races]
+    loaded_race = get_race_config()
+    pending_key = st.session_state.get('_pending_race_key')
+    target_key = pending_key or (loaded_race.race_key if loaded_race else None)
+    default_idx = 0
+    if target_key:
+        for i, r in enumerate(races):
+            if r.race_key == target_key:
+                default_idx = i
+                break
+
+    selected_idx = st.sidebar.selectbox(
+        "直近の重賞レース",
+        range(len(labels)),
+        format_func=lambda i: labels[i],
+        index=default_idx,
+        key="race_selector",
+    )
+
+    pending_race = races[selected_idx]
+    st.session_state['_pending_race_key'] = pending_race.race_key
+
+    if loaded_race and loaded_race.race_key == pending_race.race_key:
+        st.sidebar.caption(f"現在読み込み中: {pending_race.display_name}")
+    else:
+        st.sidebar.caption(f"選択中: {pending_race.display_name}")
+
+    if st.sidebar.button("✅ このレースを読み込む", key="load_selected_race"):
+        prev_loaded = get_race_config()
+        if not prev_loaded or prev_loaded.race_key != pending_race.race_key:
+            _on_race_change()
+
+        # race_id は読み込みボタン押下時にのみ解決する
+        if not pending_race.race_id:
+            with st.spinner(f"🔍 {pending_race.race_name} のレースIDを取得中..."):
+                resolved_id = resolve_race_id(pending_race)
+            if resolved_id:
+                pending_race.race_id = resolved_id
+                pending_race.csv_file = f"data/race_{resolved_id}.csv"
+
+        st.session_state['selected_race'] = pending_race
+        st.session_state['_prev_race_key'] = pending_race.race_key
+        st.rerun()
+
+    # 手動入力フォールバック（重賞一覧に無いレース用）
+    with st.sidebar.expander("📝 レースIDを手動入力"):
+        manual_id = st.text_input("レースID", placeholder="例: 202605010811", key="manual_race_id")
+        manual_name = st.text_input("レース名", placeholder="例: 高松宮記念", key="manual_race_name")
+        if manual_id and manual_name and st.button("このレースを使用", key="use_manual_race"):
+            from datetime import date as _date
+            today = _date.today()
+            ensure_data_dir()
+            race = RaceInfo(
+                race_name=manual_name,
+                grade="G1",
+                date_str=format_date_with_weekday(today),
+                date=today,
+                venue="",
+                distance="",
+                surface="",
+                race_id=manual_id,
+                race_key=f"manual_{manual_id}",
+                csv_file=f"data/race_{manual_id}.csv",
+            )
+            _on_race_change()
+            st.session_state['selected_race'] = race
+            st.session_state['_pending_race_key'] = race.race_key
+            st.session_state['_prev_race_key'] = race.race_key
+            st.rerun()
+
+
 def main():
     """
     アプリケーションのメイン処理
@@ -2675,23 +2978,69 @@ def main():
         st.stop()
         return
 
-    # レース特徴を自動初期化（初回のみ）
-    # まずドキュメントデータで即時表示し、その後Web検索で2026年情報を補完
-    if 'race_characteristics' not in st.session_state:
-        st.session_state['race_characteristics'] = RACE_INFO_FROM_DOC.copy()
+    # レースセレクターを表示
+    _display_race_selector()
+
+    r = get_race_config()
+
+    # レース未選択の場合
+    if not r:
+        st.info("👈 サイドバーでレースを選択し「✅ このレースを読み込む」を押してください")
+        st.stop()
+        return
+
+    # race_id 未解決の場合（出馬表未発表）
+    if not r.race_id:
+        display_sidebar()
+        st.warning(f"📋 {r.race_name} の出馬表はまだ公開されていません。レース日が近づいたら再度お試しください。")
+        if st.button("🔄 レースIDを再取得", key="retry_resolve_race_id_btn"):
+            with st.spinner(f"🔍 {r.race_name} のレースIDを再取得中..."):
+                # 直前失敗がキャッシュされている場合も再試行できるようクリア
+                clear_resolve_race_id_cache()
+                resolved_id = resolve_race_id(r)
+
+            if resolved_id:
+                r.race_id = resolved_id
+                r.csv_file = f"data/race_{resolved_id}.csv"
+                st.session_state['selected_race'] = r
+                st.success("✅ レースIDを取得しました。画面を更新します。")
+                st.rerun()
+            else:
+                st.error("❌ まだレースIDを取得できませんでした。時間をおいて再試行してください。")
+        st.stop()
+        return
+
+    # CSV自動取得（初回のみ）
+    csv_path = get_csv_path()
+    ensure_data_dir()
+    if csv_path and not os.path.exists(csv_path):
         try:
-            with st.spinner("📡 レース特徴をWeb検索で補完中...（初回のみ）"):
-                web_info = get_race_characteristics_with_gemini()
+            with st.spinner(f"📥 {r.race_name} の出馬表を取得中..."):
+                fetch_race_csv(r.race_id, csv_path)
+        except RuntimeError as e:
+            st.error(f"❌ 出馬表の取得に失敗しました: {e}")
+            st.stop()
+            return
+
+    # レース特徴を自動初期化（初回のみ）
+    if 'race_characteristics' not in st.session_state:
+        # Gemini で動的取得、失敗時は最小限フォールバック
+        st.session_state['race_characteristics'] = get_minimal_race_characteristics()
+        try:
+            with st.spinner("📡 レース特徴をWeb検索で取得中...（初回のみ）"):
+                web_info = get_race_characteristics_with_gemini(
+                    race_name=r.race_name, grade=r.grade, venue=r.venue,
+                    distance=r.distance, surface=r.surface, date_str=r.date_str,
+                )
             if web_info:
                 st.session_state['race_characteristics'].update(web_info)
         except Exception:
-            pass  # 失敗してもドキュメントデータは表示される
+            pass  # フォールバックデータは表示される
 
     # 枠番・馬番が未取得の場合は自動取得してCSVに保存（初回のみ）
-    # 枠番・馬番はレース確定後は変わらないためCSVに永続保存する
     if 'gates_saved' not in st.session_state:
         try:
-            csv_df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
+            csv_df = pd.read_csv(csv_path, encoding='utf-8-sig')
             needs_update = csv_df['枠番'].isna().all() or (csv_df['枠番'].astype(str).str.strip() == '').all()
             if needs_update:
                 with st.spinner("🏇 枠番・馬番を取得してCSVに保存中...（初回のみ）"):
@@ -2702,8 +3051,8 @@ def main():
                         if horse in gate_data:
                             csv_df.at[idx, '枠番'] = gate_data[horse]['枠番']
                             csv_df.at[idx, '馬番'] = gate_data[horse]['馬番']
-                    csv_df.to_csv(CSV_FILE, index=False, encoding='utf-8-sig')
-                    load_race_data.clear()  # キャッシュをクリアして再読み込み
+                    csv_df.to_csv(csv_path, index=False, encoding='utf-8-sig')
+                    load_race_data.clear()
                     st.toast(f"✅ {len(gate_data)}頭の枠番・馬番をCSVに保存しました", icon="🏇")
                 elif gate_error:
                     st.session_state['latest_odds_error'] = gate_error
@@ -2715,40 +3064,36 @@ def main():
     display_sidebar()
 
     # データを読み込み（ファイル更新時刻をキャッシュキーに含めて常に最新CSVを反映）
-    _csv_mtime = os.path.getmtime(CSV_FILE) if os.path.exists(CSV_FILE) else 0
-    df = load_race_data(CSV_FILE, mtime=_csv_mtime)
+    _csv_mtime = os.path.getmtime(csv_path) if os.path.exists(csv_path) else 0
+    df = load_race_data(csv_path, mtime=_csv_mtime)
 
     # メインコンテンツを表示
     if df is not None:
         display_main_content(df)
     else:
-        # データがない場合の表示
         st.error("### ⚠️ データを読み込めませんでした")
         st.info(
-            """
+            f"""
             **次の手順を試してください:**
 
-            1. `get_keiba_info.py` を実行して `february_s_info.csv` を作成
-            2. CSVファイルが `app.py` と同じフォルダにあることを確認
-            3. ページをリロード（F5キー）
+            1. レース選択が正しいか確認
+            2. ページをリロード（F5キー）で出馬表を再取得
             """
         )
 
         # サンプルデータ表示ボタン
         if st.button("📝 サンプルデータで試す"):
-            # サンプルデータを作成
             sample_data = {
                 '枠番': ['1', '2', '3', '4', '5'],
                 '馬番': ['1', '2', '3', '4', '5'],
-                '馬名': ['ダブルハートボンド', 'コスタノヴァ', 'ラムジェット', 'サンプル馬A', 'サンプル馬B'],
+                '馬名': ['サンプル馬A', 'サンプル馬B', 'サンプル馬C', 'サンプル馬D', 'サンプル馬E'],
                 '性齢': ['牡5', '牡4', '牡5', '牡6', '牝5'],
                 '斤量': ['57.0', '57.0', '57.0', '57.0', '55.0'],
-                '騎手': ['C.ルメール', '横山武史', '戸崎圭太', 'M.デムーロ', '川田将雅'],
-                '調教師': ['矢作芳人', '藤沢和雄', '国枝栄', '友道康夫', '池江泰寿'],
+                '騎手': ['騎手A', '騎手B', '騎手C', '騎手D', '騎手E'],
+                '調教師': ['調教師A', '調教師B', '調教師C', '調教師D', '調教師E'],
                 'オッズ': ['3.5', '4.2', '5.8', '12.0', '15.5']
             }
             sample_df = pd.DataFrame(sample_data)
-
             st.success("✅ サンプルデータを読み込みました")
             display_main_content(sample_df)
 

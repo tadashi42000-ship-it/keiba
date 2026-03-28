@@ -15,7 +15,8 @@ env/
 # Streamlit
 .streamlit/secrets.toml
 
-# その他
+# データ
+data/
 *.csv
 !february_s_info.csv
 *.log

@@ -1,0 +1,63 @@
+Total lines: 2318
+gates_saved occurrences:
+  Line 2252: "    if 'gates_saved' not in st.session_state:\n"
+  Line 2270: "        st.session_state['gates_saved'] = True\n"
+
+--- Lines 2234-2290 ---
+2234: '    if not check_password():\n'
+2235: '        st.stop()\n'
+2236: '        return\n'
+2237: '\n'
+2238: '    # レース特徴を自動初期化（初回のみ）\n'
+2239: '    # まずドキュメントデータで即時表示し、その後Web検索で2026年情報を補完\n'
+2240: "    if 'race_characteristics' not in st.session_state:\n"
+2241: "        st.session_state['race_characteristics'] = RACE_INFO_FROM_DOC.copy()\n"
+2242: '        try:\n'
+2243: '            with st.spinner("📡 レース特徴をWeb検索で補完中...（初回のみ）"):\n'
+2244: '                web_info = get_race_characteristics_with_gemini()\n'
+2245: '            if web_info:\n'
+2246: "                st.session_state['race_characteristics'].update(web_info)\n"
+2247: '        except Exception:\n'
+2248: '            pass  # 失敗してもドキュメントデータは表示される\n'
+2249: '\n'
+2250: '    # 枠番・馬番が未取得の場合は自動取得してCSVに保存（初回のみ）\n'
+2251: '    # 枠番・馬番はレース確定後は変わらないためCSVに永続保存する\n'
+2252: "    if 'gates_saved' not in st.session_state:\n"
+2253: '        try:\n'
+2254: "            csv_df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')\n"
+2255: "            needs_update = csv_df['枠番'].isna().all() or (csv_df['枠番'].astype(str).str.strip() == '').all()\n"
+2256: '            if needs_update:\n'
+2257: '                with st.spinner("🏇 枠番・馬番を取得してCSVに保存中...（初回のみ）"):\n'
+2258: '                    gate_data = fetch_odds_and_gates()\n'
+2259: '                if gate_data:\n'
+2260: '                    for idx, row in csv_df.iterrows():\n'
+2261: "                        horse = str(row.get('馬名', ''))\n"
+2262: '                        if horse in gate_data:\n'
+2263: "                            csv_df.at[idx, '枠番'] = gate_data[horse]['枠番']\n"
+2264: "                            csv_df.at[idx, '馬番'] = gate_data[horse]['馬番']\n"
+2265: "                    csv_df.to_csv(CSV_FILE, index=False, encoding='utf-8-sig')\n"
+2266: '                    load_race_data.clear()  # キャッシュをクリアして再読み込み\n'
+2267: '                    st.toast(f"✅ {len(gate_data)}頭の枠番・馬番をCSVに保存しました", icon="🏇")\n'
+2268: '        except Exception:\n'
+2269: '            pass\n'
+2270: "        st.session_state['gates_saved'] = True\n"
+2271: '\n'
+2272: '    # サイドバーを表示\n'
+2273: '    display_sidebar()\n'
+2274: '\n'
+2275: '    # データを読み込み\n'
+2276: '    df = load_race_data(CSV_FILE)\n'
+2277: '\n'
+2278: '    # メインコンテンツを表示\n'
+2279: '    if df is not None:\n'
+2280: '        display_main_content(df)\n'
+2281: '    else:\n'
+2282: '        # データがない場合の表示\n'
+2283: '        st.error("### ⚠️ データを読み込めませんでした")\n'
+2284: '        st.info(\n'
+2285: '            """\n'
+2286: '            **次の手順を試してください:**\n'
+2287: '\n'
+2288: '            1. `get_keiba_info.py` を実行して `february_s_info.csv` を作成\n'
+2289: '            2. CSVファイルが `app.py` と同じフォルダにあることを確認\n'
+2290: '            3. ページをリロード（F5キー）\n'

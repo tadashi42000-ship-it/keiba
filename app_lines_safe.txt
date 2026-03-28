@@ -1,0 +1,57 @@
+2234:     if not check_password():
+2235:         st.stop()
+2236:         return
+2237: 
+2238:     # レース特徴を自動初期化[U+FF08]初回のみ[U+FF09]
+2239:     # まずドキュメントデータで即時表示し、その後Web検索で2026年情報を補完
+2240:     if 'race_characteristics' not in st.session_state:
+2241:         st.session_state['race_characteristics'] = RACE_INFO_FROM_DOC.copy()
+2242:         try:
+2243:             with st.spinner("[U+1F4E1] レース特徴をWeb検索で補完中...[U+FF08]初回のみ[U+FF09]"):
+2244:                 web_info = get_race_characteristics_with_gemini()
+2245:             if web_info:
+2246:                 st.session_state['race_characteristics'].update(web_info)
+2247:         except Exception:
+2248:             pass  # 失敗してもドキュメントデータは表示される
+2249: 
+2250:     # 枠番・馬番が未取得の場合は自動取得してCSVに保存[U+FF08]初回のみ[U+FF09]
+2251:     # 枠番・馬番はレース確定後は変わらないためCSVに永続保存する
+2252:     if 'gates_saved' not in st.session_state:
+2253:         try:
+2254:             csv_df = pd.read_csv(CSV_FILE, encoding='utf-8-sig')
+2255:             needs_update = csv_df['枠番'].isna().all() or (csv_df['枠番'].astype(str).str.strip() == '').all()
+2256:             if needs_update:
+2257:                 with st.spinner("[U+1F3C7] 枠番・馬番を取得してCSVに保存中...[U+FF08]初回のみ[U+FF09]"):
+2258:                     gate_data = fetch_odds_and_gates()
+2259:                 if gate_data:
+2260:                     for idx, row in csv_df.iterrows():
+2261:                         horse = str(row.get('馬名', ''))
+2262:                         if horse in gate_data:
+2263:                             csv_df.at[idx, '枠番'] = gate_data[horse]['枠番']
+2264:                             csv_df.at[idx, '馬番'] = gate_data[horse]['馬番']
+2265:                     csv_df.to_csv(CSV_FILE, index=False, encoding='utf-8-sig')
+2266:                     load_race_data.clear()  # キャッシュをクリアして再読み込み
+2267:                     st.toast(f"✅ {len(gate_data)}頭の枠番・馬番をCSVに保存しました", icon="[U+1F3C7]")
+2268:         except Exception:
+2269:             pass
+2270:         st.session_state['gates_saved'] = True
+2271: 
+2272:     # サイドバーを表示
+2273:     display_sidebar()
+2274: 
+2275:     # データを読み込み
+2276:     df = load_race_data(CSV_FILE)
+2277: 
+2278:     # メインコンテンツを表示
+2279:     if df is not None:
+2280:         display_main_content(df)
+2281:     else:
+2282:         # データがない場合の表示
+2283:         st.error("### ⚠[U+FE0F] データを読み込めませんでした")
+2284:         st.info(
+2285:             """
+2286:             **次の手順を試してください:**
+2287: 
+2288:             1. `get_keiba_info.py` を実行して `february_s_info.csv` を作成
+2289:             2. CSVファイルが `app.py` と同じフォルダにあることを確認
+2290:             3. ページをリロード[U+FF08]F5キー[U+FF09]

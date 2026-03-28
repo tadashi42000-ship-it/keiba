@@ -1,0 +1,17 @@
+Total horses: 16
+  オメガギネス: waku=1, umaban=1, odds=27.2
+  ハッピーマン: waku=1, umaban=2, odds=57.5
+  ブライアンセンス: waku=2, umaban=3, odds=23.4
+  ペリエール: waku=2, umaban=4, odds=37.7
+  シックスペンス: waku=3, umaban=5, odds=12.6
+  ラムジェット: waku=3, umaban=6, odds=10.9
+  ロングラン: waku=4, umaban=7, odds=192.7
+  サクラトゥジュール: waku=4, umaban=8, odds=109.9
+  ダブルハートボンド: waku=5, umaban=9, odds=3.8
+  ロードクロンヌ: waku=5, umaban=10, odds=11.8
+  サンライズホーク: waku=6, umaban=11, odds=651.5
+  コスタノヴァ: waku=6, umaban=12, odds=3.4
+  ナチュラルライズ: waku=7, umaban=13, odds=20.4
+  ウィルソンテソーロ: waku=7, umaban=14, odds=5.3
+  ペプチドナイル: waku=8, umaban=15, odds=56.4
+  サイモンザナドゥ: waku=8, umaban=16, odds=25.3
