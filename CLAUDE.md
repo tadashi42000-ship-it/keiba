@@ -15,6 +15,7 @@ c:\WORK\keiba\
 ├── get_keiba_info.py       # netkeiba.comから出走表をスクレイピングしてCSVを生成
 ├── data/                   # レースごとのCSVファイル（自動生成）
 ├── february_s_info.csv     # 旧フェブラリーS用CSV（後方互換）
+├── x_accounts.json         # X (Twitter) 監視アカウント設定
 ├── .env                    # APIキー（Gitにコミット禁止）
 ├── .gitignore              # .envなどを除外
 └── CLAUDE.md               # このファイル
@@ -48,10 +49,12 @@ APIキーは `.env` ファイルで管理する。コードへの直書き禁止
 YOUTUBE_API_KEY=AIza...
 GEMINI_API_KEY=AIza...
 TAVILY_API_KEY=tvly-...
+X_BEARER_TOKEN=AAAA...
 ```
 
 - **YouTube Data API v3**: Google Cloud Console > APIとサービス > 認証情報
 - **Gemini API**: https://aistudio.google.com/app/apikey
+- **X API v2**: X Developer Portal（従量課金プラン、$0.008/tweet）
 
 ## レース選択の仕組み
 
@@ -82,7 +85,7 @@ class RaceInfo:
 | タブ | 内容 |
 |---|---|
 | 📋 出馬表 | CSVから読み込んだ出走馬一覧 |
-| 📥 情報入力 | Web一括検索、ドキュメント分析の実行 |
+| 📥 情報入力 | Web一括検索、X投稿検索、ドキュメント分析の実行 |
 | 🏇 総合予想（馬別） | Web検索結果を馬ごとにメリット・デメリットで表示 |
 | 🏟️ レース特徴・傾向 | コース特徴・枠順傾向・注目ポイントの表示 |
 | 🎥 YouTube詳細 | YouTube動画のサムネイル・概要欄の詳細 |
@@ -102,7 +105,11 @@ class RaceInfo:
 | `search_web_articles(query, max_articles)` | Gemini Google SearchグラウンディングでWeb検索（1時間キャッシュ） |
 | `analyze_web_article_with_gemini(article_info)` | Web記事スニペットをGeminiで解析、馬別JSON返却 |
 | `fetch_and_analyze_web_articles(queries, total_article_limit)` | Tavily優先・GeminiフォールバックでWeb検索/解析、`(articles, raw)` 返却 |
-| `aggregate_horse_analysis(youtube_raw, web_raw)` | YouTube + Web の生データを馬名ごとに集約、DataFrame返却 |
+| `_load_x_accounts()` | x_accounts.json からX監視アカウントリストを読み込む |
+| `search_x_tweets(race_name, accounts, max_tweets, since_id)` | X API v2 Recent Searchでツイート取得（lang:ja優先、since_id差分） |
+| `analyze_x_tweets_with_gemini(tweets, horse_names)` | 複数ツイートをバッチでGemini解析、馬別プラス/マイナス返却 |
+| `fetch_and_analyze_x_tweets(race_name, max_tweets)` | X投稿の検索・解析オーケストレーター、`(tweets, raw)` 返却 |
+| `aggregate_horse_analysis(youtube_raw, web_raw, doc_results, x_results)` | YouTube + Web + Doc + X の生データを馬名ごとに集約、DataFrame返却 |
 | `get_race_characteristics_with_gemini(...)` | レースメタデータを引数にレース特徴をGeminiで取得 |
 
 ## 主要関数（race_catalog.py）
@@ -132,8 +139,15 @@ class RaceInfo:
 │   ├── search_web_articles_with_tavily()  ← Tavily API（優先）
 │   ├── search_web_articles()  ← Gemini Google Search grounding（フォールバック）
 │   └── analyze_web_article_with_gemini()
-└── aggregate_horse_analysis(youtube_raw, web_raw) → horse_df
+└── aggregate_horse_analysis(youtube_raw, web_raw, doc_raw, x_raw) → horse_df
         └── 馬名タブ形式で表示（✅ メリット | ⚠️ デメリット）
+
+[𝕏 X投稿検索ボタン]
+├── fetch_and_analyze_x_tweets(race_name, max_tweets) → (x_tweets, x_raw)
+│   ├── _load_x_accounts()  ← x_accounts.json
+│   ├── search_x_tweets()  ← X API v2 Recent Search（since_id差分取得）
+│   └── analyze_x_tweets_with_gemini()  ← バッチ解析
+└── aggregate_horse_analysis(...) → horse_df 再集計
 ```
 
 ## Web検索クエリ（動的生成）
@@ -156,6 +170,9 @@ class RaceInfo:
 | `youtube_summary_df` | YouTube動画別集計DataFrame |
 | `web_articles` | Web記事メタデータリスト |
 | `race_characteristics` | レース特徴辞書 |
+| `x_tweets` | Xツイートメタデータリスト（author, text全文, URL, metrics） |
+| `x_raw` | X投稿のGemini解析結果リスト |
+| `x_newest_id` | 最新取得tweet_id（since_id差分取得用） |
 
 ## Gemini API 使用モデル
 

@@ -61,15 +61,23 @@ st.set_page_config(
 # 定数定義
 # ====================
 
-# APIキーを環境変数から取得（.env ファイル または システム環境変数）
+# APIキーを環境変数から取得（.env → st.secrets の順でフォールバック）
 # キーは .env ファイルに記載。絶対にコードに直書きしないこと。
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-try:
-    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "") or st.secrets.get("TAVILY_API_KEY", "")
-except Exception:
-    TAVILY_API_KEY = os.getenv("TAVILY_API_KEY", "")
+def _get_secret(key: str, default: str = "") -> str:
+    """os.getenv → st.secrets の順でキーを探す"""
+    val = os.getenv(key, "")
+    if val:
+        return val
+    try:
+        return st.secrets.get(key, default)
+    except Exception:
+        return default
+
+YOUTUBE_API_KEY = _get_secret("YOUTUBE_API_KEY")
+GEMINI_API_KEY = _get_secret("GEMINI_API_KEY")
+GEMINI_MODEL = _get_secret("GEMINI_MODEL", "gemini-2.5-flash")
+TAVILY_API_KEY = _get_secret("TAVILY_API_KEY")
+X_BEARER_TOKEN = _get_secret("X_BEARER_TOKEN")
 
 WEB_SEARCH_ALLOWLIST = [
     "netkeiba.com",
@@ -86,6 +94,7 @@ RACE_SESSION_KEYS = [
     'web_articles', 'web_raw', 'race_characteristics', 'gates_saved',
     'yt_detail_analysis', 'doc_horse_raw', 'win_rates', 'latest_odds_error',
     'latest_odds', 'combined_keyword', 'yt_detail_keyword',
+    'x_tweets', 'x_raw', 'x_newest_id',
 ]
 
 
@@ -122,6 +131,111 @@ def get_race_url() -> str:
     if r and r.race_id:
         return f"https://race.netkeiba.com/race/shutuba.html?race_id={r.race_id}"
     return ""
+
+
+def _get_cache_path(race_key: str) -> str:
+    """race_key をファイル名にサニタイズしたキャッシュパスを返す"""
+    safe = re.sub(r'[/: ]+', '_', race_key)
+    return os.path.join("data", "search_cache", f"{safe}.json")
+
+
+def _raw_fingerprint(item: dict) -> str:
+    """重複判定キー: source_url が空なら source_title+馬名をフォールバックに使う"""
+    url = (item.get('source_url') or item.get('url') or '').strip()
+    if url:
+        return url
+    # URLなし: タイトル＋馬名の複合キーで同タイトル別馬の誤重複を回避
+    title = (item.get('source_title') or item.get('title') or '').strip()
+    horse = (item.get('馬名') or '').strip()
+    return f"{title}::{horse}" if title or horse else ""  # 全空 = "" → 常に追加扱い
+
+
+def save_race_cache(race_key: str) -> None:
+    """現在のセッションステートの検索結果をJSONキャッシュとして原子的に保存する"""
+    cache_path = _get_cache_path(race_key)
+    os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+    data = {
+        "meta": {
+            "race_key": race_key,
+            "last_updated": datetime.now().isoformat(timespec='seconds'),
+            "web_article_count": len(st.session_state.get('web_articles') or []),
+            "youtube_video_count": len(st.session_state.get('youtube_videos') or []),
+            "x_tweet_count": len(st.session_state.get('x_tweets') or []),
+            "x_newest_id": st.session_state.get('x_newest_id'),
+        },
+        "web_raw": st.session_state.get('web_raw') or [],
+        "youtube_raw": st.session_state.get('youtube_raw') or [],
+        "web_articles": st.session_state.get('web_articles') or [],
+        "race_characteristics": st.session_state.get('race_characteristics'),
+        "doc_horse_raw": st.session_state.get('doc_horse_raw') or [],
+        "x_raw": st.session_state.get('x_raw') or [],
+        "x_tweets": st.session_state.get('x_tweets') or [],
+    }
+    tmp_path = cache_path + ".tmp"
+    try:
+        with open(tmp_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp_path, cache_path)  # 原子的リネーム（書き込み中断による破損防止）
+    except Exception:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        return
+
+    # gitに自動コミット（キャッシュファイルのみ、失敗しても検索処理には影響しない）
+    try:
+        _repo_dir = os.path.dirname(os.path.abspath(__file__))
+        subprocess.run(
+            ["git", "add", "--", cache_path],
+            cwd=_repo_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            timeout=10,
+        )
+        # cache_path のみをコミット（他のstaged変更を巻き込まない）
+        subprocess.run(
+            ["git", "commit", "-m", f"update search cache: {race_key}", "--", cache_path],
+            cwd=_repo_dir, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
+def load_race_cache(race_key: str) -> bool:
+    """キャッシュファイルが存在すればセッションステートに復元し、horse_dfを再集計する"""
+    cache_path = _get_cache_path(race_key)
+    if not os.path.exists(cache_path):
+        return False
+    try:
+        with open(cache_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return False
+
+    st.session_state['web_raw'] = data.get('web_raw', [])
+    st.session_state['youtube_raw'] = data.get('youtube_raw', [])
+    st.session_state['web_articles'] = data.get('web_articles', [])
+    st.session_state['doc_horse_raw'] = data.get('doc_horse_raw', [])
+    st.session_state['x_raw'] = data.get('x_raw', [])
+    st.session_state['x_tweets'] = data.get('x_tweets', [])
+
+    # since_id用の最新ID復元
+    newest_id = data.get('meta', {}).get('x_newest_id')
+    if newest_id:
+        st.session_state['x_newest_id'] = newest_id
+
+    # race_characteristics は値がある場合のみセット（None/欠損 → main()でAPIを再トリガー）
+    rc = data.get('race_characteristics')
+    if rc:
+        st.session_state['race_characteristics'] = rc
+
+    # horse_df を全rawデータから再集計
+    horse_df = aggregate_horse_analysis(
+        st.session_state['youtube_raw'],
+        st.session_state['web_raw'],
+        st.session_state['doc_horse_raw'],
+        st.session_state.get('x_raw', []),
+    )
+    st.session_state['horse_df'] = horse_df
+    return True
 
 
 def get_minimal_race_characteristics() -> dict:
@@ -1049,20 +1163,445 @@ def analyze_web_article_with_gemini(article_info):
         return []
 
 
-def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
+# ====================
+# X (Twitter) 関連関数
+# ====================
+
+def _load_x_accounts_config() -> dict:
+    """x_accounts.json を辞書で読み込む（不在/不正時は空dict）"""
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "x_accounts.json")
+    if not os.path.exists(config_path):
+        return {}
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _get_x_default_max_tweets(default: int = 30) -> int:
+    """x_accounts.json の default_max_tweets を UI 用レンジに正規化して返す"""
+    config = _load_x_accounts_config()
+    raw = config.get("default_max_tweets", default)
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        value = default
+    return max(10, min(100, value))
+
+
+def _load_x_accounts() -> list:
+    """x_accounts.json から監視アカウントリストを正規化して返す"""
+    data = _load_x_accounts_config()
+    raw_accounts = data.get('accounts', [])
+    if not isinstance(raw_accounts, list):
+        return []
+
+    normalized = []
+    seen = set()
+    for item in raw_accounts:
+        if not isinstance(item, dict):
+            continue
+        username = str(item.get('username', '')).strip().lstrip('@')
+        if not username or username in seen:
+            continue
+        seen.add(username)
+        label = str(item.get('label', username)).strip() or username
+        normalized.append({"username": username, "label": label})
+    return normalized
+
+
+def _build_x_recent_search_queries(race_name: str, accounts: list, *, include_lang_ja: bool, max_query_len: int = 512) -> list[str]:
+    """アカウントを分割して Recent Search 用クエリを複数組み立てる"""
+    suffix = f" \"{race_name}\" -is:retweet"
+    if include_lang_ja:
+        suffix += " lang:ja"
+
+    chunks = []
+    current = []
+    for acc in accounts:
+        candidate = current + [acc]
+        from_expr = " OR ".join(f"from:{a['username']}" for a in candidate)
+        query = f"({from_expr}){suffix}"
+        if len(query) <= max_query_len:
+            current = candidate
+            continue
+        if current:
+            chunks.append(current)
+            current = [acc]
+        else:
+            # 単体でも超過する異常ケース（username/race_nameが極端に長い）
+            current = []
+
+    if current:
+        chunks.append(current)
+
+    queries = []
+    for chunk in chunks:
+        from_expr = " OR ".join(f"from:{a['username']}" for a in chunk)
+        query = f"({from_expr}){suffix}"
+        if len(query) <= max_query_len:
+            queries.append(query)
+    return queries
+
+
+def _is_newer_tweet_id(candidate_id, current_id) -> bool:
+    """tweet_id の新旧を安全に判定する（基本は整数比較、失敗時は文字列比較）"""
+    if current_id in (None, ""):
+        return True
+    try:
+        return int(str(candidate_id)) > int(str(current_id))
+    except (TypeError, ValueError):
+        cand = str(candidate_id)
+        curr = str(current_id)
+        if len(cand) != len(curr):
+            return len(cand) > len(curr)
+        return cand > curr
+
+
+def search_x_tweets(race_name, accounts, max_tweets=30, since_id=None):
     """
-    YouTube・Web記事・ドキュメントの分析結果を馬名ごとに集約するDataFrameを作成する
+    X API v2 Recent Search でレース関連ツイートを取得する。
+
+    戻り値:
+        tuple: (tweets_list, newest_id)
+            tweets_list: ツイート情報の辞書リスト
+            newest_id: 取得結果の最新tweet_id（差分取得用）
+    """
+    if not X_BEARER_TOKEN or not accounts:
+        return [], None
+
+    headers = {"Authorization": f"Bearer {X_BEARER_TOKEN}"}
+    api_endpoints = [
+        "https://api.x.com/2/tweets/search/recent",
+        "https://api.twitter.com/2/tweets/search/recent",
+    ]
+    active_api_url = api_endpoints[0]
+    fallback_notified = False
+
+    # アカウント名→ラベルのマッピング
+    label_map = {a['username']: a.get('label', a['username']) for a in accounts}
+
+    all_tweets = []
+    seen_tweet_ids = set()
+    newest_id = None
+
+    def _request_with_fallback(params: dict):
+        nonlocal active_api_url, fallback_notified
+        try:
+            return requests.get(active_api_url, headers=headers, params=params, timeout=15), None
+        except requests.RequestException as first_error:
+            if active_api_url != api_endpoints[0]:
+                return None, first_error
+            # 接続系エラー時のみ旧ドメインへフォールバック
+            try:
+                resp = requests.get(api_endpoints[1], headers=headers, params=params, timeout=15)
+                active_api_url = api_endpoints[1]
+                if not fallback_notified:
+                    st.info("ℹ️ api.x.com へ接続できなかったため、api.twitter.com にフォールバックしました。")
+                    fallback_notified = True
+                return resp, None
+            except requests.RequestException as fallback_error:
+                return None, fallback_error
+
+    # lang:ja 優先戦略: まず日本語フィルタ付き、0件ならフィルタなしで再検索
+    for include_lang_ja in (True, False):
+        queries = _build_x_recent_search_queries(
+            race_name,
+            accounts,
+            include_lang_ja=include_lang_ja,
+            max_query_len=512,
+        )
+        if not queries:
+            if include_lang_ja:
+                # lang:ja 付きで超過した場合は、フィルタなし構成で再試行する
+                continue
+            st.warning("⚠️ X検索クエリを組み立てられませんでした。アカウント数やレース名を確認してください。")
+            return [], None
+
+        for query in queries:
+            next_token = None
+            while len(all_tweets) < max_tweets:
+                params = {
+                    "query": query,
+                    "max_results": min(100, max_tweets - len(all_tweets)),  # API上限は100
+                    "tweet.fields": "created_at,public_metrics,author_id",
+                    "expansions": "author_id",
+                    "user.fields": "username",
+                }
+                if since_id:
+                    params["since_id"] = str(since_id)
+                if next_token:
+                    params["next_token"] = next_token
+
+                resp, req_error = _request_with_fallback(params)
+                if req_error is not None:
+                    st.warning(f"⚠️ X API接続エラー: {req_error}")
+                    return all_tweets, newest_id
+
+                if resp.status_code == 401 or resp.status_code == 403:
+                    st.error("❌ X API認証エラー: Bearer Tokenを確認してください")
+                    return [], None
+                if resp.status_code == 429:
+                    st.warning("⚠️ X APIレート制限に達しました。15分後に再試行してください。")
+                    return all_tweets, newest_id
+                if resp.status_code != 200:
+                    st.warning(f"⚠️ X APIエラー: {resp.status_code} {resp.text[:200]}")
+                    return all_tweets, newest_id
+
+                data = resp.json()
+
+                # author_id → username マッピング構築
+                users = {u['id']: u['username'] for u in data.get('includes', {}).get('users', [])}
+
+                tweets = data.get('data', [])
+                if not tweets:
+                    break
+
+                for tw in tweets:
+                    if len(all_tweets) >= max_tweets:
+                        break
+                    tweet_id = tw.get('id')
+                    if not tweet_id:
+                        continue
+                    if tweet_id in seen_tweet_ids:
+                        continue
+                    seen_tweet_ids.add(tweet_id)
+
+                    author_id = tw.get('author_id', '')
+                    username = users.get(author_id, '')
+                    tweet_url = f"https://x.com/{username}/status/{tweet_id}" if username else ""
+
+                    all_tweets.append({
+                        "tweet_id": tweet_id,
+                        "text": tw.get('text', ''),
+                        "author_username": username,
+                        "author_label": label_map.get(username, username),
+                        "created_at": tw.get('created_at', ''),
+                        "url": tweet_url,
+                        "public_metrics": tw.get('public_metrics', {}),
+                    })
+
+                    # newest_id を更新（安全な新旧比較）
+                    if _is_newer_tweet_id(tweet_id, newest_id):
+                        newest_id = tweet_id
+
+                # ページング
+                meta = data.get('meta', {})
+                next_token = meta.get('next_token')
+                if not next_token or len(all_tweets) >= max_tweets:
+                    break
+
+            if len(all_tweets) >= max_tweets:
+                break
+
+        # lang:ja で結果があれば終了
+        if all_tweets:
+            break
+
+    return all_tweets, newest_id
+
+
+def analyze_x_tweets_with_gemini(tweets, horse_names):
+    """
+    複数ツイートをバッチでGemini解析し、馬別のプラス/マイナス情報を返す。
+
+    戻り値:
+        list: 馬別の解析結果辞書リスト
+    """
+    if not GEMINI_API_KEY or not tweets:
+        return []
+
+    horse_list_str = "\n".join([f"- {name}" for name in horse_names])
+
+    # ツイート一覧テキスト構築
+    tweet_lines = []
+    for i, tw in enumerate(tweets, 1):
+        author = tw.get('author_username', '不明')
+        date_str = (tw.get('created_at') or '')[:10]
+        text = tw.get('text', '')
+        tweet_lines.append(f"[{i}] @{author} ({date_str}): {text}")
+    tweets_text = "\n\n".join(tweet_lines)
+
+    try:
+        client = google_genai.Client(api_key=GEMINI_API_KEY)
+
+        prompt = f"""あなたは競馬予想の専門家です。以下のX (Twitter) 投稿群を読み、各馬の評価情報を抽出してください。
+
+# 投稿一覧
+{tweets_text}
+
+# 注目すべき出走馬（これら以外の馬名が登場しても抽出してください）
+{horse_list_str}
+
+# 抽出してほしい情報（各馬について）
+プラス情報として以下を重点的に探してください：
+- 前走・近走の成績（例：「前走G2優勝」「3連勝中」「重賞実績あり」）
+- 調教・追切の様子（例：「最終追切で好時計」「動き抜群」「好調仕上がり」）
+- 体調・調子（例：「状態上昇中」「気配良好」「充実期」）
+- コース・距離適性（例：「東京ダート1600m得意」「左回り巧者」）
+- 騎手・厩舎の強み（例：「ルメール騎手で信頼度高い」「名手とのコンビ」）
+- その他の好材料
+
+マイナス情報として以下を重点的に探してください：
+- 前走・近走での敗因（例：「前走惨敗」「近走凡走続き」）
+- 調教不安（例：「追切動き平凡」「仕上がり遅れ気味」）
+- コース・距離の不安（例：「距離短縮が課題」「東京コースは初」）
+- 枠順・展開の不安（例：「外枠で先行困難」）
+- その他の懸念点
+
+# 出力形式
+以下のJSON形式で**必ず**出力してください（説明文は一切不要）：
+
+```json
+[
+  {{
+    "馬名": "馬の名前",
+    "プラス情報": "具体的な好材料を2～3文で詳しく記載",
+    "マイナス情報": "具体的な懸念点・不安材料を記載（なければ「特になし」）",
+    "source_index": [1, 3]
+  }}
+]
+```
+
+source_index は情報元の投稿番号リスト（複数可）。
+
+# 注意事項
+- 投稿に情報がない馬は出力しない
+- 同じ馬について複数投稿で言及されている場合は情報を統合して1件にまとめる
+- 馬名が全く見当たらない場合のみ「全体的な予想」として1件だけ出力
+- JSONのみ出力し、前後に説明文を付けないこと
+"""
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=prompt
+        )
+
+        response_text = response.text
+        if not response_text:
+            return []
+
+        analysis_results = _parse_gemini_json_response(response_text, expected="list")
+
+        # source_index → 実際のツイートURLとタイトルに変換
+        for result in analysis_results:
+            indices = result.pop('source_index', [])
+            if indices and isinstance(indices, list):
+                # 最初の参照投稿のURLをsource_urlに使用
+                first_idx = indices[0] - 1  # 1-indexed → 0-indexed
+                if 0 <= first_idx < len(tweets):
+                    tw = tweets[first_idx]
+                    result['source_url'] = tw.get('url', '')
+                    result['source_title'] = f"𝕏 @{tw.get('author_username', '不明')}"
+                else:
+                    result['source_url'] = ''
+                    result['source_title'] = '𝕏投稿'
+            else:
+                result['source_url'] = ''
+                result['source_title'] = '𝕏投稿'
+            result['source_type'] = 'x_twitter'
+
+        return analysis_results
+
+    except (json.JSONDecodeError, ValueError):
+        return []
+    except Exception as e:
+        error_msg = str(e)
+        if _is_transient_gemini_error(error_msg):
+            raise
+        st.warning(f"⚠️ X投稿の解析をスキップしました: {type(e).__name__} ({error_msg[:120]})")
+        return []
+
+
+def fetch_and_analyze_x_tweets(race_name, max_tweets=30):
+    """
+    X投稿の検索・解析オーケストレーター。
+
+    戻り値:
+        tuple: (tweets_metadata, raw_analysis_results)
+    """
+    accounts = _load_x_accounts()
+    if not accounts:
+        st.warning("⚠️ x_accounts.json が見つからないか、アカウントが未登録です。")
+        return [], []
+
+    since_id = st.session_state.get('x_newest_id')
+
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    # Phase 1: ツイート検索
+    status_text.info("𝕏 X投稿を検索中...")
+    progress_bar.progress(0.2)
+
+    tweets = []
+    newest_id = None
+    for attempt in range(3):
+        try:
+            tweets, newest_id = search_x_tweets(race_name, accounts, max_tweets, since_id)
+            break
+        except Exception as e:
+            if attempt < 2:
+                time.sleep(2)
+            else:
+                st.warning(f"⚠️ X検索に失敗しました: {e}")
+                progress_bar.empty()
+                status_text.empty()
+                return [], []
+
+    progress_bar.progress(0.5)
+
+    if not tweets:
+        progress_bar.empty()
+        status_text.empty()
+        st.info("ℹ️ 該当するツイートが見つかりませんでした。")
+        return [], []
+
+    status_text.info(f"𝕏 {len(tweets)}件のツイートを解析中...")
+
+    # Phase 2: Gemini解析（バッチ）
+    horse_names = get_all_horse_names()
+    raw_results = []
+    for attempt in range(3):
+        try:
+            raw_results = analyze_x_tweets_with_gemini(tweets, horse_names)
+            break
+        except Exception as e:
+            if attempt < 2 and _is_transient_gemini_error(str(e)):
+                time.sleep(2)
+            else:
+                st.warning(f"⚠️ X投稿のGemini解析に失敗しました: {e}")
+                break
+
+    progress_bar.progress(1.0)
+    progress_bar.empty()
+    status_text.empty()
+
+    # newest_id をセッションに保存（差分取得用）
+    if newest_id:
+        st.session_state['x_newest_id'] = newest_id
+
+    return tweets, raw_results
+
+
+def aggregate_horse_analysis(youtube_results, web_results, doc_results=None, x_results=None):
+    """
+    YouTube・Web記事・ドキュメント・X投稿の分析結果を馬名ごとに集約するDataFrameを作成する
 
     引数:
         youtube_results (list): YouTube分析の生データリスト
         web_results (list): Web記事分析の生データリスト
         doc_results (list): ドキュメント分析の生データリスト（省略可）
+        x_results (list): X投稿分析の生データリスト（省略可）
 
     戻り値:
         DataFrame: 馬名ごとに集約されたメリット・デメリット情報
     """
     if doc_results is None:
         doc_results = []
+    if x_results is None:
+        x_results = []
     horse_data = defaultdict(lambda: {
         "メリット_items": [],
         "メリット_sources": [],
@@ -1136,6 +1675,23 @@ def aggregate_horse_analysis(youtube_results, web_results, doc_results=None):
         if minus and minus not in ("特になし", ""):
             horse_data[horse]["デメリット_items"].append(minus)
             horse_data[horse]["デメリット_sources"].append((f"📄{title[:38]}", ""))
+
+    # X (Twitter) 結果を処理
+    for item in x_results:
+        if not isinstance(item, dict):
+            continue
+        horse = normalize_horse_name(as_text(item.get("馬名", "不明")) or "不明")
+        plus = as_text(item.get("プラス情報", ""))
+        minus = as_text(item.get("マイナス情報", ""))
+        url = as_text(item.get("source_url", ""))
+        title = as_text(item.get("source_title", "𝕏投稿")) or "𝕏投稿"
+
+        if plus and plus not in ("特になし", ""):
+            horse_data[horse]["メリット_items"].append(plus)
+            horse_data[horse]["メリット_sources"].append((f"𝕏{title[:38]}", url))
+        if minus and minus not in ("特になし", ""):
+            horse_data[horse]["デメリット_items"].append(minus)
+            horse_data[horse]["デメリット_sources"].append((f"𝕏{title[:38]}", url))
 
     rows = []
     for horse_name, data in horse_data.items():
@@ -2326,6 +2882,23 @@ div[data-testid="metric-container"] {
                 key="combined_max_web"
             )
 
+        # 前回の保存情報を表示
+        if r:
+            _cache_path = _get_cache_path(r.race_key)
+            if os.path.exists(_cache_path):
+                try:
+                    with open(_cache_path, 'r', encoding='utf-8') as _f:
+                        _meta = json.load(_f).get('meta', {})
+                    _last_updated = _meta.get('last_updated', '')[:16].replace('T', ' ')
+                    _art_count = _meta.get('web_article_count', 0)
+                    _yt_count = _meta.get('youtube_video_count', 0)
+                    st.info(
+                        f"💾 前回の保存: {_last_updated} ｜ Web記事 {_art_count}件 ／ YouTube {_yt_count}件\n\n"
+                        "🔄 「Web 一括検索」を実行すると新しい情報が追加されます（既存の情報は保持）"
+                    )
+                except Exception:
+                    pass
+
         if st.button("🔍 Web 一括検索", type="primary", key="combined_search"):
             st.info("⏳ Web の解析には30秒〜1分程度かかります。しばらくお待ちください。")
 
@@ -2347,31 +2920,172 @@ div[data-testid="metric-container"] {
             _top_horses = get_all_horse_names()[:5]
             if _top_horses:
                 web_queries.append(f"{rl} {' '.join(_top_horses)} 予想")
-            web_articles, web_raw = fetch_and_analyze_web_articles(
+            new_articles, new_web_raw = fetch_and_analyze_web_articles(
                 web_queries, total_article_limit=int(combined_max_web)
             )
-            st.metric("Web記事", f"{len(web_articles)}件取得")
 
-            # Phase 2: 馬別集計（ドキュメントから抽出した馬別情報も統合）
-            doc_horse_raw = st.session_state.get('doc_horse_raw', [])
-            youtube_raw = []
-            horse_df = aggregate_horse_analysis(youtube_raw, web_raw, doc_horse_raw)
-            if active_horse_names and not horse_df.empty and '馬名' in horse_df.columns:
-                horse_df = horse_df[horse_df['馬名'].astype(str).isin(active_horse_names)].reset_index(drop=True)
+            # 差分マージ（既存結果を保持しつつ新しい記事を追加）
+            existing_web_raw = st.session_state.get('web_raw', [])
+            existing_fp = {_raw_fingerprint(r2) for r2 in existing_web_raw if _raw_fingerprint(r2)}
+            added_raw = [
+                r2 for r2 in new_web_raw
+                if not _raw_fingerprint(r2) or _raw_fingerprint(r2) not in existing_fp
+            ]
+            existing_article_urls = {a.get('url') for a in st.session_state.get('web_articles', []) if a.get('url')}
+            added_articles = [a for a in new_articles if not a.get('url') or a.get('url') not in existing_article_urls]
+
+            merged_web_raw = existing_web_raw + added_raw
+            merged_articles = st.session_state.get('web_articles', []) + added_articles
+
+            st.metric("Web記事", f"{len(new_articles)}件取得（うち新規: {len(added_articles)}件）")
+
+            # Phase 2: 馬別集計（YouTube / 既存Web / 新規Web / ドキュメント を全統合）
+            merged_horse_df = aggregate_horse_analysis(
+                st.session_state.get('youtube_raw', []),
+                merged_web_raw,
+                st.session_state.get('doc_horse_raw', []),
+                st.session_state.get('x_raw', []),
+            )
+            if active_horse_names and not merged_horse_df.empty and '馬名' in merged_horse_df.columns:
+                merged_horse_df = merged_horse_df[
+                    merged_horse_df['馬名'].astype(str).isin(active_horse_names)
+                ].reset_index(drop=True)
 
             # セッションステートに保存
-            st.session_state['horse_df'] = horse_df
-            st.session_state['youtube_videos'] = []
-            st.session_state['youtube_raw'] = youtube_raw
-            st.session_state['web_raw'] = web_raw
-            st.session_state['youtube_summary_df'] = pd.DataFrame()
+            st.session_state['horse_df'] = merged_horse_df
+            st.session_state['web_raw'] = merged_web_raw
+            st.session_state['web_articles'] = merged_articles
+            st.session_state.setdefault('youtube_videos', [])
+            st.session_state.setdefault('youtube_raw', [])
+            st.session_state.setdefault('youtube_summary_df', pd.DataFrame())
             st.session_state.pop('yt_detail_analysis', None)
-            st.session_state['web_articles'] = web_articles
+
+            # キャッシュ保存
+            if r:
+                save_race_cache(r.race_key)
+
             st.success("✅ 検索・解析が完了しました！「総合予想（馬別）」タブで結果を確認してください。")
 
         st.markdown("---")
 
-        # ===== Section 2: ドキュメントアップロード =====
+        # ===== Section 2: X (Twitter) 予想投稿 =====
+        st.markdown("#### 𝕏 X (Twitter) 予想投稿")
+
+        x_accounts = _load_x_accounts()
+        x_disabled = False
+        if not X_BEARER_TOKEN:
+            st.warning("⚠️ X_BEARER_TOKENが未設定です。.envファイルを確認してください。")
+            x_disabled = True
+        elif not x_accounts:
+            st.warning("⚠️ x_accounts.json が見つからないか、アカウントが未登録です。")
+            x_disabled = True
+        else:
+            st.caption(f"登録アカウント: {', '.join('@' + a['username'] for a in x_accounts)}")
+
+        x_default_max = _get_x_default_max_tweets(30)
+        x_max = st.number_input(
+            "取得上限ツイート数",
+            min_value=10,
+            max_value=100,
+            value=x_default_max,
+            key="x_max_tweets",
+        )
+
+        # キャッシュ情報表示
+        x_tweets_cached = st.session_state.get('x_tweets', [])
+        if x_tweets_cached:
+            st.info(f"💾 取得済みX投稿: {len(x_tweets_cached)}件")
+
+        if st.button("𝕏 X投稿を検索", key="x_search", disabled=x_disabled):
+            with st.spinner("𝕏 X投稿を検索・解析中..."):
+                new_tweets, new_x_raw = fetch_and_analyze_x_tweets(
+                    r.race_name, max_tweets=x_max
+                )
+
+            if new_tweets:
+                # 差分マージ: x_raw は _raw_fingerprint で重複排除
+                existing_x_raw = st.session_state.get('x_raw', [])
+                existing_fp = {_raw_fingerprint(r2) for r2 in existing_x_raw if _raw_fingerprint(r2)}
+                added_raw = [r2 for r2 in new_x_raw
+                             if not _raw_fingerprint(r2) or _raw_fingerprint(r2) not in existing_fp]
+
+                # x_tweets は tweet_id で重複排除
+                existing_tweet_ids = {t.get('tweet_id') or t.get('url') for t in st.session_state.get('x_tweets', [])
+                                      if t.get('tweet_id') or t.get('url')}
+                added_tweets = [t for t in new_tweets
+                                if (t.get('tweet_id') or t.get('url') or '') not in existing_tweet_ids]
+
+                merged_x_raw = existing_x_raw + added_raw
+                merged_x_tweets = st.session_state.get('x_tweets', []) + added_tweets
+
+                st.session_state['x_raw'] = merged_x_raw
+                st.session_state['x_tweets'] = merged_x_tweets
+
+                st.metric("X投稿", f"{len(new_tweets)}件取得（うち新規: {len(added_tweets)}件）")
+
+                # 馬別集計の再計算
+                updated_horse_df = aggregate_horse_analysis(
+                    st.session_state.get('youtube_raw', []),
+                    st.session_state.get('web_raw', []),
+                    st.session_state.get('doc_horse_raw', []),
+                    merged_x_raw,
+                )
+                if active_horse_names and not updated_horse_df.empty and '馬名' in updated_horse_df.columns:
+                    updated_horse_df = updated_horse_df[
+                        updated_horse_df['馬名'].astype(str).isin(active_horse_names)
+                    ].reset_index(drop=True)
+                st.session_state['horse_df'] = updated_horse_df
+
+                if r:
+                    save_race_cache(r.race_key)
+
+                st.success("✅ X投稿の検索・解析が完了しました！「総合予想（馬別）」タブで確認してください。")
+
+        # 取得済みツイート表示
+        x_tweets_display = st.session_state.get('x_tweets', [])
+        if x_tweets_display:
+            with st.expander(f"𝕏 取得済みツイート ({len(x_tweets_display)}件)", expanded=False):
+                for tw in x_tweets_display:
+                    author = tw.get('author_username', '不明')
+                    label = tw.get('author_label', author)
+                    date_str = (tw.get('created_at') or '')[:10]
+                    text = tw.get('text', '')
+                    metrics = tw.get('public_metrics', {})
+                    likes = metrics.get('like_count', 0)
+                    rts = metrics.get('retweet_count', 0)
+                    url = tw.get('url', '')
+
+                    st.markdown(f"**@{author}** ({label}) — {date_str}")
+                    st.text(text[:300] + ("..." if len(text) > 300 else ""))
+                    cols = st.columns([1, 1, 2])
+                    cols[0].caption(f"♥ {likes}")
+                    cols[1].caption(f"🔁 {rts}")
+                    if url:
+                        cols[2].caption(f"[元の投稿]({url})")
+                    st.markdown("---")
+
+                if st.button("🗑️ X情報をリセット", key="x_reset"):
+                    st.session_state.pop('x_raw', None)
+                    st.session_state.pop('x_tweets', None)
+                    st.session_state.pop('x_newest_id', None)
+                    # horse_df を再集計（X情報なしで）
+                    updated_horse_df = aggregate_horse_analysis(
+                        st.session_state.get('youtube_raw', []),
+                        st.session_state.get('web_raw', []),
+                        st.session_state.get('doc_horse_raw', []),
+                    )
+                    if active_horse_names and not updated_horse_df.empty and '馬名' in updated_horse_df.columns:
+                        updated_horse_df = updated_horse_df[
+                            updated_horse_df['馬名'].astype(str).isin(active_horse_names)
+                        ].reset_index(drop=True)
+                    st.session_state['horse_df'] = updated_horse_df
+                    if r:
+                        save_race_cache(r.race_key)
+                    st.rerun()
+
+        st.markdown("---")
+
+        # ===== Section 3: ドキュメントアップロード =====
         st.markdown("#### 📄 ドキュメントをアップロード（PDF / テキスト）")
         st.caption("レース傾向や各馬の情報が含まれたPDF・テキストファイルをアップロードすると、分析に活用されます。")
 
@@ -2417,6 +3131,8 @@ div[data-testid="metric-container"] {
                                 else:
                                     existing[k] = f"【{uploaded_file.name}より】\n{value_text}"
                         st.session_state['race_characteristics'] = existing
+                        if r:
+                            save_race_cache(r.race_key)  # ドキュメントのレース特徴をキャッシュに保存
                         st.success(f"✅ {uploaded_file.name} からレース特徴を抽出しました。「レース特徴・傾向」タブで確認できます。")
 
                 if analyze_doc_horses:
@@ -2427,13 +3143,16 @@ div[data-testid="metric-container"] {
                     updated_horse_df = aggregate_horse_analysis(
                         st.session_state.get('youtube_raw', []),
                         st.session_state.get('web_raw', []),
-                        st.session_state.get('doc_horse_raw', [])
+                        st.session_state.get('doc_horse_raw', []),
+                        st.session_state.get('x_raw', []),
                     )
                     if active_horse_names and not updated_horse_df.empty and '馬名' in updated_horse_df.columns:
                         updated_horse_df = updated_horse_df[
                             updated_horse_df['馬名'].astype(str).isin(active_horse_names)
                         ].reset_index(drop=True)
                     st.session_state['horse_df'] = updated_horse_df
+                    if r:
+                        save_race_cache(r.race_key)  # ドキュメント解析結果をキャッシュに保存
                     st.success(f"✅ {uploaded_file.name} から {len(new_doc_raw)}件の馬別情報を抽出しました。「総合予想（馬別）」タブで確認できます。")
             else:
                 st.error("❌ ファイルからテキストを抽出できませんでした")
@@ -2450,6 +3169,8 @@ div[data-testid="metric-container"] {
                 if st.button("🗑️ ドキュメント馬別情報をリセット", key="btn_doc_horse_reset"):
                     st.session_state.pop('doc_horse_raw', None)
                     st.session_state.pop('horse_df', None)
+                    if r:
+                        save_race_cache(r.race_key)  # クリア後の状態をキャッシュに反映
                     st.rerun()
 
         st.markdown("---")
@@ -2459,6 +3180,8 @@ div[data-testid="metric-container"] {
         st.info("💡 レース特徴はアプリ起動時に自動表示されます。「レース特徴・傾向」タブで確認してください。")
         if st.button("🔄 レース特徴をWeb再取得", key="btn_race_refresh"):
             st.session_state.pop('race_characteristics', None)
+            if r:
+                save_race_cache(r.race_key)  # キャッシュからもrace_characteristicsを削除→次回ロード時にAPI再実行
             st.rerun()
 
     # ===== タブ3: 総合予想（馬別） =====
@@ -3022,6 +3745,10 @@ def main():
             st.stop()
             return
 
+    # キャッシュから前回の検索結果を復元（初回ロード時のみ・web_rawをセンチネルとして使用）
+    if 'web_raw' not in st.session_state:
+        load_race_cache(r.race_key)
+
     # レース特徴を自動初期化（初回のみ）
     if 'race_characteristics' not in st.session_state:
         # Gemini で動的取得、失敗時は最小限フォールバック
@@ -3034,6 +3761,7 @@ def main():
                 )
             if web_info:
                 st.session_state['race_characteristics'].update(web_info)
+                save_race_cache(r.race_key)  # API取得成功時のみキャッシュ保存
         except Exception:
             pass  # フォールバックデータは表示される
 

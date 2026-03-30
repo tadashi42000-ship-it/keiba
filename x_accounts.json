@@ -1,0 +1,7 @@
+{
+  "accounts": [
+    {"username": "uma_channel", "label": "馬チャンネル"},
+    {"username": "keiba_lab", "label": "競馬ラボ"}
+  ],
+  "default_max_tweets": 30
+}

@@ -15,8 +15,10 @@ env/
 # Streamlit
 .streamlit/secrets.toml
 
-# データ
-data/
+# データ（CSVは除外、検索キャッシュはgit管理）
+data/*
+!data/search_cache/
+!data/search_cache/**
 *.csv
 !february_s_info.csv
 *.log

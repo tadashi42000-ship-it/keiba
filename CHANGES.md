@@ -308,3 +308,51 @@ Additional issues were found during Playwright regression checks.
 - `get_keiba_info.py`
 - `app.py`
 - `CHANGES.md`
+
+---
+
+## Additional Fixes (2026-03-30)
+
+### Background
+Search results had been effectively session-scoped, so re-login and cross-device checks could appear incomplete.  
+To reduce update time and API calls, we added persistence and incremental merge behavior for race search results.
+
+### Implemented Changes
+
+#### `app.py`
+- Added cache IO helpers:
+  - `_get_cache_path(race_key)`
+  - `_raw_fingerprint(item)`
+  - `save_race_cache(race_key)`
+  - `load_race_cache(race_key)`
+- Changed "Web batch search" from replace-all to merge-by-diff:
+  - Keep existing results.
+  - Add only new items after dedupe.
+  - Rebuild `horse_df` from merged raw sources.
+- Added automatic restore on app load/re-login:
+  - Use `web_raw` presence as sentinel.
+  - Load cache for the selected race key when session is fresh.
+- Wired cache save calls into related flows:
+  - After Web batch search.
+  - After document race-characteristics extraction.
+  - After document horse extraction.
+  - After document-horse reset.
+  - After race-characteristics refresh action.
+  - After successful race-characteristics web fetch in `main()`.
+
+#### `.gitignore`
+- Updated data policy to keep `data/search_cache/` under Git while still ignoring generated CSV/log artifacts.
+
+### Known Limitations / Notes
+- YouTube detail state (for example `yt_detail_analysis`) is not persisted yet, so cross-device depth can still differ.
+- Dedupe currently prioritizes `url`/`source_url` with title fallback; false positives/negatives are still possible.
+- For device-to-device checks, use the server host IP (not `localhost`) from other devices.
+- Current implementation includes auto `git add`/`git commit` during cache save; this is an operational caveat.
+
+### Verification
+- Confirmed section append keeps Markdown hierarchy and existing content intact.
+- Confirmed notes are aligned with current code paths in `app.py` and `.gitignore`.
+- Confirmed this update is documentation-only and does not alter runtime behavior.
+
+### Files Updated (Additional)
+- `CHANGES.md`
