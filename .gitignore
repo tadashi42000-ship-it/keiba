@@ -1,4 +1,4 @@
-# 機密情報 - 絶対にコミットしないこと
+﻿# Environment
 .env
 .env.local
 .env.*.local
@@ -12,14 +12,25 @@ venv/
 .venv/
 env/
 
-# Streamlit
+# Streamlit secrets
 .streamlit/secrets.toml
+legacy/streamlit_app/.streamlit/secrets.toml
 
-# データ（CSVは除外、検索キャッシュはgit管理）
+# Data and logs
 data/*
 !data/search_cache/
 !data/search_cache/**
+legacy/streamlit_app/data/*
+!legacy/streamlit_app/data/search_cache/
+!legacy/streamlit_app/data/search_cache/**
 *.csv
-!february_s_info.csv
+!legacy/streamlit_app/february_s_info.csv
 *.log
+
+# Node / build artifacts
+node_modules/
+.next/
+dist/
+build/
+
 .DS_Store

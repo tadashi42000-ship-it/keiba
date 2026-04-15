@@ -1,4 +1,4 @@
-"""
+﻿"""
 重賞レース予想Webアプリ
 
 Streamlitを使用して、netkeiba.comから出馬表を取得し、
@@ -12,6 +12,7 @@ import os
 import sys
 import subprocess
 from datetime import datetime, date
+from pathlib import Path
 import re
 import json
 import time  # 待機時間のために追加
@@ -47,6 +48,9 @@ from race_catalog import (
 from get_keiba_info import fetch_race_csv
 
 # .env ファイルからAPIキーを読み込む（app.py と同じフォルダに .env を置くこと）
+BASE_DIR = Path(__file__).resolve().parent
+os.chdir(BASE_DIR)
+
 load_dotenv()
 
 # ====================
@@ -6872,3 +6876,4 @@ def main():
 if __name__ == "__main__":
     # このファイルが直接実行された場合のみ、main関数を実行
     main()
+
