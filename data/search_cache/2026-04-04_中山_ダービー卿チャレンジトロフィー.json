@@ -1,0 +1,1156 @@
+{
+  "meta": {
+    "race_key": "2026-04-04_中山_ダービー卿チャレンジトロフィー",
+    "last_updated": "2026-04-03T15:58:40",
+    "web_article_count": 0,
+    "youtube_video_count": 0,
+    "x_tweet_count": 30,
+    "x_newest_id": "2039943180754280531",
+    "training_item_count": 0,
+    "training_time_row_count": 36
+  },
+  "web_raw": [],
+  "youtube_raw": [],
+  "web_articles": [],
+  "race_characteristics": {
+    "コース特徴": "中山芝1600mは外回りコースを使用します。スタート地点は1コーナー横のポケットで、すぐにコーナーを迎えるレイアウトです。スタートから2コーナーまでの距離は短く、その後、2コーナーの終わりから3コーナーにかけて約4mもの下り坂が続きます。この下り坂でスピードが乗り、3コーナーに突入します。そして、ゴール前200m地点からは有名な中山の急坂（高低差5.3m）が待ち構えています。この急坂を上りきるスタミナと、下り坂で加速できるスピードが要求されるトリッキーなコースです。全体的に緩いカーブが多く、内枠が距離ロスなく走行できるため有利とされる傾向があります。 [3, 7, 9, 11, 15]",
+    "注目ポイント": "2026/04/04(土)のダービー卿チャレンジトロフィーでは、ハンデ戦であるため波乱含みですが、単勝オッズ15倍未満の上位人気サイドを中心に据えつつも、過度な信頼は禁物です。特に若い4歳・5歳馬、前走マイル戦を経験している馬、そしてノーザンファーム生産馬に注目が集まります。斤量55kg前後の馬や、馬格のある馬も好走パターンに合致します。枠順では内枠（特に2枠〜5枠）が有利ですが、極端な内枠は包まれるリスクも考慮し、外枠からの勝ち馬は少ない傾向にあります。脚質は先行・中団からの差しが基本となります。 [4, 6, 14, 16, 23, 25, 28, 33, 34, 35]",
+    "過去の傾向": "過去10年のダービー卿チャレンジトロフィー（2016年〜2025年）では、ハンデ戦であるため荒れることが多く、高配当が狙えるレースとして知られています。3連単で10万円以上の配当が3回、馬連や3連複でも万馬券が頻繁に出ています [4, 16, 18, 35]。上位人気馬は必ずしも信頼できず、1番人気は過去10年で1勝、2着も1回のみと苦戦傾向にあります。しかし、馬券に絡んだ馬の73%は5番人気以内の馬で占められており、上位人気サイドが中心となりつつも、その中の順番付けで高配当を狙うのがおすすめです [16, 20, 34]。年齢別では4歳馬と5歳馬が圧倒的に強く、過去10年で8勝を挙げています。特に5歳馬は3着内数、連対率、複勝率でトップの成績を収めています [4, 6, 23, 25]。脚質については、逃げ馬は2勝と多くないものの、先行・中団からの差しが優勢です。後方一気の追い込みは物理的に難しく、基本的に届きにくい傾向にあります [8, 19, 21, 23, 35]。",
+    "勝ちやすい馬のタイプ": [
+      "4歳・5歳馬: 特に5歳馬が好成績で、4歳馬も関東馬であれば高勝率を示します。 [4, 6, 23, 25, 28]",
+      "マイル実績のある馬: 前走で1600m戦を使われていた馬が勝率・単勝回収率ともに高く、特にニューイヤーステークス(L)からのローテーションは好成績です。マイルで連対率50%以上ある馬が勝ち切りやすい傾向にあります。 [23, 28, 30, 33]",
+      "ノーザンファーム生産馬: 過去10年で7勝を挙げており、特に近年は「上位人気×ノーザンファーム」の組み合わせが非常に信頼できます。 [23]",
+      "先行・中団からの差し馬: 直線が短くコーナーが多いコース形態から、前目で立ち回れる馬や、中団から早めに動ける馬が有利です。 [3, 8, 10, 19, 23, 35]",
+      "斤量55kg台の馬: ハンデ戦ですが、55kg前後の馬が好走する傾向にあります。 [28, 33]",
+      "馬格のある馬: 馬体重が460kg以上、特に520kg以上の大型馬の成績が良い傾向にあります。 [2, 33]",
+      "血統: ロードカナロア産駒が安定しており、ディープインパクト系やキングマンボ系、シルバーステート産駒も好成績です。 [2, 10, 30]"
+    ],
+    "苦手な馬のタイプ": [
+      "6歳以上の高齢馬: 6歳以上の馬は成績が低下し、特に7歳以上は割引が必要です。 [6, 25]",
+      "極端な追い込み馬: 中山芝1600mは直線が短く、後方からの差し切りは展開に恵まれないと難しいです。 [19, 35]",
+      "重いハンデを背負う馬: 57.5kg以上の重ハンデ馬は苦戦する傾向にあります。 [33]",
+      "位置取りができない人気馬: 人気馬であっても、スタートが悪く後方からの競馬になってしまうと、期待を裏切ることが多いです。 [19, 35]",
+      "外枠の先行馬: 外枠からの先行は、1コーナーまでの距離が短いためポジション取りに脚を使い、ペースを上げてしまうリスクがあります。 [19]"
+    ],
+    "枠順有利": "中山芝1600mはコース形態上、一般的に内枠が有利とされています。特に2枠、5枠の好走率が高いです。過去10年のダービー卿チャレンジトロフィーでは、2枠が勝率21.1%でトップ、5枠が勝率15.0%で2位と好成績です。また、1枠も勝率10.5%で3位と内寄りの枠が優勢です。これは、スタートからすぐにコーナーがあるため、内枠の方が距離ロスなく立ち回れるためと考えられます。 [2, 3, 10, 14, 24, 28, 29, 33]",
+    "枠順不利": "ダービー卿チャレンジトロフィーにおいては、6枠から外の枠からは勝ち馬が1頭も出ておらず、外枠は勝利に繋がりにくい傾向があります。良馬場においては6～8枠が複勝率で劣るデータもあります。これは外々を回らされることで距離ロスが大きくなり、最後の急坂でスタミナを消耗しやすいためです。 [2, 13, 27, 28, 29, 33]。ただし、重賞レースでは極端な内枠（1枠・2枠）が外からのプレッシャーを受け、進路確保が困難になる場合があり、複勝回収率が低くなる傾向も見られます。 [13]",
+    "騎手厩舎傾向": "特定の騎手や厩舎が継続して好成績を収める傾向があります。C.ルメール騎手や戸崎圭太騎手が中山芝1600mで高い勝率・連対率を誇ります。 [8, 10, 24]。また、ノーザンファーム生産馬の活躍が顕著であり、ノーザンファームと連携の強い厩舎も注目に値します。 [23]"
+  },
+  "doc_horse_raw": [],
+  "x_raw": [
+    {
+      "馬名": "ファーヴェント",
+      "プラス情報": "軍師AIの最終結論における考察対象で買い目の中心候補とされ、予想印では△評価を受けています。初見予想で2位評価、さらに3連複の軸候補にも挙げられています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/pog_info_update/status/2039943180754280531",
+      "source_title": "𝕏 @pog_info_update",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ミニトランザット",
+      "プラス情報": "軍師AIの最終結論における考察対象で買い目の中心候補とされ、予想印では▲評価、弥永明郎氏の予想印でも△評価を受けています。初見予想では1位評価を得ています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/pog_info_update/status/2039943180754280531",
+      "source_title": "𝕏 @pog_info_update",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ジュンブロッサム",
+      "プラス情報": "軍師AIの最終結論における考察対象で、買い目の中心候補として挙げられています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/pog_info_update/status/2039943180754280531",
+      "source_title": "𝕏 @pog_info_update",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "メダルスピード",
+      "プラス情報": "予想印で◎評価を獲得しており、3連複の軸候補にも挙げられています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/Ttt71632373/status/2039915824899908090",
+      "source_title": "𝕏 @Ttt71632373",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ブエナオンダ",
+      "プラス情報": "予想印で〇評価、弥永明郎氏の予想印では☆評価を得ています。",
+      "マイナス情報": "注意が必要な馬として⚠評価がついています。",
+      "source_url": "https://x.com/Ttt71632373/status/2039915824899908090",
+      "source_title": "𝕏 @Ttt71632373",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ケイアイセナ",
+      "プラス情報": "予想印で△評価を受けています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/Ttt71632373/status/2039915824899908090",
+      "source_title": "𝕏 @Ttt71632373",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "エンペラーズソード",
+      "プラス情報": "予想印で注評価、別の予想では◎評価を受けており、前走3勝Cを11番人気ながら勝利している点が評価され、勢いがあると見られています。弥永明郎氏の予想印では▲評価です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/Ttt71632373/status/2039915824899908090",
+      "source_title": "𝕏 @Ttt71632373",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "サイルーン",
+      "プラス情報": "伝説の競馬記者である弥永明郎氏の予想印で◎評価を獲得しています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/banushinaru/status/2039900444697170309",
+      "source_title": "𝕏 @banushinaru",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "シリウスコルト",
+      "プラス情報": "伝説の競馬記者である弥永明郎氏の予想印で〇評価を獲得しています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/banushinaru/status/2039900444697170309",
+      "source_title": "𝕏 @banushinaru",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "イミグラントソング",
+      "プラス情報": "初見予想で3位評価を獲得しており、単勝複勝予想の対象にも挙げられています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/TJ_Dragon9/status/2039893146641797126",
+      "source_title": "𝕏 @TJ_Dragon9",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "エエヤン",
+      "プラス情報": "3連複の相手候補として推奨されています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/keiba_z_h_t_/status/2039872546745782437",
+      "source_title": "𝕏 @keiba_z_h_t_",
+      "source_type": "x_twitter"
+    }
+  ],
+  "x_tweets": [
+    {
+      "tweet_id": "2039943180754280531",
+      "text": "🎦 動画更新❣ 🎦  軍師AIギャンブルデータ徹底競馬予想チャンネル ：   【2026ダービー卿チャレンジトロフィー最終結論】軍師AI最終競馬予想｜ファーヴェントとミニトランザット、ジュンブロッサムはなぜ？単勝・馬連・ワイド・三連複まで実際にどう買うかも明確に提示しています …",
+      "author_username": "pog_info_update",
+      "author_label": "pog_info_update",
+      "created_at": "2026-04-03T05:48:49.000Z",
+      "url": "https://x.com/pog_info_update/status/2039943180754280531",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 85
+      }
+    },
+    {
+      "tweet_id": "2039943095505355001",
+      "text": "【2026ダービー卿チャレンジトロフィー最終結論】軍師AI最終競馬予想｜ファーヴェントとミニトランザット、ジュンブロッサムはなぜ？単勝・馬連・ワ... https://t.co/YKSyMZTiYb @YouTubeより",
+      "author_username": "makochancha",
+      "author_label": "makochancha",
+      "created_at": "2026-04-03T05:48:28.000Z",
+      "url": "https://x.com/makochancha/status/2039943095505355001",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 146
+      }
+    },
+    {
+      "tweet_id": "2039942389645943254",
+      "text": "『状態で買う、それだけ』2026/4/4〜4/5分｜manbakensurfer @Manbakensurfer \n的中率と回収率を上げるべく\nチャーチルダウンズカップ、ダービー卿チャレンジトロフィー、大阪杯3レースまとめて3頭絞り予想！\n追い切りから厳選した③頭をチェック https://t.co/W0FUIez0Ai",
+      "author_username": "Manbakensurfer",
+      "author_label": "Manbakensurfer",
+      "created_at": "2026-04-03T05:45:40.000Z",
+      "url": "https://x.com/Manbakensurfer/status/2039942389645943254",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 194
+      }
+    },
+    {
+      "tweet_id": "2039939486055064059",
+      "text": "ダービー卿チャレンジトロフィー、チャーチルダウンズカップは本日深夜に予想更新します。\n大阪杯は明日深夜に予想更新します。\n今年も負債額が大きくなってきました。\nGⅠレース4連勝できたら嬉しいです☺️\nhttps://t.co/U47ctpODSq #mixi2",
+      "author_username": "nakajima2540043",
+      "author_label": "nakajima2540043",
+      "created_at": "2026-04-03T05:34:08.000Z",
+      "url": "https://x.com/nakajima2540043/status/2039939486055064059",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 122
+      }
+    },
+    {
+      "tweet_id": "2039933217911067054",
+      "text": "【ダービー卿CT】明日は中山マイル戦🔥\n\n内回り感覚の急坂コース、末脚vs器用さのせめぎ合い。\n人気馬だけでは解けない構図がある。\n\nデータが示す狙い目を絞り込んだ。厳選5頭、今夜公開。\n\n#ダービー卿チャレンジトロフィー #競馬予想 #競馬",
+      "author_username": "gensen5keiba",
+      "author_label": "gensen5keiba",
+      "created_at": "2026-04-03T05:09:13.000Z",
+      "url": "https://x.com/gensen5keiba/status/2039933217911067054",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 1
+      }
+    },
+    {
+      "tweet_id": "2039929515934183618",
+      "text": "🎦 動画更新❣ 🎦  ぼんケン ：   ダービー卿チャレンジトロフィー２０２６【中山競馬予想】波乱しか考えられず、一発狙います！ https://t.co/XEAk0bApsF #競馬youtube",
+      "author_username": "pog_info_update",
+      "author_label": "pog_info_update",
+      "created_at": "2026-04-03T04:54:31.000Z",
+      "url": "https://x.com/pog_info_update/status/2039929515934183618",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 110
+      }
+    },
+    {
+      "tweet_id": "2039928128638955603",
+      "text": "ダービー卿チャレンジトロフィー2026予想と最終追い切り・調教評価｜未勝利マニア＠キリツクバ @DQc5K1klCoADKkO https://t.co/HN8LfDSOOp \n\n更新しました！",
+      "author_username": "DQc5K1klCoADKkO",
+      "author_label": "DQc5K1klCoADKkO",
+      "created_at": "2026-04-03T04:49:00.000Z",
+      "url": "https://x.com/DQc5K1klCoADKkO/status/2039928128638955603",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 170
+      }
+    },
+    {
+      "tweet_id": "2039926330415063362",
+      "text": "netkeibaさんのウマい馬券に4/4分の予想をアップしました。\n特に期待値の高い勝負レースは以下となります。\n是非ご参考にしてください。\n\n阪神11R チャーチルダウンズカップ\n中山11R ダービー卿チャレンジトロフィー\n\nhttps://t.co/iLp4i9onNe",
+      "author_username": "KeibaZettai",
+      "author_label": "KeibaZettai",
+      "created_at": "2026-04-03T04:41:51.000Z",
+      "url": "https://x.com/KeibaZettai/status/2039926330415063362",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 98
+      }
+    },
+    {
+      "tweet_id": "2039921993634775050",
+      "text": "競馬 - 2026年ダービー卿チャレンジトロフィー 出馬表 - スポーツナビ https://t.co/8yg4BL1rpf",
+      "author_username": "riwCsNJOCyoCtAq",
+      "author_label": "riwCsNJOCyoCtAq",
+      "created_at": "2026-04-03T04:24:37.000Z",
+      "url": "https://x.com/riwCsNJOCyoCtAq/status/2039921993634775050",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 64
+      }
+    },
+    {
+      "tweet_id": "2039915824899908090",
+      "text": "ダービー卿チャレンジトロフィー\n◎メダルスピード\n◯ブエナオンダ\n▲ミニトランザット\n△ファーヴェント\n△ケイアイセナ \n注エンペラーズソード\n\n#ダービー卿チャレンジトロフィー\n#ダービー卿CT\n#中山11R\n#土曜中山11R\n#土曜競馬",
+      "author_username": "Ttt71632373",
+      "author_label": "Ttt71632373",
+      "created_at": "2026-04-03T04:00:07.000Z",
+      "url": "https://x.com/Ttt71632373/status/2039915824899908090",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 6,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 174
+      }
+    },
+    {
+      "tweet_id": "2039911784706949409",
+      "text": "🎦 動画更新❣ 🎦  トッパー ：   【ダービー卿チャレンジトロフィー2026】 枠順確定後シミュレーション春の中山  ファーヴェントは4枠8番、ミニトランザットは1枠2番に確定 https://t.co/MiF2oXzlib #競馬youtube",
+      "author_username": "pog_info_update",
+      "author_label": "pog_info_update",
+      "created_at": "2026-04-03T03:44:03.000Z",
+      "url": "https://x.com/pog_info_update/status/2039911784706949409",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 282
+      }
+    },
+    {
+      "tweet_id": "2039905545164112240",
+      "text": "第58回ダービー卿チャレンジトロフィーGⅢ2026 馬連馬単予想\nhttps://t.co/hAXRTtLd2X\n\n第35回チャーチルダウンズカップGⅢ2026 馬連馬単予想\nhttps://t.co/MSL0v4m855",
+      "author_username": "kemumakia",
+      "author_label": "kemumakia",
+      "created_at": "2026-04-03T03:19:16.000Z",
+      "url": "https://x.com/kemumakia/status/2039905545164112240",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 104
+      }
+    },
+    {
+      "tweet_id": "2039905477891338674",
+      "text": "大阪杯・ダービー卿チャレンジトロフィー・チャーチルダウンズカップ(旧アーリントンカップ)の3重賞とも枠まで出たんで、早速昨日まとめたデータに当てはめていく💪💪💪\n\n3重賞のデータをまとめたブログ更新は【本日19時頃】を予定しています🐎📝 #競馬",
+      "author_username": "umaumauuma",
+      "author_label": "umaumauuma",
+      "created_at": "2026-04-03T03:19:00.000Z",
+      "url": "https://x.com/umaumauuma/status/2039905477891338674",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 195
+      }
+    },
+    {
+      "tweet_id": "2039904276001198305",
+      "text": "４月４日（土）の確定版アップ完了📝\n\n①「ハイブリッド新聞」\n②「推定３ハロン分析シート」\n③「ハイブリッド新聞」（ライト版）\n④「ＨＢリスト」（ライト版）\n\n●トップページ\nhttps://t.co/e8OIvWS9wj\n\n#競馬 #ハイブリッド新聞 #チャーチルダウンカップ #ダービー卿チャレンジトロフィー https://t.co/CjyFOYndQK",
+      "author_username": "hybridshinbun",
+      "author_label": "hybridshinbun",
+      "created_at": "2026-04-03T03:14:13.000Z",
+      "url": "https://x.com/hybridshinbun/status/2039904276001198305",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 3,
+        "quote_count": 0,
+        "bookmark_count": 1,
+        "impression_count": 480
+      }
+    },
+    {
+      "tweet_id": "2039903721682034923",
+      "text": "大阪杯「無料予想」公開しました✨\n枠順確定後の公開です\n本命の枠は極端な枠も力は発揮できると見ています\n晴れ雨兼用予想です\n先週はサトノレーヴで的中🎯\n土曜重賞も公開中です\n今週も楽しみましょう😄\n#大阪杯\n#ダービー卿チャレンジトロフィー\n#チャーチルダウンズカップ\nhttps://t.co/TBq1HVtdVQ",
+      "author_username": "hashiqre1",
+      "author_label": "hashiqre1",
+      "created_at": "2026-04-03T03:12:01.000Z",
+      "url": "https://x.com/hashiqre1/status/2039903721682034923",
+      "public_metrics": {
+        "retweet_count": 2,
+        "reply_count": 0,
+        "like_count": 70,
+        "quote_count": 3,
+        "bookmark_count": 7,
+        "impression_count": 2378
+      }
+    },
+    {
+      "tweet_id": "2039902925649273071",
+      "text": "うーん\nこれは困ったなー\nノリさんの内枠怖いです\n大阪杯本命迷い中\n\nダービー卿チャレンジトロフィーは本命決まりました\n\nチャーチルダウンズカップはエイシンティザーかサトノセプターあたりからと思ってたけど動画出すかは迷い中です https://t.co/UVWxoI1juV",
+      "author_username": "anarchistyosou",
+      "author_label": "anarchistyosou",
+      "created_at": "2026-04-03T03:08:51.000Z",
+      "url": "https://x.com/anarchistyosou/status/2039902925649273071",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 30,
+        "quote_count": 0,
+        "bookmark_count": 9,
+        "impression_count": 6250
+      }
+    },
+    {
+      "tweet_id": "2039902160356614264",
+      "text": "#ダービー卿チャレンジトロフィー \n#ダービー卿CT の予想動画です\n\nhttps://t.co/QhSOMYsdki",
+      "author_username": "miyare402",
+      "author_label": "miyare402",
+      "created_at": "2026-04-03T03:05:49.000Z",
+      "url": "https://x.com/miyare402/status/2039902160356614264",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 207
+      }
+    },
+    {
+      "tweet_id": "2039901039512658364",
+      "text": "【4月4日❨土❩中山11R 第58回ダービー卿チャレンジトロフィー🐬❨GIII❩】\n\n◎ ③エンペラーズソード\n※前走3勝C、11番人気で勝利。\n\n《相手》 ①⑧⑭⑮\n\n⚠⑤ブエナオンダ\n\nエンペラーズソードも9番人気か🤔\n#りんくの競馬予想\n#グルミク競馬部 https://t.co/7HpmhbGnLt",
+      "author_username": "rinku_keiba",
+      "author_label": "rinku_keiba",
+      "created_at": "2026-04-03T03:01:22.000Z",
+      "url": "https://x.com/rinku_keiba/status/2039901039512658364",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 126
+      }
+    },
+    {
+      "tweet_id": "2039900706358841611",
+      "text": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬〟に最高評価「Ｓ」\nhttps://t.co/6MrtKjqYNm\n \n#ダービー卿チャレンジトロフィー #ダービー卿チャレンジT #ダービー卿CT  #うましる",
+      "author_username": "umasiru",
+      "author_label": "umasiru",
+      "created_at": "2026-04-03T03:00:02.000Z",
+      "url": "https://x.com/umasiru/status/2039900706358841611",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 162
+      }
+    },
+    {
+      "tweet_id": "2039900444697170309",
+      "text": "いまだかつて馬券収入のみで給料は使ったことがなく、「競馬界のゴルゴ13」の異名を持つ伝説の競馬記者の土曜重賞予想\n\n弥永明郎\nダービー卿チャレンジトロフィー2026予想\n◎　１６　サイルーン\n〇　１５　シリウスコルト\n▲　３　エンペラーズソード\n☆　５　ブエナオンダ\n△　２　ミニトランザット\n×",
+      "author_username": "banushinaru",
+      "author_label": "banushinaru",
+      "created_at": "2026-04-03T02:59:00.000Z",
+      "url": "https://x.com/banushinaru/status/2039900444697170309",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 354
+      }
+    },
+    {
+      "tweet_id": "2039893146641797126",
+      "text": "#ダービー卿チャレンジトロフィー (GIII) 中山 芝1600',m 🅷 予想\n\n#初見予想 (週なかの初見予想)\n🥇⑵#ミニトランザット\n🥈⑻#ファーヴェント\n🥉⒀#イミグラントソング\n\n#🅵🅼🅻馬券術\n#🅵人気1.0~6.9🅼中穴7.0~17.9🅻大穴18.0~ ¹²³🅵🅼🅻内順位 https://t.co/77Zi6DorxH",
+      "author_username": "TJ_Dragon9",
+      "author_label": "TJ_Dragon9",
+      "created_at": "2026-04-03T02:30:00.000Z",
+      "url": "https://x.com/TJ_Dragon9/status/2039893146641797126",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 129
+      }
+    },
+    {
+      "tweet_id": "2039889988570214518",
+      "text": "ダービー卿チャレンジトロフィー単勝複勝予想\n13 イミグラントソング\nチャーチルダウンズカップ単勝複勝予想\n6 サンダーストラック\n#競馬予想 #土曜競馬",
+      "author_username": "Ghecci",
+      "author_label": "Ghecci",
+      "created_at": "2026-04-03T02:17:27.000Z",
+      "url": "https://x.com/Ghecci/status/2039889988570214518",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 140
+      }
+    },
+    {
+      "tweet_id": "2039889753622114750",
+      "text": "【無料公開】ダービー卿CT（G3）ファクターシート\n\n明日の中山11R、全16頭のデータをまとめました。\n\n注目：逃げ馬は過去10年で勝ち星ゼロ。差し馬が圧倒的有利。\n\nnoteで無料公開中\nhttps://t.co/TYTmqSGR9D\n\n#ダービー卿チャレンジトロフィー #競馬",
+      "author_username": "keiba_sozai",
+      "author_label": "keiba_sozai",
+      "created_at": "2026-04-03T02:16:31.000Z",
+      "url": "https://x.com/keiba_sozai/status/2039889753622114750",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 17
+      }
+    },
+    {
+      "tweet_id": "2039887036321345834",
+      "text": "note更新しました♡\nhttps://t.co/pEeAN7YSt2\n\n「２０２６大阪杯予想」\n「２０２６ダービー卿チャレンジトロフィー予想」\n「２０２６チャーチルダウンズカップ予想」",
+      "author_username": "money__lion",
+      "author_label": "money__lion",
+      "created_at": "2026-04-03T02:05:43.000Z",
+      "url": "https://x.com/money__lion/status/2039887036321345834",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 157
+      }
+    },
+    {
+      "tweet_id": "2039884384619352109",
+      "text": "今週の予想するレース発表\n4/4 #チャーチルダウンズカップ GⅢ・阪神\n4/5 #大阪杯 GⅠ・阪神\n\n連日阪神に絞ってやりたいと思います！\n4/4に #ダービー卿チャレンジトロフィー もありますがこちらは辞退いたします💦\nすいません。\n\n今回から予想の仕方を少し変えたので、固定ポストからご確認ください！",
+      "author_username": "KBlife19",
+      "author_label": "KBlife19",
+      "created_at": "2026-04-03T01:55:11.000Z",
+      "url": "https://x.com/KBlife19/status/2039884384619352109",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 179
+      }
+    },
+    {
+      "tweet_id": "2039877809154514964",
+      "text": "【新フクフク競馬ハズレてたまるか！】\n今週は春の中距離G1大阪杯が行われます。そして天気も気になる今週の予想は、土曜日中山G3・ダービー卿チャレンジトロフィーと阪神G3・チャーチルタウンズカップ、日曜日阪神G1・大阪杯と『上昇中！穴馬軸馬発掘倶楽部』も日曜日分でお送りします。\n#競馬予想",
+      "author_username": "okonomiyaki047",
+      "author_label": "okonomiyaki047",
+      "created_at": "2026-04-03T01:29:03.000Z",
+      "url": "https://x.com/okonomiyaki047/status/2039877809154514964",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 216
+      }
+    },
+    {
+      "tweet_id": "2039876612125257999",
+      "text": "今週はダービー卿チャレンジトロフィーが面白そうなんですよね。混戦ではあるけど🙄また早めに重賞予想出したいと思います。\n\n#ダービー卿チャレンジトロフィー　#競馬 https://t.co/SI8fGDQ6rO",
+      "author_username": "kachiuma777",
+      "author_label": "kachiuma777",
+      "created_at": "2026-04-03T01:24:18.000Z",
+      "url": "https://x.com/kachiuma777/status/2039876612125257999",
+      "public_metrics": {
+        "retweet_count": 1,
+        "reply_count": 1,
+        "like_count": 15,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 491
+      }
+    },
+    {
+      "tweet_id": "2039875911030559112",
+      "text": "#ダービー卿CT 中山11R 芝1600m\nダービー卿CTは4/4（土）中山競馬場で15:45発走となります。\n&lt;枠順確定&gt;\nダービー卿チャレンジトロフィーの出馬表です👇\nhttps://t.co/69ewHPe2KX",
+      "author_username": "umapia_jp",
+      "author_label": "umapia_jp",
+      "created_at": "2026-04-03T01:21:30.000Z",
+      "url": "https://x.com/umapia_jp/status/2039875911030559112",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 121
+      }
+    },
+    {
+      "tweet_id": "2039872574516306249",
+      "text": "4/4（土）\n阪神\n【チャーチルダウンズカップ・GIII】\n🏇3連複🏇\n②⑧ー③④⑥⑦⑨⑩⑭\n\n #競馬\n #阪神\n #ダービー卿チャレンジトロフィー\n #GIII\n #メイショウソラリス\n #アンドゥーリル",
+      "author_username": "keiba_z_h_t_",
+      "author_label": "keiba_z_h_t_",
+      "created_at": "2026-04-03T01:08:15.000Z",
+      "url": "https://x.com/keiba_z_h_t_/status/2039872574516306249",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 1,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 32
+      }
+    },
+    {
+      "tweet_id": "2039872546745782437",
+      "text": "4/4（土）\n中山\n【ダービー卿チャレンジトロフィー・GIII】\n🏇3連複🏇\n④⑧ー③⑤⑥⑦⑨⑪\n\n #競馬\n #中山\n #ダービー卿チャレンジトロフィー\n #GIII\n #メタルスピード\n #ファーヴェント\n #エエヤン",
+      "author_username": "keiba_z_h_t_",
+      "author_label": "keiba_z_h_t_",
+      "created_at": "2026-04-03T01:08:08.000Z",
+      "url": "https://x.com/keiba_z_h_t_/status/2039872546745782437",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 48
+      }
+    }
+  ],
+  "training_items": [],
+  "training_time_rows": [
+    {
+      "馬名": "イミグラントソング",
+      "時期": "直近",
+      "場所": "美浦W(重)",
+      "6F": "—",
+      "5F": "66.7",
+      "4F": "51.6",
+      "3F": "37.8",
+      "2F": "—",
+      "1F": "12.0",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "イミグラントソング",
+      "時期": "1週前",
+      "場所": "美浦W(良)",
+      "6F": "—",
+      "5F": "65.8",
+      "4F": "50.7",
+      "3F": "37.1",
+      "2F": "—",
+      "1F": "11.9",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "イミグラントソング",
+      "時期": "前走最終",
+      "場所": "美浦W(良)",
+      "6F": "—",
+      "5F": "68.5",
+      "4F": "53.4",
+      "3F": "38.6",
+      "2F": "—",
+      "1F": "11.8",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "エエヤン",
+      "時期": "直近",
+      "場所": "美浦W(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "49.7",
+      "3F": "34.6",
+      "2F": "—",
+      "1F": "11.5",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "エエヤン",
+      "時期": "前走最終",
+      "場所": "美浦W(良)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "49.5",
+      "3F": "35.3",
+      "2F": "—",
+      "1F": "11.8",
+      "脚色": "一杯",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "エンペラーズソード",
+      "時期": "直近",
+      "場所": "美浦W(重)",
+      "6F": "83.1",
+      "5F": "66.4",
+      "4F": "51.4",
+      "3F": "37.3",
+      "2F": "—",
+      "1F": "12.1",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "エンペラーズソード",
+      "時期": "前走最終",
+      "場所": "美浦W(良)",
+      "6F": "84.8",
+      "5F": "68.1",
+      "4F": "53.2",
+      "3F": "38.8",
+      "2F": "—",
+      "1F": "11.8",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ケイアイセナ",
+      "時期": "直近",
+      "場所": "栗東坂路(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "53.3",
+      "3F": "39.1",
+      "2F": "—",
+      "1F": "12.3",
+      "脚色": "末強め",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ケイアイセナ",
+      "時期": "前走最終",
+      "場所": "栗東坂路(良)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "50.8",
+      "3F": "37.2",
+      "2F": "—",
+      "1F": "12.0",
+      "脚色": "強め",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "サイルーン",
+      "時期": "直近",
+      "場所": "美浦W(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "53.5",
+      "3F": "38.0",
+      "2F": "—",
+      "1F": "12.2",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "サイルーン",
+      "時期": "1週前",
+      "場所": "美浦W(重)",
+      "6F": "—",
+      "5F": "65.4",
+      "4F": "50.2",
+      "3F": "36.0",
+      "2F": "—",
+      "1F": "11.2",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "サイルーン",
+      "時期": "前走最終",
+      "場所": "美浦W(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "53.9",
+      "3F": "38.7",
+      "2F": "—",
+      "1F": "12.2",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "シリウスコルト",
+      "時期": "直近",
+      "場所": "美浦W(重)",
+      "6F": "83.5",
+      "5F": "67.0",
+      "4F": "52.7",
+      "3F": "38.3",
+      "2F": "—",
+      "1F": "11.6",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "シリウスコルト",
+      "時期": "1週前",
+      "場所": "美浦W(良)",
+      "6F": "—",
+      "5F": "69.3",
+      "4F": "53.7",
+      "3F": "38.6",
+      "2F": "—",
+      "1F": "11.5",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "シリウスコルト",
+      "時期": "前走最終",
+      "場所": "美浦W(良)",
+      "6F": "84.1",
+      "5F": "67.6",
+      "4F": "52.6",
+      "3F": "38.0",
+      "2F": "—",
+      "1F": "11.7",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ジュンブロッサム",
+      "時期": "直近",
+      "場所": "栗東CW(重)",
+      "6F": "—",
+      "5F": "67.0",
+      "4F": "52.4",
+      "3F": "37.4",
+      "2F": "—",
+      "1F": "11.5",
+      "脚色": "G前気合付",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ジュンブロッサム",
+      "時期": "前走最終",
+      "場所": "栗東坂路(良)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "52.7",
+      "3F": "38.0",
+      "2F": "—",
+      "1F": "12.2",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "スズハローム",
+      "時期": "直近",
+      "場所": "栗東坂路(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "52.5",
+      "3F": "38.3",
+      "2F": "—",
+      "1F": "12.2",
+      "脚色": "強め",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "スズハローム",
+      "時期": "前走最終",
+      "場所": "栗東坂路(不良)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "54.9",
+      "3F": "38.8",
+      "2F": "—",
+      "1F": "12.0",
+      "脚色": "末一杯",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ゾンニッヒ",
+      "時期": "直近",
+      "場所": "栗東CW(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "53.5",
+      "3F": "37.8",
+      "2F": "—",
+      "1F": "11.6",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ゾンニッヒ",
+      "時期": "前走最終",
+      "場所": "栗東CW(良)",
+      "6F": "⑦98.1",
+      "5F": "66.6",
+      "4F": "51.5",
+      "3F": "36.4",
+      "2F": "—",
+      "1F": "11.1",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "タイムトゥヘヴン",
+      "時期": "直近",
+      "場所": "美浦坂路(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "51.9",
+      "3F": "39.2",
+      "2F": "—",
+      "1F": "13.3",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "タイムトゥヘヴン",
+      "時期": "1週前",
+      "場所": "美浦坂路(良)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "51.3",
+      "3F": "37.7",
+      "2F": "—",
+      "1F": "12.2",
+      "脚色": "G前仕掛け",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "タイムトゥヘヴン",
+      "時期": "前走最終",
+      "場所": "美浦W(良)",
+      "6F": "84.7",
+      "5F": "69.2",
+      "4F": "54.0",
+      "3F": "38.4",
+      "2F": "—",
+      "1F": "11.5",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ダディーズビビッド",
+      "時期": "直近",
+      "場所": "栗東芝(稍重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "53.0",
+      "3F": "37.8",
+      "2F": "—",
+      "1F": "11.6",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ダディーズビビッド",
+      "時期": "前走最終",
+      "場所": "栗東CW(良)",
+      "6F": "83.4",
+      "5F": "66.8",
+      "4F": "52.6",
+      "3F": "38.1",
+      "2F": "—",
+      "1F": "11.8",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ファーヴェント",
+      "時期": "直近",
+      "場所": "栗東坂路(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "53.7",
+      "3F": "39.0",
+      "2F": "—",
+      "1F": "12.8",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ファーヴェント",
+      "時期": "前走最終",
+      "場所": "栗東坂路(良)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "54.1",
+      "3F": "40.3",
+      "2F": "—",
+      "1F": "12.6",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ブエナオンダ",
+      "時期": "直近",
+      "場所": "栗東坂路(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "54.9",
+      "3F": "39.6",
+      "2F": "—",
+      "1F": "12.5",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ブエナオンダ",
+      "時期": "前走最終",
+      "場所": "栗東坂路(良)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "53.3",
+      "3F": "38.3",
+      "2F": "—",
+      "1F": "12.3",
+      "脚色": "末強め",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "マテンロウオリオン",
+      "時期": "直近",
+      "場所": "栗東CW(重)",
+      "6F": "85.0",
+      "5F": "69.3",
+      "4F": "54.1",
+      "3F": "38.0",
+      "2F": "—",
+      "1F": "11.3",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "マテンロウオリオン",
+      "時期": "前走最終",
+      "場所": "栗東CW(良)",
+      "6F": "82.4",
+      "5F": "66.0",
+      "4F": "50.4",
+      "3F": "35.7",
+      "2F": "—",
+      "1F": "11.5",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ミニトランザット",
+      "時期": "直近",
+      "場所": "栗東坂路(重)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "55.6",
+      "3F": "40.4",
+      "2F": "—",
+      "1F": "12.9",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "ミニトランザット",
+      "時期": "前走最終",
+      "場所": "栗東坂路(良)",
+      "6F": "—",
+      "5F": "—",
+      "4F": "56.1",
+      "3F": "40.5",
+      "2F": "—",
+      "1F": "12.5",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "メタルスピード",
+      "時期": "直近",
+      "場所": "美浦W(重)",
+      "6F": "—",
+      "5F": "66.4",
+      "4F": "51.7",
+      "3F": "37.4",
+      "2F": "—",
+      "1F": "11.6",
+      "脚色": "馬なり",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    },
+    {
+      "馬名": "メタルスピード",
+      "時期": "前走最終",
+      "場所": "美浦W(良)",
+      "6F": "82.7",
+      "5F": "66.6",
+      "4F": "51.8",
+      "3F": "37.2",
+      "2F": "—",
+      "1F": "11.4",
+      "脚色": "直強め",
+      "source_type": "umasiru",
+      "source_title": "【ダービー卿CT2026追い切り評価／全頭診断】上位人気の〝アノ馬 ...",
+      "source_url": "https://umasiru.com/archives/19321"
+    }
+  ],
+  "yt_detail_analysis": {}
+}

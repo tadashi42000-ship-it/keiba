@@ -356,3 +356,154 @@ To reduce update time and API calls, we added persistence and incremental merge 
 
 ### Files Updated (Additional)
 - `CHANGES.md`
+
+---
+
+## Markdownレポート出力機能追加 (2026-04-03)
+
+### Background
+6タブ分の情報（出馬表・レース特徴・総合予想・追切評価）をサイドバーのボタン1つでMarkdownファイルとしてダウンロードできる機能を追加した。
+
+### Changes (`app.py`)
+- `generate_markdown_report(df)` 関数を追加（`aggregate_training_data()` 直後）
+  - 引数 `df`: `load_race_data()` 済みの出馬表DataFrame（再読み込みなし）
+  - 出馬表: 枠/馬番/馬名/性齢/斤量/騎手/調教師をMarkdownテーブルで出力
+  - レース特徴: `race_characteristics` の全キーを見出し+本文形式で出力
+  - 総合予想: `horse_df` を馬名見出し+プラス/マイナス本文形式で出力（テーブル不使用、改行・記号の崩れ回避）
+  - 追切評価: `training_items` をMarkdownテーブルで出力（`|` → `｜`、改行除去でテーブル崩れ回避）
+- `display_main_content(df)` 末尾に `with st.sidebar:` ブロックを追加
+  - `display_sidebar()` は `load_race_data()` より前に呼ばれるため、df 取得後の `display_main_content` 内でサイドバーにボタンを描画
+  - `st.download_button("📄 Markdownレポート出力", ...)` をサイドバー末尾に配置
+  - ファイル名: `{レース名}_{年}_予想レポート.md`（空白→`_`、`/`→`-`）
+
+---
+
+## 追切結果・評価タブ追加 + X監視アカウント更新 (2026-04-03)
+
+### Background
+Web/X/YouTubeの馬別分析結果に追切・調教情報が混在しているため、専用タブに集約して一覧確認できるようにした。
+あわせてX監視アカウントを実運用向けに更新し、大阪杯（2026-04-05）の検索キャッシュを追加。
+
+### Implemented Changes
+
+#### `app.py`
+- `_TRAINING_KEYWORDS` 定数を追加（追切/調教/坂路/ウッド等の正規表現）
+- `aggregate_training_data()` 関数を追加:
+  - `web_raw`, `x_raw`, `youtube_raw`, `yt_detail_analysis` から追切キーワード含む行を抽出
+  - `_to_text()` で文字列化、完全一致重複排除（6キーのtuple）、馬名昇順ソート
+- `RACE_SESSION_KEYS` に `training_items` を追加（レース切替時クリア対象）
+- `save_race_cache()` に `training_items` / `yt_detail_analysis` の保存を追加
+- `load_race_cache()` に `yt_detail_analysis` 復元と `aggregate_training_data()` 再生成を追加
+- 更新トリガーを5箇所に追加（Web検索後・X検索後・Xリセット後・YouTube詳細分析後・キャッシュ読込後）
+- `st.tabs` を6タブに拡張し「🏋️ 追切結果・評価」タブを追加
+- 追切タブ表示: DataFrame一覧（馬名/種別/評価内容/情報源）+ 出典リンクexpander
+
+#### `x_accounts.json`
+- 監視アカウントをプレースホルダーから実運用アカウントに更新:
+  - ちかさん@競馬展開予想 (`chika_tenkai`)
+  - ユキムラ【6連続G1本命馬券内】 (`yukimura_g1`)
+  - けんしろう (`kenshiro_ytb`)
+  - アキラ｜トラックバイアス (`akira_trackbias`)
+  - 超越者リットマン (`rittman_keiba`)
+  - かっち@競馬 (`kacchi_keiba`)
+
+#### `data/search_cache/`
+- `2026-04-05_阪神_大阪杯.json` を追加（大阪杯の検索結果キャッシュ）
+
+### Files Updated (Additional)
+- `app.py`
+- `x_accounts.json`
+- `data/search_cache/2026-04-05_阪神_大阪杯.json`
+- `CHANGES.md`
+
+---
+
+## 総合動作検証 + 仕様整理（2026-04-03）
+
+### Verification
+今回の差分（Xフィルタ強化、追切タブ、前回レース自動復元を含む）について、以下を実施。
+
+| 検証項目 | 結果 | 補足 |
+|---|---|---|
+| `python -m py_compile app.py race_catalog.py get_keiba_info.py` | ✅ 成功 | 構文エラーなし |
+| Streamlit起動スモーク（`streamlit run app.py --server.headless true --server.port 8510`） | ✅ 成功 | `http://127.0.0.1:8510` が HTTP 200 を返すことを確認 |
+| 重賞一覧取得（`get_upcoming_races`） | ✅ 成功 | 直近重賞が取得できることを確認 |
+| Xレース名フィルタ（ユニット） | ✅ 成功 | 対象レース投稿のみ残り、他レース投稿が除外されることを確認 |
+| うましる追切テーブル抽出（ユニット） | ✅ 成功 | `時期/場所/6F/5F/4F/3F/1F/脚色` の構造化行を抽出できることを確認 |
+| 前回レースキー保存/読込（ユニット） | ✅ 成功 | `data/last_selected_race.json` 経由で復元可能であることを確認 |
+
+### 仕様整理（今回の主要挙動）
+- X投稿は取得後・表示前・キャッシュ読込時の3段階で「対象レース名に言及する投稿のみ」を残す。
+- 追切タブは「うましる優先 + 不足馬のWeb補完」でタイム行を構築する。
+- 追切コメントのプラス/マイナスは従来どおり `web / YouTube / X (+ YouTube詳細)` 由来で追切関連文のみを表示。
+- アプリ起動時、`data/last_selected_race.json` に保存された前回レースを優先して自動選択・自動ロードする。
+
+### APIキー使用量目安（1操作あたり）
+実装コードベースの呼び出し回数目安。実際の課金は契約プラン・リトライ・キャッシュヒット率で増減する。
+
+| 操作 | 使用キー | 1回あたりの呼び出し目安 | 備考 |
+|---|---|---|---|
+| アプリ初回起動時のレース特徴自動取得 | `GEMINI_API_KEY` | 0〜1回 | セッション未初期化かつキャッシュ未命中時のみ |
+| `🔍 Web 一括検索` | `TAVILY_API_KEY` | 検索クエリ数分（概ね 10〜20回） | `9固定 + 馬名バッチ` のクエリを順次検索 |
+| `🔍 Web 一括検索`（Tavily失敗時フォールバック） | `GEMINI_API_KEY` | 検索クエリ数分（最大同程度） | Gemini Web Search フォールバック |
+| `🔍 Web 一括検索`（記事解析） | `GEMINI_API_KEY` | 1〜`total_article_limit` 回（既定20） | 解析対象記事ごとに1回 |
+| `𝕏 X投稿を検索`（投稿取得） | `X_BEARER_TOKEN` | 1〜数回（通常）〜十数回（多ページ） | クエリ分割・ページング・再試行で変動 |
+| `𝕏 X投稿を検索`（投稿解析） | `GEMINI_API_KEY` | 1回 | 取得投稿をバッチ解析 |
+| `🏋️ 追切専用情報を追加取得`（うましる検索） | `TAVILY_API_KEY` | 0〜1回 | 失敗時はGemini検索へフォールバック |
+| `🏋️ 追切専用情報を追加取得`（不足馬補完検索） | `TAVILY_API_KEY` | 1〜`1 + ceil(不足馬/4)` 回 | 不足馬のみクエリ生成 |
+| `🏋️ 追切専用情報を追加取得`（補完記事解析） | `GEMINI_API_KEY` | 0〜`training_article_limit` 回（既定15） | 記事ごとの馬別抽出 |
+| `🔍 YouTube検索` | `YOUTUBE_API_KEY` | 1回 | `search().list()` 1回 |
+| YouTube動画ごとの `読み込み+概要取得` | `GEMINI_API_KEY` | 1回/クリック | 動画1本ごとに1回 |
+| `📊 ドキュメントからレース特徴を抽出` | `GEMINI_API_KEY` | 1回 | ドキュメント1件あたり |
+| `🐴 ドキュメントから馬別情報を抽出` | `GEMINI_API_KEY` | 1回 | ドキュメント1件あたり |
+| `🔄 レース特徴をWeb再取得`（次回起動時） | `GEMINI_API_KEY` | 1回 | `race_characteristics` を消した後の再取得 |
+| `🔄 最新オッズを取得` / 出馬表CSV取得 | APIキー不要 | 0回 | `netkeiba` へのHTTP/Playwrightアクセス |
+
+### Cost Notes
+- X APIの課金単位は契約プラン依存（ツイート単価課金プランでは取得件数に比例）。
+- Gemini / YouTube / Tavily もプラン・モデル・入力/出力トークン量で変動。
+- このアプリは `st.cache_data` とレースキャッシュで再実行を抑制する設計。
+
+---
+
+## 追加修正（2026-04-07）
+
+### Background
+直近の運用で、YouTube要約品質、出馬表の枠順/オッズ反映、Markdownレポート出力内容の不足が確認されたため、
+既存機能を壊さずに品質改善と永続化挙動の補強を行った。
+
+### Implemented Changes
+
+#### `app.py`
+- YouTube要約専用モデルを切り出し:
+  - `GEMINI_MODEL_YOUTUBE`（環境変数）を追加し、既定値を `gemini-3.1-flash` に設定。
+  - `_youtube_model_candidates()` / `_generate_content_with_youtube_model()` を追加し、YouTube処理のみ専用モデル経由に変更。
+- レースキャッシュのオッズ情報を保存/復元対象に追加:
+  - `latest_odds`, `latest_odds_error` を `save_race_cache()` / `load_race_cache()` に連携。
+- レース読込時の自動反映を強化:
+  - 枠順・オッズの自動取得後、取得済みオッズを表示データとCSVへ反映し、次回起動用キャッシュへ保存。
+- Markdownレポート出力を拡張:
+  - 出馬表にオッズ列を含めて出力。
+  - 追切タイム（馬別・時期別）と追切コメント（プラス/マイナス）を出力。
+  - `nan` 相当値は `-` に正規化して可読性を改善。
+
+#### `get_keiba_info.py`
+- netkeibaのクラス名揺れ対策を追加:
+  - `class='Waku1'`, `class='Umaban1'` など接尾辞付きクラスを拾える `_find_td_by_class_prefix()` を追加。
+  - これにより枠順/馬番が `不明` になりやすいケースを改善。
+
+#### `x_accounts.json`
+- 監視アカウント設定を運用中の構成に更新（6アカウント、`default_max_tweets=30`）。
+
+### Verification
+- `rg` で以下の実装点を確認:
+  - YouTube専用モデル切替 (`GEMINI_MODEL_YOUTUBE`, `_generate_content_with_youtube_model`)
+  - オッズ永続化キー (`latest_odds`, `latest_odds_error`) の保存/復元
+  - 枠順抽出補強 (`_find_td_by_class_prefix`)
+  - レポート出力 (`generate_markdown_report`) の追切・オッズ関連反映
+
+### Files Updated (Additional)
+- `app.py`
+- `get_keiba_info.py`
+- `x_accounts.json`
+- `CHANGES.md`

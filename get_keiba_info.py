@@ -80,6 +80,14 @@ def parse_shutuba_table(soup):
         print("[NG] 出馬表が見つかりませんでした")
         return horses_data
 
+    def _find_td_by_class_prefix(row, prefix: str):
+        """class='Waku1' のような接尾辞付きクラスにも対応する。"""
+        for td in row.find_all('td'):
+            classes = td.get('class') or []
+            if any(str(c).startswith(prefix) for c in classes):
+                return td
+        return None
+
     # テーブルの各行（馬）を処理
     rows = shutuba_table.find_all('tr')
 
@@ -97,11 +105,11 @@ def parse_shutuba_table(soup):
             continue
 
         # 枠番を取得
-        waku_tag = row.find('td', class_='Waku')
+        waku_tag = _find_td_by_class_prefix(row, 'Waku')
         waku = waku_tag.text.strip() if waku_tag else "不明"
 
         # 馬番を取得
-        umaban_tag = row.find('td', class_='Umaban')
+        umaban_tag = _find_td_by_class_prefix(row, 'Umaban')
         umaban = umaban_tag.text.strip() if umaban_tag else "不明"
 
         # 性齢を取得

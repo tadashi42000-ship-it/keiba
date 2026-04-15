@@ -1,7 +1,11 @@
 {
   "accounts": [
-    {"username": "uma_channel", "label": "馬チャンネル"},
-    {"username": "keiba_lab", "label": "競馬ラボ"}
+    {"username": "chika_umapro", "label": "ちかさん@競馬展開予想"},
+    {"username": "keiba_yukimura", "label": "ユキムラ【6連続G1本命馬券内】"},
+    {"username": "kenshiro_ytb", "label": "けんしろう"},
+    {"username": "akira_umapro", "label": "アキラ｜トラックバイアス"},
+    {"username": "89damashii07", "label": "超越者リットマン"},
+    {"username": "katti_keiba", "label": "かっち@競馬"}
   ],
   "default_max_tweets": 30
 }
