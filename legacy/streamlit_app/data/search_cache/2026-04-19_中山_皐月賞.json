@@ -1,12 +1,12 @@
 {
   "meta": {
     "race_key": "2026-04-19_中山_皐月賞",
-    "last_updated": "2026-04-16T23:36:53",
+    "last_updated": "2026-04-16T23:43:28",
     "web_article_count": 32,
     "youtube_video_count": 0,
     "x_tweet_count": 28,
     "x_newest_id": "2044022869923926378",
-    "training_item_count": 4,
+    "training_item_count": 7,
     "training_time_row_count": 0,
     "yt_video_conclusion_count": 2,
     "bet_plan_ticket_count": 6
@@ -58,6 +58,142 @@
       "マイナス情報": "距離を延ばした前走でややパフォーマンスを下げました。",
       "source_url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868191",
       "source_title": "【皐月賞2026】ろてむプロの『前走から紐解く！隠されたオッズ妙味』直線あわやの追い込みは地力強化の証　ロブチェン｜競馬ニュース｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "全体的な予想",
+      "プラス情報": "記事タイトルから、従来の皐月賞の定石にとらわれず、「〇〇で通用する馬」と称される特定の適性を持った馬が、今回のレースで真に買うべき馬として推奨される可能性が示唆されています。",
+      "マイナス情報": "一般的な「皐月賞向き」とされるタイプ（詳細不明）の馬は、本記事の観点では危険視されており、安易な評価は避けるべきであると警告されています。",
+      "source_url": "https://tv.netkeiba.com/watch/?id=12688&rf=kmatome",
+      "source_title": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で通用する馬” 人気馬を診断/安井涼太 | 競馬動画  - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "朝日杯FSを制したG1ウィナーで、昨年のJRA賞最優秀2歳牡馬に輝きました。その実績から魅力あふれる存在として注目されています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "昨年のホープフルSを制したG1ウィナーです。今年の緒戦を僅差3着で収めており、引き続き魅力的な存在です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "京成杯を制覇しており、重賞実績を持っています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "重賞を2勝している実力馬です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "弥生賞を制しており、主要トライアルでの勝利実績があります。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "プラス情報": "東スポ杯2歳Sの優勝馬です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "若葉Sを快勝しており、勢いがあります。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "スプリングSで2着に入っており、好走実績があります。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "プラス情報": "毎日杯の勝ち馬です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "弥生賞で2着に入っており、高いレベルでの好走実績があります。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "弥生賞で3着に入っています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "きさらぎ賞の優勝馬です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "ホープフルSで2着の実績があり、G1での好走経験があります。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/graderace/0002/05/race_data_analyze.php",
+      "source_title": "皐月賞2026特集｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "前走弥生賞を1着で勝利し、同舞台（中山芝2000m）で上がり最速を記録した点は評価できる。2走前の阪神芝内2000mでも小回り向きの一瞬の切れ味を感じさせる末脚を披露しており、16頭立ての多頭数経験もあるため、内回り適性が活かせる可能性がある。",
+      "マイナス情報": "前走の弥生賞は最有力トライアルとされるものの、皐月賞との相性はさほど良くないとされている。また、皐月賞特有の速い流れへの対応力が課題として挙げられる。",
+      "source_url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868130",
+      "source_title": "【皐月賞2026】距離短縮・延長から見る有力馬　戦国皐月賞！ バステールが天下統一の一歩を踏み出す｜競馬ニュース｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "前走京成杯を1着で勝利し、上がり最速33.8秒を記録するなど、他馬と一線を画す走りを見せた。4コーナーまで最内を立ち回り、直線で進路を求めながら叩き出した数字は価値が高い。京成杯の2着馬が若葉Sを制しており、京成杯のレースレベルも決して低くない。2走前の東京未勝利戦では好位から抜け出し上がり32.9秒を記録しており、末脚一辺倒ではない強みがある。京成杯の前後半1000m59.9秒-59.4秒のイーブンペースは、仮想皐月賞として弥生賞より評価できる可能性もある。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868130",
+      "source_title": "【皐月賞2026】距離短縮・延長から見る有力馬　戦国皐月賞！ バステールが天下統一の一歩を踏み出す｜競馬ニュース｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "前走若葉Sを1着で快勝し、皐月賞の出走権を確保した。京成杯でグリーンエナジーに敗れた後の巻き返しであり、勝負所で結果を出せる点は評価できる。",
+      "マイナス情報": "前々走の京成杯では、今回の有力馬の一角であるグリーンエナジーに敗れている。",
+      "source_url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868130",
+      "source_title": "【皐月賞2026】距離短縮・延長から見る有力馬　戦国皐月賞！ バステールが天下統一の一歩を踏み出す｜競馬ニュース｜競馬予想のウマニティ",
       "source_type": "web"
     }
   ],
@@ -751,6 +887,30 @@
       "種別": "プラス",
       "情報源": "【皐月賞2026】ろてむプロの『前走から紐解く！隠されたオッズ妙味』直線あわやの追い込みは地力強化の証　ロブチェン｜競馬ニュース｜競馬予想のウマニティ",
       "url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868191",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "33.8秒を記録するなど、他馬と一線を画す走りを見せた",
+      "種別": "プラス",
+      "情報源": "【皐月賞2026】距離短縮・延長から見る有力馬　戦国皐月賞！ バステールが天下統一の一歩を踏み出す｜競馬ニュース｜競馬予想のウマニティ",
+      "url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868130",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "32.9秒を記録しており、末脚一辺倒ではない強みがある",
+      "種別": "プラス",
+      "情報源": "【皐月賞2026】距離短縮・延長から見る有力馬　戦国皐月賞！ バステールが天下統一の一歩を踏み出す｜競馬ニュース｜競馬予想のウマニティ",
+      "url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868130",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "59.9秒-59.4秒のイーブンペースは、仮想皐月賞として弥生賞より評価できる可能性もある",
+      "種別": "プラス",
+      "情報源": "【皐月賞2026】距離短縮・延長から見る有力馬　戦国皐月賞！ バステールが天下統一の一歩を踏み出す｜競馬ニュース｜競馬予想のウマニティ",
+      "url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868130",
       "source_type": "web"
     },
     {
