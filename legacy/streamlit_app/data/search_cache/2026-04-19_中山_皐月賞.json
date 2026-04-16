@@ -1,14 +1,14 @@
 {
   "meta": {
     "race_key": "2026-04-19_中山_皐月賞",
-    "last_updated": "2026-04-16T22:02:38",
+    "last_updated": "2026-04-16T22:03:25",
     "web_article_count": 20,
-    "youtube_video_count": 0,
+    "youtube_video_count": 4,
     "x_tweet_count": 28,
     "x_newest_id": "2044022869923926378",
     "training_item_count": 0,
     "training_time_row_count": 0,
-    "yt_video_conclusion_count": 1,
+    "yt_video_conclusion_count": 0,
     "bet_plan_ticket_count": 0
   },
   "web_raw": [
@@ -623,18 +623,9 @@
   "training_items": [],
   "training_time_rows": [],
   "yt_detail_analysis": {
-    "BjlfL1FWT1A": []
+    "PGhm1J_p9qo": []
   },
-  "yt_video_conclusions": {
-    "BjlfL1FWT1A": {
-      "本命": "不明",
-      "対抗": "不明",
-      "単穴": "不明",
-      "連下": "不明",
-      "危険な人気馬": "不明",
-      "買い目方針": "想定8番人気の大穴と鉄板馬を狙い撃つ方針。攻略法として、右回りリセット以上の勝ち鞍があり、中山の小回り適性を持つ馬、およびハイラップを持続できるマイル～1800m重賞好走馬に注目する。"
-    }
-  },
+  "yt_video_conclusions": {},
   "latest_odds": {
     "アクロフェイズ": "36.3",
     "アスクエジンバラ": "19.2",
