@@ -1,7 +1,7 @@
 {
   "meta": {
     "race_key": "2026-04-19_中山_皐月賞",
-    "last_updated": "2026-04-16T23:43:28",
+    "last_updated": "2026-04-16T23:53:00",
     "web_article_count": 32,
     "youtube_video_count": 0,
     "x_tweet_count": 28,
@@ -424,10 +424,7 @@
       "source_type": "web"
     }
   ],
-  "race_characteristics": {
-    "コース特徴": "中山競馬場 芝2000m",
-    "注目ポイント": "G1レース"
-  },
+  "race_characteristics": null,
   "doc_horse_raw": [],
   "x_raw": [],
   "x_tweets": [
