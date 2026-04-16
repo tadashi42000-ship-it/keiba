@@ -1,14 +1,14 @@
 {
   "meta": {
     "race_key": "2026-04-19_中山_皐月賞",
-    "last_updated": "2026-04-16T23:57:16",
+    "last_updated": "2026-04-16T23:59:12",
     "web_article_count": 32,
     "youtube_video_count": 5,
     "x_tweet_count": 51,
     "x_newest_id": "2044761043008983465",
     "training_item_count": 6,
     "training_time_row_count": 0,
-    "yt_video_conclusion_count": 2,
+    "yt_video_conclusion_count": 3,
     "bet_plan_ticket_count": 6
   },
   "web_raw": [
@@ -1386,6 +1386,22 @@
         "video_url": "https://www.youtube.com/watch?v=5Kg9Fo7LOto",
         "video_title": "【展開予想】2026皐月賞！Cコースの皐月賞で逃げ候補は多くない！内に揃った先行馬で出ていくのは？"
       }
+    ],
+    "XzVMNl7LhJk": [
+      {
+        "馬名": "アスクエジンバラ",
+        "プラス情報": "字幕で言及（Gemini一時障害時の簡易抽出）",
+        "マイナス情報": "特になし（Gemini復旧後の再解析を推奨）",
+        "video_url": "https://www.youtube.com/watch?v=XzVMNl7LhJk",
+        "video_title": "【皐月賞2026・1週前診断】ファクター専門家による部門別・全頭診断！超混戦の3歳牡馬クラシック初戦で高評価になったのはあの馬！？"
+      },
+      {
+        "馬名": "ロブチェン",
+        "プラス情報": "字幕で言及（Gemini一時障害時の簡易抽出）",
+        "マイナス情報": "特になし（Gemini復旧後の再解析を推奨）",
+        "video_url": "https://www.youtube.com/watch?v=XzVMNl7LhJk",
+        "video_title": "【皐月賞2026・1週前診断】ファクター専門家による部門別・全頭診断！超混戦の3歳牡馬クラシック初戦で高評価になったのはあの馬！？"
+      }
     ]
   },
   "yt_video_conclusions": {
@@ -1404,6 +1420,9 @@
       "連下": "不明",
       "危険な人気馬": "不明",
       "買い目方針": "本動画は2026年皐月賞の展開予想に終始しており、具体的な本命や買い目に関する言及はありません。Cコースの中山芝2000mは器用さとパワーが必要で、逃げ馬は少ないが内枠に先行馬が揃っているため、先行争いが注目されます。"
+    },
+    "XzVMNl7LhJk": {
+      "買い目方針": "Gemini一時障害のため、馬名言及ベースの簡易抽出結果です。"
     }
   },
   "latest_odds": {
