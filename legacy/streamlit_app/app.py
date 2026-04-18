@@ -85,9 +85,9 @@ def _get_secret(key: str, default: str = "") -> str:
 YOUTUBE_API_KEY = _get_secret("YOUTUBE_API_KEY")
 GEMINI_API_KEY = _get_secret("GEMINI_API_KEY")
 GEMINI_MODEL = _get_secret("GEMINI_MODEL", "gemini-2.5-flash")
-# YouTube解析専用モデル（未設定時は Gemini 3系Flash を優先）
-# 例: GEMINI_MODEL_YOUTUBE=gemini-3.1-flash
-GEMINI_MODEL_YOUTUBE = _get_secret("GEMINI_MODEL_YOUTUBE", _get_secret("YOUTUBE_GEMINI_MODEL", "gemini-3.1-flash"))
+# YouTube解析専用モデル（未設定時は安定利用中の2.5系Flashへフォールバック）
+# 例: GEMINI_MODEL_YOUTUBE=gemini-2.5-flash
+GEMINI_MODEL_YOUTUBE = _get_secret("GEMINI_MODEL_YOUTUBE", _get_secret("YOUTUBE_GEMINI_MODEL", "gemini-2.5-flash"))
 TAVILY_API_KEY = _get_secret("TAVILY_API_KEY")
 X_BEARER_TOKEN = _get_secret("X_BEARER_TOKEN")
 
@@ -133,6 +133,12 @@ WEB_SEARCH_ALLOWLIST = [
     "spaia-keiba.com",
     "sports.yahoo.co.jp",
 ]
+WEB_SEARCH_PRIORITY_DOMAINS = [
+    "netkeiba.com",
+    "keibalab.jp",
+    "spaia-keiba.com",
+    "sports.yahoo.co.jp",
+]
 TRAINING_FALLBACK_ALLOWLIST = [
     "umasiru.com",
     "netkeiba.com",
@@ -155,7 +161,8 @@ BET_ODDS_TYPE_CODE_CANDIDATES = {
     # netkeibaのtypeコードは将来変更される可能性があるため複数候補を用意
     "複勝": ["b1"],
     "ワイド": ["b5", "b6"],
-    "馬連": ["b4", "b5"],
+    # b5 はワイド向け。馬連は b4 を優先して使用する。
+    "馬連": ["b4"],
     "三連複": ["b7", "b8"],
     "三連単": ["b8", "b9"],
 }
@@ -3814,6 +3821,95 @@ def generate_markdown_report(df) -> str:
     return '\n'.join(lines)
 
 
+def _article_domain(article: dict) -> str:
+    """記事dictからドメイン名を抽出する。"""
+    if not isinstance(article, dict):
+        return ""
+    domain = _to_text(article.get("source_name")).lower().replace("www.", "")
+    if domain:
+        return domain
+    url = _to_text(article.get("url"))
+    if not url:
+        return ""
+    return _to_text(urlparse(url).netloc).lower().replace("www.", "")
+
+
+def _build_tavily_domain_plans(include_domains) -> list[list[str] | None]:
+    """
+    Tavily検索のドメイン制約プランを返す。
+    - 明示指定あり: その指定のみ
+    - 未指定: 非Umanity優先 → 既定allowlist → 制限なし
+    """
+    if include_domains is not None:
+        cleaned = []
+        seen = set()
+        for d in include_domains:
+            v = _to_text(d).lower().replace("www.", "")
+            if not v or v in seen:
+                continue
+            seen.add(v)
+            cleaned.append(v)
+        return [cleaned] if cleaned else [None]
+
+    plans_raw = [
+        list(WEB_SEARCH_PRIORITY_DOMAINS),
+        list(WEB_SEARCH_ALLOWLIST),
+        None,
+    ]
+    plans = []
+    seen_plan_keys = set()
+    for plan in plans_raw:
+        if plan is None:
+            key = ("__any__",)
+            if key in seen_plan_keys:
+                continue
+            seen_plan_keys.add(key)
+            plans.append(None)
+            continue
+        normalized = []
+        seen_domain = set()
+        for d in plan:
+            v = _to_text(d).lower().replace("www.", "")
+            if not v or v in seen_domain:
+                continue
+            seen_domain.add(v)
+            normalized.append(v)
+        key = tuple(normalized)
+        if not normalized or key in seen_plan_keys:
+            continue
+        seen_plan_keys.add(key)
+        plans.append(normalized)
+    return plans or [None]
+
+
+def _merge_unique_articles(base_articles: list[dict], incoming_articles: list[dict], max_items: int) -> list[dict]:
+    """URL/タイトルキーで重複排除しながら記事をマージする。"""
+    merged = list(base_articles or [])
+    seen = set()
+    for article in merged:
+        if not isinstance(article, dict):
+            continue
+        url_key = _to_text(article.get("url")).strip().lower()
+        title_key = _to_text(article.get("title")).strip().lower()
+        key = url_key or f"title::{title_key}"
+        if key:
+            seen.add(key)
+
+    for article in incoming_articles or []:
+        if not isinstance(article, dict):
+            continue
+        url_key = _to_text(article.get("url")).strip().lower()
+        title_key = _to_text(article.get("title")).strip().lower()
+        key = url_key or f"title::{title_key}"
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        merged.append(article)
+        if max_items > 0 and len(merged) >= max_items:
+            break
+    return merged
+
+
 def fetch_and_analyze_web_articles(
     queries,
     total_article_limit=20,
@@ -3846,7 +3942,7 @@ def fetch_and_analyze_web_articles(
     all_articles = []
     all_web_raw = []
     seen_article_keys = set()
-    domains_for_tavily = include_domains or WEB_SEARCH_ALLOWLIST
+    tavily_domain_plans = _build_tavily_domain_plans(include_domains)
 
     progress_bar = st.progress(0)
     status_text = st.empty()
@@ -3867,24 +3963,50 @@ def fetch_and_analyze_web_articles(
         if remaining == 0:
             break
 
-        # 1) Tavily優先
+        # 1) Tavily優先（既定時は非Umanity優先 → allowlist全体 → 制限なし）
         tavily_error = None
         if TAVILY_API_KEY:
-            for retry in range(3):
-                try:
-                    status_text.info(f"🌐 Tavily検索中... ({q_idx+1}/{len(queries)}): {query[:30]}")
-                    articles = search_web_articles_with_tavily(
-                        query,
-                        max_articles=min(5, remaining),
-                        include_domains=domains_for_tavily
-                    )
-                    if articles:
+            for plan_idx, domain_plan in enumerate(tavily_domain_plans):
+                plan_error = None
+                plan_articles = []
+                domain_label = "制限なし"
+                if domain_plan:
+                    preview = ", ".join(domain_plan[:2])
+                    domain_label = preview + ("..." if len(domain_plan) > 2 else "")
+
+                for retry in range(3):
+                    try:
+                        status_text.info(
+                            f"🌐 Tavily検索中... ({q_idx+1}/{len(queries)}): {query[:30]} [{domain_label}]"
+                        )
+                        plan_articles = search_web_articles_with_tavily(
+                            query,
+                            max_articles=min(8, max(5, remaining)),
+                            include_domains=domain_plan,
+                        )
                         break
-                except Exception as e:
-                    tavily_error = e
-                    if retry < 2:
-                        status_text.info("⏳ Tavily検索リトライ中...")
-                        time.sleep(2)
+                    except Exception as e:
+                        plan_error = e
+                        if retry < 2:
+                            status_text.info("⏳ Tavily検索リトライ中...")
+                            time.sleep(2)
+
+                if plan_error and not plan_articles:
+                    tavily_error = plan_error
+
+                if plan_articles:
+                    articles = _merge_unique_articles(
+                        articles,
+                        plan_articles,
+                        max_items=max(remaining + 2, 8),
+                    )
+
+                # 既定の複数プランでは「件数 + ドメイン多様性」が足りたら次プランへ進まない
+                domains = {_article_domain(a) for a in articles if _article_domain(a)}
+                non_umanity_domains = {d for d in domains if "umanity.jp" not in d}
+                enough_count = len(articles) >= min(max(3, MAX_ANALYZE_ARTICLES_PER_QUERY), remaining)
+                if enough_count and non_umanity_domains:
+                    break
         else:
             if not tavily_warned:
                 st.warning("⚠️ TAVILY_API_KEYが未設定のため、Gemini検索へフォールバック中です。")
@@ -3914,15 +4036,21 @@ def fetch_and_analyze_web_articles(
 
         # レース/馬名との関連が高い記事を優先して複数件解析する
         articles = articles[:max(remaining, 5)]
+        limit_items = min(MAX_ANALYZE_ARTICLES_PER_QUERY, remaining)
+        candidate_limit = min(max(6, limit_items * 3), max(remaining, 6))
         unique_articles = _select_articles_for_analysis(
             articles,
             race_name=race_name,
             horse_names=all_horse_names,
             query=query,
-            max_items=min(MAX_ANALYZE_ARTICLES_PER_QUERY, remaining),
+            max_items=candidate_limit,
         )
 
         selected_articles = []
+        selected_article_keys = set()
+        selected_domains = set()
+
+        # 1パス目: ドメイン重複を避けて拾う
         for article in unique_articles:
             url_key = _to_text(article.get("url", "")).strip().lower()
             title_key = _to_text(article.get("title", "")).strip().lower()
@@ -3931,8 +4059,35 @@ def fetch_and_analyze_web_articles(
                 continue
             if article_key in seen_article_keys:
                 continue
-            seen_article_keys.add(article_key)
+            if article_key in selected_article_keys:
+                continue
+            domain = _article_domain(article)
+            if domain and domain in selected_domains:
+                continue
             selected_articles.append(article)
+            selected_article_keys.add(article_key)
+            if domain:
+                selected_domains.add(domain)
+            if len(selected_articles) >= limit_items:
+                break
+
+        # 2パス目: 不足分を関連度順で補充
+        if len(selected_articles) < limit_items:
+            for article in unique_articles:
+                url_key = _to_text(article.get("url", "")).strip().lower()
+                title_key = _to_text(article.get("title", "")).strip().lower()
+                article_key = url_key or f"title::{title_key}"
+                if not article_key:
+                    continue
+                if article_key in seen_article_keys or article_key in selected_article_keys:
+                    continue
+                selected_articles.append(article)
+                selected_article_keys.add(article_key)
+                if len(selected_articles) >= limit_items:
+                    break
+
+        for key in selected_article_keys:
+            seen_article_keys.add(key)
 
         # Tavily結果の関連度が低い場合は Gemini検索結果で補完する
         if not selected_articles and articles and TAVILY_API_KEY:
@@ -3944,7 +4099,7 @@ def fetch_and_analyze_web_articles(
                     race_name=race_name,
                     horse_names=all_horse_names,
                     query=query,
-                    max_items=min(MAX_ANALYZE_ARTICLES_PER_QUERY, remaining),
+                    max_items=candidate_limit,
                 )
                 for article in backfill_unique:
                     url_key = _to_text(article.get("url", "")).strip().lower()
@@ -3954,6 +4109,8 @@ def fetch_and_analyze_web_articles(
                         continue
                     seen_article_keys.add(article_key)
                     selected_articles.append(article)
+                    if len(selected_articles) >= limit_items:
+                        break
                 if selected_articles:
                     status_text.info("↪ Tavily関連薄のため Gemini検索結果で補完しました")
             except Exception as e:
@@ -6541,7 +6698,7 @@ div[data-testid="metric-container"] {
         "📥 情報入力",
         "🏇 総合予想（馬別）",
         "🏟️ レース特徴・傾向",
-        "YOUTUBEから情報入手",
+        "🎥 YouTubeから情報入手",
         "🏋️ 追切結果・評価",
         "💰 予算別買い目プラン",
     ])
@@ -6708,6 +6865,23 @@ div[data-testid="metric-container"] {
                 help="最終的に取得するWeb記事件数の上限",
                 key="combined_max_web"
             )
+        col_yt1, col_yt2 = st.columns([2, 1])
+        with col_yt1:
+            combined_auto_youtube = st.checkbox(
+                "Web一括検索時にYouTube動画も同時取得",
+                value=True,
+                key="combined_auto_youtube",
+                help="ON時はWeb検索と同時にYouTube動画候補を取得します（動画の馬別解析はタブ5で実行）。",
+            )
+        with col_yt2:
+            combined_max_youtube = st.number_input(
+                "YouTube件数",
+                min_value=1,
+                max_value=10,
+                value=3,
+                key="combined_max_youtube",
+                disabled=not combined_auto_youtube,
+            )
 
         # 前回の保存情報を表示
         if r:
@@ -6765,6 +6939,39 @@ div[data-testid="metric-container"] {
             merged_articles = st.session_state.get('web_articles', []) + added_articles
 
             st.metric("Web記事", f"{len(new_articles)}件取得（うち新規: {len(added_articles)}件）")
+
+            # Phase 1.5: YouTube動画候補（任意）
+            if combined_auto_youtube:
+                st.markdown("#### YouTube動画を検索中...")
+                youtube_keyword = combined_keyword or f"{rl} 予想"
+                videos = search_youtube_videos(youtube_keyword, int(combined_max_youtube))
+                before_filter = len(videos)
+                videos = filter_relevant_videos(videos)
+
+                existing_videos = st.session_state.get('youtube_videos', []) or []
+                existing_video_ids = {
+                    _to_text(v.get('video_id') or v.get('video_url')).strip()
+                    for v in existing_videos
+                    if _to_text(v.get('video_id') or v.get('video_url')).strip()
+                }
+                added_videos = []
+                for video in videos:
+                    vid = _to_text(video.get('video_id') or video.get('video_url')).strip()
+                    if not vid or vid in existing_video_ids:
+                        continue
+                    existing_video_ids.add(vid)
+                    added_videos.append(video)
+
+                merged_videos = existing_videos + added_videos
+                st.session_state['youtube_videos'] = merged_videos
+                st.session_state.setdefault('yt_detail_analysis', {})
+                st.session_state.setdefault('yt_video_conclusions', {})
+                st.metric("YouTube動画", f"{len(videos)}件取得（うち新規: {len(added_videos)}件）")
+                filtered_out = before_filter - len(videos)
+                if filtered_out > 0:
+                    st.caption(f"無関係動画として {filtered_out}件を除外しました。")
+            else:
+                st.session_state.setdefault('youtube_videos', [])
 
             # Phase 2: 馬別集計（YouTube / 既存Web / 新規Web / ドキュメント を全統合）
             merged_horse_df = aggregate_horse_analysis(
@@ -7430,7 +7637,7 @@ div[data-testid="metric-container"] {
                     st.caption("（サムネイル下の「読み込み+概要取得」を押すと分析結果が表示されます）")
 
         else:
-            st.info("👆 上の「🔍 YouTube検索」ボタンをクリックして動画を取得してください（または「総合予想（馬別）」タブで一括検索すると動画も取得されます）")
+            st.info("👆 上の「🔍 YouTube検索」ボタンをクリックして動画を取得してください（または「情報入力」タブのWeb一括検索で「YouTube同時取得」をONにすると動画候補も取得されます）")
 
             col_guide1, col_guide2 = st.columns(2)
             with col_guide1:
