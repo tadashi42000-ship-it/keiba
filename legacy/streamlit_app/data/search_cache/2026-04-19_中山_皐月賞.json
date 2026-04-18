@@ -1,13 +1,13 @@
 {
   "meta": {
     "race_key": "2026-04-19_中山_皐月賞",
-    "last_updated": "2026-04-18T20:41:58",
-    "web_article_count": 32,
-    "youtube_video_count": 0,
+    "last_updated": "2026-04-18T20:48:03",
+    "web_article_count": 40,
+    "youtube_video_count": 5,
     "x_tweet_count": 70,
     "x_newest_id": "2045460021455237166",
-    "training_item_count": 8,
-    "training_time_row_count": 54,
+    "training_item_count": 26,
+    "training_time_row_count": 56,
     "yt_video_conclusion_count": 1,
     "bet_plan_ticket_count": 6
   },
@@ -194,6 +194,382 @@
       "マイナス情報": "前々走の京成杯では、今回の有力馬の一角であるグリーンエナジーに敗れている。",
       "source_url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868130",
       "source_title": "【皐月賞2026】距離短縮・延長から見る有力馬　戦国皐月賞！ バステールが天下統一の一歩を踏み出す｜競馬ニュース｜競馬予想のウマニティ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "G1ホープフルSを皐月賞と同舞台で制覇しており、実績は高く中心的存在。2000mでは2戦2勝と距離適性も非常に高く、その力を存分に発揮できる舞台。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46117/",
+      "source_title": "【皐月賞】出走馬格付けバトル！世代の頂点を懸けた激突 - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "G1朝日杯FSを制覇しており、能力の高さは疑いようがない。世代の中心としてクラシック戦線を牽引する存在となるでしょう。",
+      "マイナス情報": "初の2000mへの対応が焦点となる",
+      "source_url": "https://www.keibalab.jp/topics/46117/",
+      "source_title": "【皐月賞】出走馬格付けバトル！世代の頂点を懸けた激突 - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "きさらぎ賞(G3)1着を含め、重賞で安定して上位争いを続ける堅実さを持つ。相手なりに走れるタイプで、メンバーに見劣りしない。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46117/",
+      "source_title": "【皐月賞】出走馬格付けバトル！世代の頂点を懸けた激突 - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "キャリア5戦すべてで連対を確保し、そのうち4戦が2000mと舞台経験が豊富。距離適性と安定感が高水準。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46117/",
+      "source_title": "【皐月賞】出走馬格付けバトル！世代の頂点を懸けた激突 - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "キャリア3戦中2戦で2000mを経験しており、前走の弥生賞を制して臨む勢いは大きな武器となる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46117/",
+      "source_title": "【皐月賞】出走馬格付けバトル！世代の頂点を懸けた激突 - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "中山芝コースで2戦2連対と非常に高い適性を見せている。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46117/",
+      "source_title": "【皐月賞】出走馬格付けバトル！世代の頂点を懸けた激突 - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "中山芝コース適性で2位に選出されており、高い適性を持つ。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46117/",
+      "source_title": "【皐月賞】出走馬格付けバトル！世代の頂点を懸けた激突 - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "GI馬であり、皐月賞に繋がりやすい共同通信杯をローテーションとして使用しています。",
+      "マイナス情報": "前走の共同通信杯では3着に敗れて本命には至らず、ホープフルSの勝利は枠順や展開に恵まれた印象が強く、軸としては評価しづらい面があります。",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58715",
+      "source_title": "【皐月賞予想】今年は難解な皐月賞 有力各馬の評価は？ | 競馬コラム",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "朝日杯FS馬であり、ぶっつけ本番での皐月賞となりますが、最近のぶっつけローテはマイナス材料にならない傾向があります。距離適性も問題ないと見られています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58715",
+      "source_title": "【皐月賞予想】今年は難解な皐月賞 有力各馬の評価は？ | 競馬コラム",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "報知杯弥生賞で3着に入着しています。陣営からは「状態は右肩上がり」とのコメントがあり、体調は好調のようです。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58715",
+      "source_title": "【皐月賞予想】今年は難解な皐月賞 有力各馬の評価は？ | 競馬コラム",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "若葉Sをレースレコードで制しており、高速決着への高い適性が期待されます。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58715",
+      "source_title": "【皐月賞予想】今年は難解な皐月賞 有力各馬の評価は？ | 競馬コラム",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "上原佑調教師が「これからの関東を背負うジョッキー」と評価する佐々木大輔騎手とのコンビで、頂点を目指す点が好材料です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_title": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "3枠5番という好枠を得ており、福永調教師が騎手・調教師として史上2人目の快挙を目指すという状況も期待感を高めます。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_title": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "GI馬であり、記事の見出しで「調教トップ5」に選ばれるほどの高い調教評価が示唆されています。また、前走と1週前の馬体比較が行われるなど、状態面にも注目が集まっています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_title": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "GI馬であり、記事の見出しで「調教トップ5」に選ばれるほどの高い調教評価が示唆されています。また、前走と1週前の馬体比較が行われるなど、状態面にも注目が集まっています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_title": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "前走の朝日杯FSを快勝しており、G1ホースとしての実績を持つ。",
+      "マイナス情報": "朝日杯FS快勝から皐月賞にぶっつけ本番で挑む点が懸念される。",
+      "source_url": "https://www.keibalab.jp/yosou/mitsuboshi/558/",
+      "source_title": "【皐月賞】人気馬を飲み込む準備はできている！「美味い」激走候補はこの2頭 | 3つ星穴馬 | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "ホープフルSの覇者であり、G1タイトル獲得の実績がある。",
+      "マイナス情報": "共同通信杯から始動したが、そのレースでは3着に終わっており、G1馬としてはやや物足りない結果だった。",
+      "source_url": "https://www.keibalab.jp/yosou/mitsuboshi/558/",
+      "source_title": "【皐月賞】人気馬を飲み込む準備はできている！「美味い」激走候補はこの2頭 | 3つ星穴馬 | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "今週のナンバーワンと評価されており、中間は前走時と同様に土曜CWコースで負荷をかけ、週中は坂路で軽く調整し順調な仕上がり。硬さもなくリズミカルな動きで、程よく気合も乗って態勢は整っている。11日土曜の栗東CW（重）では84.2-68.6-53.3-38.1-11.3を一杯でマーク。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_title": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "1週前の動きが非常に良く、CWコースでの3頭併せで内から仕掛けた際の反応が抜群だった。重心の低いフォームでスムーズに加速しており、前哨戦を叩いた上積みが大きいと見られる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_title": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "3週連続で津村騎手が跨っており、弾力性のあるフットワークで楽々と先着を続けている。1週前には自己ベストをマークし、今週も余力を残して好時計を出しており、前走時よりも鋭さが出てきた。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_title": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "中間はプールを併用して乗り込みは十分で、1週前には古馬のオープン馬と併せて最先着を果たすなど、体が出来上がっていると評価されている。今週も気合を付けると良い加速を見せていた。",
+      "マイナス情報": "レース本番での折り合いが課題となる",
+      "source_url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_title": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "上原佑厩舎による異例の「三本の矢」追いの一頭として、フォルテアンジェロ、ライヒスアドラーとの3頭併せで最終追い切りを実施。上原佑調教師は「凄くいい内容」と評価しており、「G1仕様の渾身仕上げ」で「勝ちに行く」と意欲的なコメントを残していることから、体調は非常に充実していると見られる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_title": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "グリーンエナジー、ライヒスアドラーとの3頭併せで最終追い切りを行っており、G1出走馬とそのパートナーと共に調整されることで、質の高い調教ができたと考えられる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_title": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "グリーンエナジー、フォルテアンジェロとの3頭併せで最終追い切りを行っており、G1出走馬とそのパートナーと共に調整されることで、質の高い調教ができたと考えられる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_title": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "共同通信杯を1:45.5のタイムでアタマ差押し切って勝利し、重賞2勝目を挙げました。共同通信杯では後半46.0と持久力を要する展開で押し切っており、後続に脚を使わせるレースができる点が強みです。",
+      "マイナス情報": "キャリア3勝全てがワンターンの左回りコースでのものであり、今回はコーナー4つのコース形態となる中山芝2000mへの適性が懸念されます。",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "ホープフルSを勝ちタイム2:01.0で制覇し、中山コースでの適性を証明済みです。共同通信杯では3着に終わったものの、素質上位であることは示しており、底力が問われる皐月賞ではさらにパフォーマンスを上げてくる可能性が高いです。",
+      "マイナス情報": "共同通信杯ではゴール前でベレシートに差されて3着に敗れました。",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ベレシート",
+      "プラス情報": "共同通信杯でロブチェンを差し切り2着に好走しました。この世代では素質上位の存在と評価されています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "ホープフルSで2着と好走しました。直線で他馬に進路を塞がれるロスがありながらも、最後はよく伸びたことから地力の高さがうかがえます。",
+      "マイナス情報": "ホープフルSの直線で外に切り替える際にロスがあり、ロブチェンに先着を許しました。",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "ホープフルSで3着に入着しています。",
+      "マイナス情報": "ホープフルSではロブチェンとフォルテアンジェロに先着を許しました。",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "京成杯を勝ちタイム1:59.3で豪快な末脚を繰り出し差し切って優勝しました。2戦目の未勝利戦では後半1000m57.9、800m45.3、ラスト10.5-11.1と総合力が非常に高く、京成杯で唯一の上がり33秒台となる33.8の末脚を見せたことから、かなりの素質を感じさせる有力候補です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "京成杯ではグリーンエナジーに敗れたものの、その後に若葉Sを勝利しており、京成杯のレースレベルを裏付ける形となりました。",
+      "マイナス情報": "京成杯ではグリーンエナジーに先着を許しました。",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "弥生賞ディープインパクト記念を勝ちタイム2:00.2で勝利しました。未勝利戦を好タイムで制しており、直線で他馬と接触しながらも一頭違う脚色で伸びて勝利したことから、非凡な素質を感じさせる内容でした。",
+      "マイナス情報": "弥生賞ディープインパクト記念の直線で他馬と接触しバランスを崩す場面がありました。皐月賞ではさらに相手関係が強化される点が課題です。",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "弥生賞ディープインパクト記念で2着に入着し、1番人気のアドマイヤクワッズとの追い比べをクビ差制しました。",
+      "マイナス情報": "弥生賞ディープインパクト記念ではバステールに交わされ、3/4馬身差をつけられました。",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "デイリー杯2歳Sでは後の朝日杯フューチュリティS優勝馬カヴァレリッツォを競り負かした実績があります。初の2000m戦自体は問題ないと見られています。",
+      "マイナス情報": "弥生賞ディープインパクト記念では1番人気に推されながら、3番手追走から伸びきれず3着に終わりました。ライヒスアドラーにもクビ差で敗れており、この内容では少し物足りない印象を受けます。",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "朝日杯FSを勝利しました。中団追走からロスなく立ち回り、ゴール前で差し切る勝負強さを見せました。",
+      "マイナス情報": "特になし",
+      "source_url": "https://spaia-keiba.com/news/detail/34961",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マスカレードボール",
+      "プラス情報": "横山武史騎手と手塚貴久厩舎の黄金コンビが注目される。このコンビは中山芝2000mで勝率60％、複勝率80％と抜群の成績を誇り、騎手部門1位（横山武史騎手）と厩舎部門1位（手塚貴久厩舎）の強力な組み合わせである。横山武史騎手は中山芝2000mで勝率20.4%、複勝率41.7%とコースを得意としている。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/45100/",
+      "source_title": "【皐月賞】重賞最強データ！馬券率8割を誇る黄金コンビの伏兵候補！ | 競馬ニュース | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ダノンデサイル",
+      "プラス情報": "血統部門1位のエピファネイア産駒であり、中山芝2000mの京成杯を優勝した実績があるため、コース適性は高い。京成杯では後の菊花賞馬アーバンシックを抑えており、レース直前の除外がなければ皐月賞でも好走していた可能性が示唆される。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/45100/",
+      "source_title": "【皐月賞】重賞最強データ！馬券率8割を誇る黄金コンビの伏兵候補！ | 競馬ニュース | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ジョバンニ",
+      "プラス情報": "血統部門1位のエピファネイア産駒であり、同舞台の中山芝2000mで行われたホープフルSで2着の実績がある。この結果から血統的なコース適性を証明済みと言える。",
+      "マイナス情報": "ホープフルSではクロワデュノールに先着を許しており、その点ではやや評価が劣る可能性がある。",
+      "source_url": "https://www.keibalab.jp/topics/45100/",
+      "source_title": "【皐月賞】重賞最強データ！馬券率8割を誇る黄金コンビの伏兵候補！ | 競馬ニュース | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "クロワデュノール",
+      "プラス情報": "同舞台のホープフルSにおいて、血統的なコース適性を持つジョバンニに先着した実績があることから、中山芝2000mでの能力は高いと推測される。",
+      "マイナス情報": "記事中での詳細な評価やその他の好材料、懸念点については言及がなく不明な点が多い。",
+      "source_url": "https://www.keibalab.jp/topics/45100/",
+      "source_title": "【皐月賞】重賞最強データ！馬券率8割を誇る黄金コンビの伏兵候補！ | 競馬ニュース | 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "中山芝2000mの重賞を勝っており、予想オッズでは1番人気に推されています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58718",
+      "source_title": "【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬 ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "中山芝2000mの重賞を勝っており、予想オッズでは2番人気に推されています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58718",
+      "source_title": "【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬 ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "実績十分であり、予想オッズでは3番人気に推されています。",
+      "マイナス情報": "今回が初の2000mとなり、距離適性に懸念があります。",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58718",
+      "source_title": "【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬 ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "実績十分であり、予想オッズでは4番人気です。最終調整では精神面が大人になり万全の態勢で、差しの練習も積んでいます。",
+      "マイナス情報": "今回が初の2000mとなり、距離適性に懸念があります。",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58718",
+      "source_title": "【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬 ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ラージアンサンブル",
+      "プラス情報": "高杉吏麒騎手が本馬での重賞勝ちを狙うと意欲を示しています。",
+      "マイナス情報": "トレーナーの「まだウチで...」というコメントがあり、成長途上や仕上がりに対して何らかの懸念がある可能性が示唆されています。",
+      "source_url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58718",
+      "source_title": "【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬 ...",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "プラス情報": "中山芝2000mで勝率20.4%、複勝率42.6%とトップデータを持つ横山武史騎手が騎乗。これまでの3戦で一度も馬券圏内を外しておらず安定感抜群で、前走の毎日杯で見せた見事な勝ちっぷりから高いポテンシャルが伺えます。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46132/",
+      "source_title": "【皐月賞】重賞最強データ！舞台を知り尽くす名門から - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "中山芝2000mで勝率24.3%、複勝率45.9%とトップデータを誇る手塚貴久厩舎が手掛け、ソールオリエンスでの皐月賞制覇実績もある名門の仕上げに期待できます。朝日杯FSで5着に敗れた以外は3戦3勝と、その素質の高さは本物です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46132/",
+      "source_title": "【皐月賞】重賞最強データ！舞台を知り尽くす名門から - 競馬ラボ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "皐月賞でソールオリエンスなどを輩出しているキタサンブラック産駒であり、中山芝2000mで勝率17.9%、複勝率33.3%とトップデータを持つ血統です。前走の弥生賞では初の重賞挑戦ながら見事な差し切り勝ちを収めており、ポテンシャルの高さは相当なもので、勢いそのままにG1制覇も十分狙える存在です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/topics/46132/",
+      "source_title": "【皐月賞】重賞最強データ！舞台を知り尽くす名門から - 競馬ラボ",
       "source_type": "web"
     }
   ],
@@ -421,6 +797,62 @@
       "url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868186",
       "source_name": "umanity.jp",
       "snippet": "![](/common/img/loading.gif) # 【皐月賞2026】舞台巧者を探せ 種牡馬成績から見る「中山芝2000m」で狙いたい特選馬｜競馬ニュース｜競馬予想のウマニティ [![とは](/common/img/header_icon_beginner.png) ウマニティとは](//umanity.jp/virgin_index.php) | [![よくある質問](/common/img/header_icon_faq.png) よくある質問](//umanity.jp/faq.php) | [![ログイン](/common/img/header_icon_login.png) ログイン](javascript:void(0);) ![](/common/img/inside.gif?2025) [![banner](/image/ad/16725771366686586194ddc.jpg)](https://umanity.jp/club/) | | | | | --- | --- | --- | | [Ｕストア](//umanity.jp/store/) | | | [馬計簿](javascript:void(0);) | | [WIN5](//win5.umanity.jp/) | | | [No.1予想](//umanity.jp/no1/) | | [香港競馬](//umanity.jp/hk/) | | | [クチコミ](//umanity.jp/professional/pro_review_top.php) | ## 中央競馬ニュース 【皐月賞2026】舞台巧者を探せ 種牡馬成績から見る「中山芝2000m」で狙いたい特選馬 ![](/common/img/news/coment.png) 0 ![](/common/img/news/nice.png) 1 ![](/common/img/news/view.png) 8,310 ![【皐月賞2026】舞台巧者を探せ 種牡馬成績から見る「中山芝2000m」で狙いたい特選馬](/image/news/169293233869df0c26b20f7.jpg) [皐月賞](//umanity.jp/racedata/graderace/0002/)が行われる「中山芝2000m」は、直線の入り口付近からスタートする。大歓声があがるスタンド前を通過し、そこから内回りコースを1周するため、ゴール前の急坂を2回越えなければならない。パワーが求められ、さらに小回り適性も試される舞台だ。 今回は、2021年1月5日から2026年4月12日までに「中山芝2000m」で行われた275レースをもとに、[皐月賞](//umanity.jp/racedata/graderace/0002/)に出走予定メンバーの種牡馬別勝ち星成績を参考にして、舞台巧者を紐解いていきたい。 ■全体1位の19勝をマークする[エピファネイア](//umanity.jp/racedata/db/horse_top.php?code=2010104155)産駒を素直に信頼 <中山芝2000m 出走予定馬の種牡馬別成績と勝率> [エピファネイア](//umanity.jp/racedata/db/horse_top.php?code=2010104155) 【19.15.24.126】10.3% [キタサンブラック](//umanity.jp/racedata/db/horse_top.php?code=2012102013) 【16.9.3.67】16.8% [キズナ](//umanity.jp/racedata/db/horse_top.php?code=2010105827) 【13.8.9.99】10.1% [モーリス](//umanity.jp/racedata/db/horse_top.php?code=2011100655) 【9.8.9.71】9.3% [リアルスティール](//umanity.jp/racedata/db/horse_top.php?code=2012104889) 【6.5.10.40】9.8% [ロードカナロア](//umanity.jp/racedata/db/horse_top.php?code=2008103552) 【4.6.4.53】6.0% [サートゥルナーリア](//umanity.jp/racedata/db/horse_top.php?code=2016104505) 【4.4.4.35】8.5% [フィエールマン](//umanity.jp/racedata/db/horse_top.php?code=2015105075) 【4.2.2.31】10.3% [リオンディーズ](//umanity.jp/racedata/db/horse_top.php?code=2013105915) 【4.1.7.40】7.7% [スワーヴリチャード](//umanity.jp/racedata/db/horse_top.php?code=2014106083) 【2.5.1.16】8.3% [イスラボニータ](//umanity.jp/racedata/db/horse_top.php?code=2011103565) 【2.2.5.20】6.9% [グレーターロンドン](//umanity.jp/racedata/db/horse_top.php?code=2012101402) 【2.1.1.9】15.4% [アルアイン](//umanity.jp/racedata/db/horse_top.php?code=2014106046) 【1.4.0.19】4.2% [ワールドプレミア](//umanity.jp/racedata/db/horse_top.php?code=2016104854) 【1.1.0.6】12.5% ベンバトル 【1.0.0.8】11.1% シスキン 【0.1.0.6】0.0% ポエティックフレア 【0.0.0.1】0.0% 全体ランキングでも勝ち数トップの[エピファネイア](//umanity.jp/racedata/db/horse_top.php?code=2010104155)産駒を素直に信頼したい。出走予定馬は1頭。 ・[マテンロウゲイル](//umanity.jp/racedata/db/horse_top.php?code=2023100946)（若葉S1着） 前走の若葉Sでは、レースレコードの1分58秒5で2馬身差快勝を披露し、勢いそのままに本番へ乗り込む。前々走では今回と同じ舞台の[京成杯](//umanity.jp/racedata/graderace/0111/)で2着とコース適性も示し、デビュー2戦目の未勝利では[ギャラボーグ](//umanity.jp/racedata/db/horse_top.php?code=2023105825)（[桜花賞](//umanity.jp/racedata/graderace/0001/)2着、[阪神JF](//umanity.jp/racedata/graderace/0013/)2着）とクビ差の接戦を演じた経験もある。若葉S組からの勝ち馬は[ヴィクトリー](//umanity.jp/racedata/db/horse_top.php?code=2004102884)（2007年）まで遡ることになるが、以前は[サニーブライアン](//umanity.jp/racedata/db/horse_top.php?code=1994105719)（1997年）や[トウカイテイオー](//umanity.jp/racedata/db/horse_top.php?code=1988101025)（1991年）といった2冠馬も誕生したステップレース。伏兵的な存在となりそうだが、父[エピファネイア](//umanity.jp/racedata/db/horse_top.php?code=2010104155)産駒の好成績を追い風に戴冠を狙う。",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞予想】今年は難解な皐月賞 有力各馬の評価は？ | 競馬コラム",
+      "url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58715",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "* [トップ](https://sp.netkeiba.com/?rf=kslp \"トップ\") * [ニュース](https://news.sp.netkeiba.com/?rf=kslp \"ニュース\") * [レース](https://race.sp.netkeiba.com/?rf=kslp \"レース\") * [ウマい馬券](https://yoso.sp.netkeiba.com/?access=init&rf=kslp \"ウマい馬券\") * [コラム](https://news.sp.netkeiba.com/?pid=column_top&rf=kslp \"コラム\") * [netkeibaTV](https://tv.netkeiba.com/?rf=kslp \"netkeibaTV\") * [地方競馬](https://nar.sp.netkeiba.com/?rf=kslp \"地方競馬\") * [データベース](https://db.sp.netkeiba.com/?rf=kslp \"データベース\") * [俺プロ](https://yosocs.sp.netkeiba.com/?rf=kslp \"俺プロ\") * [一口馬主](https://sp.netkeiba.com/?pid=owner_info&rf=kslp \"一口馬主\") * [POG](https://pog.sp.netkeiba.com/?rf=kslp \"POG\") * [競馬広場](https://community.sp.keiba.findfriends.jp/?rf=kslp \"競馬広場\") * [お気に入り馬](https://race.sp.netkeiba.com/?pid=bookmark&rf=kslp \"お気に入り馬\") * [まとめ](https://dir.netkeiba.com/keibamatome/index.html?rf=kslp \"競馬まとめ\") * [ゲーム](https://sp.netkeiba.com/game?rf=kslp \"ゲーム\") * [アカウント](https://regist.sp.netkeiba.com/?rf=kslp \"アカウント\") # 【皐月賞予想】今年は難解な皐月賞 有力各馬の評価は？ * 傾向が変わってくる可能性がある 今年の皐月賞はかなり難解だ。さらに昨年からCコースになったことで、傾向が変わってくる可能性もある。幸い人気割れしているので、的中にたどり着きさえすればある程度の配当は望めるだろう。 GI馬ということで、まずはロブチェン。皐月賞に繋がりやすい共同通信杯を使ってきたがそこでは3着。勝ってくれば文句なしの本命だったが……ホープフルSは枠順や展開などすべてがうまくいった印象もある。今回軸にはしづらいが、無印にもできないという感じだ。 朝日杯FS馬カヴァレリッツォはぶっつけでの皐月賞。桜花賞を見ても分かるように最近のぶっつけはマイナス材料にならない。距離はもつだろうし、キレ… [続きを読む](https://news.netkeiba.com/?pid=column_view&cid=58715&rf=kslp) ## あなたにおすすめ * [## 「10頭まで絞った」「予想固まった」混戦必至の皐月賞 前日オッズ発表後ネットではさらに戸惑いの声続出](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328480&rf=ksop \"「10頭まで絞った」「予想固まった」混戦必至の皐月賞 前日オッズ発表後ネットではさらに戸惑いの声続出\") * [## 霜降り明星・粗品はロブチェンを信頼 3連単＆3連複で勝負だ](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328475&rf=ksop \"霜降り明星・粗品はロブチェンを信頼 3連単＆3連複で勝負だ\") * [## 【皐月賞・特選有力馬チェック】カヴァレリッツォは買うべき?](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328478&rf=ksop \"【皐月賞・特選有力馬チェック】カヴァレリッツォは買うべき?\") * [## 【皐月賞】混戦必至!オッズも割れ模様 前日の単勝1番人気はロブチェンの4・2倍 3連単は1番人気でも82・9倍](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328471&rf=ksop \"【皐月賞】混戦必至!オッズも割れ模様 前日の単勝1番人気はロブチェンの4・2倍 3連単は1番人気でも82・9倍\") * [## 【皐月賞前日オッズ】ロブチェンが4.2倍で1番人気](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328468&rf=ksop \"【皐月賞前日オッズ】ロブチェンが4.2倍で1番人気\") * [## 【皐月賞】報知杯弥生賞3着アドマイヤクワッズが大一番の地に到着 陣営「状態は右肩上がりです」](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328467&rf=ksop \"【皐月賞】報知杯弥生賞3着アドマイヤクワッズが大一番の地に到着 陣営「状態は右肩上がりです」\") ## 新着コラム [もっと見る](https://dir.netkeiba.com/keiba/column/index.html) * [## 【皐月賞予想】今年も高速決着か 若葉Sをレースレコードで制したマテンロウゲイルに期待 1時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58719&rf=kssp \"【皐月賞予想】今年も高速決着か 若葉Sをレースレコードで制したマテンロウゲイルに期待\") * [## 【無料・皐月賞予想】追走力が求められる皐月賞は 過去の“ある経験”がモノをいう 7時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58711&rf=kssp \"【無料・皐月賞予想】追走力が求められる皐月賞は 過去の“ある経験”がモノをいう\") * [## 【皐月賞など予想】今週から中山の芝コースはCコースに!! 先行馬と内目の枠の馬に要注意 7時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58712&rf=kssp \"【皐月賞など予想】今週から中山の芝コースはCコースに!! 先行馬と内目の枠の馬に要注意\") * [## 【皐月賞】多彩な顔ぶれの皐月賞 過去3年間、勝ち馬の前走は全て異なる 7時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58713&rf=kssp \"【皐月賞】多彩な顔ぶれの皐月賞 過去3年間、勝ち馬の前走は全て異なる\") * [## 【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬」から手広く勝負!!/第280回 7時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58718&rf=kssp \"【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬」から手広く勝負!!/第280回\") [もっと見る](https://dir.netkeiba.com/keiba/column/index.html) ## コンテンツ * [中央競馬(JRA)](https://race.netkeiba.com/top/) * [地方競馬(NAR)](https://nar.netkeiba.com/top/) * [ウマい馬券](https://yos",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "* [トップ](https://sp.netkeiba.com/?rf=kslp \"トップ\") * [ニュース](https://news.sp.netkeiba.com/?rf=kslp \"ニュース\") * [レース](https://race.sp.netkeiba.com/?rf=kslp \"レース\") * [ウマい馬券](https://yoso.sp.netkeiba.com/?access=init&rf=kslp \"ウマい馬券\") * [コラム](https://news.sp.netkeiba.com/?pid=column_top&rf=kslp \"コラム\") * [netkeibaTV](https://tv.netkeiba.com/?rf=kslp \"netkeibaTV\") * [地方競馬](https://nar.sp.netkeiba.com/?rf=kslp \"地方競馬\") * [データベース](https://db.sp.netkeiba.com/?rf=kslp \"データベース\") * [俺プロ](https://yosocs.sp.netkeiba.com/?rf=kslp \"俺プロ\") * [一口馬主](https://sp.netkeiba.com/?pid=owner_info&rf=kslp \"一口馬主\") * [POG](https://pog.sp.netkeiba.com/?rf=kslp \"POG\") * [競馬広場](https://community.sp.keiba.findfriends.jp/?rf=kslp \"競馬広場\") * [お気に入り馬](https://race.sp.netkeiba.com/?pid=bookmark&rf=kslp \"お気に入り馬\") * [まとめ](https://dir.netkeiba.com/keibamatome/index.html?rf=kslp \"競馬まとめ\") * [ゲーム](https://sp.netkeiba.com/game?rf=kslp \"ゲーム\") * [アカウント](https://regist.sp.netkeiba.com/?rf=kslp \"アカウント\") # 【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で通用する馬” 人気馬を診断/安井涼太 * 皐月賞の人気馬を診断！ 安井涼太がラップを分析し人気馬を診断。 今回は2026年4月19日(日)に中山競馬場で行われる「皐月賞」を予想します。 さらに今回はイチオシ馬も発表！ 安井涼太の予想理論と共に今回の馬券購入の参考になる情報をお伝えしますのでぜひご覧ください。 ■出演 安井涼太 プロフィール 2013年に『競馬最強の法則』にて予想家デビュー。 同年に『安井式ラップキャラ(KKベストセラーズ)』、2018年に『超穴馬の激走を見抜く！ 追走力必勝法』、2021年に『競走馬の適性を5つに分けて激走を見抜く！ 脚質ギアファイブ』と数々の単行本を上梓。現在も『競馬の天才！』『競馬王』『勝SPA!』など多くのメディアで活躍中。2021年にス… [映像を見る](https://tv.netkeiba.com/watch/?id=12688&rf=kslp) ## あなたにおすすめ * [## 【皐月賞】上原佑調教師「これからの関東を背負うジョッキー」 佐々木大輔騎手がライヒスアドラーと頂点へ](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328272&rf=ksop \"【皐月賞】上原佑調教師「これからの関東を背負うジョッキー」 佐々木大輔騎手がライヒスアドラーと頂点へ\") * [## 【トク捜リレー】美浦・三戸記者の注目はディープインパクトなど最多5勝の好枠をゲットした芦毛馬 皐月賞](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328273&rf=ksop \"【トク捜リレー】美浦・三戸記者の注目はディープインパクトなど最多5勝の好枠をゲットした芦毛馬 皐月賞\") * [## 【皐月賞2026予想｜調教トップ5】GI馬ロブチェン＆カヴァレリッツォの評価は？](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12690&rf=ksop \"【皐月賞2026予想｜調教トップ5】GI馬ロブチェン＆カヴァレリッツォの評価は？\") * [## 【ショート】皐月賞の上位人気馬を診断/安井涼太](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12689&rf=ksop \"【ショート】皐月賞の上位人気馬を診断/安井涼太\") * [## 【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で通用する馬” 人気馬を診断/安井涼太](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12688&rf=ksop \"【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で通用する馬” 人気馬を診断/安井涼太\") * [## 【皐月賞】騎手&調教師で勝利なら史上2人目の快挙の福永調教師 アスクエジンバラは3枠5番に「ジョッキーに任せるだけ」](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328270&rf=ksop \"【皐月賞】騎手&調教師で勝利なら史上2人目の快挙の福永調教師 アスクエジンバラは3枠5番に「ジョッキーに任せるだけ」\") ## 新着動画 [もっと見る](https://dir.netkeiba.com/keiba/tv/index.html) * [## 【皐月賞2026予想｜調教トップ5】GI馬ロブチェン＆カヴァレリッツォの評価は？ 4時間前](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12690&rf=kssp \"【皐月賞2026予想｜調教トップ5】GI馬ロブチェン＆カヴァレリッツォの評価は？\") * [## 【ショート】皐月賞の上位人気馬を診断/安井涼太 4時間前](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12689&rf=kssp \"【ショート】皐月賞の上位人気馬を診断/安井涼太\") * [## 【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で通用する馬” 人気馬を診断/安井涼太 4時間前](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12688&rf=kssp \"【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で通用する馬” 人気馬を診断/安井涼太\") * [## 【皐月賞2026】細江純子とじゃいが徹底討論！ディープ級と語った本命馬は！ 6時間前](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12681&rf=kssp \"【皐月賞2026】細江純子とじゃいが徹底討論！ディープ級と語った本命馬は！\") * [## 【皐月賞2026】カヴァレリッツォ、ロブチェンなどの前走と1週前の馬体を比較！ 1日前](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12680&rf=kssp \"【皐月賞2026】カヴァレリッツォ、ロブチェンなどの前走と1週前の馬体を比較！\") [もっと見る](https://dir.netkeiba.com/keiba/tv/index.html) ## コンテンツ * [中央競馬(JRA)](https://race.netkeiba.com/top/) * [地方競馬(NAR)](https://nar.netkeiba.com/top/) * [ウマい馬券](h",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞】人気馬を飲み込む準備はできている！「美味い」激走候補はこの2頭 | 3つ星穴馬 | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/mitsuboshi/558/",
+      "source_name": "keibalab.jp",
+      "snippet": "# [競馬ラボ](/) ![JRAデータ公式 データベース検索](https://www-f.keibalab.jp/img/index/jradata.png?1459672717) [* 新規登録](/login/entry.html) [* ログイン](/login/login.html) 第86回 皐月賞 (ＧⅠ) : 4/19(日) 中山芝2000m ![皐月賞のレース写真](https://www-f.keibalab.jp/img/race/202604/202604190611_01.jpg?1775609215) 第23回 福島牝馬Ｓ (ＧⅢ) : 4/19(日) 福島芝1800m ![福島牝馬Ｓのレース写真](https://www-f.keibalab.jp/img/race/202604/202604190311_01.jpg?1775982577) 第31回 アンタレスＳ (ＧⅢ) : 4/18(土) 阪神ダ1800m ![アンタレスＳのレース写真](https://www-f.keibalab.jp/img/race/202604/202604180911_01.jpg?1775982577) * 重賞 * 04/18 * 04/19 * [中山 皐月賞 (ＧⅠ)](/db/race/202604190611/) * [福島 福島牝馬ステークス (ＧⅢ)](/db/race/202604190311/) * [中山 中山グランドジャンプ (ＧⅠ)](/db/race/202604180611/) * [阪神 アンタレスステークス (ＧⅢ)](/db/race/202604180911/) * [中山 下総ステークス](/db/race/202604180610/) * [阪神 アンタレスステークス (ＧⅢ)](/db/race/202604180911/) * [福島 ラジオ福島賞](/db/race/202604180311/) * [中山 皐月賞 (ＧⅠ)](/db/race/202604190611/) * [阪神 陽春ステークス](/db/race/202604190910/) * [福島 福島牝馬ステークス (ＧⅢ)](/db/race/202604190311/) [レース一覧](/db/race/) [重賞・次走報一覧](/db/race/grade.html) [![新規会員登録](https://www-f.keibalab.jp/img/index/bn_entry.png?1774399876)](/login/entry.html) ### SNS&Event ### PR * [![](https://www-f.keibalab.jp/img/upload/pr/202604/260419_umasq_sidecolumn.png?1775981418)](/ad/?a=WzM2MTgwLDQwNF0=) ### トピックス + [【全券種カタログ】見るのは馬柱じゃない！「馬連と枠連」オッズだ！](/topics/46141/) + [【皐月賞】イクイノックス&クロワデュノールも当てはまっていた！軸選びにピッタリの神条件](/topics/46140/) + [【皐月賞】りくりゅうペア引退から連想する激熱サイン馬券！抜群のコンビネーションでダブル好走の期待！？](/topics/46139/) + [【中山グランドジャンプ】絶 対 王 者 ！レコードタイムでエコロデュエルが連覇達成！](/topics/46138/) + [【アンタレスS】地力証明の逃げ切り！ムルソーが待望の重賞タイトル獲得！](/topics/46137/) ### 騎手コラム * [![](https://www-f.keibalab.jp/img/index/side/bn_keita_weekly.jpg?1772955811)](/column/keita_weekly/) * [![](https://www-f.keibalab.jp/img/index/side/bn_manami.jpg?1737250794)](/column/manami/) * [![](https://www-f.keibalab.jp/img/index/side/bn_daichi.jpg?1773794740)](/column/daichi/) * [![](https://www-f.keibalab.jp/img/index/side/bn_feel.jpg?1773794745)](/column/feel/) * [ホーム](/) * [競馬予想](/yosou/) * [3つ星穴馬](/yosou/mitsuboshi/) * 【皐月賞】人気馬を飲み込む準備はできている！「美味い」激走候補はこの2頭 ![三つ星穴馬](https://www-f.keibalab.jp/img/yosou/mitsuboshi/tit_mitsuboshi.jpg?1771578784) 腕利き研究員が激走候補を徹底調査！馬券ライフに役立つ「オイシイ穴馬」を紹介します この記事をシェアする # 【皐月賞】人気馬を飲み込む準備はできている！「美味い」激走候補はこの2頭 2026/4/18(土) [![](/img/nad/11/umasq_native_thumnail.png) 【皐月賞】勝ちに行くレースで堂々と押し切る！ 提供：編集長のこの3頭で勝負](/articles/98523/) [もう1頭の穴馬を見る](https://www.keibalab.jp/login/entry.html) 2歳女王のスターアニスが連勝した桜花賞に続いて、今週は牡馬クラシックの第一関門・[皐月賞(G1、中山芝2000m)](/db/race/202604190611/)。 朝日杯FS快勝からぶっつけで挑むカヴァレリッツォ、共同通信杯から始動も3着に終わったホープフルSの覇者ロブチェン。 2頭のG1ホースを負かすべく、他路線から挑む素質馬も虎視眈々。そんな『戦国皐月賞』を仕留めるべく、我が競馬ラボが誇る腕利き研究員も気合MAX！ 先週の桜花賞では12番人気ジッピーチューンの激走をズバリ！ 桜花賞の3つ星穴馬は[コチラ](/yosou/mitsuboshi/556) “人気はないけど美味い穴馬”をコンセプトに、従来のデータ一辺倒ではない研究員独自の視点も加味したスパイシーな逸品をご賞味ください！ ![](https://www-f.keibalab.jp/img/yosou/mitsuboshi/line.png?1771360978) 直近の3つ星激走馬 : 4月12日 阪神11R 桜花賞(G1) ★☆☆ジッピーチューン(12人気) 3着 レースセンスはなかなかのものを持っている。 : 4月4日 中山11R ダービー卿CT(G3) ★★☆サイルーン(6人気) 2着 滅法得意な中山マイルで好走！ : 3月7日 中山11R 中山牝馬S(G3) ★★☆エセルフリーダ(6人気) 1着 ハンデ53キロで、一発の可能性は十分！ : 2月28日 中山11R オーシャンS(G3) ★★★ペアポルックス(7人気) 1着 昨年の再現…絶好のタイミング！ ![](https://www-f.keibalab.jp/img/yosou/mitsuboshi/line.png?1771360978) 本命じゃない。でも美味い。 皐月賞・推奨穴馬 [![](https://www-f.keibalab.jp/img/horse/2023105311/2023105311_01.jpg?1763107158)](https://www.keibalab.jp/db/horse/2023105311/) ![](https://www-f.keibalab.jp/img/yosou/",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_name": "keibalab.jp",
+      "snippet": "# [競馬ラボ](/) ![JRAデータ公式 データベース検索](https://www-f.keibalab.jp/img/index/jradata.png?1459672717) [* 新規登録](/login/entry.html) [* ログイン](/login/login.html) 第86回 皐月賞 (ＧⅠ) : 4/19(日) 中山芝2000m ![皐月賞のレース写真](https://www-f.keibalab.jp/img/race/202604/202604190611_01.jpg?1775609215) 第23回 福島牝馬Ｓ (ＧⅢ) : 4/19(日) 福島芝1800m ![福島牝馬Ｓのレース写真](https://www-f.keibalab.jp/img/race/202604/202604190311_01.jpg?1775982577) 第31回 アンタレスＳ (ＧⅢ) : 4/18(土) 阪神ダ1800m ![アンタレスＳのレース写真](https://www-f.keibalab.jp/img/race/202604/202604180911_01.jpg?1775982577) * 重賞 * 04/18 * 04/19 * [中山 皐月賞 (ＧⅠ)](/db/race/202604190611/) * [福島 福島牝馬ステークス (ＧⅢ)](/db/race/202604190311/) * [中山 中山グランドジャンプ (ＧⅠ)](/db/race/202604180611/) * [阪神 アンタレスステークス (ＧⅢ)](/db/race/202604180911/) * [中山 下総ステークス](/db/race/202604180610/) * [阪神 アンタレスステークス (ＧⅢ)](/db/race/202604180911/) * [福島 ラジオ福島賞](/db/race/202604180311/) * [中山 皐月賞 (ＧⅠ)](/db/race/202604190611/) * [阪神 陽春ステークス](/db/race/202604190910/) * [福島 福島牝馬ステークス (ＧⅢ)](/db/race/202604190311/) [レース一覧](/db/race/) [重賞・次走報一覧](/db/race/grade.html) [![新規会員登録](https://www-f.keibalab.jp/img/index/bn_entry.png?1774399876)](/login/entry.html) ### SNS&Event ### PR * [![](https://www-f.keibalab.jp/img/upload/pr/202604/260419_umasq_sidecolumn.png?1775981418)](/ad/?a=WzM2MTgwLDQwNF0=) ### トピックス + [【全券種カタログ】見るのは馬柱じゃない！「馬連と枠連」オッズだ！](/topics/46141/) + [【皐月賞】イクイノックス&クロワデュノールも当てはまっていた！軸選びにピッタリの神条件](/topics/46140/) + [【皐月賞】りくりゅうペア引退から連想する激熱サイン馬券！抜群のコンビネーションでダブル好走の期待！？](/topics/46139/) + [【中山グランドジャンプ】絶 対 王 者 ！レコードタイムでエコロデュエルが連覇達成！](/topics/46138/) + [【アンタレスS】地力証明の逃げ切り！ムルソーが待望の重賞タイトル獲得！](/topics/46137/) ### 騎手コラム * [![](https://www-f.keibalab.jp/img/index/side/bn_keita_weekly.jpg?1772955811)](/column/keita_weekly/) * [![](https://www-f.keibalab.jp/img/index/side/bn_manami.jpg?1737250794)](/column/manami/) * [![](https://www-f.keibalab.jp/img/index/side/bn_daichi.jpg?1773794740)](/column/daichi/) * [![](https://www-f.keibalab.jp/img/index/side/bn_feel.jpg?1773794745)](/column/feel/) * [ホーム](/) * [競馬予想](/yosou/) * [ナカノコール！](/yosou/nakano/) * 【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ ![ナカノコール！](https://www-f.keibalab.jp/img/yosou/nakano/tit_nakano.jpg?1772956607) 騎手時代に約20万人が来場した90年ダービーをアイネスフウジンで逃げ切った中野栄治元調教師が、 独自の視点で重賞の好調教馬を導き出します！ この記事をシェアする # 【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ 2026/4/18(土) [![](/img/nad/11/umasq_native_thumnail.png) 【皐月賞】勝ちに行くレースで堂々と押し切る！ 提供：編集長のこの3頭で勝負](/articles/98523/) ![](https://www-f.keibalab.jp/img/yosou/nakano/nakano01.jpg?1725429966) [カヴァレリッツォ](/db/horse/2023107153/) | 11日土曜 栗東CW（重） | | --- | | 84.2 | 68.6 | 53.3 | 38.1 | 11.3 | 一杯 | はじめに先週の桜花賞の話から。勝ったスターアニスは純粋に強かったね。 最近は阪神ジュベナイルフィリーズからのブッツケ本番組が結果を出しているけれど、この馬もしかり、今後が楽しみだ。これは個人的な感想で、今の3歳世代で牡馬も含めて一番強いんじゃないかな。 だから僕としてはダービーに出ないかなぁとも思ってる(笑)。さすがにオークスに行くようだけれど、次走も有力候補になることは間違いない。 それでは本題の皐月賞に話を移して、今週のナンバーワンはカヴァレリッツォだ。 中間は前走時と同様、土曜にCWコースで負荷をかけて週中は坂路で軽く調整してきた。順調さが伝わる仕上がりだと思う。硬さもないし、凄くリズミカルな動き。程よく気合も乗って、態勢は整ったと見るね。 ![](https://www-f.keibalab.jp/img/yosou/nakano/nakano02.jpg?1725429984) [ロブチェン](/db/horse/2023107089/) [リアライズシリウス](/db/horse/2023103604/) [アドマイヤクワッズ](/db/horse/2023105311/) ロブチェンは1週前の動きが非常に良かった。CWコースで3頭併せの内から仕掛けての反応が抜群だったね。重心の低いフォームでスムーズに加速していたし、前哨戦を叩いた上積みは大きいと思う。 リアライズシリウスは3週連続で津村騎手が跨っていたけれど、弾力性のあるフットワークでラクラクと先着していた。1週前は自己ベストをマークして、今週も余力を残して好時計。前走時より鋭さが出てきた感じだね。 最後にアドマイヤクワッズ。中間はプールを併用して乗り込みは十分。1週前は古馬のオープン馬と併せて最先着していたし、これで体は出来上がったと思うよ。今週も気合を付けると良い加速をしていたし、あとはレースに行っての折り合い次第だろう。 余談なんだけれど、ここまではあくまで追い切りの評価。僕が今回の皐月賞で一番",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_name": "news.sp.netkeiba.com",
+      "snippet": "![](https://cdn.netkeiba.com/img.sp/common/img/top/bnr_transprent_h155.png) ![](https://cdn.netkeiba.com/img.sp/common/img/icon/icon_top_jack_close.png) # [netkeiba](https://sp.netkeiba.com/) ![](https://cdn.netkeiba.com/img.sp/common/img/common/icon_keirin01.png) # 【皐月賞】上原佑厩舎 異例の“三本の矢”追い (12)グリーンエナジーは「凄くいい内容」 ![スポニチ](https://cdn.netkeiba.com/img.news.sp/common/img/news/logo_sponichi.png) 2026年04月17日(金) 05:30 ![](https://cdn.netkeiba.com/img.news/?pid=news_img&id=1010077) 3頭併せで追い切る（左から）フォルテアンジェロ、ライヒスアドラー、グリーンエナジー （撮影・村上 大輔） スポンサーリンク 配送未経験者歓迎!「配送ドライバー」平均年収450万円以上/車貸与以外の天引きなし 株式会社Field & Wings 詳しく見る スポンサー求人ボックス ## 関連情報 枠順確定 皐月賞 予想オッズ 皐月賞の人気をチェック！ プロフィール グリーンエナジーの全成績と掲示板 プロフィール 上原佑紀の全成績 ニュース 【皐月賞】3本の矢追い切りでグリーンエナジーがG1仕様の渾身仕上げ 上原佑調教師「勝ちに行く」 ## みんなのコメント ニュースコメントを表示するには、『コメント非表示』のチェックを外してください。 ## 最新ニュース ![](https://cdn.netkeiba.com/img.sp/common/img/common/gif-load.gif?20190116) ![競輪情報はこちら!netkeirin](https://cdn.netkeiba.com/img.news.sp/common/img/news/bnr_info_keirin_s01.png) ## ランキング ![大井町の魔術師](https://cdn.findfriends.jp/img/profile/90/18358990_4.jpg?220) 1 #### 大井町の魔術師 ♂ 16 東京 ジンジャーエールで乾杯！ ![カトゥ](https://cdn.findfriends.jp/img/227/2278311/avatar_1_0_s.gif?544) 2 #### カトゥ ![ガット](https://cdn.findfriends.jp/img/203/2036237/avatar_1_0_s.gif?359) 3 #### ガット ♂ 15 新潟 本当、あの人はいちがいこきだよね ## ニュースを探す ![](https://cdn.netkeiba.com/img.sp/common/img/common/PageTop.png) *P便利でお得な*プレミアムサービスのご案内 お気づきの点がございましたら、お聞かせください ご意見・ご要望 ![競輪を気軽に楽しもう！nerkeirin](https://cdn.netkeiba.com/img.sp/common/img/common/SP_footer_bnr01.png) ![](https://cdn.netkeiba.com/img.sp/common/img/footer_twitter.png) ![](https://cdn.netkeiba.com/img.sp/common/img/footer_line.png) ![](https://cdn.netkeiba.com/img.sp/common/img/footer_share.png) © NET DREAMERS, Co., Ltd. All Rights Reserved.",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞】重賞最強データ！馬券率8割を誇る黄金コンビの伏兵候補！ | 競馬ニュース | 競馬ラボ",
+      "url": "https://www.keibalab.jp/topics/45100/",
+      "source_name": "keibalab.jp",
+      "snippet": "# [競馬ラボ](/) ![JRAデータ公式 データベース検索](https://www-f.keibalab.jp/img/index/jradata.png?1459672717) [* 新規登録](/login/entry.html) [* ログイン](/login/login.html) 第86回 皐月賞 (ＧⅠ) : 4/19(日) 中山芝2000m ![皐月賞のレース写真](https://www-f.keibalab.jp/img/race/202604/202604190611_01.jpg?1775609215) 第23回 福島牝馬Ｓ (ＧⅢ) : 4/19(日) 福島芝1800m ![福島牝馬Ｓのレース写真](https://www-f.keibalab.jp/img/race/202604/202604190311_01.jpg?1775982577) 第31回 アンタレスＳ (ＧⅢ) : 4/18(土) 阪神ダ1800m ![アンタレスＳのレース写真](https://www-f.keibalab.jp/img/race/202604/202604180911_01.jpg?1775982577) * 重賞 * 04/18 * 04/19 * [中山 皐月賞 (ＧⅠ)](/db/race/202604190611/) * [福島 福島牝馬ステークス (ＧⅢ)](/db/race/202604190311/) * [中山 中山グランドジャンプ (ＧⅠ)](/db/race/202604180611/) * [阪神 アンタレスステークス (ＧⅢ)](/db/race/202604180911/) * [中山 下総ステークス](/db/race/202604180610/) * [阪神 アンタレスステークス (ＧⅢ)](/db/race/202604180911/) * [福島 ラジオ福島賞](/db/race/202604180311/) * [中山 皐月賞 (ＧⅠ)](/db/race/202604190611/) * [阪神 陽春ステークス](/db/race/202604190910/) * [福島 福島牝馬ステークス (ＧⅢ)](/db/race/202604190311/) [レース一覧](/db/race/) [重賞・次走報一覧](/db/race/grade.html) [![新規会員登録](https://www-f.keibalab.jp/img/index/bn_entry.png?1774399876)](/login/entry.html) ### SNS&Event ### PR * [![](https://www-f.keibalab.jp/img/upload/pr/202604/260419_umasq_sidecolumn.png?1775981418)](/ad/?a=WzM2MTgwLDQwNF0=) ### トピックス + [【全券種カタログ】見るのは馬柱じゃない！「馬連と枠連」オッズだ！](/topics/46141/) + [【皐月賞】イクイノックス&クロワデュノールも当てはまっていた！軸選びにピッタリの神条件](/topics/46140/) + [【皐月賞】りくりゅうペア引退から連想する激熱サイン馬券！抜群のコンビネーションでダブル好走の期待！？](/topics/46139/) + [【中山グランドジャンプ】絶 対 王 者 ！レコードタイムでエコロデュエルが連覇達成！](/topics/46138/) + [【アンタレスS】地力証明の逃げ切り！ムルソーが待望の重賞タイトル獲得！](/topics/46137/) ### 騎手コラム * [![](https://www-f.keibalab.jp/img/index/side/bn_keita_weekly.jpg?1772955811)](/column/keita_weekly/) * [![](https://www-f.keibalab.jp/img/index/side/bn_manami.jpg?1737250794)](/column/manami/) * [![](https://www-f.keibalab.jp/img/index/side/bn_daichi.jpg?1773794740)](/column/daichi/) * [![](https://www-f.keibalab.jp/img/index/side/bn_feel.jpg?1773794745)](/column/feel/) * [ホーム](/) * [競馬ニュース一覧](/topics/backnumber.html) * 【皐月賞】重賞最強データ！馬券率8割を誇る黄金コンビの伏兵候補！ ## トピックスTopics # 【皐月賞】重賞最強データ！馬券率8割を誇る黄金コンビの伏兵候補！ 2025/4/17(木) [![](/img/nad/11/umasq_native_thumnail.png) 【皐月賞】勝ちに行くレースで堂々と押し切る！ 提供：編集長のこの3頭で勝負](/articles/98523/) この記事をシェアする ![マスカレードボールに騎乗する横山武史騎手](https://www-f.keibalab.jp/img/upload/topics/202504/250417_topi.jpg?1744869554) マスカレードボールに騎乗する横山武史騎手 注目重賞の傾向を各項目に分けて徹底深掘り！ 今回は牡馬クラシック1冠目、[皐月賞(G1、中山芝2000m)](/db/race/202504200611/)の重賞最強データを発表します！ **▼中山芝2000m最強データ** 【騎手1位】横山武史 [21-11-11-60] 勝率20.4% 複勝率41.7% 【厩舎1位】手塚貴久 [9- 6-12-39] 勝率13.6% 複勝率40.9% 【血統1位】エピファネイア [11-8-14-84] 勝率9.4% 複勝率28.2% (※集計期間22年1/5～先週。参戦の人馬に限る) 騎手部門1位は[マスカレードボール](/db/horse/2022105519/)と初コンビを組む[横山武史騎手](/db/jockey/01170/)。23年皐月賞をソールオリエンスで制するなど、この舞台を得意としています。現在34勝を挙げて東西リーディング3位と、勢いに乗るジョッキーの手腕に期待です。 厩舎部門1位は先述したソールオリエンスを管理する手塚貴久厩舎。今回出走するマスカレードボールに騎乗する横山武史騎手と同厩舎のコンビは、集計期間内に5戦してソールオリエンスでの2勝を含む［3-0-1-1］勝率60％、複勝率80％と抜群の成績を残しており、要注目です！ 血統部門1位はエピファネイア。同産駒のダノンデサイルは中山芝2000mの京成杯で後の菊花賞馬アーバンシック(2着)を抑えて優勝。レース直前の除外がなければ皐月賞でも好走していたかもしれません。 同舞台のホープフルSで2着に入った[ジョバンニ](/db/horse/2022103995/)は血統的なコース適性を証明済みと言えるでしょう。当時先着を許したクロワデュノールに一矢報いることができるでしょうか。 ## みんなの掲示板 [コメントを書く](/topics/45100/bbs.html) みんなの掲示板 この記事にはまだコメントがありません ## おすすめの記事 [![](https://www-f.keibalab.jp/img/special/basic/thum_treasure.jpg?1772955587) ### 【皐月賞】敵は己れだけ 水上学の血統トレジャーハンティング](/yosou/treasure/2701/) [![](/img/upload/thums/yt-thum_umayohou_satsuki-sho_a_0.jpg) ### 【You",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬 ...",
+      "url": "https://dir.netkeiba.com/keiba/column/column_preview_amp.html?cid=58718",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "* [トップ](https://sp.netkeiba.com/?rf=kslp \"トップ\") * [ニュース](https://news.sp.netkeiba.com/?rf=kslp \"ニュース\") * [レース](https://race.sp.netkeiba.com/?rf=kslp \"レース\") * [ウマい馬券](https://yoso.sp.netkeiba.com/?access=init&rf=kslp \"ウマい馬券\") * [コラム](https://news.sp.netkeiba.com/?pid=column_top&rf=kslp \"コラム\") * [netkeibaTV](https://tv.netkeiba.com/?rf=kslp \"netkeibaTV\") * [地方競馬](https://nar.sp.netkeiba.com/?rf=kslp \"地方競馬\") * [データベース](https://db.sp.netkeiba.com/?rf=kslp \"データベース\") * [俺プロ](https://yosocs.sp.netkeiba.com/?rf=kslp \"俺プロ\") * [一口馬主](https://sp.netkeiba.com/?pid=owner_info&rf=kslp \"一口馬主\") * [POG](https://pog.sp.netkeiba.com/?rf=kslp \"POG\") * [競馬広場](https://community.sp.keiba.findfriends.jp/?rf=kslp \"競馬広場\") * [お気に入り馬](https://race.sp.netkeiba.com/?pid=bookmark&rf=kslp \"お気に入り馬\") * [まとめ](https://dir.netkeiba.com/keibamatome/index.html?rf=kslp \"競馬まとめ\") * [ゲーム](https://sp.netkeiba.com/game?rf=kslp \"ゲーム\") * [アカウント](https://regist.sp.netkeiba.com/?rf=kslp \"アカウント\") # 【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬」から手広く勝負!!/第280回 * 今年の皐月賞は例年にないほどの大混戦。予想オッズを見ると、中山芝2000mの重賞を勝ったロブチェン、グリーンエナジーが1、2番人気、実績十分ながら今回が初の2000mとなるカヴァレリッツォ、リアライズシリウスが3、4番人気となっています。はたしてこのなかで最も軸にふさわしいのはどの馬なのでしょうか？ 馬券裁判男こと卍氏が開発した美味しさ指数「妙味度」を使って予想していきます。 (取材・文・構成＝オーパーツ・パブリッシング編集K3) 条件に該当したら2002年以降9回目 編集K3(以下、K3) 先週の桜花賞は「儲かる軸馬」に該当したスターアニスが勝ちました。ただ、ギャラボーグもジッピーチューンも相手に入っていたんですが、僕の馬… [続きを読む](https://news.netkeiba.com/?pid=column_view&cid=58718&rf=kslp) ## あなたにおすすめ * [## 【無料・皐月賞予想】追走力が求められる皐月賞は 過去の“ある経験”がモノをいう](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58711&rf=ksop \"【無料・皐月賞予想】追走力が求められる皐月賞は 過去の“ある経験”がモノをいう\") * [## 【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬」から手広く勝負!!/第280回](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58718&rf=ksop \"【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬」から手広く勝負!!/第280回\") * [## 【皐月賞・最終調整】「リラックス」「成長著しい」「直前に...」最多タイ3頭出し上原佑厩舎勢スタンバイ完了](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328422&rf=ksop \"【皐月賞・最終調整】「リラックス」「成長著しい」「直前に...」最多タイ3頭出し上原佑厩舎勢スタンバイ完了\") * [## 【皐月賞・最終調整】「武井厩舎で重賞勝ちたい」高杉吏麒騎手ラージアンサンブルでVなるか トレーナーは「まだウチで...」](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328421&rf=ksop \"【皐月賞・最終調整】「武井厩舎で重賞勝ちたい」高杉吏麒騎手ラージアンサンブルでVなるか トレーナーは「まだウチで...」\") * [## 【皐月賞2026】弥永明郎が出走馬をジャッジ！](https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12698&rf=ksop \"【皐月賞2026】弥永明郎が出走馬をジャッジ！\") * [## 【皐月賞・最終調整】「差しの練習もしているよ(笑)」リアライズシリウスは精神面も大人になり万全の態勢](https://dir.netkeiba.com/keiba/news/news_preview.html?no=328420&rf=ksop \"【皐月賞・最終調整】「差しの練習もしているよ(笑)」リアライズシリウスは精神面も大人になり万全の態勢\") ## 新着コラム [もっと見る](https://dir.netkeiba.com/keiba/column/index.html) * [## 【無料・皐月賞予想】追走力が求められる皐月賞は 過去の“ある経験”がモノをいう 3時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58711&rf=kssp \"【無料・皐月賞予想】追走力が求められる皐月賞は 過去の“ある経験”がモノをいう\") * [## 【皐月賞など予想】今週から中山の芝コースはCコースに!! 先行馬と内目の枠の馬に要注意 3時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58712&rf=kssp \"【皐月賞など予想】今週から中山の芝コースはCコースに!! 先行馬と内目の枠の馬に要注意\") * [## 【皐月賞】多彩な顔ぶれの皐月賞 過去3年間、勝ち馬の前走は全て異なる 3時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58713&rf=kssp \"【皐月賞】多彩な顔ぶれの皐月賞 過去3年間、勝ち馬の前走は全て異なる\") * [## 【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬」から手広く勝負!!/第280回 3時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58718&rf=kssp \"【皐月賞予想】数年に一度の大荒れパターンに該当!?「儲かる軸馬」から手広く勝負!!/第280回\") * [## 【皐月賞予想】今年のGIは5戦4勝で回収率317％をマーク！ 平場でも存在感を発揮する新進気鋭の予想家に丸乗り 6時間前](https://dir.netkeiba.com/keiba/column/column_preview.html?cid=58706&rf=kssp \"【皐月賞予想】今年のGIは5戦4勝で回収率317％をマーク！ 平場でも存在感を発揮する新進気鋭の予想家に丸乗り\") [もっと見る](https://dir.netkeiba.com/keiba/colu",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞】重賞最強データ！舞台を知り尽くす名門から - 競馬ラボ",
+      "url": "https://www.keibalab.jp/topics/46132/",
+      "source_name": "keibalab.jp",
+      "snippet": "# [競馬ラボ](/) ![JRAデータ公式 データベース検索](https://www-f.keibalab.jp/img/index/jradata.png?1459672717) [* 新規登録](/login/entry.html) [* ログイン](/login/login.html) 第86回 皐月賞 (ＧⅠ) : 4/19(日) 中山芝2000m ![皐月賞のレース写真](https://www-f.keibalab.jp/img/race/202604/202604190611_01.jpg?1775609215) 第23回 福島牝馬Ｓ (ＧⅢ) : 4/19(日) 福島芝1800m ![福島牝馬Ｓのレース写真](https://www-f.keibalab.jp/img/race/202604/202604190311_01.jpg?1775982577) 第31回 アンタレスＳ (ＧⅢ) : 4/18(土) 阪神ダ1800m ![アンタレスＳのレース写真](https://www-f.keibalab.jp/img/race/202604/202604180911_01.jpg?1775982577) * 重賞 * 04/18 * 04/19 * [中山 皐月賞 (ＧⅠ)](/db/race/202604190611/) * [福島 福島牝馬ステークス (ＧⅢ)](/db/race/202604190311/) * [中山 中山グランドジャンプ (ＧⅠ)](/db/race/202604180611/) * [阪神 アンタレスステークス (ＧⅢ)](/db/race/202604180911/) * [中山 下総ステークス](/db/race/202604180610/) * [阪神 アンタレスステークス (ＧⅢ)](/db/race/202604180911/) * [福島 ラジオ福島賞](/db/race/202604180311/) * [中山 皐月賞 (ＧⅠ)](/db/race/202604190611/) * [阪神 陽春ステークス](/db/race/202604190910/) * [福島 福島牝馬ステークス (ＧⅢ)](/db/race/202604190311/) [レース一覧](/db/race/) [重賞・次走報一覧](/db/race/grade.html) [![新規会員登録](https://www-f.keibalab.jp/img/index/bn_entry.png?1774399876)](/login/entry.html) ### SNS&Event ### PR * [![](https://www-f.keibalab.jp/img/upload/pr/202604/260419_umasq_sidecolumn.png?1775981418)](/ad/?a=WzM2MTgwLDQwNF0=) ### トピックス + [ジャンプ界の頂上決戦。《中山グランドジャンプ》【高田潤コラム】](/topics/46135/) + [【皐月賞】ラボオールスターズ大予想！あの有力馬の評価は？【動画まとめ】](/topics/46134/) + [【福島牝馬S】ベタ買いでもプラス収支になる！好走率と回収率が絶妙にマッチしたマーク必須の穴馬2頭](/topics/46133/) + [【皐月賞】重賞最強データ！舞台を知り尽くす名門から、素質馬がいざ一冠目へ！](/topics/46132/) + [【アンタレスS】勝ち筋に乗る注目株、中距離戦線の主役争いへ！](/topics/46131/) ### 騎手コラム * [![](https://www-f.keibalab.jp/img/index/side/bn_keita_weekly.jpg?1772955811)](/column/keita_weekly/) * [![](https://www-f.keibalab.jp/img/index/side/bn_manami.jpg?1737250794)](/column/manami/) * [![](https://www-f.keibalab.jp/img/index/side/bn_daichi.jpg?1773794740)](/column/daichi/) * [![](https://www-f.keibalab.jp/img/index/side/bn_feel.jpg?1773794745)](/column/feel/) * [ホーム](/) * [競馬ニュース一覧](/topics/backnumber.html) * 【皐月賞】重賞最強データ！舞台を知り尽くす名門から、素質馬がいざ一冠目へ！ ## トピックスTopics # 【皐月賞】重賞最強データ！舞台を知り尽くす名門から、素質馬がいざ一冠目へ！ 2026/4/17(金) [![](/img/update/thum/thum_umahiro_2604117.jpg) 【YouTube】新キャラ登場！有力馬3頭出しの新進調教師に突撃インタビュー🎤 提供：久光＆前田のウマヒロバ](/articles/98505/) この記事をシェアする ![クラシック獲得に期待がかかるリアライズシリウス](https://www-f.keibalab.jp/img/upload/topics/202604/260417_topi53siriusu.jpg?1776416087) クラシック獲得に期待がかかるリアライズシリウス 注目重賞の傾向を各項目に分けて徹底深掘り！ 今回は、牡馬クラシックの一冠目、[皐月賞(G1・中山芝2000m)](/db/race/202604190611/)の重賞最強データを紹介します！ **▼中山芝2000m最強データ(3歳限定)** 【騎手1位】横山武史［11-7-5-31］ 勝率20.4% 複勝率42.6% 【厩舎1位】手塚貴久［9-2-6-20］ 勝率24.3% 複勝率45.9% 【血統1位】キタサンブラック［7-5-1-26］ 勝率17.9% 複勝率33.3% ※集計期間23年1/5～先週。参戦の人馬に限る 騎手部門1位は、エフフォーリアとのコンビで皐月賞を制し、自身のG1初制覇を飾った横山武史騎手。複勝率42.6%が示すように、このトリッキーな舞台でひときわ心強い存在です。 今回騎乗するのは[アルトラムス](/db/horse/2023103480/)。ここまで3戦して一度も馬券圏内を外さない安定感はもちろん、前走の毎日杯で見せた勝ちっぷりも見事。高いポテンシャルを示しており、続く大一番でもその走りに注目が集まります。 厩舎部門1位は手塚貴久調教師。ソールオリエンスでの皐月賞制覇に加え、昨年もマスカレードボールが3着に入っており、この舞台を知り尽くした名門厩舎です。 今年送り出すのは[リアライズシリウス](/db/horse/2023103604/)。朝日杯FSでは5着に敗れましたが、その他のレースでは3戦3勝と素質の高さを見せています。厩舎の仕上げる力で一冠目獲得なるか注目したいところです。 血統部門1位はキタサンブラック。現役時代に名馬として活躍し、種牡馬入り後も次々と活躍馬を輩出。この皐月賞でも優勝したソールオリエンスや昨年2着のクロワデュノールなどが好走し、わずか3年の集計期間でG1馬も送り出す、日本競馬を代表する種牡馬です。 そんな偉大な血統を継ぐ今年の出走馬が[バステール](/db/horse/2023107247/)。前走の弥生賞では初の重賞挑戦ながらも、見事な差し切り勝ちを収めており、ポテンシャルの高さは相当なもの。勢いそのままに、一気のG1制覇まで十分狙える存在です。 ## みんなの掲示板 [コメントを書く](/topics/46132/bbs.html) みんなの掲示板 この記事にはまだコメントがありません ## おすすめの記事 [![](h",
       "source_type": "web"
     }
   ],
@@ -2095,6 +2527,22 @@
   ],
   "training_items": [
     {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教師が騎手・調教師として史上2人目の快挙を目指すという状況も期待感を高めます",
+      "種別": "プラス",
+      "情報源": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "1週前には古馬のオープン馬と併せて最先着を果たすなど",
+      "種別": "プラス",
+      "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
       "馬名": "カヴァレリッツォ",
       "評価内容": "調教で軽めに15-15秒台で上がっているが",
       "種別": "プラス",
@@ -2103,11 +2551,67 @@
       "source_type": "youtube"
     },
     {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "調教トップ5」に選ばれるほどの高い調教評価が示唆されています",
+      "種別": "プラス",
+      "情報源": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "CWコースで負荷をかけ",
+      "種別": "プラス",
+      "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "坂路で軽く調整し順調な仕上がり",
+      "種別": "プラス",
+      "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "CW（重）では84.2-68.6-53.3-38.1-11.3を一杯でマーク",
+      "種別": "プラス",
+      "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
       "馬名": "グリーンエナジー",
       "評価内容": "前走の京成杯（1着）では、前進気勢を見せながらも後方のインでじっくりと脚を溜め、4コーナーで内があく絶好の展開を活かしてスムーズに馬群を捌き快勝しました。完璧に立ち回れた恩恵は大きいですが、ラストの伸び脚自体は強烈で、前向きさが強い分、ペースが上がりやすいG1向きの馬と言えます。2走前の未勝利戦も直線手応え十分でまともに追われることなく完勝しています。",
       "種別": "プラス",
       "情報源": "【皐月賞2026】ろてむプロの『前走から紐解く！隠されたオッズ妙味』直線あわやの追い込みは地力強化の証　ロブチェン｜競馬ニュース｜競馬予想のウマニティ",
       "url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868191",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "併せで最終追い切りを実施",
+      "種別": "プラス",
+      "情報源": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "調教師は「凄くいい内容」と評価しており",
+      "種別": "プラス",
+      "情報源": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "ラスト10.5-11.1と総合力が非常に高く",
+      "種別": "プラス",
+      "情報源": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "url": "https://spaia-keiba.com/news/detail/34961",
       "source_type": "web"
     },
     {
@@ -2135,6 +2639,22 @@
       "source_type": "youtube"
     },
     {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "併せで最終追い切りを行っており",
+      "種別": "プラス",
+      "情報源": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "調教ができたと考えられる",
+      "種別": "プラス",
+      "情報源": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_type": "web"
+    },
+    {
       "馬名": "マテンロウゲイル",
       "評価内容": "調教師は「もう一段階上がある」とコメント",
       "種別": "プラス",
@@ -2157,6 +2677,62 @@
       "情報源": "【皐月賞2026・予想】群雄割拠の牡馬クラシック１冠目！今年最初の頂点に立つのはあの馬！！昨年総回収1,000万超のけんしろうと昨年秋8連続G1的中のアキラと最強の予想家達が本命を大公開！！",
       "url": "https://www.youtube.com/watch?v=MZopAaHrOlY",
       "source_type": "youtube"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "評価内容": "調教師が「これからの関東を背負うジョッキー」と評価する佐々木大輔騎手とのコンビで",
+      "種別": "プラス",
+      "情報源": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "評価内容": "併せで最終追い切りを行っており",
+      "種別": "プラス",
+      "情報源": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "評価内容": "調教ができたと考えられる",
+      "種別": "プラス",
+      "情報源": "【皐月賞】上原佑厩舎　異例の“三本の矢”追い　(12)グリーンエナジーは「凄くいい内容」 | 競馬ニュース - netkeiba",
+      "url": "https://news.sp.netkeiba.com/?pid=news_view&no=328295",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "今週も余力を残して好時計を出しており",
+      "種別": "プラス",
+      "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "調教トップ5」に選ばれるほどの高い調教評価が示唆されています",
+      "種別": "プラス",
+      "情報源": "【皐月賞2026予想】皐月賞向きは危険!? 本当に買うべきは“〇〇で ...",
+      "url": "https://dir.netkeiba.com/keiba/tv/tv_preview_amp.html?id=12688",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "1週前の動きが非常に良く",
+      "種別": "プラス",
+      "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "CWコースでの3頭併せで内から仕掛けた際の反応が抜群だった",
+      "種別": "プラス",
+      "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
     }
   ],
   "training_time_rows": [
@@ -2371,6 +2947,21 @@
       "source_url": "https://umasiru.com/archives/19540"
     },
     {
+      "馬名": "カヴァレリッツォ",
+      "時期": "不明",
+      "場所": "CW(重)",
+      "6F": "84.2",
+      "5F": "68.6",
+      "4F": "53.3",
+      "3F": "38.1",
+      "2F": "—",
+      "1F": "11.3",
+      "脚色": "一杯",
+      "source_type": "web",
+      "source_title": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
+      "source_url": "https://www.keibalab.jp/yosou/nakano/90/"
+    },
+    {
       "馬名": "グリーンエナジー",
       "時期": "直近",
       "場所": "美浦W(重)",
@@ -2414,6 +3005,21 @@
       "source_type": "umasiru",
       "source_title": "【皐月賞2026追い切り評価／全頭診断】穴馬候補の〝この3頭〟にトップ評価「Ｓ」 | うましる",
       "source_url": "https://umasiru.com/archives/19540"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "時期": "不明",
+      "場所": "—",
+      "6F": "—",
+      "5F": "—",
+      "4F": "—",
+      "3F": "—",
+      "2F": "10.5",
+      "1F": "11.1",
+      "脚色": "不明",
+      "source_type": "web",
+      "source_title": "【皐月賞】共同通信杯組は単回220% GⅠ馬ロブチェンの巻き返しに ...",
+      "source_url": "https://spaia-keiba.com/news/detail/34961"
     },
     {
       "馬名": "サウンドムーブ",
