@@ -11,7 +11,7 @@ import pandas as pd
 import os
 import sys
 import subprocess
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from pathlib import Path
 import re
 import json
@@ -20,6 +20,7 @@ import traceback
 import unicodedata
 import math
 import itertools
+import html
 from difflib import SequenceMatcher
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse, urljoin, parse_qs
@@ -91,6 +92,13 @@ TAVILY_API_KEY = _get_secret("TAVILY_API_KEY")
 X_BEARER_TOKEN = _get_secret("X_BEARER_TOKEN")
 
 _TRAINING_KEYWORDS = re.compile(r'追切|追い切り|調教|時計|仕上がり|動き[がをは]|坂路|ウッド|CW')
+_TRAINING_STRONG_CONTEXT_PAT = re.compile(
+    r'追切|追い切り|調教|最終追い|最終追切|1週前追い|1週前追切|一週前追い|一週前追切|坂路|ウッド|CW|南W|北W|ポリ|併せ'
+)
+_TRAINING_WEAK_CONTEXT_PAT = re.compile(r'時計|仕上がり|動き[がをは]|終い|ラスト|ハロン')
+_NON_TRAINING_RACE_CONTEXT_PAT = re.compile(
+    r'予想|本命|対抗|単穴|連下|買い目|馬券|オッズ|人気|印|展開|ペース|先行|差し|追込|上がり|直線|脚質|枠順|血統|適性'
+)
 # 追切タイム抽出パターン（1:08.5 / 34.5 / 68.5秒 / 12-10.8 / C34.5 / F36.0 / 66秒5 など）
 _TRAINING_TIME_PAT = re.compile(
     r'\d:\d{2}\.\d'               # 1:08.5 形式（総合タイム）
@@ -152,10 +160,28 @@ BET_ODDS_TYPE_CODE_CANDIDATES = {
     "三連単": ["b8", "b9"],
 }
 
+UMANITY_BASE_URL = "https://umanity.jp"
+UMANITY_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Referer": UMANITY_BASE_URL,
+}
+UMANITY_RACE_NAME_ALIASES = {
+    "フェブラリーステークス": ["フェブラリーS"],
+    "朝日杯フューチュリティステークス": ["朝日杯フューチュリティS"],
+    "阪神ジュベナイルフィリーズ": ["阪神ジュベナイルF", "阪神JF"],
+    "スプリンターズステークス": ["スプリンターズS"],
+    "マイルチャンピオンシップ": ["マイルCS"],
+    "ジャパンカップ": ["ジャパンC"],
+    "チャンピオンズカップ": ["チャンピオンズC"],
+    "NHKマイルカップ": ["NHKマイルC"],
+    "エリザベス女王杯": ["エリザベス女王杯"],
+}
+
 # レース切替時にクリアするセッションステートキー
 RACE_SESSION_KEYS = [
     'horse_df', 'youtube_videos', 'youtube_raw', 'youtube_summary_df',
     'web_articles', 'web_raw', 'race_characteristics', 'gates_saved',
+    'race_characteristics_enriched', 'race_characteristics_last_attempt', 'race_characteristics_last_error',
     'yt_detail_analysis', 'yt_video_conclusions', 'doc_horse_raw', 'win_rates', 'latest_odds_error',
     'latest_odds', 'combined_keyword', 'yt_detail_keyword',
     'x_tweets', 'x_raw', 'x_newest_id',
@@ -201,8 +227,18 @@ def get_race_url() -> str:
 
 def _get_cache_path(race_key: str) -> str:
     """race_key をファイル名にサニタイズしたキャッシュパスを返す"""
-    safe = re.sub(r'[/: ]+', '_', race_key)
+    safe = _sanitize_race_key_for_cache(race_key)
     return os.path.join("data", "search_cache", f"{safe}.json")
+
+
+def _sanitize_race_key_for_cache(race_key: str) -> str:
+    """race_key をOS非依存で安全なファイル名へ正規化する。"""
+    text = str(race_key or "").strip()
+    # Windows禁止文字・制御文字をまとめて置換
+    text = re.sub(r'[<>:"/\\|?*\x00-\x1f]+', "_", text)
+    text = re.sub(r"\s+", "_", text)
+    text = re.sub(r"_+", "_", text).strip("._")
+    return text or "unknown_race"
 
 
 def _get_last_selected_race_path() -> str:
@@ -362,6 +398,11 @@ def load_race_cache(race_key: str) -> bool:
     rc = data.get('race_characteristics')
     if rc:
         st.session_state['race_characteristics'] = rc
+    st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(
+        st.session_state.get('race_characteristics')
+    )
+    st.session_state.pop('race_characteristics_last_attempt', None)
+    st.session_state.pop('race_characteristics_last_error', None)
 
     # horse_df を全rawデータから再集計
     horse_df = aggregate_horse_analysis(
@@ -386,6 +427,25 @@ def get_minimal_race_characteristics() -> dict:
         "コース特徴": f"{r.venue}競馬場 {r.surface}{r.distance}",
         "注目ポイント": f"{r.grade}レース",
     }
+
+
+def _has_meaningful_race_characteristics(info: dict | None) -> bool:
+    """レース特徴が最小フォールバックを超えて取得できているか判定する。"""
+    if not isinstance(info, dict) or not info:
+        return False
+    important_keys = (
+        "コース特徴",
+        "過去の傾向",
+        "勝ちやすい馬のタイプ",
+        "苦手な馬のタイプ",
+        "枠順有利",
+        "枠順不利",
+        "騎手厩舎傾向",
+        "注目ポイント",
+    )
+    non_empty = sum(1 for key in important_keys if _to_text(info.get(key)))
+    # 最小フォールバックは概ね2項目なので、3項目以上を「有意」とみなす
+    return non_empty >= 3
 
 
 def _to_text(value) -> str:
@@ -494,6 +554,126 @@ def _merge_video_conclusion(base: dict, extra: dict) -> dict:
     return merged
 
 
+def _is_unknown_like_text(text: str) -> bool:
+    """「不明/なし」系のプレースホルダー文言かを判定する。"""
+    normalized = unicodedata.normalize("NFKC", _to_text(text)).strip().lower()
+    if not normalized:
+        return True
+
+    normalized = re.sub(r"[。．.!！?？\s]+$", "", normalized)
+    unknown_tokens = {
+        "不明", "不詳", "なし", "無し", "該当なし", "未記載", "未言及", "未定", "未発表",
+        "n/a", "na", "-", "ー", "unknown", "none",
+    }
+    if normalized in unknown_tokens:
+        return True
+    if re.fullmatch(r"(不明|不詳|該当なし|未記載|未言及|未定|未発表)(です|でした)?", normalized):
+        return True
+    return False
+
+
+def _has_meaningful_video_conclusion(conclusion: dict | None) -> bool:
+    """本命/対抗などの印情報が1つでもあるか判定する。"""
+    if not isinstance(conclusion, dict):
+        return False
+    pick_keys = ("本命", "対抗", "単穴", "連下", "危険な人気馬")
+    return any(_to_text(conclusion.get(k)) for k in pick_keys)
+
+
+def _normalize_youtube_analysis_rows(rows: list[dict], horse_names: list[str]) -> list[dict]:
+    """YouTube抽出結果の行を正規化し、無効な行を除外する。"""
+    normalized_rows = []
+    seen = set()
+    for item in rows or []:
+        if not isinstance(item, dict):
+            continue
+        horse_raw = _to_text(item.get("馬名"))
+        plus = _to_text(item.get("プラス情報"))
+        minus = _to_text(item.get("マイナス情報"))
+        if not horse_raw or _is_unknown_like_text(horse_raw):
+            continue
+        if horse_raw in {"動画結論", "全体結論", "全体的な予想", "結論"}:
+            continue
+        if not plus and not minus:
+            continue
+
+        horse_name = _match_horse_name_from_text(horse_raw, horse_names) or horse_raw
+        key = (horse_name, plus, minus)
+        if key in seen:
+            continue
+        seen.add(key)
+        normalized_rows.append({
+            "馬名": horse_name,
+            "プラス情報": plus or "特になし",
+            "マイナス情報": minus or "特になし",
+        })
+    return normalized_rows
+
+
+def _find_horses_in_text(text: str, horse_names: list[str], limit: int = 6) -> list[str]:
+    """テキスト中に含まれる馬名を出現順に抽出する。"""
+    raw = unicodedata.normalize("NFKC", _to_text(text))
+    if not raw or not horse_names:
+        return []
+
+    hits = []
+    for horse in sorted(horse_names, key=len, reverse=True):
+        normalized_horse = unicodedata.normalize("NFKC", _to_text(horse))
+        if normalized_horse and normalized_horse in raw:
+            idx = raw.find(normalized_horse)
+            hits.append((idx, horse))
+
+    hits.sort(key=lambda x: x[0])
+    ordered = []
+    seen = set()
+    for _, horse in hits:
+        if horse in seen:
+            continue
+        seen.add(horse)
+        ordered.append(horse)
+        if len(ordered) >= limit:
+            break
+    return ordered
+
+
+def _extract_video_conclusion_from_text(text: str, horse_names: list[str]) -> dict:
+    """字幕/概要欄テキストから本命・対抗などの印をルールベース抽出する。"""
+    raw = _to_text(text)
+    if not raw or not horse_names:
+        return {}
+
+    label_patterns = {
+        "本命": [r"(?:本命|◎)"],
+        "対抗": [r"(?:対抗|○)"],
+        "単穴": [r"(?:単穴|▲)"],
+        "危険な人気馬": [r"(?:危険(?:な)?人気馬|危険馬|消し)"],
+        "連下": [r"(?:連下|抑え|△)"],
+    }
+    extracted = {}
+
+    for label, patterns in label_patterns.items():
+        for pat in patterns:
+            found = False
+            for match in re.finditer(pat, raw):
+                snippet = raw[max(0, match.start() - 8): min(len(raw), match.end() + 80)]
+                if label == "連下":
+                    horses = _find_horses_in_text(snippet, horse_names, limit=5)
+                    if horses:
+                        extracted[label] = "、".join(horses)
+                        found = True
+                        break
+                else:
+                    horse = _match_horse_name_from_text(snippet, horse_names)
+                    if horse:
+                        extracted[label] = horse
+                        found = True
+                        break
+            if found:
+                break
+
+    return extracted
+
+
 def _extract_video_conclusion_fields(payload: dict) -> dict:
     """Geminiの結論JSONから本命/対抗などの標準キーを抽出する。"""
     if not isinstance(payload, dict):
@@ -512,7 +692,10 @@ def _extract_video_conclusion_fields(payload: dict) -> dict:
     for canonical, aliases in key_aliases.items():
         value = ""
         for key in aliases:
-            value = _to_text(payload.get(key))
+            candidate = _to_text(payload.get(key))
+            if not candidate or _is_unknown_like_text(candidate):
+                continue
+            value = candidate
             if value:
                 break
         if value:
@@ -545,6 +728,8 @@ def _extract_youtube_analysis_payload(response_text: str) -> tuple[list[dict], d
     - 動画結論dict（本命/対抗/単穴/連下/危険な人気馬/買い目方針）
     を抽出する。dict形式・list形式の両方に対応。
     """
+    horse_names = get_all_horse_names()
+
     # 1) 推奨形式: dict
     try:
         parsed_dict = _parse_gemini_json_response(response_text, expected="dict")
@@ -576,7 +761,7 @@ def _extract_youtube_analysis_payload(response_text: str) -> tuple[list[dict], d
                 conclusion = _merge_video_conclusion(conclusion, _extract_video_conclusion_fields(item))
                 continue
             cleaned.append(item)
-        return cleaned, conclusion
+        return _normalize_youtube_analysis_rows(cleaned, horse_names), conclusion
 
     # 2) 互換形式: list
     parsed_list = _parse_gemini_json_response(response_text, expected="list")
@@ -589,7 +774,7 @@ def _extract_youtube_analysis_payload(response_text: str) -> tuple[list[dict], d
             conclusion = _merge_video_conclusion(conclusion, _extract_video_conclusion_fields(item))
             continue
         cleaned.append(item)
-    return cleaned, conclusion
+    return _normalize_youtube_analysis_rows(cleaned, horse_names), conclusion
 
 
 def _youtube_model_candidates() -> list[str]:
@@ -604,7 +789,7 @@ def _youtube_model_candidates() -> list[str]:
 
 def _generate_content_with_youtube_model(client, contents):
     """
-    YouTube解析専用モデルで生成し、モデル未対応時のみ共通モデルへフォールバックする。
+    YouTube解析専用モデルで生成し、モデル未対応/一時障害時は共通モデルへフォールバックする。
     """
     candidates = _youtube_model_candidates()
     if not candidates:
@@ -621,7 +806,10 @@ def _generate_content_with_youtube_model(client, contents):
             last_error = e
             msg = (str(e) or "").lower()
             is_model_error = any(token in msg for token in ("not found", "unknown model", "unsupported model", "404"))
-            if idx < len(candidates) - 1 and is_model_error:
+            is_transient_error = _is_transient_gemini_error(msg)
+            if idx < len(candidates) - 1 and (is_model_error or is_transient_error):
+                if is_transient_error:
+                    time.sleep(1.2)
                 continue
             raise
 
@@ -714,74 +902,156 @@ def search_youtube_videos(keyword, max_results=5):
         return []
 
 
+def _normalize_text_for_match(text: str) -> tuple[str, str]:
+    raw = unicodedata.normalize("NFKC", str(text or "")).lower()
+    spaced = re.sub(r"\s+", " ", raw).strip()
+    compact = re.sub(r"\s+", "", spaced)
+    return spaced, compact
+
+
+def _text_contains_term(text: str, term: str) -> bool:
+    text_spaced, text_compact = _normalize_text_for_match(text)
+    term_spaced, term_compact = _normalize_text_for_match(term)
+    if not term_spaced:
+        return False
+    if term_spaced in text_spaced:
+        return True
+    if term_compact and term_compact in text_compact:
+        return True
+    if term_compact and f"#{term_compact}" in text_compact:
+        return True
+    return False
+
+
+def _build_youtube_race_terms() -> list[str]:
+    r = get_race_config()
+    if not r:
+        return []
+    race_name = str(getattr(r, "race_name", "") or "").strip()
+    if not race_name:
+        return []
+
+    normalized = unicodedata.normalize("NFKC", race_name)
+    compact = re.sub(r"\s+", "", normalized)
+    no_year = re.sub(r"(20\d{2}|令和\d+年?)", "", compact)
+    no_round = re.sub(r"第\d+回", "", no_year)
+
+    terms: list[str] = []
+    for item in (normalized, compact, no_year, no_round):
+        val = item.strip(" #")
+        if not val or val in terms:
+            continue
+        terms.append(val)
+    return terms[:8]
+
+
+def _extract_race_like_mentions(text: str) -> list[str]:
+    normalized = unicodedata.normalize("NFKC", str(text or ""))
+    pattern = re.compile(r"[A-Za-z0-9ぁ-ヿ㐀-鿿]{2,30}(?:賞|ステークス|カップ|記念|ジャンプ|トロフィー)")
+    found = pattern.findall(normalized)
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for item in found:
+        key = re.sub(r"\s+", "", item)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(item)
+    return deduped
+
+
+def _title_has_non_target_race_mentions(title: str, race_terms: list[str]) -> bool:
+    mentions = _extract_race_like_mentions(title)
+    if not mentions:
+        return False
+    target_compacts = {_normalize_text_for_match(term)[1] for term in race_terms if term}
+    target_compacts = {x for x in target_compacts if x}
+    if not target_compacts:
+        return False
+
+    for mention in mentions:
+        mention_compact = _normalize_text_for_match(mention)[1]
+        if not mention_compact:
+            continue
+        if any(tc in mention_compact or mention_compact in tc for tc in target_compacts):
+            continue
+        return True
+    return False
+
+
 def filter_relevant_videos(videos):
     """
     予想に関係する動画を優先し、公式映像・レース中継系を除外する。
-    スコア順で並べ替えた結果を返し、0件の場合のみ緩い条件でフォールバックする。
+    レース名指定時は対象レースへの言及を必須化し、別レース混入を抑える。
     """
     if not videos:
         return []
 
-    include_keywords = [
-        "予想", "本命", "対抗", "穴", "買い目", "印", "展開", "見解", "考察", "馬券"
-    ]
-    # レースメタデータから動的にキーワード生成
-    r = get_race_config()
-    if r:
-        race_keywords = [
-            r.race_name, r.race_name[:4] if len(r.race_name) > 4 else r.race_name,
-            f"{r.venue}{r.distance}", f"{r.surface}{r.distance}",
-        ]
-    else:
-        race_keywords = ["競馬", "予想"]
+    include_keywords = ["予想", "本命", "対抗", "穴", "買い目", "印", "展開", "見解", "考察", "馬券", "調教", "追い切り", "追切"]
     exclude_keywords = [
         "jra公式", "公式", "ライブ", "生中継", "レース映像", "レース動画",
         "ハイライト", "cm", "pv", "出走馬紹介", "パドック", "払戻", "結果速報"
     ]
-    exclude_channel_tokens = [
-        "jra", "日本中央競馬会", "netkeiba", "グリーンチャンネル", "tbs", "フジ"
-    ]
+    exclude_channel_tokens = ["jra", "日本中央競馬会", "netkeiba", "グリーンチャンネル", "tbs", "フジ"]
+
+    race_terms = _build_youtube_race_terms()
+    strict_race = bool(race_terms)
+    if not race_terms:
+        race_terms = ["競馬", "予想"]
 
     scored = []
-    for v in videos:
-        title = (v.get('title') or '').lower()
-        desc = (v.get('description') or '')[:300].lower()
-        channel = (v.get('channel_title') or '').lower()
-        text = f"{title} {desc}"
+    desc_only_candidates = []
 
-        # レース名すらない動画は除外
-        if not any(k in text for k in [rk.lower() for rk in race_keywords]):
+    for v in videos:
+        title_raw = str(v.get('title') or '')
+        desc_raw = str(v.get('description') or '')[:800]
+        channel = (v.get('channel_title') or '').lower()
+        text = f"{title_raw} {desc_raw}"
+
+        if any(token in channel for token in [t.lower() for t in exclude_channel_tokens]):
             continue
 
-        # 公式/メディア系チャンネルは除外
-        if any(token in channel for token in [t.lower() for t in exclude_channel_tokens]):
+        title_has_target = any(_text_contains_term(title_raw, term) for term in race_terms)
+        desc_has_target = any(_text_contains_term(desc_raw, term) for term in race_terms)
+        text_has_target = title_has_target or desc_has_target
+
+        if strict_race and not text_has_target:
+            continue
+        if strict_race and not title_has_target:
+            if _title_has_non_target_race_mentions(title_raw, race_terms):
+                continue
+            if desc_has_target:
+                desc_only_candidates.append((1, v))
             continue
 
         score = 0
         for k in include_keywords:
-            if k.lower() in text:
+            if _text_contains_term(text, k):
                 score += 2
-        for k in race_keywords:
-            if k.lower() in text:
-                score += 1
+        if title_has_target:
+            score += 5
+        if desc_has_target:
+            score += 2
         for k in exclude_keywords:
-            if k.lower() in text:
+            if _text_contains_term(text, k):
                 score -= 3
 
-        if score >= 2:
+        threshold = 3 if strict_race else 2
+        if score >= threshold:
             scored.append((score, v))
 
     if scored:
         scored.sort(key=lambda x: x[0], reverse=True)
         return [v for _, v in scored]
 
-    # フォールバック: 条件を緩めてレース関連だけ返す
-    relaxed = [
-        v for v in videos
-        if any(k in ((v.get('title', '') + ' ' + (v.get('description', '') or '')[:300]).lower())
-               for k in [rk.lower() for rk in race_keywords])
-    ]
-    return relaxed if relaxed else videos
+    if strict_race and desc_only_candidates:
+        desc_only_candidates.sort(key=lambda x: x[0], reverse=True)
+        return [v for _, v in desc_only_candidates]
+
+    relaxed = [v for v in videos if any(_text_contains_term(f"{v.get('title', '')} {v.get('description', '')}", term) for term in race_terms)]
+    if relaxed:
+        return relaxed
+    return [] if strict_race else videos
 
 
 @st.cache_data(ttl=3600)
@@ -861,6 +1131,80 @@ def extract_horse_names_from_text(text):
     return found_horses
 
 
+def _build_youtube_fallback_payload(video: dict, transcript: str, description: str) -> tuple[list[dict], dict]:
+    """
+    Geminiが一時障害で失敗した場合の簡易フォールバック。
+    字幕/概要欄/タイトルの馬名言及のみを抽出して最小限の結果を返す。
+    """
+    title = _to_text((video or {}).get('title'))
+    transcript_text = _to_text(transcript)
+    description_text = _to_text(description)
+    source_text = "\n".join([x for x in (transcript_text, description_text, title) if x])
+
+    horse_names = extract_horse_names_from_text(source_text)[:8]
+    analysis_results = []
+    for horse in horse_names:
+        clues = []
+        if transcript_text and horse in transcript_text:
+            clues.append("字幕で言及")
+        if description_text and horse in description_text:
+            clues.append("概要欄で言及")
+        if not clues:
+            clues.append("タイトル/本文で言及")
+
+        analysis_results.append({
+            "馬名": horse,
+            "プラス情報": "・".join(clues) + "（Gemini一時障害時の簡易抽出）",
+            "マイナス情報": "特になし（Gemini復旧後の再解析を推奨）",
+        })
+
+    if analysis_results:
+        conclusion = {"買い目方針": "Gemini一時障害のため、馬名言及ベースの簡易抽出結果です。"}
+        return analysis_results, conclusion
+    return [], {}
+
+
+def _analyze_video_with_direct_url(video: dict, prompt: str) -> tuple[list[dict], dict]:
+    """YouTube URL を Gemini に直接渡して解析する。"""
+    video_url = _to_text((video or {}).get("video_url"))
+    if not GEMINI_API_KEY or not video_url:
+        return [], {}
+
+    client = google_genai.Client(api_key=GEMINI_API_KEY)
+    last_error = None
+    for attempt in range(3):
+        try:
+            response = _generate_content_with_youtube_model(
+                client,
+                [
+                    genai_types.Part(
+                        file_data=genai_types.FileData(
+                            file_uri=video_url,
+                            mime_type='video/mp4'
+                        )
+                    ),
+                    prompt
+                ]
+            )
+            response_text = _to_text(response.text)
+            if not response_text:
+                raise ValueError("Empty response text from Gemini")
+            return _extract_youtube_analysis_payload(response_text)
+        except (json.JSONDecodeError, ValueError) as e:
+            last_error = e
+            break
+        except Exception as e:
+            last_error = e
+            if _is_transient_gemini_error(str(e)) and attempt < 2:
+                time.sleep(3 * (attempt + 1))
+                continue
+            break
+
+    if last_error and _is_transient_gemini_error(str(last_error)):
+        raise RuntimeError(f"Gemini temporary error during direct video analysis: {type(last_error).__name__}")
+    return [], {}
+
+
 def analyze_video_with_gemini(video):
     """
     Gemini APIを使って動画のタイトルと概要欄を解析し、馬名とプラス/マイナス情報を抽出する関数
@@ -875,22 +1219,11 @@ def analyze_video_with_gemini(video):
     if GEMINI_API_KEY == "YOUR_GEMINI_API_KEY_HERE" or not GEMINI_API_KEY:
         return [], {}
 
-    try:
-        # 字幕を取得して使用（概要欄よりも豊富な情報が含まれる）
-        transcript = fetch_video_transcript(video['video_id'])
-        if transcript:
-            content_label = "字幕（音声内容）"
-            content = transcript
-        else:
-            content_label = "概要欄"
-            content = video.get('description', '') or ''
+    horse_names = get_all_horse_names()
 
-        # 新しいSDK（google-genai）でクライアントを作成
-        # 古いSDK（google-generativeai）とは書き方が異なります
-        client = google_genai.Client(api_key=GEMINI_API_KEY)
-
+    def _build_prompt(content_label: str, content: str) -> str:
         # Gemini に送るプロンプトを作成（前走成績・調教・調子を具体的に抽出）
-        prompt = f"""
+        return f"""
 あなたは競馬予想の専門家です。以下のYouTube動画のタイトルと{content_label}を読み、各馬の詳細な評価情報を抽出してください。
 
 # 動画タイトル
@@ -900,7 +1233,7 @@ def analyze_video_with_gemini(video):
 {content}
 
 # 注目すべき出走馬（これら以外の馬名が登場しても抽出してください）
-{chr(10).join(['- ' + name for name in get_all_horse_names()[:10]])}
+{chr(10).join(['- ' + name for name in horse_names[:12]])}
 
 # 抽出してほしい情報（各馬について）
 プラス情報として以下を重点的に探してください：
@@ -949,34 +1282,114 @@ def analyze_video_with_gemini(video):
 - JSONのみ出力し、前後に説明文を付けないこと
 """
 
-        # YouTube解析専用モデル（既定: Gemini 3系Flash）を利用
-        response = _generate_content_with_youtube_model(client, prompt)
+    try:
+        # 字幕を優先し、失敗時は概要欄へフォールバック
+        transcript = fetch_video_transcript(video['video_id'])
+        description = video.get('description', '') or ''
+        title = video.get('title', '') or ''
+        combined_text_hint = "\n".join([x for x in (transcript, description, title) if x])
+        content_candidates = []
+        if transcript:
+            content_candidates.append(("字幕（音声内容）", transcript))
+        if description:
+            content_candidates.append(("概要欄", description))
+        if not content_candidates:
+            content_candidates.append(("タイトル", video.get('title', '') or ''))
 
-        # レスポンスからテキストを取得
-        response_text = response.text
+        # 新しいSDK（google-genai）でクライアントを作成
+        client = google_genai.Client(api_key=GEMINI_API_KEY)
 
-        # レスポンスが空の場合のチェック
-        if not response_text:
-            return [], {}
+        # 各コンテンツ候補に対してリトライ付きで解析
+        last_error = None
+        best_analysis_results = []
+        best_conclusion = {}
+        for content_label, content in content_candidates:
+            prompt = _build_prompt(content_label, content)
+            for attempt in range(3):
+                try:
+                    response = _generate_content_with_youtube_model(client, prompt)
+                    response_text = response.text
+                    if not response_text:
+                        break
 
-        # JSONを頑健にパース（馬別 + 動画結論）
-        analysis_results, video_conclusion = _extract_youtube_analysis_payload(response_text)
+                    analysis_results, video_conclusion = _extract_youtube_analysis_payload(response_text)
+                    analysis_results = _normalize_youtube_analysis_rows(analysis_results, horse_names)
+                    rule_conclusion = _extract_video_conclusion_from_text(content, horse_names)
+                    video_conclusion = _merge_video_conclusion(video_conclusion, rule_conclusion)
+                    for result in analysis_results:
+                        result['video_url'] = video['video_url']
+                        result['video_title'] = video['title']
 
-        # 動画URLを各結果に追加
-        for result in analysis_results:
-            result['video_url'] = video['video_url']
-            result['video_title'] = video['title']
+                    if analysis_results and not best_analysis_results:
+                        best_analysis_results = analysis_results
+                    if video_conclusion:
+                        best_conclusion = _merge_video_conclusion(best_conclusion, video_conclusion)
 
-        return analysis_results, video_conclusion
+                    # 馬別情報、または本命/対抗などの印情報が取れたら成功扱い
+                    if analysis_results or _has_meaningful_video_conclusion(video_conclusion):
+                        return analysis_results, video_conclusion
 
-    except (json.JSONDecodeError, ValueError):
-        # JSON解析失敗は静かに無視（概要欄が短すぎる動画など）
+                    # 空抽出は次候補へフォールバック
+                    break
+                except (json.JSONDecodeError, ValueError) as e:
+                    # JSON解析失敗は次候補へフォールバック
+                    last_error = e
+                    break
+                except Exception as e:
+                    last_error = e
+                    error_msg = str(e)
+                    if _is_transient_gemini_error(error_msg) and attempt < 2:
+                        time.sleep(3 * (attempt + 1))
+                        continue
+                    break
+
+        # 字幕/概要欄ベースで印情報が弱い場合は、動画URLを直接解析して補完
+        if _to_text(video.get('video_url')):
+            direct_prompt = _build_prompt("動画メタ情報（補助）", description or title or get_race_display_name())
+            direct_results, direct_conclusion = _analyze_video_with_direct_url(video, direct_prompt)
+            direct_results = _normalize_youtube_analysis_rows(direct_results, horse_names)
+            direct_conclusion = _merge_video_conclusion(
+                direct_conclusion,
+                _extract_video_conclusion_from_text(combined_text_hint, horse_names)
+            )
+            for result in direct_results:
+                result['video_url'] = video['video_url']
+                result['video_title'] = video['title']
+
+            if direct_results:
+                best_analysis_results = direct_results
+            if direct_conclusion:
+                best_conclusion = _merge_video_conclusion(best_conclusion, direct_conclusion)
+
+            if direct_results or _has_meaningful_video_conclusion(direct_conclusion):
+                return direct_results, direct_conclusion
+
+        if best_analysis_results or best_conclusion:
+            return best_analysis_results, best_conclusion
+
+        if last_error and _is_transient_gemini_error(str(last_error)):
+            fallback_results, fallback_conclusion = _build_youtube_fallback_payload(
+                video=video,
+                transcript=transcript,
+                description=description,
+            )
+            fallback_results = _normalize_youtube_analysis_rows(fallback_results, horse_names)
+            fallback_conclusion = _merge_video_conclusion(
+                fallback_conclusion,
+                _extract_video_conclusion_from_text(combined_text_hint, horse_names)
+            )
+            if fallback_results or fallback_conclusion:
+                for result in fallback_results:
+                    result['video_url'] = video['video_url']
+                    result['video_title'] = video['title']
+                return fallback_results, fallback_conclusion
+            raise RuntimeError(f"Gemini temporary error after retries: {type(last_error).__name__}")
         return [], {}
     except Exception as e:
         error_msg = str(e)
-        # 429 レート制限は呼び出し元でリトライするため、ここでは例外をそのまま投げる
+        # 一時障害は呼び出し元で表示するため再送
         if _is_transient_gemini_error(error_msg):
-            raise  # create_summary_dataframe 側でキャッチしてリトライ
+            raise
         # それ以外の予期しないエラーのみ表示
         st.warning(f"⚠️ 動画の解析をスキップしました: {type(e).__name__}")
         return [], {}
@@ -1014,7 +1427,7 @@ def _analyze_one_video_worker(video, prompt_template):
             error_msg = str(e)
             if _is_transient_gemini_error(error_msg):
                 if retry < 2:
-                    time.sleep(60 * (retry + 1))  # 60秒、120秒と待機
+                    time.sleep(3 * (retry + 1))  # 3秒、6秒で再試行
                 else:
                     return []
             else:
@@ -1268,7 +1681,12 @@ def _is_transient_gemini_error(error_msg: str) -> bool:
         "429",
         "resource_exhausted",
         "503",
+        "500",
         "unavailable",
+        "servererror",
+        "internal server error",
+        "backend error",
+        "upstream",
         "high demand",
         "deadline exceeded",
         "timed out",
@@ -1277,10 +1695,44 @@ def _is_transient_gemini_error(error_msg: str) -> bool:
     return any(token in msg for token in transient_tokens)
 
 
+def _contains_japanese_text(text: str) -> bool:
+    """文字列に日本語が含まれるかを判定する。"""
+    return bool(re.search(r'[\u3040-\u30ff\u3400-\u9fff]', _to_text(text)))
+
+
+def _extract_query_tokens(query: str) -> list[str]:
+    """検索クエリから関連度計算用のトークンを抽出する。"""
+    text = _to_text(query)
+    if not text:
+        return []
+    stopwords = {
+        "競馬", "予想", "評価", "分析", "全頭", "診断", "記事", "ニュース",
+        "レース", "重賞", "g1", "g2", "g3", "2024", "2025", "2026", "2027",
+    }
+    tokens = []
+    seen = set()
+    for raw in re.split(r'[\s　,、/・|]+', text):
+        token = _to_text(raw).strip().lower()
+        if not token:
+            continue
+        if len(token) <= 1:
+            continue
+        if token in stopwords:
+            continue
+        if re.fullmatch(r'\d{2,4}', token):
+            continue
+        if token in seen:
+            continue
+        seen.add(token)
+        tokens.append(token)
+    return tokens[:12]
+
+
 def _select_articles_for_analysis(
     articles,
     race_name: str,
     horse_names: list[str],
+    query: str = "",
     max_items: int = MAX_ANALYZE_ARTICLES_PER_QUERY,
 ):
     """
@@ -1293,6 +1745,8 @@ def _select_articles_for_analysis(
     race_tokens = [race_name, race_name.replace(" 2026", "").strip(), race_name.replace(" 2025", "").strip()]
     race_tokens = [t for t in race_tokens if t]
     horse_tokens = [h for h in (horse_names or [])[:12] if h]
+    query_tokens = _extract_query_tokens(query)
+    expect_ja = _contains_japanese_text(" ".join(race_tokens) + " " + query)
 
     scored = []
     for article in articles:
@@ -1300,20 +1754,33 @@ def _select_articles_for_analysis(
         snippet = str(article.get("snippet", "") or "")
         url = str(article.get("url", "") or "")
         text = f"{title} {snippet}"
+        text_l = text.lower()
         parsed = urlparse(url) if url else None
+        host = (parsed.netloc or "").lower() if parsed else ""
         path = (parsed.path or "/") if parsed else "/"
 
         score = 0
         score += sum(1 for token in race_tokens if token in text) * 3
         score += sum(1 for horse in horse_tokens if horse in text) * 2
+        score += sum(1 for token in query_tokens if token and token in text_l) * 2
         if "/db/race/" in url or "/race/" in url:
             score += 2
+        if "/racedata/graderace/" in url or "/race_newsdet.php" in url:
+            score += 2
+        if "/library/detail.html" in url:
+            score -= 2
+        if "race_calendar" in url:
+            score -= 4
         if path in ("", "/"):
             score -= 4
         if "日本最大の競馬情報サービス" in title:
             score -= 3
         if len(snippet) < 120:
             score -= 1
+        if expect_ja and not _contains_japanese_text(text):
+            score -= 5
+        if "en.netkeiba.com" in host and expect_ja:
+            score -= 6
 
         scored.append((score, article))
 
@@ -1367,14 +1834,14 @@ def analyze_web_article_with_gemini(article_info):
         list: 抽出された情報のリスト（馬名、プラス情報、マイナス情報を含む辞書）
     """
     if not GEMINI_API_KEY:
-        return []
+        raise RuntimeError("GEMINI_API_KEY is not configured")
 
     title = _to_text(article_info.get('title', '')) if isinstance(article_info, dict) else ""
     snippet = _to_text(article_info.get('snippet', '')) if isinstance(article_info, dict) else ""
     source_url = _to_text(article_info.get('url', '')) if isinstance(article_info, dict) else ""
     source_title = title or "Web記事"
     if not title and not snippet:
-        return []
+        raise ValueError("Web article has no title/snippet")
 
     all_horse_names = get_all_horse_names()
     horse_list_str = "\n".join([f"- {name}" for name in all_horse_names])
@@ -1436,25 +1903,43 @@ def analyze_web_article_with_gemini(article_info):
 
         response_text = response.text
         if not response_text:
-            return []
+            raise ValueError("Gemini response text is empty")
 
         analysis_results = _parse_gemini_json_response(response_text, expected="list")
-
+        normalized_results = []
         for result in analysis_results:
-            result['source_url'] = source_url
-            result['source_title'] = source_title
-            result['source_type'] = 'web'
+            if not isinstance(result, dict):
+                continue
+            horse_name = _to_text(result.get('馬名'))
+            plus_info = _to_text(result.get('プラス情報'))
+            minus_info = _to_text(result.get('マイナス情報'))
+            if not horse_name:
+                continue
+            if horse_name in {"全体的な予想", "全体評価", "総評", "全体", "不明"}:
+                continue
+            if not plus_info and not minus_info:
+                continue
+            normalized_results.append({
+                "馬名": horse_name,
+                "プラス情報": plus_info or "特になし",
+                "マイナス情報": minus_info or "特になし",
+                "source_url": source_url,
+                "source_title": source_title,
+                "source_type": "web",
+            })
 
-        return analysis_results
+        if not normalized_results:
+            raise ValueError("Gemini returned no horse-level web analysis rows")
+
+        return normalized_results
 
     except (json.JSONDecodeError, ValueError):
-        return []
+        raise
     except Exception as e:
         error_msg = str(e)
         if _is_transient_gemini_error(error_msg):
             raise
-        st.warning(f"⚠️ Web記事の解析をスキップしました: {type(e).__name__} ({error_msg[:120]})")
-        return []
+        raise RuntimeError(f"Web article analysis failed: {type(e).__name__}: {error_msg[:200]}")
 
 
 # ====================
@@ -2271,6 +2756,49 @@ def _normalize_training_text(text: str) -> str:
     return _to_text(text).translate(trans_table)
 
 
+def _is_training_segment(text: str) -> bool:
+    """文が追切コメントとして妥当かを判定する。"""
+    normalized = _normalize_training_text(text)
+    if not normalized:
+        return False
+
+    has_strong = bool(_TRAINING_STRONG_CONTEXT_PAT.search(normalized))
+    has_keyword = bool(_TRAINING_KEYWORDS.search(normalized))
+    has_weak = bool(_TRAINING_WEAK_CONTEXT_PAT.search(normalized))
+    has_time = bool(_TRAINING_TIME_PAT.search(normalized))
+    has_intensity = bool(_TRAINING_INTENSITY_PAT.search(normalized))
+    has_lap_hint = bool(_TRAINING_LAP_HINT_PAT.search(normalized))
+    has_phase = bool(
+        _TRAINING_PHASE_WEEK_PAT.search(normalized)
+        or _TRAINING_PHASE_LATEST_PAT.search(normalized)
+        or _TRAINING_PHASE_PREV_PAT.search(normalized)
+    )
+    has_place = bool(re.search(r'栗東|美浦|坂路|CW|ウッド|南W|北W|ポリ', normalized, flags=re.IGNORECASE))
+    has_race_context = bool(_NON_TRAINING_RACE_CONTEXT_PAT.search(normalized))
+
+    if has_strong:
+        return True
+
+    # 「馬なり」「一杯」など強度表現 + 時間/時期ヒント
+    if (has_place or has_intensity) and (has_time or has_lap_hint or has_phase):
+        return True
+
+    # 弱シグナルは補助情報付きの場合のみ採用
+    if has_weak and (has_time or has_intensity or has_place or has_phase):
+        if has_race_context and not (has_place or has_intensity or has_phase):
+            return False
+        return True
+
+    # ラップ数字だけ・競走展開コメントだけは除外
+    if has_race_context:
+        return False
+
+    if has_time and (has_place or has_intensity):
+        return True
+
+    return False
+
+
 def _extract_training_sentences(text: str) -> list[str]:
     """追切に関係する文のみを抽出して返す（非追切コメントを除外）。"""
     normalized = _normalize_training_text(text)
@@ -2280,14 +2808,24 @@ def _extract_training_sentences(text: str) -> list[str]:
     candidates = re.split(r'[。\n]+', normalized)
     picked = []
     for raw in candidates:
-        s = raw.strip(" ・-　\t")
-        if not s:
+        chunk = raw.strip(" ・-　\t")
+        if not chunk:
             continue
-        if _TRAINING_KEYWORDS.search(s) or _TRAINING_TIME_PAT.search(s) or _TRAINING_INTENSITY_PAT.search(s) or _TRAINING_LAP_HINT_PAT.search(s):
+
+        chunk_has_strong_context = bool(_TRAINING_STRONG_CONTEXT_PAT.search(chunk))
+        for part in re.split(r'[、，]+', chunk):
+            s = part.strip(" ・-　\t")
+            if not s:
+                continue
+            if not _is_training_segment(s):
+                if not (chunk_has_strong_context and _TRAINING_INTENSITY_PAT.search(s)):
+                    continue
+
             starts = []
             for pat in (
                 _TRAINING_PHASE_WEEK_PAT,
                 _TRAINING_PHASE_LATEST_PAT,
+                _TRAINING_STRONG_CONTEXT_PAT,
                 _TRAINING_KEYWORDS,
                 _TRAINING_LAP_HINT_PAT,
                 _TRAINING_TIME_PAT,
@@ -2298,10 +2836,11 @@ def _extract_training_sentences(text: str) -> list[str]:
                     starts.append(m.start())
             if starts:
                 s = s[min(starts):].lstrip("、, ")
-            picked.append(s)
+            if s:
+                picked.append(s)
 
     # 文分割で何も取れないが全体は追切系の場合は、全文を採用
-    if not picked and (_TRAINING_KEYWORDS.search(normalized) or _TRAINING_TIME_PAT.search(normalized) or _TRAINING_LAP_HINT_PAT.search(normalized)):
+    if not picked and _is_training_segment(normalized):
         picked = [normalized.strip()]
 
     uniq = []
@@ -2956,6 +3495,16 @@ def generate_markdown_report(df) -> str:
             return "-"
         return text
 
+    # 表示本体と同じく「馬番が1頭でも確定している場合は馬番欠損行を除外」
+    report_df = df.copy() if isinstance(df, pd.DataFrame) else df
+    if isinstance(report_df, pd.DataFrame) and not report_df.empty and '馬番' in report_df.columns:
+        umaban_num = pd.to_numeric(report_df['馬番'], errors='coerce')
+        if umaban_num.notna().any():
+            report_df = report_df[umaban_num.notna()].copy().reset_index(drop=True)
+    allowed_horses = set()
+    if report_df is not None and not report_df.empty and '馬名' in report_df.columns:
+        allowed_horses = {_to_text(x) for x in report_df['馬名'].tolist() if _to_text(x)}
+
     # ── ヘッダー ──
     lines.append(f"# {race_name} — 予想レポート")
     if race:
@@ -2967,7 +3516,7 @@ def generate_markdown_report(df) -> str:
 
     # ── 出馬表 ──
     lines.append("---\n## 📋 出馬表")
-    if df is not None and not df.empty:
+    if report_df is not None and not report_df.empty:
         col_candidates = [
             ("枠番", ["枠番", "枠"]),
             ("馬番", ["馬番"]),
@@ -2975,19 +3524,21 @@ def generate_markdown_report(df) -> str:
             ("性齢", ["性齢"]),
             ("斤量", ["斤量"]),
             ("騎手", ["騎手"]),
-            ("調教師", ["調教師"]),
+            ("前走", ["前走"]),
+            ("2走前", ["2走前"]),
+            ("3走前", ["3走前"]),
             ("オッズ", ["オッズ", "単勝オッズ"]),
         ]
         selected_cols = []
         rename_map = {}
         for target, candidates in col_candidates:
-            src = next((c for c in candidates if c in df.columns), None)
+            src = next((c for c in candidates if c in report_df.columns), None)
             if src:
                 selected_cols.append(src)
                 rename_map[src] = target
 
         if selected_cols:
-            df_entry = df[selected_cols].rename(columns=rename_map)
+            df_entry = report_df[selected_cols].rename(columns=rename_map)
             lines.append('| ' + ' | '.join(str(c) for c in df_entry.columns) + ' |')
             lines.append('|' + '---|' * len(df_entry.columns))
             for _, row in df_entry.iterrows():
@@ -3011,12 +3562,18 @@ def generate_markdown_report(df) -> str:
         preferred_keys = [
             'コース特徴', '勝ちやすい馬のタイプ', '苦手な馬のタイプ',
             '枠順有利', '枠順不利', '過去の傾向', '騎手厩舎傾向', '注目ポイント',
+            '情報ソース', '情報取得方式', '情報ソースURL',
         ]
+        skip_keys = {'データ分析テーブル'}
         output_keys = []
         for key in preferred_keys:
+            if key in skip_keys:
+                continue
             if key in rc and _to_text(rc.get(key)):
                 output_keys.append(key)
         for key in rc.keys():
+            if key in skip_keys:
+                continue
             if key not in output_keys and _to_text(rc.get(key)):
                 output_keys.append(key)
 
@@ -3033,7 +3590,10 @@ def generate_markdown_report(df) -> str:
     horse_df = st.session_state.get('horse_df')
     if horse_df is not None and not horse_df.empty:
         for _, row in horse_df.iterrows():
-            lines.append(f"\n### {row.get('馬名', '?')}")
+            horse_name_raw = _to_text(row.get('馬名'))
+            if allowed_horses and horse_name_raw and horse_name_raw not in allowed_horses:
+                continue
+            lines.append(f"\n### {horse_name_raw or '?'}")
             merit = str(row.get('メリット') or '').strip()
             demerit = str(row.get('デメリット') or '').strip()
             if merit:
@@ -3112,15 +3672,22 @@ def generate_markdown_report(df) -> str:
         for video in youtube_videos:
             video_id = str(video.get('video_id') or '')
             analysis_results = yt_detail_map.get(video_id, []) or []
-            if not analysis_results:
+            filtered_results = []
+            for res in analysis_results:
+                if not isinstance(res, dict):
+                    continue
+                horse_name_raw = _to_text(res.get('馬名'))
+                if allowed_horses and horse_name_raw and horse_name_raw not in allowed_horses:
+                    continue
+                filtered_results.append(res)
+
+            if not filtered_results:
                 continue
             displayed_ids.add(video_id)
             title = _md_text(video.get('title') or video_id or '動画')
             lines.append(f"\n#### {title}")
-            for res in analysis_results:
-                if not isinstance(res, dict):
-                    continue
-                horse_name = _md_text(res.get('馬名') or '不明')
+            for res in filtered_results:
+                horse_name = _md_text(_to_text(res.get('馬名')) or '不明')
                 plus = _to_text(res.get('プラス情報') or '')
                 minus = _to_text(res.get('マイナス情報') or '')
                 lines.append(f"- **{horse_name}**")
@@ -3133,14 +3700,21 @@ def generate_markdown_report(df) -> str:
         for video_id, analysis_results in yt_detail_map.items():
             if str(video_id) in displayed_ids:
                 continue
-            if not analysis_results:
-                continue
-            title = _md_text(id_to_video.get(str(video_id), {}).get('title') or str(video_id) or '動画')
-            lines.append(f"\n#### {title}")
+            filtered_results = []
             for res in analysis_results:
                 if not isinstance(res, dict):
                     continue
-                horse_name = _md_text(res.get('馬名') or '不明')
+                horse_name_raw = _to_text(res.get('馬名'))
+                if allowed_horses and horse_name_raw and horse_name_raw not in allowed_horses:
+                    continue
+                filtered_results.append(res)
+
+            if not filtered_results:
+                continue
+            title = _md_text(id_to_video.get(str(video_id), {}).get('title') or str(video_id) or '動画')
+            lines.append(f"\n#### {title}")
+            for res in filtered_results:
+                horse_name = _md_text(_to_text(res.get('馬名')) or '不明')
                 plus = _to_text(res.get('プラス情報') or '')
                 minus = _to_text(res.get('マイナス情報') or '')
                 lines.append(f"- **{horse_name}**")
@@ -3155,10 +3729,6 @@ def generate_markdown_report(df) -> str:
     lines.append("\n---\n## 🏋️ 追切結果・評価")
     training_items = st.session_state.get('training_items') or []
     training_time_rows = st.session_state.get('training_time_rows') or []
-
-    allowed_horses = set()
-    if df is not None and not df.empty and '馬名' in df.columns:
-        allowed_horses = {_to_text(x) for x in df['馬名'].tolist() if _to_text(x)}
 
     training_items = _filter_training_items_by_horses(training_items, allowed_horses)
     training_time_rows = _filter_training_time_rows_by_horses(training_time_rows, allowed_horses)
@@ -3212,12 +3782,13 @@ def generate_markdown_report(df) -> str:
                 continue
 
             bucket = comments_by_horse.setdefault(horse, {"plus": [], "minus": []})
-            if kind == "プラス":
-                if content not in bucket["plus"]:
-                    bucket["plus"].append(content)
-            else:
-                if content not in bucket["minus"]:
-                    bucket["minus"].append(content)
+            for seg in _extract_training_sentences(content):
+                if kind == "プラス":
+                    if seg not in bucket["plus"]:
+                        bucket["plus"].append(seg)
+                else:
+                    if seg not in bucket["minus"]:
+                        bucket["minus"].append(seg)
 
         for horse in sorted(comments_by_horse.keys()):
             lines.append(f"\n#### {horse}")
@@ -3240,61 +3811,6 @@ def generate_markdown_report(df) -> str:
     elif not merged_time_rows:
         lines.append("*追切コメントデータなし*")
 
-    # ── 予算別買い目プラン ──
-    lines.append("\n---\n## 💰 予算別買い目プラン")
-    bet_settings = st.session_state.get('bet_plan_settings') or {}
-    bet_result = st.session_state.get('bet_plan_result') or {}
-    tickets = bet_result.get('tickets') or []
-    summary = bet_result.get('summary') or {}
-
-    if bet_settings:
-        lines.append(
-            f"- 予算: {_md_text(bet_settings.get('budget'))}円"
-            f" / 方針スライダー: {_md_text(bet_settings.get('slider'))}"
-            f" / 配分単位: {_md_text(bet_settings.get('stake_unit'))}円"
-        )
-        lines.append(
-            f"- 券種: {_md_text(' / '.join(bet_settings.get('bet_types') or []))}"
-            f" / 軸馬: {_md_text(bet_settings.get('anchor_horse') or '自動')}"
-        )
-
-    if summary:
-        roi_idx = float(summary.get('推定回収指数', 0) or 0)
-        hit_idx = float(summary.get('推定的中指数', 0) or 0)
-        lines.append(
-            f"- 総点数: {_md_text(summary.get('総点数'))}点"
-            f" / 総投資額: {_md_text(summary.get('総投資額'))}円"
-            f" / 推定回収指数: {_md_text(f'{roi_idx:.3f}')}"
-            f" / 推定的中指数: {_md_text(f'{hit_idx:.3f}')}"
-        )
-
-    warnings = bet_result.get('warnings') or []
-    if warnings:
-        lines.append("\n### 警告")
-        for w in warnings:
-            lines.append(f"- {_md_text(w)}")
-
-    if tickets:
-        lines.append("\n### 推奨買い目")
-        lines.append("| 券種 | 買い目 | オッズ | 配分額 | hit_score | roi_score | final_score |")
-        lines.append("|---|---|---|---|---|---|---|")
-        for t in tickets:
-            lines.append(
-                "| "
-                + " | ".join([
-                    _md_text(t.get("券種")),
-                    _md_text(t.get("買い目")),
-                    _md_text(f"{float(t.get('オッズ', 0)):.2f}"),
-                    _md_text(f"{int(t.get('配分額', 0))}"),
-                    _md_text(f"{float(t.get('hit_score', 0)):.4f}"),
-                    _md_text(f"{float(t.get('roi_score', 0)):.4f}"),
-                    _md_text(f"{float(t.get('final_score', 0)):.4f}"),
-                ])
-                + " |"
-            )
-    else:
-        lines.append("*買い目プラン未生成*")
-
     return '\n'.join(lines)
 
 
@@ -3315,6 +3831,7 @@ def fetch_and_analyze_web_articles(
     戻り値:
         tuple: (articles_metadata, raw_analysis_results)
     """
+    queries = list(queries or [])
     race_name = get_race_display_name()
     all_horse_names = get_all_horse_names()
 
@@ -3328,11 +3845,16 @@ def fetch_and_analyze_web_articles(
 
     all_articles = []
     all_web_raw = []
+    seen_article_keys = set()
     domains_for_tavily = include_domains or WEB_SEARCH_ALLOWLIST
 
     progress_bar = st.progress(0)
     status_text = st.empty()
     total_queries = len(queries)
+    if total_queries == 0:
+        progress_bar.empty()
+        status_text.empty()
+        return [], []
     tavily_warned = False
 
     for q_idx, query in enumerate(queries):
@@ -3391,17 +3913,59 @@ def fetch_and_analyze_web_articles(
                 st.warning(f"⚠️ Gemini検索に失敗しました: {type(gemini_search_error).__name__} ({msg[:120]})")
 
         # レース/馬名との関連が高い記事を優先して複数件解析する
-        articles = articles[:remaining]
+        articles = articles[:max(remaining, 5)]
         unique_articles = _select_articles_for_analysis(
             articles,
             race_name=race_name,
             horse_names=all_horse_names,
+            query=query,
             max_items=min(MAX_ANALYZE_ARTICLES_PER_QUERY, remaining),
         )
-        all_articles.extend(articles)
+
+        selected_articles = []
+        for article in unique_articles:
+            url_key = _to_text(article.get("url", "")).strip().lower()
+            title_key = _to_text(article.get("title", "")).strip().lower()
+            article_key = url_key or f"title::{title_key}"
+            if not article_key:
+                continue
+            if article_key in seen_article_keys:
+                continue
+            seen_article_keys.add(article_key)
+            selected_articles.append(article)
+
+        # Tavily結果の関連度が低い場合は Gemini検索結果で補完する
+        if not selected_articles and articles and TAVILY_API_KEY:
+            gemini_backfill_error = None
+            try:
+                gemini_candidates = search_web_articles(query, max_articles=min(5, remaining))
+                backfill_unique = _select_articles_for_analysis(
+                    gemini_candidates,
+                    race_name=race_name,
+                    horse_names=all_horse_names,
+                    query=query,
+                    max_items=min(MAX_ANALYZE_ARTICLES_PER_QUERY, remaining),
+                )
+                for article in backfill_unique:
+                    url_key = _to_text(article.get("url", "")).strip().lower()
+                    title_key = _to_text(article.get("title", "")).strip().lower()
+                    article_key = url_key or f"title::{title_key}"
+                    if not article_key or article_key in seen_article_keys:
+                        continue
+                    seen_article_keys.add(article_key)
+                    selected_articles.append(article)
+                if selected_articles:
+                    status_text.info("↪ Tavily関連薄のため Gemini検索結果で補完しました")
+            except Exception as e:
+                gemini_backfill_error = e
+            if not selected_articles and gemini_backfill_error:
+                msg = str(gemini_backfill_error)
+                st.warning(f"⚠️ Gemini補完検索に失敗しました: {type(gemini_backfill_error).__name__} ({msg[:120]})")
+
         progress_bar.progress((q_idx + 0.5) / total_queries)
 
-        for a_idx, article in enumerate(unique_articles):
+        successful_articles = []
+        for a_idx, article in enumerate(selected_articles):
             article_title = _to_text(article.get('title', '')) if isinstance(article, dict) else ""
             status_text.info(f"🤖 Web記事を解析中... {(article_title or '無題')[:30]}...")
             results = []
@@ -3417,7 +3981,12 @@ def fetch_and_analyze_web_articles(
             if not results and analyze_error:
                 msg = str(analyze_error)
                 st.warning(f"⚠️ Web記事解析に失敗しました: {type(analyze_error).__name__} ({msg[:120]})")
-            all_web_raw.extend(results)
+            if results:
+                all_web_raw.extend(results)
+                successful_articles.append(article)
+
+        if successful_articles:
+            all_articles.extend(successful_articles)
 
         progress_bar.progress((q_idx + 1) / total_queries)
 
@@ -3463,6 +4032,616 @@ def extract_text_from_uploaded_file(uploaded_file):
             return ""
 
 
+def _normalize_race_name_for_match(name: str) -> str:
+    """レース名を比較用に正規化する。"""
+    text = unicodedata.normalize("NFKC", _to_text(name))
+    if not text:
+        return ""
+    text = text.lower()
+    text = re.sub(r"\s+", "", text)
+    text = re.sub(r"[()（）［］【】「」『』<>＜＞・.。,、]", "", text)
+    text = re.sub(r"20\d{2}", "", text)
+    text = re.sub(r"(g|jg)[123ⅠⅡⅢ]", "", text)
+    return text
+
+
+def _race_name_alias_candidates(race_name: str) -> list[str]:
+    """マッチ精度を上げるために、レース名の別表記候補を返す。"""
+    base = _to_text(race_name)
+    if not base:
+        return []
+
+    candidates = [base]
+    normalized_base = _normalize_race_name_for_match(base)
+
+    simple_variants = {
+        base.replace("ステークス", "S"),
+        base.replace("ステークス", ""),
+        base.replace("カップ", "C"),
+        base.replace("カップ", ""),
+        base.replace("フィリーズ", "F"),
+    }
+    for variant in simple_variants:
+        variant = _to_text(variant)
+        if variant and variant not in candidates:
+            candidates.append(variant)
+
+    for canonical, aliases in UMANITY_RACE_NAME_ALIASES.items():
+        group = [canonical] + list(aliases or [])
+        normalized_group = {_normalize_race_name_for_match(name) for name in group}
+        if normalized_base in normalized_group:
+            for name in group:
+                if name and name not in candidates:
+                    candidates.append(name)
+
+    return candidates
+
+
+@st.cache_data(ttl=43200)
+def fetch_umanity_graderace_catalog() -> list[dict]:
+    """ウマニティ重賞一覧ページから race_id とレース名の対応表を取得する。"""
+    url = f"{UMANITY_BASE_URL}/racedata/graderace/"
+    response = requests.get(url, headers=UMANITY_HEADERS, timeout=20)
+    if response.status_code >= 400:
+        raise RuntimeError(f"Umanity catalog HTTP {response.status_code}")
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    by_id: dict[str, dict] = {}
+    for a_tag in soup.find_all("a", href=True):
+        href = urljoin(UMANITY_BASE_URL, _to_text(a_tag.get("href")))
+        match = re.search(r"/racedata/graderace/(\d{4})/?$", href)
+        if not match:
+            continue
+        race_id = match.group(1)
+        race_name = _to_text(a_tag.get_text(" ", strip=True))
+        # 一部リンクは「皐月賞 G1 4月19日...」の長文になっているため、レース名部分だけ抽出
+        race_name = re.sub(r"\s*(?:J)?G[123ⅠⅡⅢ]\b.*$", "", race_name).strip()
+        race_name = re.split(r"\s+", race_name)[0] if race_name else ""
+        if not race_name:
+            continue
+        current = by_id.get(race_id)
+        # 同一race_idに複数リンクがあるため、短く素直な表記を優先して保持
+        if (not current) or (len(race_name) < len(_to_text(current.get("race_name")))):
+            by_id[race_id] = {
+                "race_id": race_id,
+                "race_name": race_name,
+                "url": f"{UMANITY_BASE_URL}/racedata/graderace/{race_id}/",
+            }
+
+    return sorted(by_id.values(), key=lambda x: x.get("race_id", ""))
+
+
+def resolve_umanity_race_info(race_name: str) -> dict | None:
+    """レース名からウマニティの graderace 情報を解決する。"""
+    catalog = fetch_umanity_graderace_catalog()
+    if not catalog:
+        return None
+
+    candidates = _race_name_alias_candidates(race_name)
+    if not candidates:
+        return None
+
+    normalized_catalog = []
+    for item in catalog:
+        catalog_name = _to_text(item.get("race_name"))
+        norm_name = _normalize_race_name_for_match(catalog_name)
+        if norm_name:
+            normalized_catalog.append((item, catalog_name, norm_name))
+
+    # 1) 正規化完全一致
+    for query in candidates:
+        query_norm = _normalize_race_name_for_match(query)
+        for item, _, norm_name in normalized_catalog:
+            if query_norm == norm_name:
+                return item
+
+    # 2) 部分一致（略称・正式名称の差を吸収）
+    for query in candidates:
+        query_norm = _normalize_race_name_for_match(query)
+        partial_matches = []
+        for item, _, norm_name in normalized_catalog:
+            if query_norm and (query_norm in norm_name or norm_name in query_norm):
+                partial_matches.append((len(norm_name), item))
+        if partial_matches:
+            partial_matches.sort(key=lambda x: x[0], reverse=True)
+            return partial_matches[0][1]
+
+    # 3) あいまい一致
+    best_item = None
+    best_score = 0.0
+    for query in candidates:
+        query_norm = _normalize_race_name_for_match(query)
+        if not query_norm:
+            continue
+        for item, _, norm_name in normalized_catalog:
+            score = SequenceMatcher(None, query_norm, norm_name).ratio()
+            if score > best_score:
+                best_score = score
+                best_item = item
+    if best_item and best_score >= 0.6:
+        return best_item
+    return None
+
+
+def _normalize_umanity_header_label(text: str) -> str:
+    """Umanity表ヘッダを比較しやすい形へ正規化する。"""
+    normalized = unicodedata.normalize("NFKC", _to_text(text))
+    if not normalized:
+        return ""
+    return normalized.replace("　", "").replace(" ", "").strip()
+
+
+def _find_umanity_header_index(headers: list[str], *candidates: str) -> int:
+    """ヘッダ文字列から候補語に一致する列indexを返す。"""
+    for idx, header in enumerate(headers):
+        for candidate in candidates:
+            if candidate and candidate in header:
+                return idx
+    return -1
+
+
+def _extract_weight_from_jockey_cell(text: str) -> str:
+    """騎手・斤量セルから斤量数値を抽出する。"""
+    normalized = unicodedata.normalize("NFKC", _to_text(text))
+    if not normalized:
+        return ""
+    tail_match = re.search(r"(\d{2}(?:\.\d)?)\s*$", normalized)
+    if tail_match:
+        return tail_match.group(1)
+    any_match = re.search(r"(\d{2}(?:\.\d)?)", normalized)
+    return any_match.group(1) if any_match else ""
+
+
+@st.cache_data(ttl=21600)
+def fetch_umanity_racecard_map(race_name: str) -> dict:
+    """Umanity racecard から馬別の近3走情報を取得する。"""
+    resolved = resolve_umanity_race_info(race_name)
+    if not resolved:
+        raise RuntimeError(f"Umanity racecard id unresolved: {race_name}")
+
+    race_id = _to_text(resolved.get("race_id"))
+    if not race_id:
+        raise RuntimeError(f"Invalid Umanity race id: {resolved}")
+
+    page_url = f"{UMANITY_BASE_URL}/racedata/graderace/{race_id}/racecard.php"
+    response = requests.get(page_url, headers=UMANITY_HEADERS, timeout=20)
+    if response.status_code >= 400:
+        raise RuntimeError(f"Umanity racecard page HTTP {response.status_code}")
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    table = soup.select_one("table.grace_table")
+    if not table:
+        raise RuntimeError("Umanity racecard table not found")
+
+    headers = [_normalize_umanity_header_label(th.get_text(" ", strip=True)) for th in table.select("thead th")]
+    if not headers:
+        head_cells = table.select("tr th")
+        headers = [_normalize_umanity_header_label(cell.get_text(" ", strip=True)) for cell in head_cells]
+    if not headers:
+        raise RuntimeError("Umanity racecard header not found")
+
+    horse_idx = _find_umanity_header_index(headers, "馬名")
+    jockey_idx = _find_umanity_header_index(headers, "騎手負担重量", "騎手")
+    prev1_idx = _find_umanity_header_index(headers, "前走")
+    prev2_idx = _find_umanity_header_index(headers, "2走前", "２走前")
+    prev3_idx = _find_umanity_header_index(headers, "3走前", "３走前")
+    if horse_idx < 0:
+        raise RuntimeError("Umanity racecard horse column not found")
+
+    rows = table.select("tbody tr")
+    if not rows:
+        rows = table.find_all("tr")[1:]
+    if not rows:
+        raise RuntimeError("Umanity racecard rows not found")
+
+    entries: dict[str, dict] = {}
+    for row in rows:
+        cells = row.find_all("td")
+        if not cells or horse_idx >= len(cells):
+            continue
+
+        horse_cell = cells[horse_idx]
+        horse_name = ""
+        horse_link = horse_cell.select_one("a")
+        if horse_link:
+            horse_name = _to_text(horse_link.get_text(" ", strip=True))
+        if not horse_name:
+            horse_text = _to_text(horse_cell.get_text(" ", strip=True))
+            horse_name = re.split(r"\s+", horse_text)[0] if horse_text else ""
+        if not horse_name:
+            continue
+
+        jockey_text = ""
+        if 0 <= jockey_idx < len(cells):
+            jockey_text = _to_text(cells[jockey_idx].get_text(" ", strip=True))
+
+        def _cell_text(idx: int) -> str:
+            if idx < 0 or idx >= len(cells):
+                return ""
+            return re.sub(r"\s+", " ", _to_text(cells[idx].get_text(" ", strip=True))).strip()
+
+        entry = {
+            "馬名": horse_name,
+            "斤量補完": _extract_weight_from_jockey_cell(jockey_text),
+            "前走": _cell_text(prev1_idx),
+            "2走前": _cell_text(prev2_idx),
+            "3走前": _cell_text(prev3_idx),
+        }
+        entries[_normalize_horse_token(horse_name)] = entry
+
+    if not entries:
+        raise RuntimeError("Umanity racecard entries not found")
+
+    return {
+        "race_id": race_id,
+        "source_url": page_url,
+        "entries": entries,
+    }
+
+
+def enrich_entry_table_with_umanity(df: pd.DataFrame, race_name: str) -> pd.DataFrame:
+    """出馬表DataFrameへ Umanity racecard の近3走と斤量補完を反映する。"""
+    if not isinstance(df, pd.DataFrame) or df.empty or "馬名" not in df.columns:
+        return df
+
+    race_label = _to_text(race_name)
+    if not race_label:
+        return df.copy()
+
+    try:
+        payload = fetch_umanity_racecard_map(race_label)
+    except Exception:
+        return df.copy()
+
+    entries = payload.get("entries") if isinstance(payload, dict) else {}
+    if not isinstance(entries, dict) or not entries:
+        return df.copy()
+
+    enriched = df.copy()
+    for col in ("前走", "2走前", "3走前"):
+        if col not in enriched.columns:
+            enriched[col] = ""
+    if "斤量" not in enriched.columns:
+        enriched["斤量"] = ""
+
+    for idx, row in enriched.iterrows():
+        horse_name = _to_text(row.get("馬名"))
+        key = _normalize_horse_token(horse_name)
+        entry = entries.get(key)
+        if not entry:
+            continue
+
+        for col in ("前走", "2走前", "3走前"):
+            val = _to_text(entry.get(col))
+            if val:
+                enriched.at[idx, col] = val
+
+        current_weight = _to_text(row.get("斤量"))
+        if current_weight.lower() in {"", "-", "nan", "none", "---.-"}:
+            fallback_weight = _to_text(entry.get("斤量補完"))
+            if fallback_weight:
+                enriched.at[idx, "斤量"] = fallback_weight
+
+    return enriched
+
+
+def _extract_umanity_section_title(table, fallback_index: int) -> str:
+    """Umanityデータ表の直前見出し（◆〜）をセクション名として抽出する。"""
+    label_tag = table.find_previous(
+        lambda tag: tag.name in {"p", "h3", "h4"} and "◆" in _to_text(tag.get_text(" ", strip=True))
+    )
+    if label_tag:
+        text = _to_text(label_tag.get_text(" ", strip=True)).lstrip("◆").strip()
+        if text:
+            return text
+    return f"データ分析 {fallback_index + 1}"
+
+
+def _parse_umanity_analysis_tables(soup: BeautifulSoup) -> list[dict]:
+    """Umanityのデータ分析表（人気/脚質/枠順など）を抽出する。"""
+    tables = []
+    for idx, table in enumerate(soup.select("table.grace_data_table01")):
+        rows = table.find_all("tr")
+        if len(rows) < 2:
+            continue
+
+        headers = [_to_text(cell.get_text(" ", strip=True)) for cell in rows[0].find_all(["th", "td"])]
+        headers = [h for h in headers if h]
+        if len(headers) < 2:
+            continue
+
+        parsed_rows = []
+        for row in rows[1:]:
+            cells = [_to_text(cell.get_text(" ", strip=True)) for cell in row.find_all(["th", "td"])]
+            if not cells:
+                continue
+            if len(cells) < len(headers):
+                cells = cells + [""] * (len(headers) - len(cells))
+            row_dict = {headers[i]: cells[i] for i in range(len(headers))}
+            parsed_rows.append(row_dict)
+
+        if not parsed_rows:
+            continue
+
+        tables.append({
+            "section": _extract_umanity_section_title(table, idx),
+            "headers": headers,
+            "rows": parsed_rows,
+        })
+    return tables
+
+
+def _parse_percent_number(value) -> float | None:
+    """'55.0%' のような文字列から数値を抽出する。"""
+    text = _to_text(value).replace(",", "")
+    match = re.search(r"-?\d+(?:\.\d+)?", text)
+    if not match:
+        return None
+    try:
+        return float(match.group(0))
+    except ValueError:
+        return None
+
+
+def _top_and_bottom_by_rate(table: dict) -> tuple[dict | None, dict | None]:
+    """表から複勝率ベースの最上位/最下位行を返す。"""
+    headers = table.get("headers") if isinstance(table, dict) else None
+    if not isinstance(headers, list) or len(headers) < 2:
+        return None, None
+    label_col = headers[0]
+
+    ranked = []
+    for row in table.get("rows", []) if isinstance(table, dict) else []:
+        if not isinstance(row, dict):
+            continue
+        label = _to_text(row.get(label_col))
+        rate = _parse_percent_number(row.get("複勝率"))
+        if not label or rate is None:
+            continue
+        ranked.append((rate, row))
+    if not ranked:
+        return None, None
+    ranked.sort(key=lambda x: x[0], reverse=True)
+    return ranked[0][1], ranked[-1][1]
+
+
+def _table_top_rows(table: dict, limit: int = 3) -> list[dict]:
+    """表から複勝率の高い順に上位行を返す。"""
+    ranked = []
+    for row in table.get("rows", []) if isinstance(table, dict) else []:
+        if not isinstance(row, dict):
+            continue
+        rate = _parse_percent_number(row.get("複勝率"))
+        if rate is None:
+            continue
+        ranked.append((rate, row))
+    ranked.sort(key=lambda x: x[0], reverse=True)
+    return [row for _, row in ranked[:limit]]
+
+
+def _format_rate_row(row: dict, label_col: str) -> str:
+    """成績行を説明文へ整形する。"""
+    label = _to_text(row.get(label_col))
+    rate = _to_text(row.get("複勝率"))
+    record = _to_text(row.get("着別度数"))
+    parts = [label]
+    if rate:
+        parts.append(f"複勝率{rate}")
+    if record:
+        parts.append(f"着別{record}")
+    return "（".join([parts[0], " / ".join(parts[1:])]) + "）" if len(parts) > 1 else parts[0]
+
+
+def _build_race_characteristics_from_umanity(
+    race_name: str,
+    grade: str,
+    venue: str,
+    distance: str,
+    surface: str,
+    date_str: str,
+    source_url: str,
+    umanity_race_label: str,
+    tables: list[dict],
+) -> dict:
+    """Umanityデータ分析表から、画面表示用のレース特徴dictを構築する。"""
+    table_map = {}
+    for table in tables:
+        section = _to_text(table.get("section"))
+        if "人気別成績" in section:
+            table_map["popularity"] = table
+        elif "単勝オッズ別成績" in section:
+            table_map["odds"] = table
+        elif "配当" in section:
+            table_map["payout"] = table
+        elif "脚質別成績" in section:
+            table_map["style"] = table
+        elif "枠順別成績" in section:
+            table_map["frame"] = table
+        elif "種牡馬別成績" in section:
+            table_map["sire"] = table
+
+    past_lines = []
+    win_lines = []
+    lose_lines = []
+
+    popularity = table_map.get("popularity")
+    if popularity:
+        top_rows = _table_top_rows(popularity, limit=3)
+        label_col = popularity.get("headers", ["人気"])[0]
+        if top_rows:
+            top_text = " / ".join(_format_rate_row(row, label_col) for row in top_rows)
+            past_lines.append(f"人気別上位: {top_text}")
+        pop_best, pop_worst = _top_and_bottom_by_rate(popularity)
+        if pop_best:
+            win_lines.append(f"人気傾向: {_format_rate_row(pop_best, label_col)}")
+        if pop_worst:
+            lose_lines.append(f"人気傾向: {_format_rate_row(pop_worst, label_col)}")
+
+    odds = table_map.get("odds")
+    if odds:
+        odds_best, odds_worst = _top_and_bottom_by_rate(odds)
+        label_col = odds.get("headers", ["単勝オッズ"])[0]
+        if odds_best:
+            win_lines.append(f"オッズ帯: {_format_rate_row(odds_best, label_col)}")
+        if odds_worst:
+            lose_lines.append(f"オッズ帯: {_format_rate_row(odds_worst, label_col)}")
+
+    style = table_map.get("style")
+    if style:
+        style_best, style_worst = _top_and_bottom_by_rate(style)
+        label_col = style.get("headers", ["脚質"])[0]
+        if style_best:
+            win_lines.append(f"脚質傾向: {_format_rate_row(style_best, label_col)}")
+        if style_worst:
+            lose_lines.append(f"脚質傾向: {_format_rate_row(style_worst, label_col)}")
+
+    frame = table_map.get("frame")
+    frame_good = ""
+    frame_bad = ""
+    if frame:
+        frame_best, frame_worst = _top_and_bottom_by_rate(frame)
+        label_col = frame.get("headers", ["枠順"])[0]
+        if frame_best:
+            frame_good = _format_rate_row(frame_best, label_col)
+            win_lines.append(f"枠順傾向: {frame_good}")
+        if frame_worst:
+            frame_bad = _format_rate_row(frame_worst, label_col)
+            lose_lines.append(f"枠順傾向: {frame_bad}")
+
+    payout = table_map.get("payout")
+    if payout:
+        payout_focus = []
+        for row in payout.get("rows", []):
+            if not isinstance(row, dict):
+                continue
+            bet_type = _to_text(row.get("馬券種"))
+            avg = _to_text(row.get("平均配当"))
+            if bet_type in {"単勝", "複勝", "馬連", "三連複", "三連単"} and avg:
+                payout_focus.append(f"{bet_type}平均{avg}")
+        if payout_focus:
+            past_lines.append("配当傾向: " + " / ".join(payout_focus))
+
+    sire = table_map.get("sire")
+    if sire:
+        top_sires = []
+        for row in sire.get("rows", [])[:3]:
+            if not isinstance(row, dict):
+                continue
+            sire_name = _to_text(row.get("種牡馬"))
+            rate = _to_text(row.get("複勝率"))
+            if sire_name:
+                top_sires.append(f"{sire_name}（複勝率{rate}）" if rate else sire_name)
+        if top_sires:
+            past_lines.append("同コース好調種牡馬: " + " / ".join(top_sires))
+
+    source_label = _to_text(umanity_race_label) or race_name
+    course_text = f"{venue}競馬場 {surface}{distance}（{grade}）を対象に、ウマニティ「{source_label}データ分析」を主ソースとして整理。"
+    note_lines = [
+        f"主ソース: ウマニティ データ分析（{source_url}）",
+        f"取得対象: {date_str} {race_name}",
+    ]
+    if not _to_text(table_map.get("style")):
+        note_lines.append("脚質別データが取得できなかったため、追加分析を推奨。")
+
+    return {
+        "コース特徴": course_text,
+        "過去の傾向": "\n".join(f"・{line}" for line in past_lines) if past_lines else "",
+        "勝ちやすい馬のタイプ": "\n".join(f"・{line}" for line in win_lines) if win_lines else "",
+        "苦手な馬のタイプ": "\n".join(f"・{line}" for line in lose_lines) if lose_lines else "",
+        "枠順有利": frame_good,
+        "枠順不利": frame_bad,
+        "騎手厩舎傾向": "このページには騎手・厩舎別の集計表は掲載なし（必要時はサブ分析で補完）。",
+        "注目ポイント": "\n".join(f"・{line}" for line in note_lines),
+        "情報ソース": "ウマニティ（データ分析）",
+        "情報ソースURL": source_url,
+        "情報取得方式": "Umanityスクレイピング（主）",
+        "データ分析テーブル": tables,
+    }
+
+
+@st.cache_data(ttl=14400)
+def get_race_characteristics_with_umanity(race_name="", grade="", venue="", distance="", surface="", date_str=""):
+    """Umanityのデータ分析ページをスクレイピングしてレース特徴を取得する。"""
+    resolved = resolve_umanity_race_info(race_name)
+    if not resolved:
+        raise RuntimeError(f"Umanity graderace id unresolved: {race_name}")
+
+    race_id = _to_text(resolved.get("race_id"))
+    if not race_id:
+        raise RuntimeError(f"Invalid Umanity race id: {resolved}")
+
+    page_url = f"{UMANITY_BASE_URL}/racedata/graderace/{race_id}/race_data_analyze.php"
+    response = requests.get(page_url, headers=UMANITY_HEADERS, timeout=20)
+    if response.status_code >= 400:
+        raise RuntimeError(f"Umanity analyze page HTTP {response.status_code}")
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    tables = _parse_umanity_analysis_tables(soup)
+    if not tables:
+        raise RuntimeError("Umanity analyze tables not found")
+
+    race_label = ""
+    h1_tags = soup.find_all("h1")
+    if h1_tags:
+        # 先頭h1は長文タイトル、後段h1は「皐月賞 G1」のような短い表記
+        race_label = _to_text(h1_tags[-1].get_text(" ", strip=True))
+    if not race_label:
+        race_label = _to_text(resolved.get("race_name"))
+
+    return _build_race_characteristics_from_umanity(
+        race_name=race_name,
+        grade=grade,
+        venue=venue,
+        distance=distance,
+        surface=surface,
+        date_str=date_str,
+        source_url=page_url,
+        umanity_race_label=race_label,
+        tables=tables,
+    )
+
+
+def get_race_characteristics_primary(race_name="", grade="", venue="", distance="", surface="", date_str="", extra_context=""):
+    """
+    レース特徴取得の統合入口。
+    1) Umanityスクレイピング（主）を優先
+    2) 失敗時のみ Gemini Web検索（副）へフォールバック
+    """
+    primary_error = None
+    try:
+        info = get_race_characteristics_with_umanity(
+            race_name=race_name,
+            grade=grade,
+            venue=venue,
+            distance=distance,
+            surface=surface,
+            date_str=date_str,
+        )
+        if _has_meaningful_race_characteristics(info):
+            return info
+        primary_error = RuntimeError("Umanity result was too sparse")
+    except Exception as e:
+        primary_error = e
+
+    fallback = get_race_characteristics_with_gemini(
+        race_name=race_name,
+        grade=grade,
+        venue=venue,
+        distance=distance,
+        surface=surface,
+        date_str=date_str,
+        extra_context=extra_context,
+    )
+    fallback["情報ソース"] = _to_text(fallback.get("情報ソース")) or "Gemini Web検索（サブ）"
+    fallback["情報取得方式"] = "Geminiフォールバック（副）"
+
+    if primary_error:
+        fallback_note = f"Umanity取得失敗のためGeminiにフォールバック: {type(primary_error).__name__}"
+        current_note = _to_text(fallback.get("注目ポイント"))
+        fallback["注目ポイント"] = f"{current_note}\n{fallback_note}" if current_note else fallback_note
+    return fallback
+
+
 @st.cache_data(ttl=3600)
 def get_race_characteristics_with_gemini(race_name="", grade="", venue="", distance="", surface="", date_str="", extra_context=""):
     """
@@ -3476,16 +4655,12 @@ def get_race_characteristics_with_gemini(race_name="", grade="", venue="", dista
         dict: レース特徴の辞書
     """
     if not GEMINI_API_KEY:
-        return {}
-    try:
-        client = google_genai.Client(api_key=GEMINI_API_KEY)
-        grounding_tool = genai_types.Tool(google_search=genai_types.GoogleSearch())
-        config = genai_types.GenerateContentConfig(tools=[grounding_tool])
+        raise RuntimeError("GEMINI_API_KEY is not configured")
 
-        extra_section = f"\n# 参考資料（ユーザー提供ドキュメント）\n{extra_context[:3000]}\n" if extra_context else ""
-        race_label = f"{race_name}（{venue}競馬場 {surface}{distance} {grade}）"
+    extra_section = f"\n# 参考資料（ユーザー提供ドキュメント）\n{extra_context[:3000]}\n" if extra_context else ""
+    race_label = f"{race_name}（{venue}競馬場 {surface}{distance} {grade}）"
 
-        prompt = f"""
+    prompt = f"""
 {race_label}について、過去のデータと傾向を詳しく調査してください。
 以下の観点で分析してください。
 {extra_section}
@@ -3513,21 +4688,44 @@ def get_race_characteristics_with_gemini(race_name="", grade="", venue="", dista
 }}
 ```
 """
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=config,
-        )
+    last_error = None
+    for retry in range(3):
+        try:
+            client = google_genai.Client(api_key=GEMINI_API_KEY)
+            grounding_tool = genai_types.Tool(google_search=genai_types.GoogleSearch())
+            config = genai_types.GenerateContentConfig(tools=[grounding_tool])
 
-        response_text = response.text or ""
-        return _parse_gemini_json_response(response_text, expected="dict")
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt,
+                config=config,
+            )
 
-    except (json.JSONDecodeError, ValueError, Exception) as e:
-        error_msg = str(e)
-        if _is_transient_gemini_error(error_msg):
+            response_text = response.text or ""
+            if not _to_text(response_text):
+                raise ValueError("Gemini response is empty")
+
+            parsed = _parse_gemini_json_response(response_text, expected="dict")
+            normalized = {}
+            for key, value in (parsed or {}).items():
+                txt = _to_text(value)
+                if txt:
+                    normalized[key] = value
+
+            if not _has_meaningful_race_characteristics(normalized):
+                raise ValueError("Race characteristics response was too sparse")
+            return normalized
+
+        except Exception as e:
+            last_error = e
+            msg = str(e)
+            retryable = _is_transient_gemini_error(msg) or isinstance(e, (ValueError, json.JSONDecodeError))
+            if retry < 2 and retryable:
+                time.sleep(2 * (retry + 1))
+                continue
             raise
-        st.warning(f"⚠️ レース特徴の取得に失敗しました: {type(e).__name__} ({error_msg[:120]})")
-        return {}
+
+    raise RuntimeError(f"Failed to get race characteristics: {type(last_error).__name__ if last_error else 'Unknown'}")
 
 
 def analyze_document_for_race_characteristics(text, source_name):
@@ -4159,6 +5357,27 @@ def _discover_bet_type_url_candidates(race_url: str, race_id: str) -> tuple[dict
     return candidates, warnings
 
 
+def _check_jra_odds_api_status(race_id: str) -> tuple[str, str]:
+    """
+    netkeibaのJRAオッズAPI状態を返す。
+    戻り値: (status, reason)
+    """
+    url = "https://race.netkeiba.com/api/api_get_jra_odds.html"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "X-Requested-With": "XMLHttpRequest",
+        "Referer": f"https://race.netkeiba.com/odds/index.html?race_id={race_id}",
+    }
+    try:
+        resp = requests.get(url, headers=headers, params={"race_id": race_id}, timeout=15)
+        data = resp.json() if resp.headers.get("content-type", "").startswith("application/json") else {}
+        status = _to_text((data or {}).get("status", "")) or ""
+        reason = _to_text((data or {}).get("reason", "")) or ""
+        return status.lower(), reason.lower()
+    except Exception:
+        return "", ""
+
+
 def _extract_tansho_fukusho_maps(html: str) -> tuple[dict[str, float], dict[str, float]]:
     """単勝/複勝同居ページから馬番別オッズを抽出する。"""
     soup = BeautifulSoup(html, 'html.parser')
@@ -4212,11 +5431,39 @@ def _extract_tansho_fukusho_maps(html: str) -> tuple[dict[str, float], dict[str,
 def _extract_combination_odds_map(html: str, expected_size: int, ordered: bool) -> dict[str, float]:
     """
     連系オッズページから組み合わせオッズを抽出する。
-    テーブル行に「1-2」「1-2-3」形式が出るレイアウトを主対象にする。
+    旧レイアウト（1-2形式）と現行レイアウト（cart-item属性）に対応。
     """
     soup = BeautifulSoup(html, 'html.parser')
     odds_map = {}
 
+    # 現行レイアウト: td[cart-item] の末尾に組み合わせ番号が入る
+    for cell in soup.select('td[cart-item], td[name*="_b"]'):
+        attr = _to_text(cell.get('cart-item') or cell.get('name') or "")
+        if not attr:
+            continue
+
+        m = re.search(r'_c\d+_((?:\d+_?)+)$', attr)
+        if not m:
+            continue
+        nums = [_normalize_umaban(x) for x in m.group(1).split('_')]
+        nums = [n for n in nums if n]
+        if len(nums) != expected_size:
+            continue
+
+        odds_val = _safe_odds_float(cell.get_text(" ", strip=True))
+        if not odds_val:
+            continue
+
+        key = _ticket_key(nums, ordered=ordered)
+        if not key:
+            continue
+        if key not in odds_map or odds_val < odds_map[key]:
+            odds_map[key] = odds_val
+
+    if odds_map:
+        return odds_map
+
+    # 旧レイアウト: 行テキストに「1-2」「1-2-3」が出る形式
     if expected_size == 2:
         combo_pat = re.compile(r'(\d{1,2})\s*[-ー－→/]\s*(\d{1,2})')
     else:
@@ -4235,7 +5482,7 @@ def _extract_combination_odds_map(html: str, expected_size: int, ordered: bool) 
             continue
 
         odds_val = None
-        for raw in re.findall(r'\d+\.\d+', row_text):
+        for raw in re.findall(r'\d+(?:\.\d+)?', row_text):
             odds_val = _safe_odds_float(raw)
             if odds_val:
                 break
@@ -4249,6 +5496,34 @@ def _extract_combination_odds_map(html: str, expected_size: int, ordered: bool) 
             odds_map[key] = odds_val
 
     return odds_map
+
+
+def _format_bet_type_list(items: list[str]) -> str:
+    ordered = []
+    seen = set()
+    for bt in BET_TYPES_ALL:
+        if bt in (items or []) and bt not in seen:
+            ordered.append(bt)
+            seen.add(bt)
+    for bt in (items or []):
+        if bt not in seen:
+            ordered.append(bt)
+            seen.add(bt)
+    return " / ".join(ordered)
+
+
+def _looks_like_unpublished_odds_html(html: str) -> bool:
+    if not html:
+        return False
+    text = re.sub(r'\s+', ' ', BeautifulSoup(html, 'html.parser').get_text(" ", strip=True))
+    hints = (
+        "馬券発売開始後",
+        "順次公開",
+        "発売開始日時",
+        "オッズは現在",
+        "更新待ち",
+    )
+    return any(h in text for h in hints)
 
 
 def fetch_multi_bet_type_odds(df_active: pd.DataFrame, selected_bet_types: list[str]) -> tuple[dict[str, dict[str, float]], list[str]]:
@@ -4289,12 +5564,22 @@ def fetch_multi_bet_type_odds(df_active: pd.DataFrame, selected_bet_types: list[
 
     non_single_types = [bt for bt in selected if bt != "単勝"]
     if non_single_types:
+        api_status, api_reason = _check_jra_odds_api_status(str(r.race_id))
+        odds_unpublished = api_status in {"middle", "ng"} and ("empty" in api_reason or "result odds empty" in api_reason)
+        if odds_unpublished:
+            warnings.append("単勝以外の券種オッズは現在未公開です（発売前または更新待ち）。")
+            for bt in non_single_types:
+                odds_by_type[bt] = {}
+            return odds_by_type, warnings
+
         # 単勝以外のオッズURL候補を収集
         candidates, discover_warnings = _discover_bet_type_url_candidates(get_race_url(), str(r.race_id))
         warnings.extend(discover_warnings)
     else:
         candidates = {}
 
+    unpublished_types = []
+    failed_types = []
     for bet_type in selected:
         if bet_type == "単勝":
             continue
@@ -4302,12 +5587,15 @@ def fetch_multi_bet_type_odds(df_active: pd.DataFrame, selected_bet_types: list[
         urls = candidates.get(bet_type, [])
         parsed = {}
         last_err = ""
+        unpublished_hint = False
 
         for url in urls:
             html, err = _fetch_netkeiba_html(url, max_retries=2)
             if err and not html:
                 last_err = err
                 continue
+            if _looks_like_unpublished_odds_html(html):
+                unpublished_hint = True
 
             if bet_type == "複勝":
                 _, fukusho_map = _extract_tansho_fukusho_maps(html)
@@ -4324,10 +5612,23 @@ def fetch_multi_bet_type_odds(df_active: pd.DataFrame, selected_bet_types: list[
 
         odds_by_type[bet_type] = parsed
         if not parsed:
-            msg = f"{bet_type}オッズを取得できませんでした。"
-            if last_err:
-                msg += f"（{last_err.splitlines()[-1]}）"
-            warnings.append(msg)
+            if unpublished_hint:
+                unpublished_types.append(bet_type)
+            else:
+                detail = last_err.splitlines()[-1] if last_err else ""
+                failed_types.append((bet_type, detail))
+
+    if unpublished_types:
+        warnings.append(
+            f"以下券種のオッズは現在未公開です（発売前または更新待ち）: {_format_bet_type_list(unpublished_types)}"
+        )
+    if failed_types:
+        failed_labels = _format_bet_type_list([bt for bt, _ in failed_types])
+        detail = next((d for _, d in failed_types if d), "")
+        msg = f"以下券種のオッズ取得に失敗しました: {failed_labels}"
+        if detail:
+            msg += f"（{detail}）"
+        warnings.append(msg)
 
     return odds_by_type, warnings
 
@@ -4633,16 +5934,30 @@ def build_budget_bet_plan(
 
     odds_by_type = bet_type_odds or {}
     candidates_by_type = {}
+    missing_odds_types = []
+    candidate_short_types = []
     for bt in selected_bet_types:
         odds_map = odds_by_type.get(bt, {}) if isinstance(odds_by_type, dict) else {}
         cands = _build_ticket_candidates(bt, horse_scores, odds_map, anchor_umaban=anchor_umaban)
         if not cands:
-            warnings.append(f"{bt}: オッズ不足または候補不足のため買い目を生成できませんでした。")
+            if odds_map:
+                candidate_short_types.append(bt)
+            else:
+                missing_odds_types.append(bt)
         candidates_by_type[bt] = cands
+
+    if missing_odds_types:
+        warnings.append(f"オッズ未取得のため買い目を生成できない券種: {_format_bet_type_list(missing_odds_types)}")
+    if candidate_short_types:
+        warnings.append(f"候補不足のため買い目を生成できない券種: {_format_bet_type_list(candidate_short_types)}")
 
     all_candidates = [c for bt in selected_bet_types for c in candidates_by_type.get(bt, [])]
     if not all_candidates:
-        return {"summary": {}, "tickets": [], "horse_scores": horse_scores, "warnings": warnings + ["有効な買い目候補がありません。"], "generated_at": datetime.now().isoformat(timespec="seconds")}
+        if missing_odds_types and len(missing_odds_types) == len(selected_bet_types):
+            terminal = "券種別オッズが未取得のため買い目を生成できませんでした。オッズ公開後に再実行してください。"
+        else:
+            terminal = "有効な買い目候補がありません。"
+        return {"summary": {}, "tickets": [], "horse_scores": horse_scores, "warnings": warnings + [terminal], "generated_at": datetime.now().isoformat(timespec="seconds")}
 
     roi_vals = [c["raw_roi"] for c in all_candidates]
     min_roi = min(roi_vals)
@@ -4795,16 +6110,69 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
                 pass
         return s
 
+    def pick(row: pd.Series, aliases: list[str]) -> str:
+        for key in aliases:
+            if key in row.index:
+                value = row.get(key, "")
+                if _to_text(value):
+                    return str(value)
+        return str(row.get(aliases[0], ""))
+
+    def _past_rank_class(rank: int) -> str:
+        if rank == 1:
+            return "rank-1"
+        if rank == 2:
+            return "rank-2"
+        if rank == 3:
+            return "rank-3"
+        return "rank-other"
+
+    def render_past_race_cell(raw_val: str) -> str:
+        raw = _to_text(raw_val)
+        if not raw or raw in {"-", "nan", "None"}:
+            return '<span class="past-race-empty">-</span>'
+
+        text = re.sub(r"\s+", " ", raw).strip()
+        escaped_text = html.escape(text)
+        match = re.match(r"^(?P<date>\d{2}/\d{2}/\d{2})\s+(?P<rank>\d+)\s+(?P<rest>.+)$", text)
+        if not match:
+            return f'<div class="past-race-plain">{escaped_text}</div>'
+
+        date = html.escape(match.group("date"))
+        rank_num = int(match.group("rank"))
+        rest = match.group("rest").strip()
+        race_name = rest
+        course_info = ""
+        course_match = re.search(r"(.+?)\s+([^\s]*／[^\s]+)$", rest)
+        if course_match:
+            race_name = course_match.group(1).strip()
+            course_info = course_match.group(2).strip()
+
+        rank_class = _past_rank_class(rank_num)
+        race_name_escaped = html.escape(race_name)
+        course_escaped = html.escape(course_info)
+        course_html = f'<div class="past-race-course">{course_escaped}</div>' if course_info else ""
+        return (
+            '<div class="past-race-box">'
+            f'<div class="past-race-date">{date}</div>'
+            f'<div class="past-race-main"><span class="past-race-rank {rank_class}">{rank_num}着</span>'
+            f'<span class="past-race-name">{race_name_escaped}</span></div>'
+            f'{course_html}'
+            '</div>'
+        )
+
     rows_html = []
     for _, row in df.iterrows():
         waku  = safe(row.get('枠番', ''), as_int=True)
         umaban = safe(row.get('馬番', ''), as_int=True)
         name  = safe(row.get('馬名', ''))
         seage = safe(row.get('性齢', ''))
-        kin   = safe(row.get('斤量', ''))
-        jockey = safe(row.get('騎手', ''))
-        trainer = safe(row.get('調教師', ''))
-        odds  = safe(row.get('オッズ', ''))
+        kin   = safe(pick(row, ['斤量', '負担重量']))
+        jockey = safe(pick(row, ['騎手', '騎手名']))
+        prev1 = safe(row.get('前走', ''))
+        prev2 = safe(row.get('2走前', ''))
+        prev3 = safe(row.get('3走前', ''))
+        odds  = safe(pick(row, ['オッズ', '単勝オッズ']))
 
         waku_cls = WAKU_COLORS.get(waku, 'waku-x')
         waku_cell = f'<span class="waku-badge {waku_cls}">{waku if waku != "-" else "?"}</span>'
@@ -4816,9 +6184,11 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
   <td class="umaban-cell">{umaban}</td>
   <td class="horse-name-cell">{name}</td>
   <td>{seage}</td>
-  <td>{kin}</td>
+  <td class="kinryo-cell">{kin}</td>
   <td>{jockey}</td>
-  <td>{trainer}</td>
+  <td class="past-race-cell">{render_past_race_cell(prev1)}</td>
+  <td class="past-race-cell">{render_past_race_cell(prev2)}</td>
+  <td class="past-race-cell">{render_past_race_cell(prev3)}</td>
   <td>{odds_cell}</td>
 </tr>""")
 
@@ -4828,7 +6198,7 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
 <thead>
 <tr>
   <th>枠</th><th>番</th><th>馬名</th><th>性齢</th>
-  <th>斤量</th><th>騎手</th><th>調教師</th><th>単勝オッズ</th>
+  <th>斤量</th><th>騎手</th><th class="past-col">前走</th><th class="past-col">2走前</th><th class="past-col">3走前</th><th>単勝オッズ</th>
 </tr>
 </thead>
 <tbody>
@@ -4948,6 +6318,63 @@ html, body, [class*="css"] { font-family: 'Noto Sans JP', sans-serif; }
 .horse-table tbody td:last-child  { border-right: 1px solid #f0f0f0; border-radius: 0 8px 8px 0; }
 .horse-name-cell { text-align: left !important; font-weight: 700; font-size: 0.95rem; color: #1a1a2e; }
 .umaban-cell { font-weight: 700; color: #333; font-size: 1rem; }
+.kinryo-cell { font-weight: 700; color: #0f3554; }
+.horse-table thead th.past-col { min-width: 210px; }
+.past-race-cell {
+    text-align: left !important;
+    min-width: 210px;
+    line-height: 1.3;
+    white-space: normal;
+    font-size: 0.78rem;
+    color: #1f2937;
+}
+.past-race-box {
+    display: grid;
+    gap: 3px;
+}
+.past-race-date {
+    font-size: 0.68rem;
+    color: #64748b;
+    letter-spacing: 0.01em;
+}
+.past-race-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+.past-race-rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 900;
+    border: 1px solid transparent;
+}
+.past-race-rank.rank-1 { background: #fff2cf; color: #7c4d00; border-color: #f4c95d; }
+.past-race-rank.rank-2 { background: #e9edf3; color: #334155; border-color: #b8c2d1; }
+.past-race-rank.rank-3 { background: #f5e5d7; color: #7a4a2b; border-color: #d8b49a; }
+.past-race-rank.rank-other { background: #f3f4f6; color: #4b5563; border-color: #d1d5db; }
+.past-race-name {
+    font-weight: 700;
+    color: #0f172a;
+    overflow-wrap: anywhere;
+}
+.past-race-course {
+    font-size: 0.7rem;
+    color: #475569;
+}
+.past-race-plain {
+    font-size: 0.72rem;
+    color: #334155;
+}
+.past-race-empty {
+    color: #94a3b8;
+    font-size: 0.72rem;
+}
 
 /* 枠番バッジ（日本競馬の伝統的な枠色） */
 .waku-badge {
@@ -5099,8 +6526,12 @@ div[data-testid="metric-container"] {
         return source_df[umaban_num.notna()].copy().reset_index(drop=True)
 
     df_active = get_active_race_df(df)
-    active_horse_names = set(df_active['馬名'].astype(str).tolist()) if (
-        df_active is not None and not df_active.empty and '馬名' in df_active.columns
+    df_active_enriched = enrich_entry_table_with_umanity(
+        df_active,
+        race_name=(r.race_name if r else ""),
+    )
+    active_horse_names = set(df_active_enriched['馬名'].astype(str).tolist()) if (
+        df_active_enriched is not None and not df_active_enriched.empty and '馬名' in df_active_enriched.columns
     ) else set()
     race_widget_scope = r.race_key if r else "default"
 
@@ -5120,13 +6551,11 @@ div[data-testid="metric-container"] {
         st.markdown("### 📊 出走予定馬一覧")
 
         # データが空でないか確認
-        if df_active is not None and not df_active.empty:
-            # 馬番（CSV保存済み）でソート → 枠順と一致
-            df_display = df_active.copy()
-            if '馬番' in df_display.columns:
-                df_display['_馬番_num'] = pd.to_numeric(df_display['馬番'], errors='coerce')
-                df_display = df_display.sort_values('_馬番_num', na_position='last')
-                df_display = df_display.drop(columns=['_馬番_num']).reset_index(drop=True)
+        if df_active_enriched is not None and not df_active_enriched.empty:
+            df_display = df_active_enriched.copy()
+            if 'オッズ' in df_display.columns:
+                # 文字列オッズを安全に上書きできるよう object 型へ寄せる
+                df_display['オッズ'] = df_display['オッズ'].astype('object')
 
             # セッション内のオッズを反映（ボタン取得後）
             if 'latest_odds' in st.session_state and 'オッズ' in df_display.columns:
@@ -5135,8 +6564,55 @@ div[data-testid="metric-container"] {
                     if horse in st.session_state['latest_odds']:
                         df_display.at[idx, 'オッズ'] = st.session_state['latest_odds'][horse]
 
+            sort_option = st.radio(
+                "並び順",
+                options=["馬番順", "オッズ昇順（人気順）", "オッズ降順（高配当順）"],
+                horizontal=True,
+                key=f"entry_sort::{race_widget_scope}",
+            )
+
+            if '馬番' in df_display.columns:
+                df_display['_馬番_num'] = pd.to_numeric(df_display['馬番'], errors='coerce')
+            else:
+                df_display['_馬番_num'] = pd.Series([float('nan')] * len(df_display), index=df_display.index)
+
+            if 'オッズ' in df_display.columns:
+                odds_text = (
+                    df_display['オッズ']
+                    .astype(str)
+                    .str.replace(',', '', regex=False)
+                    .str.replace('---.-', '', regex=False)
+                    .str.strip()
+                )
+                df_display['_オッズ_num'] = pd.to_numeric(odds_text, errors='coerce')
+
+            has_numeric_odds = ('_オッズ_num' in df_display.columns) and df_display['_オッズ_num'].notna().any()
+            if sort_option == "オッズ昇順（人気順）" and has_numeric_odds:
+                df_display = df_display.sort_values(
+                    by=['_オッズ_num', '_馬番_num'],
+                    ascending=[True, True],
+                    na_position='last',
+                )
+            elif sort_option == "オッズ降順（高配当順）" and has_numeric_odds:
+                df_display = df_display.sort_values(
+                    by=['_オッズ_num', '_馬番_num'],
+                    ascending=[False, True],
+                    na_position='last',
+                )
+            else:
+                df_display = df_display.sort_values('_馬番_num', na_position='last')
+                if sort_option != "馬番順" and not has_numeric_odds:
+                    st.caption("オッズが未公開のため、馬番順で表示しています。")
+
+            drop_cols = [c for c in ['_馬番_num', '_オッズ_num'] if c in df_display.columns]
+            if drop_cols:
+                df_display = df_display.drop(columns=drop_cols)
+            df_display = df_display.reset_index(drop=True)
+
             # 出馬表を HTML カードテーブルで表示
             st.markdown(render_horse_table_html(df_display), unsafe_allow_html=True)
+            if {"前走", "2走前", "3走前"}.issubset(set(df_display.columns)):
+                st.caption("近3走データは Umanity racecard を優先して表示しています。")
 
             # オッズ取得ボタン
             st.markdown("---")
@@ -5156,17 +6632,20 @@ div[data-testid="metric-container"] {
                             st.session_state.pop('latest_odds_error', None)
                             # 表示高速化のためCSVにも反映
                             try:
-                                csv_df = pd.read_csv(csv_path, encoding='utf-8-sig')
-                                if '馬名' in csv_df.columns and 'オッズ' in csv_df.columns:
-                                    updated = False
-                                    for idx, row in csv_df.iterrows():
-                                        horse = str(row.get('馬名', '')).strip()
-                                        if horse in latest_odds and str(row.get('オッズ', '')).strip() != latest_odds[horse]:
-                                            csv_df.at[idx, 'オッズ'] = latest_odds[horse]
-                                            updated = True
-                                    if updated:
-                                        csv_df.to_csv(csv_path, index=False, encoding='utf-8-sig')
-                                        load_race_data.clear()
+                                csv_path_local = get_csv_path()
+                                if csv_path_local and os.path.exists(csv_path_local):
+                                    csv_df = pd.read_csv(csv_path_local, encoding='utf-8-sig')
+                                    if '馬名' in csv_df.columns and 'オッズ' in csv_df.columns:
+                                        csv_df['オッズ'] = csv_df['オッズ'].astype('object')
+                                        updated = False
+                                        for idx, row in csv_df.iterrows():
+                                            horse = str(row.get('馬名', '')).strip()
+                                            if horse in latest_odds and str(row.get('オッズ', '')).strip() != latest_odds[horse]:
+                                                csv_df.at[idx, 'オッズ'] = latest_odds[horse]
+                                                updated = True
+                                        if updated:
+                                            csv_df.to_csv(csv_path_local, index=False, encoding='utf-8-sig')
+                                            load_race_data.clear()
                             except Exception:
                                 pass
                             save_race_cache(get_race_config().race_key)
@@ -5532,9 +7011,12 @@ div[data-testid="metric-container"] {
 
         # ===== Section 3: レース特徴リセット =====
         st.markdown("#### 🏟️ レース特徴・傾向")
-        st.info("💡 レース特徴はアプリ起動時に自動表示されます。「レース特徴・傾向」タブで確認してください。")
-        if st.button("🔄 レース特徴をWeb再取得", key="btn_race_refresh"):
+        st.info("💡 レース特徴はアプリ起動時に「Umanityスクレイピング優先」で自動取得されます。")
+        if st.button("🔄 レース特徴を再取得（Umanity優先）", key="btn_race_refresh"):
             st.session_state.pop('race_characteristics', None)
+            st.session_state.pop('race_characteristics_enriched', None)
+            st.session_state.pop('race_characteristics_last_attempt', None)
+            st.session_state.pop('race_characteristics_last_error', None)
             if r:
                 save_race_cache(r.race_key)  # キャッシュからもrace_characteristicsを削除→次回ロード時にAPI再実行
             st.rerun()
@@ -5663,47 +7145,81 @@ div[data-testid="metric-container"] {
                     value = json.dumps(value, ensure_ascii=False)
                 text = str(value).strip()
                 return [ln.strip() for ln in text.split('\n') if ln.strip()]
+            source_name = _to_text(race_info.get('情報ソース'))
+            source_url = _to_text(race_info.get('情報ソースURL'))
+            source_method = _to_text(race_info.get('情報取得方式'))
 
-            if race_info.get('コース特徴'):
-                st.markdown("#### 🏁 コース特徴")
-                st.info(race_info['コース特徴'])
+            if source_url:
+                st.link_button("🔗 参照元を開く（ウマニティ）", source_url, use_container_width=True)
+            if source_name or source_method:
+                st.caption(" / ".join([x for x in (source_name, source_method) if x]))
 
-            col_win, col_lose = st.columns(2)
-            with col_win:
-                if race_info.get('勝ちやすい馬のタイプ'):
-                    st.markdown("#### ✅ 勝ちやすい馬のタイプ")
-                    for line in _as_lines(race_info.get('勝ちやすい馬のタイプ')):
-                        st.success(line)
-            with col_lose:
-                if race_info.get('苦手な馬のタイプ'):
-                    st.markdown("#### ❌ 苦手な馬のタイプ")
-                    for line in _as_lines(race_info.get('苦手な馬のタイプ')):
-                        st.error(line)
+            summary_tab, data_tab = st.tabs(["🧭 傾向サマリー", "📊 Umanityデータ分析"])
 
-            col_inner, col_outer = st.columns(2)
-            with col_inner:
-                if race_info.get('枠順有利'):
-                    st.markdown("#### 📍 枠順：有利")
-                    st.success(race_info['枠順有利'])
-            with col_outer:
-                if race_info.get('枠順不利'):
-                    st.markdown("#### ⚠️ 枠順：不利")
-                    st.error(race_info['枠順不利'])
+            with summary_tab:
+                if race_info.get('コース特徴'):
+                    st.markdown("#### 🏁 コース特徴")
+                    st.info(race_info['コース特徴'])
 
-            if race_info.get('過去の傾向'):
-                st.markdown("#### 📊 過去の傾向・データ")
-                st.write(race_info['過去の傾向'])
+                col_win, col_lose = st.columns(2)
+                with col_win:
+                    if race_info.get('勝ちやすい馬のタイプ'):
+                        st.markdown("#### ✅ 勝ちやすい馬のタイプ")
+                        for line in _as_lines(race_info.get('勝ちやすい馬のタイプ')):
+                            st.success(line)
+                with col_lose:
+                    if race_info.get('苦手な馬のタイプ'):
+                        st.markdown("#### ❌ 苦手な馬のタイプ")
+                        for line in _as_lines(race_info.get('苦手な馬のタイプ')):
+                            st.error(line)
 
-            if race_info.get('騎手厩舎傾向'):
-                with st.expander("👤 騎手・厩舎の傾向"):
-                    st.write(race_info['騎手厩舎傾向'])
+                col_inner, col_outer = st.columns(2)
+                with col_inner:
+                    if race_info.get('枠順有利'):
+                        st.markdown("#### 📍 枠順：有利")
+                        st.success(race_info['枠順有利'])
+                with col_outer:
+                    if race_info.get('枠順不利'):
+                        st.markdown("#### ⚠️ 枠順：不利")
+                        st.error(race_info['枠順不利'])
 
-            if race_info.get('注目ポイント'):
-                st.markdown("#### 💡 今年の注目ポイント")
-                st.warning(race_info['注目ポイント'])
+                if race_info.get('過去の傾向'):
+                    st.markdown("#### 📊 過去の傾向・データ")
+                    for line in _as_lines(race_info.get('過去の傾向')):
+                        st.write(line)
+
+                if race_info.get('騎手厩舎傾向'):
+                    with st.expander("👤 騎手・厩舎の傾向", expanded=False):
+                        for line in _as_lines(race_info.get('騎手厩舎傾向')):
+                            st.write(line)
+
+                if race_info.get('注目ポイント'):
+                    st.markdown("#### 💡 注目ポイント")
+                    for line in _as_lines(race_info.get('注目ポイント')):
+                        st.warning(line)
+
+            with data_tab:
+                data_tables = race_info.get('データ分析テーブル')
+                if isinstance(data_tables, list) and data_tables:
+                    st.caption("ウマニティ「データ分析」ページの主要テーブルをそのまま表示しています。")
+                    for idx, table_info in enumerate(data_tables):
+                        section_title = _to_text(table_info.get("section")) or f"データ分析 {idx + 1}"
+                        rows = table_info.get("rows")
+                        headers = table_info.get("headers")
+                        if not isinstance(rows, list) or not rows:
+                            continue
+                        df_table = pd.DataFrame(rows)
+                        if isinstance(headers, list) and headers:
+                            ordered_cols = [c for c in headers if c in df_table.columns]
+                            remain_cols = [c for c in df_table.columns if c not in ordered_cols]
+                            df_table = df_table[ordered_cols + remain_cols]
+                        with st.expander(f"◆ {section_title}", expanded=(idx < 2)):
+                            st.dataframe(df_table, use_container_width=True, hide_index=True)
+                else:
+                    st.info("Umanityデータ分析テーブルが未取得のため、サマリー情報のみ表示しています。")
 
         else:
-            st.info("👆 「情報入力」タブで「🔍 Geminiでレース特徴を分析」を実行するか、ドキュメントをアップロードしてください")
+            st.info("👆 起動時の自動取得（Umanity優先）を待つか、「情報入力」タブの再取得ボタンを実行してください")
 
     # ===== タブ5: YouTube詳細 =====
     with tab5:
@@ -5813,7 +7329,7 @@ div[data-testid="metric-container"] {
                             try:
                                 analysis_results, video_conclusion = analyze_video_with_gemini(video)
                             except Exception as e:
-                                st.error(f"❌ 解析に失敗しました: {type(e).__name__}")
+                                st.error(f"❌ 解析に失敗しました: {type(e).__name__} ({str(e)[:120]})")
                                 analysis_results, video_conclusion = [], {}
                         yt_map = st.session_state.get('yt_detail_analysis', {})
                         yt_map[video['video_id']] = analysis_results
@@ -5842,7 +7358,7 @@ div[data-testid="metric-container"] {
                     with st.expander("📝 概要欄を表示"):
                         st.write(video['description'] if video['description'] else "（概要なし）")
 
-                st.markdown("#### 🔍 Gemini 馬別分析（字幕・概要欄から抽出）")
+                st.markdown("#### 🔍 Gemini 馬別分析（字幕・概要欄・動画本編から抽出）")
                 yt_map = st.session_state.get('yt_detail_analysis', {})
                 analysis_results = yt_map.get(video['video_id'], [])
                 conclusion_map = st.session_state.get('yt_video_conclusions', {})
@@ -5850,16 +7366,30 @@ div[data-testid="metric-container"] {
 
                 if video_conclusion:
                     st.markdown("#### 🏁 動画の結論（本命・対抗）")
-                    c1, c2, c3 = st.columns(3)
-                    with c1:
-                        honmei = _to_text(video_conclusion.get('本命')) or "不明"
-                        st.success(f"◎ 本命: {honmei}")
-                    with c2:
-                        taiko = _to_text(video_conclusion.get('対抗')) or "不明"
-                        st.info(f"○ 対抗: {taiko}")
-                    with c3:
-                        tanan = _to_text(video_conclusion.get('単穴')) or "不明"
-                        st.caption(f"▲ 単穴: {tanan}")
+                    honmei = _to_text(video_conclusion.get('本命'))
+                    taiko = _to_text(video_conclusion.get('対抗'))
+                    tanan = _to_text(video_conclusion.get('単穴'))
+                    has_pick = _has_meaningful_video_conclusion(video_conclusion)
+
+                    if has_pick:
+                        c1, c2, c3 = st.columns(3)
+                        with c1:
+                            if honmei:
+                                st.success(f"◎ 本命: {honmei}")
+                            else:
+                                st.caption("◎ 本命: 抽出なし")
+                        with c2:
+                            if taiko:
+                                st.info(f"○ 対抗: {taiko}")
+                            else:
+                                st.caption("○ 対抗: 抽出なし")
+                        with c3:
+                            if tanan:
+                                st.caption(f"▲ 単穴: {tanan}")
+                            else:
+                                st.caption("▲ 単穴: 抽出なし")
+                    else:
+                        st.caption("※ 本命/対抗などの印は抽出できませんでした。")
 
                     extra_lines = []
                     renshita = _to_text(video_conclusion.get('連下'))
@@ -6508,7 +8038,7 @@ div[data-testid="metric-container"] {
     # display_main_content(df) 内に置くことで df ロード後に確実に実行される
     with st.sidebar:
         st.markdown("---")
-        _report_md = generate_markdown_report(df)
+        _report_md = generate_markdown_report(df_active_enriched)
         _safe_name = get_race_display_name().replace(' ', '_').replace('/', '-')
         st.download_button(
             label="📄 Markdownレポート出力",
@@ -6555,9 +8085,38 @@ def _display_race_selector():
         clear_fetch_graded_races_cache()
         st.rerun()
 
+    with st.sidebar.expander("📅 重賞一覧の取得期間", expanded=False):
+        days_back = int(
+            st.number_input(
+                "過去日数",
+                min_value=0,
+                max_value=30,
+                value=7,
+                step=1,
+                key="upcoming_days_back",
+                help="今日から何日前までの重賞を候補に含めるか",
+            )
+        )
+        days_ahead = int(
+            st.number_input(
+                "先日数",
+                min_value=1,
+                max_value=180,
+                value=14,
+                step=1,
+                key="upcoming_days_ahead",
+                help="今日から何日先までの重賞を候補に含めるか",
+            )
+        )
+
     # 重賞一覧を取得
     with st.spinner("重賞一覧を取得中..."):
-        races = get_upcoming_races(months_ahead=2, days_ahead=14)
+        start_date = date.today() - timedelta(days=days_back)
+        races = get_upcoming_races(
+            months_ahead=2,
+            from_date=start_date,
+            days_ahead=days_back + days_ahead,
+        )
 
     if not races:
         st.sidebar.warning("重賞一覧を取得できませんでした")
@@ -6625,6 +8184,12 @@ def _display_race_selector():
         and not st.session_state.get('_initial_race_autoloaded', False)
     ):
         st.session_state['_initial_race_autoloaded'] = True
+        # 前回レースが race_id 未解決だった場合、起動時に1回だけ解決を試みる。
+        if not pending_race.race_id:
+            resolved_id = resolve_race_id(pending_race)
+            if resolved_id:
+                pending_race.race_id = resolved_id
+                pending_race.csv_file = f"data/race_{resolved_id}.csv"
         st.session_state['selected_race'] = pending_race
         st.session_state['_prev_race_key'] = pending_race.race_key
         st.session_state['_pending_race_key'] = pending_race.race_key
@@ -6738,19 +8303,46 @@ def main():
 
     # レース特徴を自動初期化（初回のみ）
     if 'race_characteristics' not in st.session_state:
-        # Gemini で動的取得、失敗時は最小限フォールバック
         st.session_state['race_characteristics'] = get_minimal_race_characteristics()
+    if 'race_characteristics_enriched' not in st.session_state:
+        st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(
+            st.session_state.get('race_characteristics')
+        )
+
+    # 既存キャッシュがGemini由来でも、Umanityで解決可能な重賞は主ソースへ置き換える
+    current_rc = st.session_state.get('race_characteristics') or {}
+    current_source = _to_text(current_rc.get('情報ソース'))
+    if st.session_state.get('race_characteristics_enriched') and "ウマニティ" not in current_source:
         try:
-            with st.spinner("📡 レース特徴をWeb検索で取得中...（初回のみ）"):
-                web_info = get_race_characteristics_with_gemini(
-                    race_name=r.race_name, grade=r.grade, venue=r.venue,
-                    distance=r.distance, surface=r.surface, date_str=r.date_str,
-                )
-            if web_info:
-                st.session_state['race_characteristics'].update(web_info)
-                save_race_cache(r.race_key)  # API取得成功時のみキャッシュ保存
+            if resolve_umanity_race_info(r.race_name):
+                st.session_state['race_characteristics_enriched'] = False
         except Exception:
-            pass  # フォールバックデータは表示される
+            pass
+
+    # 取得失敗時も一定間隔で自動再試行（初回失敗で固着させない）
+    if not st.session_state.get('race_characteristics_enriched'):
+        now_ts = time.time()
+        last_attempt = float(st.session_state.get('race_characteristics_last_attempt') or 0.0)
+        if now_ts - last_attempt >= 20.0:
+            st.session_state['race_characteristics_last_attempt'] = now_ts
+            try:
+                with st.spinner("📡 レース特徴を取得中（Umanity優先 / Geminiフォールバック）..."):
+                    web_info = get_race_characteristics_primary(
+                        race_name=r.race_name, grade=r.grade, venue=r.venue,
+                        distance=r.distance, surface=r.surface, date_str=r.date_str,
+                    )
+                if web_info:
+                    merged_rc = dict(st.session_state.get('race_characteristics') or {})
+                    for k, v in (web_info or {}).items():
+                        if _to_text(v):
+                            merged_rc[k] = v
+                    st.session_state['race_characteristics'] = merged_rc
+                    st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(merged_rc)
+                    st.session_state.pop('race_characteristics_last_error', None)
+                    if st.session_state['race_characteristics_enriched']:
+                        save_race_cache(r.race_key)
+            except Exception as e:
+                st.session_state['race_characteristics_last_error'] = f"{type(e).__name__}: {str(e)[:160]}"
 
     # 枠番・馬番・オッズを初回表示時に自動取得（レースごとに1回）
     if 'gates_saved' not in st.session_state:
