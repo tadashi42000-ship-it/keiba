@@ -1,11 +1,11 @@
 {
   "meta": {
     "race_key": "2026-04-19_中山_皐月賞",
-    "last_updated": "2026-04-18T15:18:12",
+    "last_updated": "2026-04-18T15:19:16",
     "web_article_count": 32,
     "youtube_video_count": 0,
-    "x_tweet_count": 51,
-    "x_newest_id": "2044761043008983465",
+    "x_tweet_count": 63,
+    "x_newest_id": "2045354591429259582",
     "training_item_count": 3,
     "training_time_row_count": 53,
     "yt_video_conclusion_count": 3,
@@ -443,7 +443,56 @@
     "騎手厩舎傾向": "福永祐一厩舎と岩田康誠騎手のコンビは、通算成績【3-6-4-10】で複勝率56.5%、複勝回収率205%と非常に好相性を示しており、継続騎乗の場合はさらに成績が向上する傾向にあります。 一般的に、G1で実績のあるリーディング上位の騎手や厩舎は常に注目されますが、皐月賞に特化した特定の「強い」という傾向は検索結果から限定的です。"
   },
   "doc_horse_raw": [],
-  "x_raw": [],
+  "x_raw": [
+    {
+      "馬名": "バステール",
+      "プラス情報": "川田騎手騎乗予定であり、注目されています。",
+      "マイナス情報": "川田騎手による「衝撃発言」があったとされていますが、その具体的な内容は不明です。",
+      "source_url": "https://x.com/keiba_yukimura/status/2045064735775731728",
+      "source_title": "𝕏 @keiba_yukimura",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "競馬予想家が「いい枠」と評価しており、枠順に恵まれたと見られています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/akira_umapro/status/2044761043008983465",
+      "source_title": "𝕏 @akira_umapro",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "競馬予想家が「いい枠」と評価しており、枠順に恵まれたと見られています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/akira_umapro/status/2044761043008983465",
+      "source_title": "𝕏 @akira_umapro",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "2着、3着に食い込む可能性が想像されており、好走が期待されています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/akira_umapro/status/2044761043008983465",
+      "source_title": "𝕏 @akira_umapro",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "リアライズシリウスについていく形で2、3番手の競馬をする展開が想像されており、好走の可能性が示唆されています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/akira_umapro/status/2044761043008983465",
+      "source_title": "𝕏 @akira_umapro",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "他の馬が目標にする存在として名前が挙がっており、先行力やレースでの存在感を示唆しています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/akira_umapro/status/2044761043008983465",
+      "source_title": "𝕏 @akira_umapro",
+      "source_type": "x_twitter"
+    }
+  ],
   "x_tweets": [
     {
       "tweet_id": "2044022869923926378",
@@ -1259,6 +1308,198 @@
         "quote_count": 0,
         "bookmark_count": 355,
         "impression_count": 91534
+      }
+    },
+    {
+      "tweet_id": "2045354591429259582",
+      "text": "【皐月賞についてご報告】\n\n本命馬が決まりました\nこのポスト、すぐ消すので必ず見てください。\n桜花賞みたい「爆勝ちが期待できると思います。\n\n本命はまだ誰にもバレていない“三冠の器\"\n\n2馬身差の圧勝まであると思います。\n\nちなみにですが、\n2年連続で的中すると思います。\n\n正直に教えてほしい",
+      "author_username": "89damashii07",
+      "author_label": "超越者リットマン",
+      "created_at": "2026-04-18T04:11:50.000Z",
+      "url": "https://x.com/89damashii07/status/2045354591429259582",
+      "public_metrics": {
+        "retweet_count": 128,
+        "reply_count": 571,
+        "like_count": 713,
+        "quote_count": 8,
+        "bookmark_count": 19,
+        "impression_count": 43097
+      }
+    },
+    {
+      "tweet_id": "2045262987544645904",
+      "text": "おはようございます\n\n昨日から500人ほどフォロワーが増えました。\n\nアンタレスSと皐月賞は昨年同様に、\nいや桜花賞くらい自信あります。\n\nエンターテイナーは当然有言実行する。\n\n皐月賞まで完全勝利で導きます。",
+      "author_username": "89damashii07",
+      "author_label": "超越者リットマン",
+      "created_at": "2026-04-17T22:07:50.000Z",
+      "url": "https://x.com/89damashii07/status/2045262987544645904",
+      "public_metrics": {
+        "retweet_count": 14,
+        "reply_count": 6,
+        "like_count": 87,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 5912
+      }
+    },
+    {
+      "tweet_id": "2045129552528277727",
+      "text": "フォロワーが増えすぎてビビってる。。\n\nアンタレスSと皐月賞\n\nどちらも取ります\n\nどちらも帯狙いでいきます",
+      "author_username": "89damashii07",
+      "author_label": "超越者リットマン",
+      "created_at": "2026-04-17T13:17:36.000Z",
+      "url": "https://x.com/89damashii07/status/2045129552528277727",
+      "public_metrics": {
+        "retweet_count": 10,
+        "reply_count": 2,
+        "like_count": 82,
+        "quote_count": 0,
+        "bookmark_count": 1,
+        "impression_count": 10789
+      }
+    },
+    {
+      "tweet_id": "2045128498533269873",
+      "text": "【注意点が1つだけあります】\n\n絶対に\"フォロー\"してくれてないとDM送れませんのでご注意を。\n\n皐月賞も勝ちます https://t.co/bz9Olu3LAg",
+      "author_username": "89damashii07",
+      "author_label": "超越者リットマン",
+      "created_at": "2026-04-17T13:13:25.000Z",
+      "url": "https://x.com/89damashii07/status/2045128498533269873",
+      "public_metrics": {
+        "retweet_count": 45,
+        "reply_count": 58,
+        "like_count": 236,
+        "quote_count": 0,
+        "bookmark_count": 4,
+        "impression_count": 26121
+      }
+    },
+    {
+      "tweet_id": "2045125123527881042",
+      "text": "【皐月賞｜全頭診断】※ブクマ推奨\n\n〜最高評価SSは２連勝中！！〜\n\n桜花賞SS｜スターアニス🥇\n大阪杯SS｜クロワデュノール🥇\nフェブSS｜ダブルハートボンド🥉\n\n枠順見解付き📝\n\n✅最も信頼できる人気馬\n✅オッズ妙味抜群の大穴馬\n\n皐月賞も本命馬＆買い目を先出し公開‼️ https://t.co/oMXlTu7PsA",
+      "author_username": "keiba_yukimura",
+      "author_label": "ユキムラ【6連続G1本命馬券内】",
+      "created_at": "2026-04-17T13:00:00.000Z",
+      "url": "https://x.com/keiba_yukimura/status/2045125123527881042",
+      "public_metrics": {
+        "retweet_count": 72,
+        "reply_count": 5,
+        "like_count": 1141,
+        "quote_count": 2,
+        "bookmark_count": 407,
+        "impression_count": 73663
+      }
+    },
+    {
+      "tweet_id": "2045072512472764641",
+      "text": "皐月賞の馬券を購入しました（日本最速） https://t.co/mKoGQoFEkP",
+      "author_username": "keiba_yukimura",
+      "author_label": "ユキムラ【6連続G1本命馬券内】",
+      "created_at": "2026-04-17T09:30:57.000Z",
+      "url": "https://x.com/keiba_yukimura/status/2045072512472764641",
+      "public_metrics": {
+        "retweet_count": 86,
+        "reply_count": 18,
+        "like_count": 2574,
+        "quote_count": 3,
+        "bookmark_count": 1002,
+        "impression_count": 358526
+      }
+    },
+    {
+      "tweet_id": "2045071611188101203",
+      "text": "ここだけの話、\nこれまでにない大混戦、ハイレベルな皐月賞で【帯】取りたい人？\n\n魂のいいねしてくれた方へ\n\n魂の『2頭』お伝えします\n\nこれだけは言える\n先週の桜花賞くらい自信あります https://t.co/NbvOIUfXaK",
+      "author_username": "89damashii07",
+      "author_label": "超越者リットマン",
+      "created_at": "2026-04-17T09:27:22.000Z",
+      "url": "https://x.com/89damashii07/status/2045071611188101203",
+      "public_metrics": {
+        "retweet_count": 250,
+        "reply_count": 830,
+        "like_count": 3256,
+        "quote_count": 2,
+        "bookmark_count": 45,
+        "impression_count": 484891
+      }
+    },
+    {
+      "tweet_id": "2045066499107516445",
+      "text": "アンタレスSの最終予想。\n\nマジの\"帯狙い\"でいきます\n5週連続で特大ホームランへ。\n\n正直、絶好調すぎます。\n\n桜花賞◎スターアニス🥇▲ギャラボーグ🥈\n高松宮記念◎サトノレーヴ🥇\n\nいいねリポストで【皐月賞特別🧧】\n\n阪神11R アンタレスS｜超越者リットマン @89damashii07 https://t.co/KKLWPA752N",
+      "author_username": "89damashii07",
+      "author_label": "超越者リットマン",
+      "created_at": "2026-04-17T09:07:03.000Z",
+      "url": "https://x.com/89damashii07/status/2045066499107516445",
+      "public_metrics": {
+        "retweet_count": 143,
+        "reply_count": 41,
+        "like_count": 208,
+        "quote_count": 2,
+        "bookmark_count": 12,
+        "impression_count": 116122
+      }
+    },
+    {
+      "tweet_id": "2045064735775731728",
+      "text": "【皐月賞】\nバステール騎乗予定の川田騎手が衝撃発言… https://t.co/gjc0jtWF3D",
+      "author_username": "keiba_yukimura",
+      "author_label": "ユキムラ【6連続G1本命馬券内】",
+      "created_at": "2026-04-17T09:00:03.000Z",
+      "url": "https://x.com/keiba_yukimura/status/2045064735775731728",
+      "public_metrics": {
+        "retweet_count": 5,
+        "reply_count": 0,
+        "like_count": 422,
+        "quote_count": 0,
+        "bookmark_count": 100,
+        "impression_count": 112631
+      }
+    },
+    {
+      "tweet_id": "2045041165632929796",
+      "text": "アンタレスSの本命馬を確信。\n\n5週連続で重賞的中へ。\nこれだけは言える。\n皐月賞の前に単複で爆勝ちできる予想だ。\n\n桜花賞同様に大本線的中決めます。\n\n18時頃に最終予想をnoteで特別公開。\n\n本命を見て驚くかもしれないが、これがラップ理論。\n\n通知はオンで必ず見逃さないようにしてほしいぜ。 https://t.co/RKPMR3Zftk",
+      "author_username": "89damashii07",
+      "author_label": "超越者リットマン",
+      "created_at": "2026-04-17T07:26:23.000Z",
+      "url": "https://x.com/89damashii07/status/2045041165632929796",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 18,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 10439
+      }
+    },
+    {
+      "tweet_id": "2044986740251996562",
+      "text": "皐月賞の参考にしてほしいぜ。 https://t.co/MaAEVbWHv2",
+      "author_username": "89damashii07",
+      "author_label": "超越者リットマン",
+      "created_at": "2026-04-17T03:50:07.000Z",
+      "url": "https://x.com/89damashii07/status/2044986740251996562",
+      "public_metrics": {
+        "retweet_count": 20,
+        "reply_count": 0,
+        "like_count": 369,
+        "quote_count": 0,
+        "bookmark_count": 93,
+        "impression_count": 21513
+      }
+    },
+    {
+      "tweet_id": "2044792824697434317",
+      "text": "日曜日に行われる皐月賞の全頭追い切り診断です✅\n\n今週は\"勝負所\"で気合いを闘魂注入して頑張ります🔥🔥\n\nXに投稿しようとしたら文字オーバーで投稿できずnoteご覧ください🙇‍♂️\n\n無料でご覧いただけるので是非いいねボタンとリポストで拡散いただければ幸いです🙏 https://t.co/gRgOqi0fyx",
+      "author_username": "kenshiro_ytb",
+      "author_label": "けんしろう",
+      "created_at": "2026-04-16T14:59:34.000Z",
+      "url": "https://x.com/kenshiro_ytb/status/2044792824697434317",
+      "public_metrics": {
+        "retweet_count": 116,
+        "reply_count": 1,
+        "like_count": 594,
+        "quote_count": 2,
+        "bookmark_count": 100,
+        "impression_count": 148325
       }
     }
   ],
