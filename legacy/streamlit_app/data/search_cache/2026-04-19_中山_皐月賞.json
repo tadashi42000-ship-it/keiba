@@ -1,13 +1,13 @@
 {
   "meta": {
     "race_key": "2026-04-19_中山_皐月賞",
-    "last_updated": "2026-04-18T21:47:41",
-    "web_article_count": 43,
-    "youtube_video_count": 0,
+    "last_updated": "2026-04-18T22:22:06",
+    "web_article_count": 59,
+    "youtube_video_count": 3,
     "x_tweet_count": 70,
     "x_newest_id": "2045460021455237166",
-    "training_item_count": 26,
-    "training_time_row_count": 56,
+    "training_item_count": 169,
+    "training_time_row_count": 57,
     "yt_video_conclusion_count": 1,
     "bet_plan_ticket_count": 6
   },
@@ -603,6 +603,998 @@
       "source_url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=294273",
       "source_title": "【皐月賞想定騎手】クロワデュノールは北村友一騎手、サトノシャイニングは西村淳也騎手 | 競馬ニュース - netkeiba",
       "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "単勝オッズ7.0倍、複勝オッズ2.4-3.2倍と、4番人気に支持されており上位争いが期待される一頭です。多くの支持を集めており、注目度が高いことがうかがえます。",
+      "マイナス情報": "記事からはオッズと人気以外の具体的な競走成績、調教、適性に関する情報は得られませんでした。",
+      "source_url": "https://www.keibalab.jp/db/race/202604190611/odds.html",
+      "source_title": "皐月賞の単勝・複勝・枠連オッズ【2026年4月19日中山11R】",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "プラス情報": "特になし",
+      "マイナス情報": "16番人気と非常に低い評価に留まっており、単勝オッズ105.2倍、複勝オッズ14.4-20.3倍と大穴扱いとなっています。現状では上位進出は厳しいと見られており、記事からは具体的な競走成績や調教、適性に関する情報は得られませんでした。",
+      "source_url": "https://www.keibalab.jp/db/race/202604190611/odds.html",
+      "source_title": "皐月賞の単勝・複勝・枠連オッズ【2026年4月19日中山11R】",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "プラス情報": "特になし",
+      "マイナス情報": "単勝オッズ60.5倍と非常に高い数字であり、人気薄であることがうかがえます。上位人気馬に比べて評価が低い状況で、記事からは具体的な競走成績や調教、適性に関する情報は得られませんでした。",
+      "source_url": "https://www.keibalab.jp/db/race/202604190611/odds.html",
+      "source_title": "皐月賞の単勝・複勝・枠連オッズ【2026年4月19日中山11R】",
+      "source_type": "web"
+    },
+    {
+      "馬名": "皐月賞の全体的な予想",
+      "プラス情報": "スポニチの田井秀一記者によると、皐月賞では持続力とパワーが求められる。特に、大きく状態を上げてきている馬や、舞台適性のある馬が注目されており、好走が期待される。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12676",
+      "source_title": "【皐月賞2026予想】持続力とパワーに注目！3頭をピックアップ！/田井秀一 | 競馬予想動画 - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤテラ",
+      "プラス情報": "坂路でパワフルな動きを披露しており、友道調教師からは「今の状態なら器用な競馬ができそう」とのコメントがある。これは体調の良さとレースでの適応能力が期待される好材料。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=317507",
+      "source_title": "【有馬記念】アドマイヤテラは坂路でパワフルな動き　友道調教師「今の状態なら器用な競馬ができそう」 | 競馬ニュース - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "前走の朝日杯FSを制覇した実績があり、3歳世代のGI馬として能力は折り紙付き。D.レーン騎手が騎乗を予定しており、名手とのコンビで上位進出が期待されます。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.netkeiba.com/?pid=news_view&no=327888",
+      "source_title": "【皐月賞想定騎手】カヴァレリッツォはD.レーン騎手、ロブチェンは松山弘平騎手",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "松山弘平騎手が騎乗を予定しており、経験豊富な騎手の手腕に注目が集まります。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.netkeiba.com/?pid=news_view&no=327888",
+      "source_title": "【皐月賞想定騎手】カヴァレリッツォはD.レーン騎手、ロブチェンは松山弘平騎手",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "2枠4番と内目の好枠を引いたことで、中山芝2000mのスタートから最初のコーナーまでをロスなく先行しやすい。多頭数のG1において、経済コースを通れるアドバンテージは大きい。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keibamatome/detail.html?no=5653",
+      "source_title": "【皐月賞2026枠順発表】全18頭 ロブチェン2枠4番・カヴァレリッツォ1枠1番など最新情報【4月19日(日)15時40分】 | 競馬まとめ - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "1枠1番という絶好の最内枠を引いたことで、中山芝2000mの舞台で最も経済的なコースを先行できる可能性が高い。直線での内突きなど、スムーズに運べれば大きな武器となる。",
+      "マイナス情報": "最内枠ゆえに、スタートで出遅れると包まれるリスクや、他馬との接触でポジションを失う可能性も考慮する必要がある。レース展開次第では身動きが取れないケースも。",
+      "source_url": "https://dir.netkeiba.com/keibamatome/detail.html?no=5653",
+      "source_title": "【皐月賞2026枠順発表】全18頭 ロブチェン2枠4番・カヴァレリッツォ1枠1番など最新情報【4月19日(日)15時40分】 | 競馬まとめ - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤマーズ",
+      "プラス情報": "記事タイトルにおいて、皐月賞で「Ｖに最も近い」馬として名が挙げられています。勝利への高い期待が示されています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://sports.yahoo.co.jp/column/detail/201904110001-spnavi",
+      "source_title": "前走人気と着順データから皐月賞を予想 Ｖに最も近いのはアドマイヤマーズ！",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "プラス情報": "坂でも減速せず伸びる走りを見せ、先行・中団どちらからでも競馬ができ、大外を回しても脚を使える器用さがあります。距離適性もあり、時計が速くなっても対応可能と見られており、現在の状態も高いレベルで推移しています。",
+      "マイナス情報": "スプリングSでアスクエジンバラに競り負けた経験があり、オープン級の能力に疑問視する声があります。強い馬との対戦経験が少なく余力があるか不透明な点や、調教本数が少ないこと、使い詰めによる影響を懸念する意見もあり、G1の舞台では厳しい可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "追い切りで最高の「S」評価を得ており、岩田康誠騎手とのコンビ評価も「S」と非常に高く、現在のデキは他を圧倒しています。中山の重賞で安定した成績を残しておりコース相性の良さが光り、間隔が詰まっての出走ながらハードな調教ができている点も好材料です。",
+      "マイナス情報": "スプリングSではロスなく立ち回れたため、その分他の馬よりも評価をやや下げる見方もあります。内枠で脚を溜める競馬をした際に、そのまま伸び切れない可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "追い切り評価は「S」で、馬体も非常に良く見え、銭形斑点が浮き出るほどの良い毛艶もプラス材料です。一瞬の脚が使え反応が良い点が強みで、中山2000mの距離も問題ないとされており、叩き2戦目の上積みも期待されています。",
+      "マイナス情報": "レース内容から能力そのものの評価が難しく、展開に左右される部分が大きいと見られています。体形がマイラー寄りに見えるという意見もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "プラス情報": "追い切りで「A」評価を得ており、外から伸びる形の競馬ができる点が強みです。毎日杯の勝ち馬であり、横山武史騎手とのコンビも期待されています。",
+      "マイナス情報": "相手関係の強化や初の2ターン戦が課題とされており、これまでのような競馬が今回もできるかは未知数です。位置取りによってレースの印象が大きく変わる可能性があり、中2週という間隔から調整程度の内容が多く、良くても前走同様までという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "朝日杯FSの勝ち馬であり、G1勝ちからの直行ローテは連対率80%という好データがあります。鞍上のレーン騎手は日本でのG1勝利実績も豊富で、2000mの距離も問題ないという見方です。馬自身でペースを作れる点で、仕上がりも良好、馬体も一回り大きくなったと成長が認められています。",
+      "マイナス情報": "休み明けであることや、距離延長が初めての挑戦となる点が懸念されています。調教で格下馬に遅れを取ったことがあり、マイラー寄りの可能性や早熟傾向、また4コーナーでの経験がない点が過去データからはマイナスと見られており、成長が足りない可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "今回人気を集める一頭と予想されており、調教では好時計をマークし、前向きなフットワークを見せています。非社台・非ノーザンファーム生産馬ながら、G1制覇の可能性も秘めていると評価されています。",
+      "マイナス情報": "父スワーヴリチャードの産駒が東京競馬場のような広いコース向きの傾向があるため、中山コースへの適性が懸念材料です。前走のような後方からの競馬では、皐月賞では厳しい展開になる可能性も指摘されており、父スワーヴリチャード自身も中山では馬券外の経験があるためその影響も考えられます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "プラス情報": "スプリングSでは不利な大外枠から距離ロスがありながらも、同組では最上位に評価されています。内枠を引けたことでロスなく運べれば好走が期待されており、機動力があり中山コースも向くタイプで、精神面も充実しており状態は良いと評価されています。",
+      "マイナス情報": "スプリングSのメンバーレベルがそれほど高くなかった可能性があり、レース内容として目立つ部分が少ないという意見もあります。ワンターンの競馬しか経験がなく、上がり3ハロンの自己ベストも物足りない点が指摘されており、内枠は後方待機する馬には不向きで、能力的に壁がある可能性も示唆されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "プラス情報": "スプリングSでは不利を受けながらも評価されており、坂路を力強く登坂しリズム良く加速できる点で仕上がりは好感触です。昨冬の中山・葉牡丹賞で2歳コースレコード勝ちの実績があり、能力の高さと安定した末脚を持っています。追い切りでもウッドでしっかり負荷をかけまずまずの動きを見せており、総合評価は「A」、展開がはまれば一発も期待されています。",
+      "マイナス情報": "前哨戦の重賞では上位馬に歯が立たなかった経験があります。中山2000mでの勝利経験はあるものの、オープンや重賞レースはワンターンの競馬しか経験がない点が懸念材料です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "きさらぎ賞の勝ち馬であり、追い切りでは「抜群」と高評価を受けています。調教爆穴候補としても挙げられています。",
+      "マイナス情報": "コンパクトな馬体をしているため、今後の成長力に疑問符がつくという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "未勝利戦と弥生賞を連勝中で、馬体も引き締まり毛艶も輝いています。馬体重も一戦ごとに増えており成長がうかがえ、全体的にまとまった優等生の馬体と評価されています。調教では精神面の成長も感じさせ、動きの質も高い水準を維持し、完成途上ながらもG1馬に待ったをかける存在になり得ると期待されています。",
+      "マイナス情報": "連勝は展開がハマった部分もある可能性があり、馬体にまだ若さが見られるという指摘もあります。キタサンブラック産駒ですが、スパッと切れるタイプではないと見られており、マイラーの可能性や早熟傾向も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "プラス情報": "東スポ杯2歳Sの勝ち馬であり、フォトパドックでも見た目が良く、透き通るような毛艶が評価されています。休み明けではありますが、出来はソコソコで、8割くらいの出来でも3着になる能力があると見られており、ルメール騎手とのコンビ評価は「S」と非常に高いです。",
+      "マイナス情報": "東スポ杯からの休み明けで、ダービーがメイチの目標である可能性が指摘されています。ルメール騎手とキズナ産駒はG1で相性があまり良くないという見方や、他馬との成長力の比較、中山よりも東京向きの可能性も挙げられています。調教がイマイチという評価や、中145日でのG1勝利となるとレース史上最長となり、難しい挑戦となります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "ホープフルS2着と勝ちに等しい内容で、1勝馬ながら連対率100%と安定した成績を残しています。馬体的にも穴が少ない印象で、立ち回り次第では勝ち負けも期待されています。中山芝コース適性はトップクラスと評価されており、非常に器用な馬で展開に左右されず狭いところも抜けてこられるためどの条件でも走れると師も自信を持っています。調教でも特A評価を受けており、操縦性の高さが武器とされています。",
+      "マイナス情報": "ホープフルSではスローペース先行有利の恩恵を受けた可能性があり、ロブチェンの決め手にやられたという見方もあります。まだ幼く、成長途上であるという指摘もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "連対率100%で、若葉Sを快勝しており勢いがあります。中山コース経験があることもプラスとされており、調教爆穴候補にも挙げられています。",
+      "マイナス情報": "勝ち味に遅い部分がある点が指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "ポテンシャルが高く、中山適性も十分にあると評価されています。先行してスピードを持続できるタイプで、上がり3位以内を記録できる能力があり、前走の弥生賞2着から叩いての上積みも期待されています。フォトパドックでも良く見え、上原佑師も「ポテンシャルは他の馬に負けてない」と自信を見せており、中山芝コース適性も2位とされています。",
+      "マイナス情報": "スローペースでのヨーイドンよりもスピード持続型である点が皐月賞の展開によってはどうかという見方もあります。重賞実績がもう少し欲しいという声も聞かれます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ラージアンサンブル",
+      "プラス情報": "特になし",
+      "マイナス情報": "現時点では、皐月賞では厳しいという見方が優勢です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "共同通信杯の勝ち馬であり、有力馬の一頭とされています。追い切りでは「A」評価で、最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています。課題とされていた右回りでの調教でも好感触で、重賞を勝った前走と遜色ない仕上がりで、調教では特S評価を受けています。操縦性の高さとキビキビとした動きが目立ち、津村明秀騎手とのコンビ評価も「S」と高評価です。",
+      "マイナス情報": "フォトパドックではボヤッとして見えるという意見もありますが、芦毛馬で元々良く見せないタイプであるため気にしなくてよいというフォローもあります。一部では左回り限定の可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "ホープフルSの勝ち馬であり、続く共同通信杯3着の内容からも地力は上位と見られています。道中インで脚を溜めて直線でスパッと切れる器用なタイプで、松山弘平騎手と手が合うとされており、偶数内枠も理想的です。追い切りでは「A」評価で、G1を勝った2走前と遜色ない仕上がりです。",
+      "マイナス情報": "ホープフルSのレースレベルに疑問符がつくという声や、共同通信杯では前が止まらない展開で長く脚を使わされる形がきつかったという見方もあります。ホープフルSはスローペース先行有利の恩恵を受けた可能性も指摘されており、G1馬でありながら「0.0.0.9」というデータ的な壁があることや、成長が足りない可能性も挙げられています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロードフィレール",
+      "プラス情報": "武豊騎手に全権委任されており、状態は上がっているとされています。",
+      "マイナス情報": "マテンロウゲイルの方が評価が高いという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_title": "sponichi.co.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "プラス情報": "坂でも減速せず伸びる走りを見せ、先行・中団どちらからでも競馬ができる器用さがあります。早めに動いても粘れる形で同じような競馬を続け、距離適性も高く、時計が速くなっても対応可能と見られています。現在の状態も高いレベルで推移していると評価されています。",
+      "マイナス情報": "スプリングSでアスクエジンバラに競り負けた経験があり、オープン級の能力があるか疑問視する声があります。強い馬との対戦経験が少なく、余力があるか不透明な点や、調教本数が少ないこと、使い詰めによる影響も懸念されており、G1の舞台では厳しい可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "追い切りで最高の「S」評価を得ており、岩田康誠騎手とのコンビ評価も「S」と非常に高く、現在のデキは他を圧倒しているとされています。中山の重賞で安定した成績を残しており、コース相性の良さが光ります。間隔が詰まっての出走ながら、ハードな調教ができている点も好材料です。",
+      "マイナス情報": "スプリングSではロスなく立ち回れたため、その分他の馬よりも評価をやや下げる見方もあります。内枠で脚を溜める競馬をした際に、そのまま伸び切れない可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "追い切り評価は「S」で、馬体も非常に良く見え、銭形斑点が浮き出るほどの良い毛艶もプラスです。一瞬の脚が使え、反応が良い点が強みで、中山2000mの距離も問題ないとされています。叩き2戦目の上積みも期待されています。",
+      "マイナス情報": "レース内容から能力そのものの評価が難しく、展開に左右される部分が大きいと見られています。体形がマイラー寄りに見えるという意見もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "プラス情報": "追い切りで「A」評価を得ており、外から伸びる形の競馬ができる点が強みです。毎日杯の勝ち馬であり、横山武史騎手とのコンビも期待されています。",
+      "マイナス情報": "相手関係の強化や初の2ターン戦が課題とされており、これまでのような競馬が今回もできるかは未知数です。位置取りによってレースの印象が大きく変わる可能性があり、中2週という間隔から調整程度の内容が多く、良くても前走同様までという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "朝日杯FSの勝ち馬であり、G1勝ちからの直行ローテは連対率80%という好データがあります。鞍上のレーン騎手は日本でのG1勝利実績も豊富で、2000mの距離も問題ないという見方です。馬自身でペースを作れる点で、仕上がりも良好、馬体も一回り大きくなったと成長が認められています。重馬場でも瞬発力を発揮でき、父サートゥルナーリアが中山適性を持っていたこともプラス材料です。",
+      "マイナス情報": "休み明けであることや、距離延長が初めての挑戦となる点が懸念されています。調教で格下馬に遅れを取ったことがあり、マイラー寄りの可能性や早熟傾向、また4コーナーでの経験がない点が過去データからはマイナスと見られています。成長が足りない可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "今回人気を集める一頭と予想されており、調教では好時計をマークし、前向きなフットワークを見せています。非社台・非ノーザンファーム生産馬ながら、G1制覇の可能性も秘めていると評価されています。",
+      "マイナス情報": "父スワーヴリチャードの産駒が東京競馬場のような広いコース向きの傾向があるため、中山コースへの適性がどうかという懸念があります。前走のような後方からの競馬では、皐月賞では厳しい展開になる可能性も指摘されています。スワーヴリチャード自身も中山では馬券外の経験があり、その影響も考えられます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "プラス情報": "スプリングSでは不利な大外枠から距離ロスがありながらも、同組では最上位に評価されています。内枠を引けたことで、ロスなく運べれば好走が期待されています。機動力があり、そつなくレースができるタイプで、中山コースも向くとされており、精神面も充実し状態は良いと評価されています。",
+      "マイナス情報": "スプリングSのメンバーレベルがそれほど高くなかった可能性があり、レース内容として目立つ部分が少ないという意見もあります。ワンターンの競馬しか経験がなく、上がり3ハロンの自己ベストも物足りない点が指摘されており、内枠は後方待機する馬には不向きで、能力的に壁がある可能性も示唆されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "プラス情報": "スプリングSでは不利を受けながらも評価されており、東京コース向きの可能性も指摘されています。坂路を力強く登坂し、リズム良く加速できる点で仕上がりは好感触とされ、昨冬の中山・葉牡丹賞で2歳コースレコード勝ちの実績があり、能力の高さと安定した末脚を持っています。追い切りでもウッドでしっかり負荷をかけ、まずまずの動きを見せており、総合評価は「A」、展開がはまれば一発も期待されています。",
+      "マイナス情報": "前哨戦の重賞では上位馬に歯が立たなかった経験があります。中山2000mでの勝利経験はあるものの、オープンや重賞レースはワンターンの競馬しか経験がない点が懸念材料です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "きさらぎ賞の勝ち馬であり、追い切りでは「抜群」と高評価を受けています。調教爆穴候補としても挙げられています。",
+      "マイナス情報": "コンパクトな馬体をしているため、今後の成長力に疑問符がつくという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "未勝利戦と弥生賞を連勝中で、馬体も引き締まり、毛艶も輝いています。馬体重も一戦ごとに増えており、成長がうかがえ、全体的にまとまった優等生の馬体と評価されており、調教では精神面の成長も感じさせ、動きの質も高い水準を維持しています。完成途上ながらも、G1馬に待ったをかける存在になり得ると期待されています。",
+      "マイナス情報": "連勝は展開がハマった部分もある可能性があり、馬体にまだ若さが見られるという指摘もあります。キタサンブラック産駒ですが、スパッと切れるタイプではないと見られており、マイラーの可能性や早熟傾向を指摘する声もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "プラス情報": "東スポ杯2歳Sの勝ち馬であり、フォトパドックでも見た目が良く、透き通るような毛艶が評価されています。休み明けではありますが、出来はソコソコで、8割くらいの出来でも3着になる能力があると見られており、ルメール騎手とのコンビ評価は「S」と非常に高いです。",
+      "マイナス情報": "東スポ杯からの休み明けで、ダービーがメイチの目標である可能性が指摘されています。ルメール騎手とキズナ産駒はG1で相性があまり良くないという見方や、他馬との成長力の比較、中山よりも東京向きの可能性も挙げられています。調教がイマイチという評価や、中145日でのG1勝利となるとレース史上最長となり、難しい挑戦となります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "ホープフルS2着と勝ちに等しい内容で、1勝馬ながら連対率100%と安定した成績を残しています。馬体的にも穴が少ない印象で、立ち回り次第では勝ち負けも期待され、中山芝コース適性はトップクラスと評価されており、非常に器用で、展開に左右されず狭いところも抜けてこられるため、師もどの条件でも走れると自信を持っています。この中山コースは器用なこの馬にとってプラス材料であり、調教でも特A評価を受けています。操縦性の高さが武器とされています。",
+      "マイナス情報": "ホープフルSではスローペース先行有利の恩恵を受けた可能性があり、ロブチェンの決め手にやられたという見方もあります。まだ幼く、成長途上であるという指摘もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "連対率100%で、若葉Sを快勝しており勢いがあります。中山コース経験があることもプラスとされており、調教爆穴候補にも挙げられています。",
+      "マイナス情報": "勝ち味に遅い部分がある点が指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "ポテンシャルが高く、中山適性も十分にあると評価されています。先行してスピードを持続できるタイプで、上がり3位以内を記録できる能力があります。前走の弥生賞2着から叩いての上積みも期待されており、フォトパドックでも良く見え、上原佑師も「ポテンシャルは他の馬に負けてない」と自信を見せています。中山芝コース適性も2位とされています。",
+      "マイナス情報": "スローペースでのヨーイドンよりもスピード持続型である点が皐月賞の展開によってはどうかという見方もあります。重賞実績がもう少し欲しいという声も聞かれます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "共同通信杯の勝ち馬であり、有力馬の一頭とされています。追い切りでは「A」評価で、最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています。課題とされていた右回りでの調教でも好感触で、重賞を勝った前走と遜色ない仕上がりです。調教では特S評価を受けており、操縦性の高さとキビキビとした動きが目立ち、津村明秀騎手とのコンビ評価も「S」と高評価です。",
+      "マイナス情報": "フォトパドックではボヤッとして見えるという意見もありますが、芦毛馬で元々良く見せないタイプであるため、気にしなくてよいというフォローもあります。一部では左回り限定の可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "ホープフルSの勝ち馬であり、続く共同通信杯3着の内容からも地力は上位と見られています。道中インで脚を溜めて直線でスパッと切れる器用なタイプで、松山弘平騎手と手が合うとされており、偶数内枠も理想的とされています。追い切りでは「A」評価で、G1を勝った2走前と遜色ない仕上がりです。",
+      "マイナス情報": "ホープフルSのレースレベルに疑問符がつくという声や、共同通信杯では前が止まらない展開で長く脚を使わされる形がきつかったという見方もあります。ホープフルSはスローペース先行有利の恩恵を受けた可能性も指摘されており、G1馬でありながら「0.0.0.9」というデータ的な壁があることや、成長が足りない可能性も挙げられています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロードフィレール",
+      "プラス情報": "武豊騎手に全権委任されており、状態は上がっているとされています。",
+      "マイナス情報": "マテンロウゲイルの方が評価が高いという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "プラス情報": "坂でも減速せず伸びる走りを見せ、先行・中団どちらからでも競馬ができる器用さがあります。早めに動いても粘れる形で、距離適性も高く、時計が速くなっても対応可能と見られています。現在の状態も高いレベルで推移しています。",
+      "マイナス情報": "スプリングSでアスクエジンバラに競り負けた経験があり、オープン級の能力に疑問符がついています。強い馬との対戦経験が少なく余力があるか不透明な点や、調教本数の少なさ、使い詰めによる影響が懸念されており、G1の舞台では厳しい可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "追い切りで最高の「S」評価を得ており、岩田康誠騎手とのコンビ評価も「S」と非常に高く、現在のデキは他を圧倒しているとされています。中山の重賞で安定した成績を残しており、間隔が詰まっての出走ながらハードな調教ができている点も好材料です。",
+      "マイナス情報": "スプリングSではロスなく立ち回れたため、その分他の馬よりも評価をやや下げる見方もあります。内枠で脚を溜める競馬をした際に、そのまま伸び切れない可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "追い切り評価は「S」で、馬体も非常に良く見え、銭形斑点が浮き出るほどの良い毛艶もプラスです。一瞬の脚が使え、反応が良い点が強みで、中山2000mの距離も問題ないとされており、叩き2戦目の上積みも期待されています。",
+      "マイナス情報": "レース内容から能力そのものの評価が難しく、展開に左右される部分が大きいと見られています。体形がマイラー寄りに見えるという意見もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "プラス情報": "追い切りで「A」評価を得ており、外から伸びる形の競馬ができる点が強みです。毎日杯の勝ち馬であり、横山武史騎手とのコンビも期待されています。",
+      "マイナス情報": "相手関係の強化や初の2ターン戦が課題とされており、これまでのような競馬が今回もできるかは未知数です。位置取りによってレースの印象が大きく変わる可能性があり、中2週という間隔から調整程度の内容が多く、良くても前走同様までという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "朝日杯FSの勝ち馬であり、G1勝ちからの直行ローテは連対率80%という好データがあります。鞍上のレーン騎手は日本でのG1勝利実績も豊富で、2000mの距離も問題ないという見方です。馬自身でペースを作れる点で仕上がりも良好、馬体も一回り大きくなったと成長が認められています。",
+      "マイナス情報": "休み明けであることや、距離延長が初めての挑戦となる点が懸念されています。調教で格下馬に遅れを取ったことがあり、マイラー寄りの可能性や早熟傾向、また4コーナーでの経験がない点が過去データからはマイナスと見られています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "今回人気を集める一頭と予想されており、調教では好時計をマークし、前向きなフットワークを見せています。非社台・非ノーザンファーム生産馬ながら、G1制覇の可能性も秘めていると評価されています。",
+      "マイナス情報": "父スワーヴリチャードの産駒が東京競馬場のような広いコース向きの傾向があるため、中山コースへの適性がどうかという懸念があります。前走のような後方からの競馬では、皐月賞では厳しい展開になる可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "プラス情報": "スプリングSでは不利な大外枠から距離ロスがありながらも、同組では最上位に評価されています。内枠を引けたことでロスなく運べれば好走が期待されており、機動力があり中山コースも向くとされています。精神面も充実しており、状態は良いと評価されています。",
+      "マイナス情報": "スプリングSのメンバーレベルがそれほど高くなかった可能性があり、レース内容として目立つ部分が少ないという意見もあります。ワンターンの競馬しか経験がなく、上がり3ハロンの自己ベストも物足りない点が指摘されており、能力的に壁がある可能性も示唆されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "プラス情報": "スプリングSでは不利を受けながらも評価されており、坂路を力強く登坂し、リズム良く加速できる点で仕上がりは好感触とされています。昨冬の中山・葉牡丹賞で2歳コースレコード勝ちの実績があり、能力の高さと安定した末脚を持っています。追い切りでもウッドでしっかり負荷をかけ、まずまずの動きを見せており、総合評価は「A」です。",
+      "マイナス情報": "前哨戦の重賞では上位馬に歯が立たなかった経験があります。中山2000mでの勝利経験はあるものの、オープンや重賞レースはワンターンの競馬しか経験がない点が懸念材料です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "きさらぎ賞の勝ち馬であり、追い切りでは「抜群」と高評価を受けています。調教爆穴候補としても挙げられています。",
+      "マイナス情報": "コンパクトな馬体をしているため、今後の成長力に疑問符がつくという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "未勝利戦と弥生賞を連勝中で、馬体も引き締まり毛艶も輝いており、馬体重も一戦ごとに増えていて成長がうかがえます。調教では精神面の成長も感じさせ、動きの質も高い水準を維持しています。完成途上ながらも、G1馬に待ったをかける存在になり得ると期待されています。",
+      "マイナス情報": "連勝は展開がハマった部分もある可能性があり、馬体にまだ若さが見られるという指摘もあります。キタサンブラック産駒ですが、スパッと切れるタイプではないと見られており、マイラーの可能性や早熟傾向も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "プラス情報": "東スポ杯2歳Sの勝ち馬であり、フォトパドックでも見た目が良く透き通るような毛艶が評価されています。休み明けではありますが、出来はソコソコで、8割くらいの出来でも3着になる能力があるという見方があり、ルメール騎手とのコンビ評価は「S」と非常に高いです。",
+      "マイナス情報": "東スポ杯からの休み明けで、ダービーがメイチの目標である可能性が指摘されています。ルメール騎手とキズナ産駒はG1で相性があまり良くないという見方や、他馬との成長力の比較、中山よりも東京向きの可能性も挙げられています。調教がイマイチという評価や、中145日でのG1勝利はレース史上最長となり、難しい挑戦となります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "ホープフルS2着と勝ちに等しい内容で、1勝馬ながら連対率100%と安定した成績を残しています。中山芝コース適性はトップクラスと評価されており、非常に器用な馬で、展開に左右されず狭いところも抜けてこられると師も自信を持っています。調教でも特A評価を受けており、操縦性の高さが武器です。",
+      "マイナス情報": "ホープフルSではスローペース先行有利の恩恵を受けた可能性があり、ロブチェンの決め手にやられたという見方もあります。まだ幼く、成長途上であるという指摘もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "連対率100%で、若葉Sを快勝しており勢いがあります。中山コース経験があることもプラスとされており、調教爆穴候補にも挙げられています。",
+      "マイナス情報": "勝ち味に遅い部分がある点が指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "ポテンシャルが高く、中山適性も十分にあると評価されており、中山芝コース適性も2位です。先行してスピードを持続できるタイプで、上がり3位以内を記録できる能力があります。前走の弥生賞2着から叩いての上積みも期待されており、フォトパドックでも良く見え、師も「ポテンシャルは他の馬に負けてない」と自信を見せています。",
+      "マイナス情報": "スローペースでのヨーイドンよりもスピード持続型である点が皐月賞の展開によってはどうかという見方もあります。重賞実績がもう少し欲しいという声も聞かれます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ラージアンサンブル",
+      "プラス情報": "特になし",
+      "マイナス情報": "現時点では、皐月賞では厳しいという見方が優勢です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "共同通信杯の勝ち馬であり、有力馬の一頭とされています。追い切りでは「A」評価で、最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています。課題とされていた右回りでの調教でも好感触で、重賞を勝った前走と遜色ない仕上がりです。調教では特S評価を受けており、操縦性の高さとキビキビとした動きが目立ち、津村明秀騎手とのコンビ評価も「S」と高評価です。",
+      "マイナス情報": "フォトパドックではボヤッとして見えるという意見もありますが、芦毛馬で元々良く見せないタイプであるため気にしなくてよいというフォローもあります。一部では左回り限定の可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "ホープフルSの勝ち馬であり、続く共同通信杯3着の内容からも地力は上位と見られています。道中インで脚を溜めて直線でスパッと切れる器用なタイプで、松山弘平騎手と手が合うとされており、偶数内枠も理想的とされています。追い切りでは「A」評価で、G1を勝った2走前と遜色ない仕上がりです。",
+      "マイナス情報": "ホープフルSのレースレベルに疑問符がつくという声や、共同通信杯では前が止まらない展開で長く脚を使わされる形がきつかったという見方もあります。G1馬でありながら「0.0.0.9」というデータ的な壁があることや、成長が足りない可能性も挙げられています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロードフィレール",
+      "プラス情報": "武豊騎手に全権委任されており、状態は上がっているとされています。",
+      "マイナス情報": "マテンロウゲイルの方が評価が高いという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "メンバー唯一の重賞2勝馬であり、屈指の出世レースを制覇して皐月賞へ臨む。騎乗する津村明秀騎手も「胸を張って大きいところに」と語るほど相棒に自信を持っており、高いポテンシャルと好調さがうかがえる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.netkeiba.com/?pid=news_view&no=327961",
+      "source_title": "【皐月賞】「胸を張って大きいところに」屈指の出世レース制し津村明秀騎手は自信 相棒リアライズシリウスとクラシックへ",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "記事タイトルにて、予想1番人気とされている。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.netkeiba.com/?pid=news_view&no=328004",
+      "source_title": "【皐月賞予想オッズ】カヴァレリッツォが予想1番人気",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "プラス情報": "東スポ杯2歳S勝ち馬であり、重賞での優勝実績を持っています。",
+      "マイナス情報": "「ハイブリッド式消去法」の対象となり、消し馬と判断されています。過去10年のデータに基づく複勝率10%未満の「凡走データ」5つのいずれかに当てはまったため、評価が低いです。",
+      "source_url": "https://spaia-keiba.com/news/detail/34948",
+      "source_title": "【皐月賞】東スポ杯2歳S勝ち馬パントルナイーフ、GⅠ馬ロブチェンは消し ハイブリッド式消去法",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "GⅠ馬であり、最高峰のレースでの勝利実績があります。",
+      "マイナス情報": "「ハイブリッド式消去法」の対象となり、消し馬と判断されています。過去10年のデータに基づく複勝率10%未満の「凡走データ」5つのいずれかに当てはまったため、評価が低いです。",
+      "source_url": "https://spaia-keiba.com/news/detail/34948",
+      "source_title": "【皐月賞】東スポ杯2歳S勝ち馬パントルナイーフ、GⅠ馬ロブチェンは消し ハイブリッド式消去法",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "皐月賞のプレレーティングにおいてトップ評価を獲得しており、特に朝日杯FS優勝時のレーティングは116という高い数値を記録しています。これはG1勝ちの実績と現時点での高い能力を示唆する好材料です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://umanity.jp/racedata/race_newsdet.php?nid=11868119",
+      "source_title": "【皐月賞】プレレーティング トップはカヴァレリッツォで朝日杯FS優勝時の116",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "前走の朝日杯FSを重馬場の中団から快勝し、世代トップクラスの能力を示しました。2歳マイル王の実績に加え、父サートゥルナーリアも皐月賞を制しており血統背景から中距離適性も期待されます。馬体診断はA+評価で非常に美しく、全体のシルエットが良いとされ、D.レーン騎手も「これだけチャンスのある馬に騎乗できることがうれしい」と高評価。調教後馬体重もプラス10キロと成長が見られます。",
+      "マイナス情報": "2000mは未経験で、過去の皐月賞勝ち馬のデータと異なる点が最大の懸念です。これまでの勝利は直線が長いコースで、直線が短い中山芝2000mへの対応力が問われます。追い切りで併せ馬に遅れるなど調教の動きが微妙な印象があり、早熟で朝日杯からの成長が物足りないという見方も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "ホープフルSを勝ち中山2000mの適性を証明済みで、共同通信杯での3着内容からも地力上位と評価されています。叩き2戦目で上積みが見込め、調教でも完成度の高さがうかがえます。追い切りでは終い11.1秒をマークし、併せ馬を置き去りにする動きを見せており、G1を勝った2走前と遜色ない仕上がりです。馬体診断もA+評価で、ゲート練習も入念に行い万全の態勢を整えています。",
+      "マイナス情報": "ホープフルSのレベルには疑問の声があり、共同通信杯は前が止まらない競馬で長く脚を使わされる展開がきつかったとの見方があります。データ上、「前走GI勝ちから臨む牡馬」は『0.0.0.9』という高い壁が指摘されており、鞍上のG1連勝があるかどうかも懸念点です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "共同通信杯を早め先頭で制しており、能力は上位です。追い切りでは高い集中力を見せ、自己ベストを更新する好時計をマークし、鞍上の津村騎手も「一段階上がっている」「抜群だった」と高評価しています。調教では右回りの課題も克服し素晴らしい動きを連発しており、馬体診断でA+評価を受けています。",
+      "マイナス情報": "共同通信杯はスローペースの前残りで展開の恩恵が大きかったとの見方があります。どちらかというとマイル向きと見られ、距離延長はプラスとは言えない可能性があり、過剰人気しやすい傾向も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "プラス情報": "中山2000mの葉牡丹賞が優秀で、舞台適性があります。追い切りでは田辺騎手を背にリズム良く加速しており、尾形師も「今日はいい感じで走れていた」と評価。落ち着きがあり、馬体重も予定通りに仕上がっています。スプリングSでは不利があったものの、ロスなく運べていれば上位評価だったという見方もあります。",
+      "マイナス情報": "共同通信杯やスプリングSでは上位馬との差が見られました。どちらかというと東京コースの方が得意かもしれないという意見もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "きさらぎ賞の勝ち馬です。モーリス産駒らしい前躯の厚みとトモの力感が目立ち、全身に実が入っていて見映えが良いとされています。中山向きの力強さがあり、持続戦に寄った時に浮上する余地があるため調教爆穴として評価されています。",
+      "マイナス情報": "コンパクトな馬体で、成長力という点で懸念があるという意見も存在します。東スポ杯でパントルナイーフに先着を許している点もマイナス材料です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "デイリー杯2歳ステークスをレコードで制しています。友道調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価しており、叩き2戦目の上積みが見込めるとの評価です。馬体診断ではA評価を受けており、追い切りでは古馬OP馬に先着する動きを見せています。",
+      "マイナス情報": "進路が空いたことで結果に繋がった印象のレースが多く、能力そのものの評価が難しい面があります。弥生賞でバステールに完敗しており、体形的にはマイラーっぽいとの見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "京成杯を中山芝2000mで差し切っており、コース適性を結果で示しています。マイル実績中心の人気馬より皐月賞向きの土台がはっきりしており、京成杯では11番手付近から上がり勝負にも対応しているため直線の短い中山でも位置を悪くしすぎない競馬ができるのは魅力です。馬体診断でA評価を受けており、1週前追い切りで自己ベストを更新する絶好時計をマークしています。",
+      "マイナス情報": "16日の追い切りではフォルテアンジェロに遅れを取っています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "弥生賞ディープインパクト記念を制し、未勝利から連勝中です。馬体診断ではA+評価を受けており、全体のシルエットが非常に美しく、前後のつながりに無駄がない好馬体とされています。父キタサンブラック譲りの持続力に期待され、馬体回復と成長を優先した調整過程が理にかなっており、走りも一段上へと評価されています。追い切りではサウンドムーブをアオる勢いを見せ、精神面の成長がうかがえます。",
+      "マイナス情報": "未勝利・弥生賞と連勝していますが、展開がハマった印象もあり、馬体にもまだ若さが見られます。大外枠はプラスとマイナスの両面があるものの、一般的には懸念点となり得ます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "プラス情報": "東スポ杯2歳Sの勝ち馬で、スローペースを差して勝利した内容を評価する声があります。弥生賞を回避したものの、木村師は「大きな問題ではない」とコメントしており、馬体診断でA評価を受けており見た目が良く、透き通るような毛艶が特徴です。ルメール騎手とのコンビは評価Sと非常に高く評価されています。",
+      "マイナス情報": "東スポ杯で勝ったエコロアルバが朝日杯で離された4着であることから、力関係的には低く見積もれないという見方もあります。追い切りがイマイチという評価も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "ホープフルSではロブチェンに差されたものの、勝ちに等しい内容と評価されています。連対率100%で、成績・馬体的にも穴が少ない印象があり、立ち回り次第で勝ちまでありそうです。上原佑師は「凄く器用。展開に左右されないと思うし、狭い所を抜けてこられるので、どの条件でも走れる」「このコースはむしろこの器用な馬にとってプラス」と高く評価しており、調教爆穴として評価されています。馬体診断もB+評価です。",
+      "マイナス情報": "京成杯の追い切りでグリーンエナジーに半馬身遅れを取っています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "若葉S勝ち、京成杯2着の内容から2000m適性は高いと評価されています。派手な切れ味よりも、好位から長く脚を使うタイプで、皐月賞のようなロンスパ戦では浮上しやすいとされています。人気以上に評価したい地味な実力馬とされ、連対率100%で勢いは侮れません。中山経験があることもプラスで、調教爆穴として評価され、馬体診断でもA評価を受けています。",
+      "マイナス情報": "勝ち味に遅い感じがあるという意見も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "弥生賞2着と中山で結果を残しており、近年の皐月賞に直結するトライアルで好走している点は強みです。コース適性の高さは十分で、本番でも注目の一頭とされています。フォトパドックで前走から良くなっているように見えると評価されており、上原佑師は「ポテンシャルは負けてない」と上積みに期待しています。馬体診断もB+評価です。",
+      "マイナス情報": "東スポ杯でパントルナイーフに先着を許している点や、京成杯の追い切りでグリーンエナジーに手応え劣勢だった点が懸念されます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "プラス情報": "斉藤崇師は「機動力があり、そつなくレースができる。中山も向く」と中山適性を評価しています。1枠2番という内枠を引けたことで「ロスなく運べれば」と期待されており、追い切りで僚馬2頭に頭差先着しており「先週より走っている時のバランスが良かった。しっかり(姿勢が)起きた中で反応も良かった」と進化が確認されています。スプリングSでは不利な大外枠スタートと距離ロスが大きかったため、スプリングS組では最上位に評価する意見もあります。",
+      "マイナス情報": "レース内容としては目立つ部分が少ない印象です。スプリングSでアスクエジンバラ、アクロフェイズに負けており、そこからの強調材料は少ないという見方も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "ホープフルS3着、スプリングS2着と中山の重賞で安定した成績を残しており、コース相性の良さが光ります。調教後馬体重もしっかり増えており成長が見られ、間隔が詰まっての出走でもハードな調教が出来ており前走以上が期待できます。福永師は「不安な面は少ない」と好気配を伝えており、調教爆穴として評価され、馬体診断でもB+評価を受けています。",
+      "マイナス情報": "序盤は行きたがる面がありましたが、最近は中団で脚を溜める形に変わってきています。スプリングSは勝ち馬の一つ内をロスなく立ち回っており、能力を出し切ったレース内容に見えるため、他の馬よりはやや評価を下げたいという意見もあります。位置取り次第では伸び切れない可能性も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロードフィレール",
+      "プラス情報": "武豊騎手が騎乗し、田嶋助手は「状態は上がっている」とコメントしています。",
+      "マイナス情報": "具体的なプラス評価が少ないです。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "プラス情報": "坂でも減速せず、むしろ伸びているような走りで内容は良いとされています。先行・中団どちらからでも競馬ができ、大外を回しても脚を使えるタイプです。早めに動いても粘れる形があり、同じ競馬が続いている印象があります。",
+      "マイナス情報": "中4週で追い切り2本と調教本数が少なめです。1週前追い切りで併せ馬に遅れており、最終追い切りも流す程度であることから、使い詰めの影響が懸念されます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "プラス情報": "外から伸びる形の競馬はできており、馬体診断でB+評価を受けています。横山武史騎手とのコンビは評価Sと非常に高く評価されています。",
+      "マイナス情報": "同じ形の競馬が今回も作れるかは未知数で、位置取りによって印象が変わりそうです。毎日杯を勝ったものの、相手強化と初の2ターン戦が課題です。中2週のため、中間は調整程度の内容であり、良くて前走同様までという評価です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ラージアンサンブル",
+      "プラス情報": "武井師は「期待以上に充実している」「想像の1つ2つ上」とコメントし、状態の良さを示唆しています。",
+      "マイナス情報": "具体的なプラス評価が少ないです。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_title": "netkeiba.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "前走の朝日杯FSを重馬場の中団から一際抜けた脚で差し切り快勝しており、世代トップクラスの能力と2歳マイル王の実績は高く評価されます。父サートゥルナーリアも皐月賞を制している血統背景から中距離適性も期待され、馬体診断ではA+評価を受けています。調教後馬体重はプラス10キロと成長が見られ、D.レーン騎手も「ポテンシャルの高い馬」と高評価しています。",
+      "マイナス情報": "2000mという距離は未経験であり、これが最大の懸念点です。これまでの勝利は直線が長く脚を伸ばしやすいコースだったため、直線が短い中山芝2000mへの対応力が問われます。追い切りで併せ馬に遅れるなど調教の動きが微妙な印象を持たれることもあり、朝日杯FSからの直行ローテでの1番人気は過去に例がありません。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "ホープフルSを勝ち、中山2000mの適性は証明済みで、共同通信杯での3着内容から地力上位と評価されています。叩き2戦目で上積みが見込め、調教でも完成度の高さがうかがえ、追い切りでは終い11.1秒をマークし併せ馬を置き去りにする動きを見せ、G1を勝った2走前と遜色ない仕上がりです。馬体診断もA+評価で、安定感と再現性があり、軸として信頼できる存在です。",
+      "マイナス情報": "ホープフルSのレベルにはやや疑問の声があり、共同通信杯は前が止まらない競馬で長く脚を使わされる展開がきつかったとの見方もあります。データ上、「前走GI勝ちから臨む牡馬」には「0.0.0.9」という高い壁が指摘されており、鞍上のG1連勝があるかどうかも気になる点です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "共同通信杯を早め先頭で制しており、能力は上位と評価されています。追い切りでは高い集中力を見せ、自己ベストを更新する好時計をマークし、鞍上の津村騎手も「一段階上がっている」「抜群だった」と高評価です。調教では右回りの課題も克服し素晴らしい動きを連発しており、馬体診断でA+評価を受けています。",
+      "マイナス情報": "共同通信杯はスローの前残りで展開の恩恵が大きかったとの見方があり、どちらかというとマイル向きで距離延長はプラスとは言えない可能性があります。過剰人気しやすい傾向も指摘されています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "プラス情報": "中山2000mの葉牡丹賞が優秀で、舞台適性があります。追い切りでは田辺騎手を背にリズム良く加速しており、尾形師も「今日はいい感じで走れていた」と評価しています。落ち着きがあり、馬体重も予定通りに仕上がっており、スプリングSでは不利があったもののロスなく運べていれば上位評価だったという見方もあります。",
+      "マイナス情報": "共同通信杯やスプリングSでは上位馬との差が見られました。どちらかというと東京コースの方が得意かもしれないという意見もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "きさらぎ賞の勝ち馬で、モーリス産駒らしい前躯の厚みとトモの力感が目立ち、全身に実が入っていて見映えが良いです。中山向きの力強さがあり、持続戦に寄った時に浮上する余地があり、調教爆穴として評価されています。",
+      "マイナス情報": "コンパクトな馬体で、成長力という点で懸念があるという意見もあります。東スポ杯でパントルナイーフに先着を許しています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "デイリー杯2歳ステークスをレコードで制しており、友道調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価しています。叩き2戦目の上積みが見込めるとの評価で、馬体診断ではA評価を受けており、追い切りでは古馬OP馬に先着する動きを見せています。",
+      "マイナス情報": "進路が空いたことで結果に繋がった印象のレースが多く、能力そのものの評価が難しい面があります。弥生賞でバステールに完敗しており、体形的にはマイラーっぽいとの見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "京成杯を中山芝2000mで差し切っており、コース適性を結果で示しています。マイル実績中心の人気馬より皐月賞向きの土台がはっきりしており、京成杯では11番手付近から上がり勝負にも対応しているため直線の短い中山でも位置を悪くしすぎない競馬ができるのは魅力です。馬体診断A評価で、1週前追い切りで自己ベストを更新する絶好時計をマークしています。",
+      "マイナス情報": "16日の追い切りではフォルテアンジェロに遅れを取っています。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "弥生賞ディープインパクト記念を制し、未勝利から連勝している勢いがあります。馬体診断ではA+評価を受けており、全体のシルエットが非常に美しく、前後のつながりに無駄がない好馬体とされています。父キタサンブラック譲りの持続力に期待ができ、馬体回復と成長を優先した調整過程が理にかなっており、走りも一段上へ。追い切りではサウンドムーブをアオる勢いを見せ、精神面の成長がうかがえます。",
+      "マイナス情報": "未勝利・弥生賞と連勝ですが、展開がハマった印象もあり、馬体にもまだ若さが見られます。大外枠はプラスとマイナスの両面があります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "プラス情報": "東スポ杯2歳Sの勝ち馬で、スローペースを差して勝利した内容を評価する声があります。弥生賞を回避したものの、木村師は「大きな問題ではない」とコメントしており、馬体診断でA評価を受けており、見た目が良く、透き通るような毛艶が特徴です。ルメール騎手とのコンビは評価Sと高い信頼度です。",
+      "マイナス情報": "東スポ杯で勝ったエコロアルバが朝日杯で離された4着であることから、力関係的には低く見積もれないという見方もあります。追い切りがイマイチという評価もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "ホープフルSではロブチェンに差されたものの、勝ちに等しい内容と評価されています。連対率100%で、成績・馬体的にも穴が少ない印象で、立ち回り次第で勝ちまでありそうです。上原佑師は「凄く器用。展開に左右されないと思うし、狭い所を抜けてこられるので、どの条件でも走れる」「このコースはむしろこの器用な馬にとってプラス」と高く評価しており、調教爆穴としても評価されています。",
+      "マイナス情報": "京成杯の追い切りでグリーンエナジーに半馬身遅れを取ったことが懸念点です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "若葉S勝ち、京成杯2着の内容から2000m適性は高いです。派手な切れ味よりも、好位から長く脚を使うタイプで、皐月賞のようなロンスパ戦では浮上しやすいタイプです。人気以上に評価したい地味な実力馬とされており、連対率100%で勢いは侮れません。中山経験があることもプラスで、調教爆穴としても評価され、馬体診断A評価です。",
+      "マイナス情報": "勝ち味に遅い感じがあるという意見もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "弥生賞2着と中山で結果を残しており、近年の皐月賞に直結するトライアルで好走している点は強みです。コース適性の高さは十分で、本番でも注目の一頭とされており、フォトパドックで前走から良くなっているように見えると評価されています。上原佑師は「ポテンシャルは負けてない」と上積みに期待しています。",
+      "マイナス情報": "東スポ杯でパントルナイーフに先着を許していることと、京成杯の追い切りでグリーンエナジーに手応え劣勢だったことが懸念されます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "プラス情報": "斉藤崇師は「機動力があり、そつなくレースができる。中山も向く」と中山適性を評価しており、1枠2番という内枠を引けたことで「ロスなく運べれば」と期待されています。追い切りで僚馬2頭に頭差先着しており、「先週より走っている時のバランスが良かった。しっかり(姿勢が)起きた中で反応も良かった」と進化が確認されています。スプリングSでは不利な大外枠スタート、外目追走、4角もさらに外々と距離ロスが大きかったため、スプリングS組では最上位に評価する意見もあります。",
+      "マイナス情報": "レース内容としては目立つ部分が少ない印象があります。スプリングSでアスクエジンバラ、アクロフェイズに負けており、そこからの強調材料は少ないという見方もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "ホープフルS3着、スプリングS2着と中山の重賞で安定した成績を残しており、コース相性の良さが光ります。調教後馬体重もしっかり増えており成長が見られ、間隔が詰まっての出走でもハードな調教が出来ており、前走以上が期待できます。福永師は「不安な面は少ない」と好気配で、調教爆穴としても評価されています。",
+      "マイナス情報": "序盤は行きたがる面がありましたが、最近は中団で脚を溜める形に変わってきています。スプリングSは勝ち馬の一つ内をロスなく立ち回っており、能力を出し切ったレース内容に見えるため、他の馬よりはやや評価を下げたいという意見もあります。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロードフィレール",
+      "プラス情報": "武豊騎手が騎乗し、田嶋助手は「状態は上がっている」とコメントしており、体調の上昇に期待が持てます。",
+      "マイナス情報": "具体的なプラス評価が少ない点が懸念されます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "プラス情報": "坂でも減速せず、むしろ伸びているような走りで内容は良いです。先行・中団どちらからでも競馬ができ、大外を回しても脚を使える柔軟性があり、早めに動いても粘れる形があり同じ競馬が続いている印象です。",
+      "マイナス情報": "中4週で追い切り2本と調教本数が少なめです。1週前追い切りで併せ馬に遅れており、最終追い切りも流す程度であることから、使い詰めの影響が懸念されます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "プラス情報": "外から伸びる形の競馬はできており、馬体診断でB+評価を受けています。横山武史騎手とのコンビは評価Sと高く、騎手との相性も期待材料です。",
+      "マイナス情報": "同じ形の競馬が今回も作れるかは未知数で、位置取りによって印象が変わりそうです。毎日杯を勝ったものの、相手強化と初の2ターン戦が課題となります。中2週のため中間は調整程度の内容であり、良くて前走同様までという評価です。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ラージアンサンブル",
+      "プラス情報": "武井師は「期待以上に充実している」「想像の1つ2つ上」とコメントしており、馬の現在の充実度が非常に高いと評価されています。",
+      "マイナス情報": "具体的なプラス評価が少ない点が懸念されます。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_title": "note.com",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "前走朝日杯FSを重馬場の中団から一際抜けた脚で快勝し、世代トップクラスの能力を示す。父サートゥルナーリアも皐月賞を制しており、血統背景から中距離適性も期待。馬体診断A+の好馬体で、D.レーン騎手もポテンシャルの高さを評価し、調教後馬体重はプラス10キロで成長が見られる。",
+      "マイナス情報": "2000mは未経験であり、これが最大の懸念点。直線が短い中山芝2000mへの対応力が問われる。追い切りで併せ馬に遅れるなど調教の動きが微妙な印象があり、早熟で朝日杯からの成長が物足りないという見方もある。朝日杯FSからの直行ローテでの1番人気は過去に例がない。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "プラス情報": "ホープフルSを勝ち中山2000mの適性が証明済みで、共同通信杯3着から地力上位と評価される。叩き2戦目で上積みが見込め、調教でも完成度の高さがうかがえる。追い切りでは終い11.1秒をマークし、併せ馬を置き去りにする動きを見せておりG1を勝った2走前と遜色ない仕上がり。",
+      "マイナス情報": "ホープフルSのレベルにはやや疑問の声があり、共同通信杯は前が止まらない競馬で長く脚を使わされる展開がきつかった。データ上、「前走GI勝ちから臨む牡馬」は「0.0.0.9」という高い壁が指摘されている。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "プラス情報": "共同通信杯を早め先頭で制しており、能力は上位。追い切りでは高い集中力を見せ自己ベストを更新する好時計をマークし、鞍上の津村騎手も「一段階上がっている」「抜群だった」と高評価。調教では右回りの課題も克服しており、馬体診断もA+と高く評価されている。",
+      "マイナス情報": "共同通信杯はスローの前残りで展開の恩恵が大きかったとの見方があり、どちらかというとマイル向きで距離延長はプラスとは言えない可能性。過剰人気しやすい傾向も指摘されており、芦毛のため馬体が良く見えにくいタイプという意見もある。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "プラス情報": "中山2000mの葉牡丹賞が優秀で舞台適性があり、追い切りでは田辺騎手を背にリズム良く加速しており尾形師も「今日はいい感じで走れていた」と評価。落ち着きがあり馬体重も予定通りに仕上がっている。スプリングSでは不利があったものの、ロスなく運べていれば上位評価だったという見方もある。",
+      "マイナス情報": "共同通信杯やスプリングSでは上位馬との差が見られた。どちらかというと東京コースの方が得意かもしれないという意見もある。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "プラス情報": "きさらぎ賞の勝ち馬で、モーリス産駒らしい前躯の厚みとトモの力感が目立ち、全身に実が入っていて見映えが良い。中山向きの力強さがあり、持続戦に寄った時に浮上する余地がある。調教爆穴として評価されている。",
+      "マイナス情報": "コンパクトな馬体で成長力という点で懸念があるという意見もある。東スポ杯でパントルナイーフに先着を許している。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "デイリー杯2歳ステークスをレコードで制している。友道調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価。叩き2戦目の上積みが見込めるとの評価で、馬体診断A評価。追い切りでは古馬OP馬に先着する動きを見せている。",
+      "マイナス情報": "進路が空いたことで結果に繋がった印象のレースが多く、能力そのものの評価が難しい。弥生賞でバステールに完敗しており、体形的にはマイラーっぽいとの見方もある。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "プラス情報": "京成杯を中山芝2000mで差し切っており、コース適性を結果で示している。マイル実績中心の人気馬より皐月賞向きの土台がはっきりしており、京成杯では11番手付近から上がり勝負にも対応。馬体診断A評価で、1週前追い切りで自己ベストを更新する絶好時計をマークしている。",
+      "マイナス情報": "16日の追い切りではフォルテアンジェロに遅れを取っている。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "プラス情報": "弥生賞ディープインパクト記念を制し未勝利から連勝中で、馬体診断A+評価の好馬体。父キタサンブラック譲りの持続力に期待され、馬体回復と成長を優先した調整過程が理にかなっており走りも一段上。追い切りではサウンドムーブをアオる勢いを見せ、精神面の成長がうかがえる。",
+      "マイナス情報": "未勝利・弥生賞と連勝だが、展開がハマった印象もあり、馬体にもまだ若さが見られる。大外枠はプラスとマイナスの両面がある。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "プラス情報": "東スポ杯2歳Sの勝ち馬で、スローペースを差して勝利した内容を評価する声がある。弥生賞を回避したものの木村師は「大きな問題ではない」とコメント。馬体診断A評価で見た目が良く透き通るような毛艶が特徴。ルメール騎手とのコンビは評価S。",
+      "マイナス情報": "東スポ杯で勝ったエコロアルバが朝日杯で離された4着であることから、力関係的には低く見積もれないという見方もある。追い切りがイマイチという評価もある。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "プラス情報": "ホープフルSではロブチェンに差されたものの勝ちに等しい内容と評価され、連対率100%で成績・馬体的にも穴が少ない印象。上原佑師は「凄く器用。展開に左右されない」「このコースはむしろこの器用な馬にとってプラス」と高く評価。調教爆穴として評価され、馬体診断B+評価。",
+      "マイナス情報": "京成杯の追い切りでグリーンエナジーに半馬身遅れを取った。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "プラス情報": "若葉S勝ち、京成杯2着の内容から2000m適性は高い。派手な切れ味よりも、好位から長く脚を使うタイプで、皐月賞のようなロンスパ戦では浮上しやすい。人気以上に評価したい地味な実力馬とされ、連対率100%で勢いは侮れない。中山経験があることもプラスで、調教爆穴、馬体診断A評価。",
+      "マイナス情報": "勝ち味に遅い感じがあるという意見も。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "プラス情報": "弥生賞2着と中山で結果を残しており、近年の皐月賞に直結するトライアルで好走している点は強み。コース適性の高さは十分で本番でも注目の一頭。フォトパドックで前走から良くなっているように見え、上原佑師は「ポテンシャルは負けてない」と上積みに期待。馬体診断B+評価。",
+      "マイナス情報": "東スポ杯でパントルナイーフに先着を許しており、京成杯の追い切りでグリーンエナジーに手応え劣勢だった。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "プラス情報": "斉藤崇師は「機動力があり、そつなくレースができる。中山も向く」と中山適性を評価。1枠2番という内枠を引けたことで「ロスなく運べれば」と期待。追い切りで僚馬2頭に頭差先着しており、「先週より走っている時のバランスが良かった。しっかり(姿勢が)起きた中で反応も良かった」と進化が確認されている。",
+      "マイナス情報": "レース内容としては目立つ部分が少ない印象。スプリングSでアスクエジンバラ、アクロフェイズに負けており、そこからの強調材料は少ないという見方もある。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "プラス情報": "ホープフルS3着、スプリングS2着と中山の重賞で安定した成績を残しており、コース相性の良さが光る。調教後馬体重もしっかり増えており成長が見られ、間隔が詰まっての出走でもハードな調教が出来ており前走以上が期待できる。福永師は「不安な面は少ない」と好気配で、調教爆穴、馬体診断B+評価。",
+      "マイナス情報": "序盤は行きたがる面があったが、最近は中団で脚を溜める形に変わってきている。スプリングSは勝ち馬の一つ内をロスなく立ち回っており、能力を出し切ったレース内容に見えるため、他の馬よりはやや評価を下げたいという意見もある。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロードフィレール",
+      "プラス情報": "武豊騎手騎乗。田嶋助手は「状態は上がっている」とコメント。",
+      "マイナス情報": "特になし",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "プラス情報": "坂でも減速せずむしろ伸びているような走りで内容は良く、先行・中団どちらからでも競馬ができ、大外を回しても脚を使える。早めに動いても粘れる形があり、同じ競馬が続いている印象。",
+      "マイナス情報": "中4週で追い切り2本と調教本数が少なめ。1週前追い切りで併せ馬に遅れており、最終追い切りも流す程度であることから、使い詰めの影響が懸念される。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "プラス情報": "外から伸びる形の競馬はできており、馬体診断B+評価。横山武史騎手とのコンビは評価Sと高く評価されている。",
+      "マイナス情報": "同じ形の競馬が今回も作れるかは未知数で、位置取りによって印象が変わりそう。毎日杯を勝ったが、相手強化と初の2ターン戦が課題。中2週のため、中間は調整程度の内容であり、良くて前走同様までという評価。",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ラージアンサンブル",
+      "プラス情報": "武井師は「期待以上に充実している」「想像の1つ2つ上」とコメントし、陣営から高い評価を受けている。",
+      "マイナス情報": "特になし",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "オルフセン",
+      "プラス情報": "特になし",
+      "マイナス情報": "特になし",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_title": "spread-sports.jp",
+      "source_type": "web"
+    },
+    {
+      "馬名": "全体的なレース傾向",
+      "プラス情報": "近年の皐月賞は高速馬場化が進み、2024年は1分57秒1、2025年は1分57秒0と連続でレコードが更新されています。この傾向から、スピードと持続力に優れ、高速馬場への適性がある馬が有利と見られます。また、記事では高速馬場において外枠が有利であると指摘されており、外目の枠に入った馬には有利な展開が期待できます。",
+      "マイナス情報": "高速馬場に対応できないスタミナ偏重の馬や、瞬発力に欠ける馬にとっては厳しいレース展開となる可能性があります。また、高速馬場において外枠有利という傾向があるため、内枠に入った馬は展開面で不利を受けるリスクが考えられます。",
+      "source_url": "https://news.sp.netkeiba.com/?pid=column_view&wid=CH108",
+      "source_title": "【皐月賞予想】高速馬場の皐月賞は外枠有利",
+      "source_type": "web"
     }
   ],
   "youtube_raw": [],
@@ -906,6 +1898,118 @@
       "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=294273",
       "source_name": "dir.netkeiba.com",
       "snippet": "4月20日に中山競馬場で行われる、第85回皐月賞(3歳・牡牝・GI・芝2000m)の登録馬・想定騎手は以下の通り。 3戦無敗の2歳王者クロワデュノール(牡3、",
+      "source_type": "web"
+    },
+    {
+      "title": "皐月賞の単勝・複勝・枠連オッズ【2026年4月19日中山11R】",
+      "url": "https://www.keibalab.jp/db/race/202604190611/odds.html",
+      "source_name": "keibalab.jp",
+      "snippet": "馬番, 馬名, 単勝, 複勝, 人気. 1, カヴァレリッツォ, 7.0, 2.4-3.2, 4. 2, サウンドムーブ, 105.2, 14.4-20.3, 16. 3, サノノグレーター, 60.5",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞2026予想】持続力とパワーに注目！3頭をピックアップ！/田井秀一 | 競馬予想動画 - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/tv/tv_preview.html?id=12676",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "スポニチの田井秀一記者が今週末に出走予定の有力馬を馬体診断。今週行われる皐月賞の出走予定馬の中から「大きく状態を上げてきている馬」「舞台適性",
+      "source_type": "web"
+    },
+    {
+      "title": "【有馬記念】アドマイヤテラは坂路でパワフルな動き　友道調教師「今の状態なら器用な競馬ができそう」 | 競馬ニュース - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=317507",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "第70回有馬記念・G1(12月28日、中山競馬場・芝2500メートル)＝12月23日、栗東トレセン アドマイヤテラ(牡4歳、栗東・友道康夫厩舎、父レイデオロ)は、",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞想定騎手】カヴァレリッツォはD.レーン騎手、ロブチェンは松山弘平騎手",
+      "url": "https://news.netkeiba.com/?pid=news_view&no=327888",
+      "source_name": "news.netkeiba.com",
+      "snippet": "4月19日に中山競馬場で行われる、第86回皐月賞(3歳・牡牝・GI・芝2000m)の登録馬・想定騎手は以下の通り。 朝日杯FSの覇者カヴァレリッツォ(牡3、",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞2026枠順発表】全18頭 ロブチェン2枠4番・カヴァレリッツォ1枠1番など最新情報【4月19日(日)15時40分】 | 競馬まとめ - netkeiba",
+      "url": "https://dir.netkeiba.com/keibamatome/detail.html?no=5653",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "当記事では、2026年皐月賞(4月19日(日)15:40発走・3歳牡牝・G1・中山競馬場・芝2000m・18頭)の枠順・最新情報を記載する。",
+      "source_type": "web"
+    },
+    {
+      "title": "前走人気と着順データから皐月賞を予想 Ｖに最も近いのはアドマイヤマーズ！",
+      "url": "https://sports.yahoo.co.jp/column/detail/201904110001-spnavi",
+      "source_name": "sports.yahoo.co.jp",
+      "snippet": "先週行われた桜花賞では、朝日杯ＦＳ以来の休み明けだったグランアレグリアが優勝。これで昨年のアーモンドアイ（シンザン記念…",
+      "source_type": "web"
+    },
+    {
+      "title": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_name": "vertexaisearch.cloud.google.com",
+      "snippet": "2026年の皐月賞は混戦模様で、有力馬が多く、各馬の評価も多岐にわたっています。以下に、各馬のプラス材料（強み）とマイナス材料（懸念点）を中心にまとめました。\n\n---\n\n### 皐月賞 2026 各馬分析\n\n**アクロフェイズ**\n*   **プラス材料**: 坂でも減速せず伸びる走りを見せ、先行・中団どちらからでも競馬ができ、大外を回しても脚を使える器用さがあります。早めに動いても粘れる形で、同じような競馬を続けています。距離適性もあり、時計が速くなっても対応可能と見られています。現在の状態も高いレベルで推移していると評価されています。\n*   **マイナス材料**: スプリングSでアスクエジンバラに競り負けた経験があり、オープン級の能力があるか疑問視する声もあります。強い馬との対戦経験が少なく、余力があるか不透明な点や、調教本数が少ないこと、使い詰めによる影響を懸念する意見もあります。G1の舞台では厳しい可能性も指摘されています。\n\n**アスクイキゴミ**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**アスクエジンバラ**\n*   **プラス材料**: 追い切りで最高の「S」評価を得ており、岩田康誠騎手とのコンビ評価も「S」と非常に高く、現在のデキは他を圧倒しているとされています。中山の重賞で安定した成績を残しており、コース相性の良さが光ります。間隔が詰まっての出走ながら、ハードな調教ができている点も好材料です。\n*   **マイナス材料**: スプリングSではロスなく立ち回れたため、その分他の馬よりも評価をやや下げる見方もあります。内枠で脚を溜める競馬をした際に、そのまま伸び切れない可能性も指摘されています。\n\n**アドマイヤクワッズ**\n*   **プラス材料**: 追い切り評価は「S」で、馬体も非常に良く見え、銭形斑点が浮き出るほどの良い毛艶もプラスです。一瞬の脚が使え、反応が良い点が強みで、中山2000mの距離も問題ないとされています。叩き2戦目の上積みも期待されています。\n*   **マイナス材料**: レース内容から能力そのものの評価が難しく、展開に左右される部分が大きいと見られています。体形がマイラー寄りに見えるという意見もあります。\n\n**アルトラムス**\n*   **プラス材料**: 追い切りで「A」評価を得ており、外から伸びる形の競馬ができる点が強みです。毎日杯の勝ち馬であり、横山武史騎手とのコンビも期待されています。\n*   **マイナス材料**: 相手関係の強化や初の2ターン戦が課題とされており、これまでのような競馬が今回もできるかは未知数です。位置取りによってレースの印象が大きく変わる可能性があり、中2週という間隔から調整程度の内容が多く、良くても前走同様までという見方もあります。\n\n**オルフセン**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**カヴァレリッツォ**\n*   **プラス材料**: 朝日杯FSの勝ち馬であり、G1勝ちからの直行ローテは連対率80%という好データがあります。鞍上のレーン騎手は日本でのG1勝利実績も豊富で、2000mの距離も問題ないという見方です。馬自身でペースを作れる点で、仕上がりも良好、馬体も一回り大きくなったと成長が認められています。重馬場でも瞬発力を発揮でき、父サートゥルナーリアが中山適性を持っていたこともプラス材料です。\n*   **マイナス材料**: 休み明けであることや、距離延長が初めての挑戦となる点が懸念されています。調教で格下馬に遅れを取ったことがあり、マイラー寄りの可能性や早熟傾向、また4コーナーでの経験がない点が過去データからはマイナスと見られています。成長が足りない可能性も指摘されています。\n\n**グリーンエナジー**\n*   **プラス材料**: 今回人気を集める一頭と予想されており、調教では好時計をマークし、前向きなフットワークを見せています。非社台・非ノーザンファーム生産馬ながら、G1制覇の可能性も秘めていると評価されています。\n*   **マイナス材料**: 父スワーヴリチャードの産駒が東京競馬場のような広いコース向きの傾向があるため、中山コースへの適性がどうかという懸念があります。前走のような後方からの競馬では、皐月賞では厳しい展開になる可能性も指摘されています。スワーヴリチャード自身も中山では馬券外の経験があり、その影響も考えられます。\n\n**サイモンシャリオ**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**サウンドムーブ**\n*   **プラス材料**: スプリングSでは不利な大外枠から距離ロスがありながらも、同組では最上位に評価されています。内枠を引けたことで、ロスなく運べれば好走が期待されています。機動力があり、そつなくレースができるタイプで、中山コースも向くとされています。精神面も充実しており、状態は良いと評価されています。\n*   **マイナス材料**: スプリングSのメンバーレベルがそれほど高くなかった可能性があり、レース内容として目立つ部分が少ないという意見もあります。ワンターンの競馬しか経験がなく、上がり3ハロンの自己ベストも物足りない点が指摘されています。内枠は後方待機する馬には不向きで、能力的に壁がある可能性も示唆されています。\n\n**サノノグレーター**\n*   **プラス材料**: スプリングSでは不利を受けながらも評価されており、東京コース向きの可能性も指摘されています。坂路を力強く登坂し、リズム良く加速できる点で仕上がりは好感触とされています。昨冬の中山・葉牡丹賞で2歳コースレコード勝ちの実績があり、能力の高さと安定した末脚を持っています。追い切りでもウッドでしっかり負荷をかけ、まずまずの動きを見せており、総合評価は「A」、展開がはまれば一発も期待されています。\n*   **マイナス材料**: 前哨戦の重賞では上位馬に歯が立たなかった経験があります。中山2000mでの勝利経験はあるものの、オープンや重賞レースはワンターンの競馬しか経験がない点が懸念材料です。\n\n**ゾロアストロ**\n*   **プラス材料**: きさらぎ賞の勝ち馬であり、追い切りでは「抜群」と高評価を受けています。調教爆穴候補としても挙げられています。\n*   **マイナス材料**: コンパクトな馬体をしているため、今後の成長力に疑問符がつくという見方もあります。\n\n**バステール**\n*   **プラス材料**: 未勝利戦と弥生賞を連勝中で、馬体も引き締まり、毛艶も輝いています。馬体重も一戦ごとに増えており、成長がうかがえます。全体的にまとまった優等生の馬体と評価されており、調教では精神面の成長も感じさせ、動きの質も高い水準を維持しています。完成途上ながらも、G1馬に待ったをかける存在になり得ると期待されています。\n*   **マイナス材料**: 連勝は展開がハマった部分もある可能性があり、馬体にまだ若さが見られるという指摘もあります。キタサンブラック産駒ですが、スパッと切れるタイプではないと見られています。大外枠はプラスとマイナスの両面があるとされています。マイラーの可能性や早熟傾向を指摘する声もあります。\n\n**パントルナイーフ**\n*   **プラス材料**: 東スポ杯2歳Sの勝ち馬であり、フォトパドックでも見た目が良く、透き通るような毛艶が評価されています。休み明けではありますが、出来はソコソコで、8割くらいの出来でも3着になる能力があると見られています。ルメール騎手とのコンビ評価は「S」と非常に高いです。\n*   **マイナス材料**: 東スポ杯からの休み明けで、ダービーがメイチの目標である可能性が指摘されています。ルメール騎手とキズナ産駒はG1で相性があまり良くないという見方や、他馬との成長力の比較、中山よりも東京向きの可能性も挙げられています。調教がイマイチという評価や、中145日でのG1勝利となるとレース史上最長となり、難しい挑戦となります。\n\n**フォルテアンジェロ**\n*   **プラス材料**: ホープフルS2着と勝ちに等しい内容で、1勝馬ながら連対率100%と安定した成績を残しています。馬体的にも穴が少ない印象で、立ち回り次第では勝ち負けも期待されています。中山芝コース適性はトップクラスと評価されており、非常に器用な馬で、展開に左右されず狭いところも抜けてこられるため、どの条件でも走れると師も自信を持っています。この中山コースは器用なこの馬にとってプラス材料であり、調教でも特A評価を受けています。操縦性の高さが武器とされています。\n*   **マイナス材料**: ホープフルSではスローペース先行有利の恩恵を受けた可能性があり、ロブチェンの決め手にやられたという見方もあります。まだ幼く、成長途上であるという指摘もあります。\n\n**マテンロウゲイル**\n*   **プラス材料**: 連対率100%で、若葉Sを快勝しており勢いがあります。中山コース経験があることもプラスとされています。調教爆穴候補にも挙げられています。\n*   **マイナス材料**: 勝ち味に遅い部分がある点が指摘されています。\n\n**ライヒスアドラー**\n*   **プラス材料**: ポテンシャルが高く、中山適性も十分にあると評価されています。先行してスピードを持続できるタイプで、上がり3位以内を記録できる能力があります。前走の弥生賞2着から叩いての上積みも期待されています。フォトパドックでも良く見え、上原佑師も「ポテンシャルは他の馬に負けてない」と自信を見せています。中山芝コース適性も2位とされています。\n*   **マイナス材料**: スローペースでのヨーイドンよりもスピード持続型である点が皐月賞の展開によってはどうかという見方もあります。重賞実績がもう少し欲しいという声も聞かれます。\n\n**ラージアンサンブル**\n*   **マイナス材料**: 現時点では、皐月賞では厳しいという見方が優勢です。\n\n**リアライズシリウス**\n*   **プラス材料**: 共同通信杯の勝ち馬であり、有力馬の一頭とされています。追い切りでは「A」評価で、最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています。課題とされていた右回りでの調教でも好感触で、重賞を勝った前走と遜色ない仕上がりです。調教では特S評価を受けており、操縦性の高さとキビキビとした動きが目立ちます。津村明秀騎手とのコンビ評価も「S」と高評価です。\n*   **マイナス材料**: フォトパドックではボヤッとして見えるという意見もありますが、芦毛馬で元々良く見せないタイプであるため、気にしなくてよいというフォローもあります。一部では左回り限定の可能性も指摘されています。\n\n**ロブチェン**\n*   **プラス材料**: ホープフルSの勝ち馬であり、続く共同通信杯3着の内容からも地力は上位と見られています。道中インで脚を溜めて直線でスパッと切れる器用なタイプで、松山弘平騎手と手が合うとされており、偶数内枠も理想的とされています。追い切りでは「A」評価で、G1を勝った2走前と遜色ない仕上がりです。\n*   **マイナス材料**: ホープフルSのレースレベルに疑問符がつくという声や、共同通信杯では前が止まらない展開で長く脚を使わされる形がきつかったという見方もあります。ホープフルSはスローペース先行有利の恩恵を受けた可能性も指摘されています。G1馬でありながら「0.0.0.9」というデータ的な壁があることや、成長が足りない可能性も挙げられています。\n\n**ロードフィレール**\n*   **プラス材料**: 武豊騎手に全権委任されており、状態は上がっているとされています。\n*   **マイナス材料**: マテンロウゲイルの方が評価が高いという見方もあります。\n\n---\n\n**馬券の買い方・狙い目について**\n\n2026年の皐月賞は明確な中心馬が不在で、非常に難解なレースになるという見方が大勢を占めています。単勝オッズも割れており、実力は拮抗していると考えられます。中山芝2000mのCコース替わりで、先行馬が止まりにくい展開が予想され、序盤の位置取りが重要なポイントとなります。\n\n過去のデータからは、共同通信杯や弥生賞ディープインパクト記念組が直近5年連続で馬券に絡んでおり、好走が期待できます。また、連対率が75%以上で重賞で連対経験のある馬や、ノーザンファーム生産馬が半数以上好走しています。G1勝ち馬の直行ローテは連対率80%と非常に高い信頼度があるデータも出ています。\n\n人気馬が安定して馬券に絡む傾向もありますが、過去10年で7・8・9番人気が1勝ずつ挙げており、穴狙いも可能なレースとされています。ただし、二桁人気の大穴馬は1頭しか馬券に絡んでおらず、極端な大穴狙いは避けるべきという意見もあります。\n\n最終的な馬券検討では、単なる能力比較だけでなく、中山芝2000mへの適応力、Cコースのバイアス、先行力、4コーナーでの想定位置、そして直線での持続力といった要素を重視することが推奨されています。特に先行力と4コーナーでの位置取りが重要視されています。",
+      "source_type": "web"
+    },
+    {
+      "title": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_name": "vertexaisearch.cloud.google.com",
+      "snippet": "2026年の皐月賞は混戦模様で、有力馬が多く、各馬の評価も多岐にわたっています。以下に、各馬のプラス材料（強み）とマイナス材料（懸念点）を中心にまとめました。\n\n---\n\n### 皐月賞 2026 各馬分析\n\n**アクロフェイズ**\n*   **プラス材料**: 坂でも減速せず伸びる走りを見せ、先行・中団どちらからでも競馬ができ、大外を回しても脚を使える器用さがあります。早めに動いても粘れる形で、同じような競馬を続けています。距離適性もあり、時計が速くなっても対応可能と見られています。現在の状態も高いレベルで推移していると評価されています。\n*   **マイナス材料**: スプリングSでアスクエジンバラに競り負けた経験があり、オープン級の能力があるか疑問視する声もあります。強い馬との対戦経験が少なく、余力があるか不透明な点や、調教本数が少ないこと、使い詰めによる影響を懸念する意見もあります。G1の舞台では厳しい可能性も指摘されています。\n\n**アスクイキゴミ**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**アスクエジンバラ**\n*   **プラス材料**: 追い切りで最高の「S」評価を得ており、岩田康誠騎手とのコンビ評価も「S」と非常に高く、現在のデキは他を圧倒しているとされています。中山の重賞で安定した成績を残しており、コース相性の良さが光ります。間隔が詰まっての出走ながら、ハードな調教ができている点も好材料です。\n*   **マイナス材料**: スプリングSではロスなく立ち回れたため、その分他の馬よりも評価をやや下げる見方もあります。内枠で脚を溜める競馬をした際に、そのまま伸び切れない可能性も指摘されています。\n\n**アドマイヤクワッズ**\n*   **プラス材料**: 追い切り評価は「S」で、馬体も非常に良く見え、銭形斑点が浮き出るほどの良い毛艶もプラスです。一瞬の脚が使え、反応が良い点が強みで、中山2000mの距離も問題ないとされています。叩き2戦目の上積みも期待されています。\n*   **マイナス材料**: レース内容から能力そのものの評価が難しく、展開に左右される部分が大きいと見られています。体形がマイラー寄りに見えるという意見もあります。\n\n**アルトラムス**\n*   **プラス材料**: 追い切りで「A」評価を得ており、外から伸びる形の競馬ができる点が強みです。毎日杯の勝ち馬であり、横山武史騎手とのコンビも期待されています。\n*   **マイナス材料**: 相手関係の強化や初の2ターン戦が課題とされており、これまでのような競馬が今回もできるかは未知数です。位置取りによってレースの印象が大きく変わる可能性があり、中2週という間隔から調整程度の内容が多く、良くても前走同様までという見方もあります。\n\n**オルフセン**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**カヴァレリッツォ**\n*   **プラス材料**: 朝日杯FSの勝ち馬であり、G1勝ちからの直行ローテは連対率80%という好データがあります。鞍上のレーン騎手は日本でのG1勝利実績も豊富で、2000mの距離も問題ないという見方です。馬自身でペースを作れる点で、仕上がりも良好、馬体も一回り大きくなったと成長が認められています。重馬場でも瞬発力を発揮でき、父サートゥルナーリアが中山適性を持っていたこともプラス材料です。\n*   **マイナス材料**: 休み明けであることや、距離延長が初めての挑戦となる点が懸念されています。調教で格下馬に遅れを取ったことがあり、マイラー寄りの可能性や早熟傾向、また4コーナーでの経験がない点が過去データからはマイナスと見られています。成長が足りない可能性も指摘されています。\n\n**グリーンエナジー**\n*   **プラス材料**: 今回人気を集める一頭と予想されており、調教では好時計をマークし、前向きなフットワークを見せています。非社台・非ノーザンファーム生産馬ながら、G1制覇の可能性も秘めていると評価されています。\n*   **マイナス材料**: 父スワーヴリチャードの産駒が東京競馬場のような広いコース向きの傾向があるため、中山コースへの適性がどうかという懸念があります。前走のような後方からの競馬では、皐月賞では厳しい展開になる可能性も指摘されています。スワーヴリチャード自身も中山では馬券外の経験があり、その影響も考えられます。\n\n**サイモンシャリオ**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**サウンドムーブ**\n*   **プラス材料**: スプリングSでは不利な大外枠から距離ロスがありながらも、同組では最上位に評価されています。内枠を引けたことで、ロスなく運べれば好走が期待されています。機動力があり、そつなくレースができるタイプで、中山コースも向くとされています。精神面も充実しており、状態は良いと評価されています。\n*   **マイナス材料**: スプリングSのメンバーレベルがそれほど高くなかった可能性があり、レース内容として目立つ部分が少ないという意見もあります。ワンターンの競馬しか経験がなく、上がり3ハロンの自己ベストも物足りない点が指摘されています。内枠は後方待機する馬には不向きで、能力的に壁がある可能性も示唆されています。\n\n**サノノグレーター**\n*   **プラス材料**: スプリングSでは不利を受けながらも評価されており、東京コース向きの可能性も指摘されています。坂路を力強く登坂し、リズム良く加速できる点で仕上がりは好感触とされています。昨冬の中山・葉牡丹賞で2歳コースレコード勝ちの実績があり、能力の高さと安定した末脚を持っています。追い切りでもウッドでしっかり負荷をかけ、まずまずの動きを見せており、総合評価は「A」、展開がはまれば一発も期待されています。\n*   **マイナス材料**: 前哨戦の重賞では上位馬に歯が立たなかった経験があります。中山2000mでの勝利経験はあるものの、オープンや重賞レースはワンターンの競馬しか経験がない点が懸念材料です。\n\n**ゾロアストロ**\n*   **プラス材料**: きさらぎ賞の勝ち馬であり、追い切りでは「抜群」と高評価を受けています。調教爆穴候補としても挙げられています。\n*   **マイナス材料**: コンパクトな馬体をしているため、今後の成長力に疑問符がつくという見方もあります。\n\n**バステール**\n*   **プラス材料**: 未勝利戦と弥生賞を連勝中で、馬体も引き締まり、毛艶も輝いています。馬体重も一戦ごとに増えており、成長がうかがえます。全体的にまとまった優等生の馬体と評価されており、調教では精神面の成長も感じさせ、動きの質も高い水準を維持しています。完成途上ながらも、G1馬に待ったをかける存在になり得ると期待されています。\n*   **マイナス材料**: 連勝は展開がハマった部分もある可能性があり、馬体にまだ若さが見られるという指摘もあります。キタサンブラック産駒ですが、スパッと切れるタイプではないと見られています。大外枠はプラスとマイナスの両面があるとされています。マイラーの可能性や早熟傾向を指摘する声もあります。\n\n**パントルナイーフ**\n*   **プラス材料**: 東スポ杯2歳Sの勝ち馬であり、フォトパドックでも見た目が良く、透き通るような毛艶が評価されています。休み明けではありますが、出来はソコソコで、8割くらいの出来でも3着になる能力があると見られています。ルメール騎手とのコンビ評価は「S」と非常に高いです。\n*   **マイナス材料**: 東スポ杯からの休み明けで、ダービーがメイチの目標である可能性が指摘されています。ルメール騎手とキズナ産駒はG1で相性があまり良くないという見方や、他馬との成長力の比較、中山よりも東京向きの可能性も挙げられています。調教がイマイチという評価や、中145日でのG1勝利となるとレース史上最長となり、難しい挑戦となります。\n\n**フォルテアンジェロ**\n*   **プラス材料**: ホープフルS2着と勝ちに等しい内容で、1勝馬ながら連対率100%と安定した成績を残しています。馬体的にも穴が少ない印象で、立ち回り次第では勝ち負けも期待されています。中山芝コース適性はトップクラスと評価されており、非常に器用な馬で、展開に左右されず狭いところも抜けてこられるため、どの条件でも走れると師も自信を持っています。この中山コースは器用なこの馬にとってプラス材料であり、調教でも特A評価を受けています。操縦性の高さが武器とされています。\n*   **マイナス材料**: ホープフルSではスローペース先行有利の恩恵を受けた可能性があり、ロブチェンの決め手にやられたという見方もあります。まだ幼く、成長途上であるという指摘もあります。\n\n**マテンロウゲイル**\n*   **プラス材料**: 連対率100%で、若葉Sを快勝しており勢いがあります。中山コース経験があることもプラスとされています。調教爆穴候補にも挙げられています。\n*   **マイナス材料**: 勝ち味に遅い部分がある点が指摘されています。\n\n**ライヒスアドラー**\n*   **プラス材料**: ポテンシャルが高く、中山適性も十分にあると評価されています。先行してスピードを持続できるタイプで、上がり3位以内を記録できる能力があります。前走の弥生賞2着から叩いての上積みも期待されています。フォトパドックでも良く見え、上原佑師も「ポテンシャルは他の馬に負けてない」と自信を見せています。中山芝コース適性も2位とされています。\n*   **マイナス材料**: スローペースでのヨーイドンよりもスピード持続型である点が皐月賞の展開によってはどうかという見方もあります。重賞実績がもう少し欲しいという声も聞かれます。\n\n**ラージアンサンブル**\n*   **マイナス材料**: 現時点では、皐月賞では厳しいという見方が優勢です。\n\n**リアライズシリウス**\n*   **プラス材料**: 共同通信杯の勝ち馬であり、有力馬の一頭とされています。追い切りでは「A」評価で、最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています。課題とされていた右回りでの調教でも好感触で、重賞を勝った前走と遜色ない仕上がりです。調教では特S評価を受けており、操縦性の高さとキビキビとした動きが目立ちます。津村明秀騎手とのコンビ評価も「S」と高評価です。\n*   **マイナス材料**: フォトパドックではボヤッとして見えるという意見もありますが、芦毛馬で元々良く見せないタイプであるため、気にしなくてよいというフォローもあります。一部では左回り限定の可能性も指摘されています。\n\n**ロブチェン**\n*   **プラス材料**: ホープフルSの勝ち馬であり、続く共同通信杯3着の内容からも地力は上位と見られています。道中インで脚を溜めて直線でスパッと切れる器用なタイプで、松山弘平騎手と手が合うとされており、偶数内枠も理想的とされています。追い切りでは「A」評価で、G1を勝った2走前と遜色ない仕上がりです。\n*   **マイナス材料**: ホープフルSのレースレベルに疑問符がつくという声や、共同通信杯では前が止まらない展開で長く脚を使わされる形がきつかったという見方もあります。ホープフルSはスローペース先行有利の恩恵を受けた可能性も指摘されています。G1馬でありながら「0.0.0.9」というデータ的な壁があることや、成長が足りない可能性も挙げられています。\n\n**ロードフィレール**\n*   **プラス材料**: 武豊騎手に全権委任されており、状態は上がっているとされています。\n*   **マイナス材料**: マテンロウゲイルの方が評価が高いという見方もあります。\n\n---\n\n**馬券の買い方・狙い目について**\n\n2026年の皐月賞は明確な中心馬が不在で、非常に難解なレースになるという見方が大勢を占めています。単勝オッズも割れており、実力は拮抗していると考えられます。中山芝2000mのCコース替わりで、先行馬が止まりにくい展開が予想され、序盤の位置取りが重要なポイントとなります。\n\n過去のデータからは、共同通信杯や弥生賞ディープインパクト記念組が直近5年連続で馬券に絡んでおり、好走が期待できます。また、連対率が75%以上で重賞で連対経験のある馬や、ノーザンファーム生産馬が半数以上好走しています。G1勝ち馬の直行ローテは連対率80%と非常に高い信頼度があるデータも出ています。\n\n人気馬が安定して馬券に絡む傾向もありますが、過去10年で7・8・9番人気が1勝ずつ挙げており、穴狙いも可能なレースとされています。ただし、二桁人気の大穴馬は1頭しか馬券に絡んでおらず、極端な大穴狙いは避けるべきという意見もあります。\n\n最終的な馬券検討では、単なる能力比較だけでなく、中山芝2000mへの適応力、Cコースのバイアス、先行力、4コーナーでの想定位置、そして直線での持続力といった要素を重視することが推奨されています。特に先行力と4コーナーでの位置取りが重要視されています。",
+      "source_type": "web"
+    },
+    {
+      "title": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_name": "vertexaisearch.cloud.google.com",
+      "snippet": "2026年の皐月賞は混戦模様で、有力馬が多く、各馬の評価も多岐にわたっています。以下に、各馬のプラス材料（強み）とマイナス材料（懸念点）を中心にまとめました。\n\n---\n\n### 皐月賞 2026 各馬分析\n\n**アクロフェイズ**\n*   **プラス材料**: 坂でも減速せず伸びる走りを見せ、先行・中団どちらからでも競馬ができ、大外を回しても脚を使える器用さがあります。早めに動いても粘れる形で、同じような競馬を続けています。距離適性もあり、時計が速くなっても対応可能と見られています。現在の状態も高いレベルで推移していると評価されています。\n*   **マイナス材料**: スプリングSでアスクエジンバラに競り負けた経験があり、オープン級の能力があるか疑問視する声もあります。強い馬との対戦経験が少なく、余力があるか不透明な点や、調教本数が少ないこと、使い詰めによる影響を懸念する意見もあります。G1の舞台では厳しい可能性も指摘されています。\n\n**アスクイキゴミ**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**アスクエジンバラ**\n*   **プラス材料**: 追い切りで最高の「S」評価を得ており、岩田康誠騎手とのコンビ評価も「S」と非常に高く、現在のデキは他を圧倒しているとされています。中山の重賞で安定した成績を残しており、コース相性の良さが光ります。間隔が詰まっての出走ながら、ハードな調教ができている点も好材料です。\n*   **マイナス材料**: スプリングSではロスなく立ち回れたため、その分他の馬よりも評価をやや下げる見方もあります。内枠で脚を溜める競馬をした際に、そのまま伸び切れない可能性も指摘されています。\n\n**アドマイヤクワッズ**\n*   **プラス材料**: 追い切り評価は「S」で、馬体も非常に良く見え、銭形斑点が浮き出るほどの良い毛艶もプラスです。一瞬の脚が使え、反応が良い点が強みで、中山2000mの距離も問題ないとされています。叩き2戦目の上積みも期待されています。\n*   **マイナス材料**: レース内容から能力そのものの評価が難しく、展開に左右される部分が大きいと見られています。体形がマイラー寄りに見えるという意見もあります。\n\n**アルトラムス**\n*   **プラス材料**: 追い切りで「A」評価を得ており、外から伸びる形の競馬ができる点が強みです。毎日杯の勝ち馬であり、横山武史騎手とのコンビも期待されています。\n*   **マイナス材料**: 相手関係の強化や初の2ターン戦が課題とされており、これまでのような競馬が今回もできるかは未知数です。位置取りによってレースの印象が大きく変わる可能性があり、中2週という間隔から調整程度の内容が多く、良くても前走同様までという見方もあります。\n\n**オルフセン**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**カヴァレリッツォ**\n*   **プラス材料**: 朝日杯FSの勝ち馬であり、G1勝ちからの直行ローテは連対率80%という好データがあります。鞍上のレーン騎手は日本でのG1勝利実績も豊富で、2000mの距離も問題ないという見方です。馬自身でペースを作れる点で、仕上がりも良好、馬体も一回り大きくなったと成長が認められています。重馬場でも瞬発力を発揮でき、父サートゥルナーリアが中山適性を持っていたこともプラス材料です。\n*   **マイナス材料**: 休み明けであることや、距離延長が初めての挑戦となる点が懸念されています。調教で格下馬に遅れを取ったことがあり、マイラー寄りの可能性や早熟傾向、また4コーナーでの経験がない点が過去データからはマイナスと見られています。成長が足りない可能性も指摘されています。\n\n**グリーンエナジー**\n*   **プラス材料**: 今回人気を集める一頭と予想されており、調教では好時計をマークし、前向きなフットワークを見せています。非社台・非ノーザンファーム生産馬ながら、G1制覇の可能性も秘めていると評価されています。\n*   **マイナス材料**: 父スワーヴリチャードの産駒が東京競馬場のような広いコース向きの傾向があるため、中山コースへの適性がどうかという懸念があります。前走のような後方からの競馬では、皐月賞では厳しい展開になる可能性も指摘されています。スワーヴリチャード自身も中山では馬券外の経験があり、その影響も考えられます。\n\n**サイモンシャリオ**\n*   現時点では、具体的な評価や分析記事は見当たりませんでした。\n\n**サウンドムーブ**\n*   **プラス材料**: スプリングSでは不利な大外枠から距離ロスがありながらも、同組では最上位に評価されています。内枠を引けたことで、ロスなく運べれば好走が期待されています。機動力があり、そつなくレースができるタイプで、中山コースも向くとされています。精神面も充実しており、状態は良いと評価されています。\n*   **マイナス材料**: スプリングSのメンバーレベルがそれほど高くなかった可能性があり、レース内容として目立つ部分が少ないという意見もあります。ワンターンの競馬しか経験がなく、上がり3ハロンの自己ベストも物足りない点が指摘されています。内枠は後方待機する馬には不向きで、能力的に壁がある可能性も示唆されています。\n\n**サノノグレーター**\n*   **プラス材料**: スプリングSでは不利を受けながらも評価されており、東京コース向きの可能性も指摘されています。坂路を力強く登坂し、リズム良く加速できる点で仕上がりは好感触とされています。昨冬の中山・葉牡丹賞で2歳コースレコード勝ちの実績があり、能力の高さと安定した末脚を持っています。追い切りでもウッドでしっかり負荷をかけ、まずまずの動きを見せており、総合評価は「A」、展開がはまれば一発も期待されています。\n*   **マイナス材料**: 前哨戦の重賞では上位馬に歯が立たなかった経験があります。中山2000mでの勝利経験はあるものの、オープンや重賞レースはワンターンの競馬しか経験がない点が懸念材料です。\n\n**ゾロアストロ**\n*   **プラス材料**: きさらぎ賞の勝ち馬であり、追い切りでは「抜群」と高評価を受けています。調教爆穴候補としても挙げられています。\n*   **マイナス材料**: コンパクトな馬体をしているため、今後の成長力に疑問符がつくという見方もあります。\n\n**バステール**\n*   **プラス材料**: 未勝利戦と弥生賞を連勝中で、馬体も引き締まり、毛艶も輝いています。馬体重も一戦ごとに増えており、成長がうかがえます。全体的にまとまった優等生の馬体と評価されており、調教では精神面の成長も感じさせ、動きの質も高い水準を維持しています。完成途上ながらも、G1馬に待ったをかける存在になり得ると期待されています。\n*   **マイナス材料**: 連勝は展開がハマった部分もある可能性があり、馬体にまだ若さが見られるという指摘もあります。キタサンブラック産駒ですが、スパッと切れるタイプではないと見られています。大外枠はプラスとマイナスの両面があるとされています。マイラーの可能性や早熟傾向を指摘する声もあります。\n\n**パントルナイーフ**\n*   **プラス材料**: 東スポ杯2歳Sの勝ち馬であり、フォトパドックでも見た目が良く、透き通るような毛艶が評価されています。休み明けではありますが、出来はソコソコで、8割くらいの出来でも3着になる能力があると見られています。ルメール騎手とのコンビ評価は「S」と非常に高いです。\n*   **マイナス材料**: 東スポ杯からの休み明けで、ダービーがメイチの目標である可能性が指摘されています。ルメール騎手とキズナ産駒はG1で相性があまり良くないという見方や、他馬との成長力の比較、中山よりも東京向きの可能性も挙げられています。調教がイマイチという評価や、中145日でのG1勝利となるとレース史上最長となり、難しい挑戦となります。\n\n**フォルテアンジェロ**\n*   **プラス材料**: ホープフルS2着と勝ちに等しい内容で、1勝馬ながら連対率100%と安定した成績を残しています。馬体的にも穴が少ない印象で、立ち回り次第では勝ち負けも期待されています。中山芝コース適性はトップクラスと評価されており、非常に器用な馬で、展開に左右されず狭いところも抜けてこられるため、どの条件でも走れると師も自信を持っています。この中山コースは器用なこの馬にとってプラス材料であり、調教でも特A評価を受けています。操縦性の高さが武器とされています。\n*   **マイナス材料**: ホープフルSではスローペース先行有利の恩恵を受けた可能性があり、ロブチェンの決め手にやられたという見方もあります。まだ幼く、成長途上であるという指摘もあります。\n\n**マテンロウゲイル**\n*   **プラス材料**: 連対率100%で、若葉Sを快勝しており勢いがあります。中山コース経験があることもプラスとされています。調教爆穴候補にも挙げられています。\n*   **マイナス材料**: 勝ち味に遅い部分がある点が指摘されています。\n\n**ライヒスアドラー**\n*   **プラス材料**: ポテンシャルが高く、中山適性も十分にあると評価されています。先行してスピードを持続できるタイプで、上がり3位以内を記録できる能力があります。前走の弥生賞2着から叩いての上積みも期待されています。フォトパドックでも良く見え、上原佑師も「ポテンシャルは他の馬に負けてない」と自信を見せています。中山芝コース適性も2位とされています。\n*   **マイナス材料**: スローペースでのヨーイドンよりもスピード持続型である点が皐月賞の展開によってはどうかという見方もあります。重賞実績がもう少し欲しいという声も聞かれます。\n\n**ラージアンサンブル**\n*   **マイナス材料**: 現時点では、皐月賞では厳しいという見方が優勢です。\n\n**リアライズシリウス**\n*   **プラス材料**: 共同通信杯の勝ち馬であり、有力馬の一頭とされています。追い切りでは「A」評価で、最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています。課題とされていた右回りでの調教でも好感触で、重賞を勝った前走と遜色ない仕上がりです。調教では特S評価を受けており、操縦性の高さとキビキビとした動きが目立ちます。津村明秀騎手とのコンビ評価も「S」と高評価です。\n*   **マイナス材料**: フォトパドックではボヤッとして見えるという意見もありますが、芦毛馬で元々良く見せないタイプであるため、気にしなくてよいというフォローもあります。一部では左回り限定の可能性も指摘されています。\n\n**ロブチェン**\n*   **プラス材料**: ホープフルSの勝ち馬であり、続く共同通信杯3着の内容からも地力は上位と見られています。道中インで脚を溜めて直線でスパッと切れる器用なタイプで、松山弘平騎手と手が合うとされており、偶数内枠も理想的とされています。追い切りでは「A」評価で、G1を勝った2走前と遜色ない仕上がりです。\n*   **マイナス材料**: ホープフルSのレースレベルに疑問符がつくという声や、共同通信杯では前が止まらない展開で長く脚を使わされる形がきつかったという見方もあります。ホープフルSはスローペース先行有利の恩恵を受けた可能性も指摘されています。G1馬でありながら「0.0.0.9」というデータ的な壁があることや、成長が足りない可能性も挙げられています。\n\n**ロードフィレール**\n*   **プラス材料**: 武豊騎手に全権委任されており、状態は上がっているとされています。\n*   **マイナス材料**: マテンロウゲイルの方が評価が高いという見方もあります。\n\n---\n\n**馬券の買い方・狙い目について**\n\n2026年の皐月賞は明確な中心馬が不在で、非常に難解なレースになるという見方が大勢を占めています。単勝オッズも割れており、実力は拮抗していると考えられます。中山芝2000mのCコース替わりで、先行馬が止まりにくい展開が予想され、序盤の位置取りが重要なポイントとなります。\n\n過去のデータからは、共同通信杯や弥生賞ディープインパクト記念組が直近5年連続で馬券に絡んでおり、好走が期待できます。また、連対率が75%以上で重賞で連対経験のある馬や、ノーザンファーム生産馬が半数以上好走しています。G1勝ち馬の直行ローテは連対率80%と非常に高い信頼度があるデータも出ています。\n\n人気馬が安定して馬券に絡む傾向もありますが、過去10年で7・8・9番人気が1勝ずつ挙げており、穴狙いも可能なレースとされています。ただし、二桁人気の大穴馬は1頭しか馬券に絡んでおらず、極端な大穴狙いは避けるべきという意見もあります。\n\n最終的な馬券検討では、単なる能力比較だけでなく、中山芝2000mへの適応力、Cコースのバイアス、先行力、4コーナーでの想定位置、そして直線での持続力といった要素を重視することが推奨されています。特に先行力と4コーナーでの位置取りが重要視されています。",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞】「胸を張って大きいところに」屈指の出世レース制し津村明秀騎手は自信 相棒リアライズシリウスとクラシックへ",
+      "url": "https://news.netkeiba.com/?pid=news_view&no=327961",
+      "source_name": "news.netkeiba.com",
+      "snippet": "第86回皐月賞・G1(4月19日、中山競馬場・芝2000メートル) メンバー唯一の重賞2勝馬リアライズシリウス(牡3歳、美浦・手塚貴久厩舎、父ポエティック",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞予想オッズ】カヴァレリッツォが予想1番人気",
+      "url": "https://news.netkeiba.com/?pid=news_view&no=328004",
+      "source_name": "news.netkeiba.com",
+      "snippet": "4月19日に中山競馬場で行われる、第86回皐月賞(3歳・牡牝・GI・芝2000m)に21頭が登録。競馬ファンの予想などを元にnetkeibaが独自に開発したAIによる",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞】東スポ杯2歳S勝ち馬パントルナイーフ、GⅠ馬ロブチェンは消し ハイブリッド式消去法",
+      "url": "https://spaia-keiba.com/news/detail/34948",
+      "source_name": "spaia-keiba.com",
+      "snippet": "2026年皐月賞を「ハイブリッド式消去法」で予想する。過去10年のデータから複勝率10%未満の「凡走データ」を5つピックアップ。当てはまった馬を消して",
+      "source_type": "web"
+    },
+    {
+      "title": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_name": "vertexaisearch.cloud.google.com",
+      "snippet": "2026年の皐月賞について、各馬の評価や分析をまとめました。多くの情報が追い切り評価や馬体診断、過去のレース内容、騎手との相性、コース適性などに触れています。\n\n---\n\n**各馬の評価（プラス材料・マイナス材料）**\n\n### カヴァレリッツォ (Cavalierizzo)\n*   **プラス材料:**\n    *   前走の朝日杯FSを快勝しており、重馬場の中団から一際抜けた脚で差し切った内容は世代トップクラスの能力を示す。\n    *   2歳マイル王に上り詰めた実績は高く評価される。\n    *   父サートゥルナーリアも皐月賞を制しており、血統背景から中距離適性も期待されている。\n    *   馬体診断ではA+評価を受けており、全体のシルエットが非常に美しく、前後のつながりに無駄がない好馬体と評価されている。\n    *   馬自身でペースを作れる点は印象的。\n    *   好天予報とCコース替わりも追い風になりうる。\n    *   D.レーン騎手が「これだけチャンスのある馬に騎乗できることがうれしい」「レースのたびに良くなっていて、ポテンシャルの高い馬」と評価。\n    *   調教後馬体重はプラス10キロで成長が見られる。\n*   **マイナス材料:**\n    *   2000mという距離は未経験であり、これが最大の懸念点。過去、皐月賞の勝ち馬はすべて「前走までに1800m以上の距離を経験」しているデータがある。\n    *   これまでの勝利は直線が長く脚を伸ばしやすいコースであり、直線が短い中山芝2000mへの対応力が問われる。\n    *   追い切りで併せ馬に遅れるなど、調教の動きが微妙な印象を持たれることがある。\n    *   早熟で朝日杯からの成長が物足りないという見方もある。\n    *   朝日杯FSからの直行ローテでの1番人気は過去に例がない。\n\n### ロブチェン (Robuchen)\n*   **プラス材料:**\n    *   ホープフルSを勝ち、中山2000mの適性は証明済み。\n    *   共同通信杯での3着内容から地力上位と評価されている。\n    *   叩き2戦目で上積みが見込め、調教でも完成度の高さがうかがえる。\n    *   安定感と再現性があり、軸として信頼できる存在。\n    *   追い切りでは終い11.1秒をマークし、併せ馬を置き去りにする動きを見せており、G1を勝った2走前と遜色ない仕上がり。\n    *   馬体診断でA+評価を受けている。\n    *   ゲート練習も入念に行い、万全の態勢を整えている。\n*   **マイナス材料:**\n    *   ホープフルSのレベルにはやや疑問の声もある。\n    *   共同通信杯は前が止まらない競馬で長く脚を使わされる展開がきつかった。\n    *   データ上、「前走GI勝ちから臨む牡馬」は好走データがある一方、ロブチェンには「0.0.0.9」というデータ上の高い壁が指摘されている。\n    *   鞍上のG1連勝があるかどうかが気になる点。\n\n### リアライズシリウス (Realize Sirius)\n*   **プラス材料:**\n    *   共同通信杯を早め先頭で制しており、能力は上位。\n    *   追い切りでは高い集中力を見せ、自己ベストを更新する好時計をマーク。鞍上の津村騎手も「一段階上がっている」「抜群だった」と高評価。\n    *   調教では右回りの課題も克服し、素晴らしい動きを連発している。\n    *   馬体診断でA+評価を受けている。\n    *   手塚師は「距離は持つと思う」とコメント。\n*   **マイナス材料:**\n    *   共同通信杯はスローの前残りで展開の恩恵が大きかったとの見方がある。\n    *   どちらかというとマイル向きで、距離延長はプラスとは言えない可能性。\n    *   過剰人気しやすい傾向も指摘されている。\n    *   芦毛のため馬体が良く見えにくいタイプという意見もあるが、調子は上がっている。\n\n### サノノグレーター (Sanono Greater)\n*   **プラス材料:**\n    *   中山2000mの葉牡丹賞が優秀で、舞台適性がある。\n    *   追い切りでは田辺騎手を背にリズム良く加速しており、尾形師も「今日はいい感じで走れていた」と評価。\n    *   落ち着きがあり、馬体重も予定通りに仕上がっている。\n    *   スプリングSでは不利があったものの、ロスなく運べていれば上位評価だったという見方もある。\n*   **マイナス材料:**\n    *   共同通信杯やスプリングSでは上位馬との差が見られた。\n    *   どちらかというと東京コースの方が得意かもしれないという意見もある。\n\n### ゾロアストロ (Zoroastro)\n*   **プラス材料:**\n    *   きさらぎ賞の勝ち馬。\n    *   モーリス産駒らしい前躯の厚みとトモの力感が目立ち、全身に実が入っていて見映えが良い。\n    *   中山向きの力強さがあり、持続戦に寄った時に浮上する余地がある。\n    *   調教爆穴として評価されている。\n*   **マイナス材料:**\n    *   コンパクトな馬体で、成長力という点で懸念があるという意見も。\n    *   東スポ杯でパントルナイーフに先着を許している。\n\n### アドマイヤクワッズ (Admire Quads)\n*   **プラス材料:**\n    *   デイリー杯2歳ステークスをレコードで制している。\n    *   友道調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価。\n    *   叩き2戦目の上積みが見込めるとの評価。\n    *   馬体診断ではA評価を受けている。\n    *   追い切りでは古馬OP馬に先着する動きを見せている。\n*   **マイナス材料:**\n    *   進路が空いたことで結果に繋がった印象のレースが多く、能力そのものの評価が難しい。\n    *   弥生賞でバステールに完敗している。\n    *   体形的にはマイラーっぽいとの見方もある。\n\n### グリーンエナジー (Green Energy)\n*   **プラス材料:**\n    *   京成杯を中山芝2000mで差し切っており、コース適性を結果で示している。\n    *   マイル実績中心の人気馬より皐月賞向きの土台がはっきりしている。\n    *   京成杯では11番手付近から上がり勝負にも対応しており、直線の短い中山でも位置を悪くしすぎない競馬ができるのは魅力。\n    *   馬体診断でA評価を受けている。\n    *   1週前追い切りで自己ベストを更新する絶好時計をマークしている。\n*   **マイナス材料:**\n    *   16日の追い切りではフォルテアンジェロに遅れを取っている。\n\n### バステール (Bastille)\n*   **プラス材料:**\n    *   弥生賞ディープインパクト記念を制し、未勝利から連勝している。\n    *   馬体診断ではA+評価を受けており、全体のシルエットが非常に美しく、前後のつながりに無駄がない好馬体とされている。\n    *   父キタサンブラック譲りの持続力に期待。\n    *   馬体回復と成長を優先した調整過程が理にかなっており、走りも一段上へ。\n    *   追い切りではサウンドムーブをアオる勢いを見せ、精神面の成長がうかがえる。\n*   **マイナス材料:**\n    *   未勝利・弥生賞と連勝だが、展開がハマった印象もあり、馬体にもまだ若さが見られる。\n    *   大外枠はプラスとマイナスの両面がある。\n\n### パントルナイーフ (Peintre Naif)\n*   **プラス材料:**\n    *   東スポ杯2歳Sの勝ち馬。スローペースを差して勝利した内容を評価する声がある。\n    *   弥生賞を回避したものの、木村師は「大きな問題ではない」とコメント。\n    *   馬体診断でA評価を受けており、見た目が良く、透き通るような毛艶が特徴。\n    *   ルメール騎手とのコンビは評価S。\n*   **マイナス材料:**\n    *   東スポ杯で勝ったエコロアルバが朝日杯で離された4着であることから、力関係的には低く見積もれないという見方もある。\n    *   追い切りがイマイチという評価もある。\n\n### フォルテアンジェロ (Forte Angelo)\n*   **プラス材料:**\n    *   ホープフルSではロブチェンに差されたものの、勝ちに等しい内容と評価されている。\n    *   連対率100%で、成績・馬体的にも穴が少ない印象。立ち回り次第で勝ちまでありそう。\n    *   上原佑師は「凄く器用。展開に左右されないと思うし、狭い所を抜けてこられるので、どの条件でも走れる」「このコースはむしろこの器用な馬にとってプラス」と高く評価。\n    *   調教爆穴として評価されている。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   京成杯の追い切りでグリーンエナジーに半馬身遅れを取った。\n\n### マテンロウゲイル (Matenro Gale)\n*   **プラス材料:**\n    *   若葉S勝ち、京成杯2着の内容から2000m適性は高い。\n    *   派手な切れ味よりも、好位から長く脚を使うタイプで、皐月賞のようなロンスパ戦では浮上しやすい。\n    *   人気以上に評価したい地味な実力馬とされている。\n    *   連対率100%で、勢いは侮れない。\n    *   中山経験があることもプラス。\n    *   調教爆穴として評価されている。\n    *   馬体診断でA評価を受けている。\n*   **マイナス材料:**\n    *   勝ち味に遅い感じがあるという意見も。\n\n### ライヒスアドラー (Reichsadler)\n*   **プラス材料:**\n    *   弥生賞2着と中山で結果を残しており、近年の皐月賞に直結するトライアルで好走している点は強み。\n    *   コース適性の高さは十分で、本番でも注目の一頭。\n    *   フォトパドックで前走から良くなっているように見えると評価されている。\n    *   上原佑師は「ポテンシャルは負けてない」と上積みに期待。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   東スポ杯でパントルナイーフに先着を許している。\n    *   京成杯の追い切りでグリーンエナジーに手応え劣勢だった。\n\n### サウンドムーブ (Sound Move)\n*   **プラス材料:**\n    *   斉藤崇師は「機動力があり、そつなくレースができる。中山も向く」と中山適性を評価。\n    *   1枠2番という内枠を引けたことで「ロスなく運べれば」と期待されている。\n    *   追い切りで僚馬2頭に頭差先着しており、「先週より走っている時のバランスが良かった。しっかり(姿勢が)起きた中で反応も良かった」と進化が確認されている。\n    *   スプリングSでは不利な大外枠スタート、外目追走、4角もさらに外々と距離ロスが大きかったため、スプリングS組では最上位に評価する意見もある。\n*   **マイナス材料:**\n    *   レース内容としては目立つ部分が少ない印象。\n    *   スプリングSでアスクエジンバラ、アクロフェイズに負けており、そこからの強調材料は少ないという見方もある。\n\n### アスクエジンバラ (Ask Edinburgh)\n*   **プラス材料:**\n    *   ホープフルS3着、スプリングS2着と中山の重賞で安定した成績を残しており、コース相性の良さが光る。\n    *   調教後馬体重もしっかり増えており、成長が見られる。\n    *   間隔が詰まっての出走でもハードな調教が出来ており、前走以上が期待できる。\n    *   福永師は「不安な面は少ない」と好気配。\n    *   調教爆穴として評価されている。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   序盤は行きたがる面があったが、最近は中団で脚を溜める形に変わってきている。\n    *   スプリングSは勝ち馬の一つ内をロスなく立ち回っており、能力を出し切ったレース内容に見えるため、他の馬よりはやや評価を下げたいという意見もある。\n    *   位置取り次第では伸び切れない可能性も。\n\n### ロードフィレール (Lord Filaire)\n*   **プラス材料:**\n    *   武豊騎手騎乗。田嶋助手は「状態は上がっている」とコメント。\n*   **マイナス材料:**\n    *   具体的なプラス評価が少ない。\n\n### アクロフェイズ (Acrophetus)\n*   **プラス材料:**\n    *   坂でも減速せず、むしろ伸びているような走りで内容は良い。\n    *   先行・中団どちらからでも競馬ができ、大外を回しても脚を使える。\n    *   早めに動いても粘れる形があり、同じ競馬が続いている印象。\n*   **マイナス材料:**\n    *   中4週で追い切り2本と調教本数が少なめ。\n    *   1週前追い切りで併せ馬に遅れており、最終追い切りも流す程度であることから、使い詰めの影響が懸念される。\n\n### アルトラムス (Altrams)\n*   **プラス材料:**\n    *   外から伸びる形の競馬はできている。\n    *   馬体診断でB+評価を受けている。\n    *   横山武史騎手とのコンビは評価S。\n*   **マイナス材料:**\n    *   同じ形の競馬が今回も作れるかは未知数で、位置取りによって印象が変わりそう。\n    *   毎日杯を勝ったが、相手強化と初の2ターン戦が課題。\n    *   中2週のため、中間は調整程度の内容であり、良くて前走同様までという評価。\n\n### ラージアンサンブル (Large Ensemble)\n*   **プラス材料:**\n    *   武井師は「期待以上に充実している」「想像の1つ2つ上」とコメント。\n*   **マイナス材料:**\n    *   具体的なプラス評価が少ない。\n\n### オルフセン (Olufsen)\n*   言及されている情報が少ない。\n\n### カヴァレリッツォ (Cavalierizzo)\n（上記に詳細あり）\n\n### ロブチェン (Robuchen)\n（上記に詳細あり）\n\n---\n\n**その他、全体の傾向や注目点**\n\n*   今年の皐月賞は明確な逃げ馬不在で展開が読みにくく、Cコース替わりで内有利とはいえ、ハイレベルな馬が揃っており、展開次第でどの馬が来てもおかしくない大混戦ムード。\n*   人気サイドも不安材料を抱えている馬が多く、オッズが割れる可能性が高い。\n*   過去10年で7・8・9番人気が1勝ずつ挙げており、穴狙いも可能なレースだが、二桁人気の大穴はほとんど馬券になっていない。\n*   データでは外枠有利、脚質は前後互角という見方もある。\n*   共同通信杯組や弥生賞ディープインパクト記念組が活躍する傾向にある。\n*   前走3着以下の馬は好走率が低い。\n*   馬体面では大型でパワー型の好素材が多く、中山の坂に強い馬が注目される。機動力と持続力の両立が大きなポイント。\n\n---\n\n上記の情報は、2026年皐月賞の予想や各馬の分析記事からの抜粋です。最終的な判断は、枠順、馬場状態、当日のオッズなども考慮して行う必要があります。",
+      "source_type": "web"
+    },
+    {
+      "title": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_name": "vertexaisearch.cloud.google.com",
+      "snippet": "2026年の皐月賞について、各馬の評価や分析をまとめました。多くの情報が追い切り評価や馬体診断、過去のレース内容、騎手との相性、コース適性などに触れています。\n\n---\n\n**各馬の評価（プラス材料・マイナス材料）**\n\n### カヴァレリッツォ (Cavalierizzo)\n*   **プラス材料:**\n    *   前走の朝日杯FSを快勝しており、重馬場の中団から一際抜けた脚で差し切った内容は世代トップクラスの能力を示す。\n    *   2歳マイル王に上り詰めた実績は高く評価される。\n    *   父サートゥルナーリアも皐月賞を制しており、血統背景から中距離適性も期待されている。\n    *   馬体診断ではA+評価を受けており、全体のシルエットが非常に美しく、前後のつながりに無駄がない好馬体と評価されている。\n    *   馬自身でペースを作れる点は印象的。\n    *   好天予報とCコース替わりも追い風になりうる。\n    *   D.レーン騎手が「これだけチャンスのある馬に騎乗できることがうれしい」「レースのたびに良くなっていて、ポテンシャルの高い馬」と評価。\n    *   調教後馬体重はプラス10キロで成長が見られる。\n*   **マイナス材料:**\n    *   2000mという距離は未経験であり、これが最大の懸念点。過去、皐月賞の勝ち馬はすべて「前走までに1800m以上の距離を経験」しているデータがある。\n    *   これまでの勝利は直線が長く脚を伸ばしやすいコースであり、直線が短い中山芝2000mへの対応力が問われる。\n    *   追い切りで併せ馬に遅れるなど、調教の動きが微妙な印象を持たれることがある。\n    *   早熟で朝日杯からの成長が物足りないという見方もある。\n    *   朝日杯FSからの直行ローテでの1番人気は過去に例がない。\n\n### ロブチェン (Robuchen)\n*   **プラス材料:**\n    *   ホープフルSを勝ち、中山2000mの適性は証明済み。\n    *   共同通信杯での3着内容から地力上位と評価されている。\n    *   叩き2戦目で上積みが見込め、調教でも完成度の高さがうかがえる。\n    *   安定感と再現性があり、軸として信頼できる存在。\n    *   追い切りでは終い11.1秒をマークし、併せ馬を置き去りにする動きを見せており、G1を勝った2走前と遜色ない仕上がり。\n    *   馬体診断でA+評価を受けている。\n    *   ゲート練習も入念に行い、万全の態勢を整えている。\n*   **マイナス材料:**\n    *   ホープフルSのレベルにはやや疑問の声もある。\n    *   共同通信杯は前が止まらない競馬で長く脚を使わされる展開がきつかった。\n    *   データ上、「前走GI勝ちから臨む牡馬」は好走データがある一方、ロブチェンには「0.0.0.9」というデータ上の高い壁が指摘されている。\n    *   鞍上のG1連勝があるかどうかが気になる点。\n\n### リアライズシリウス (Realize Sirius)\n*   **プラス材料:**\n    *   共同通信杯を早め先頭で制しており、能力は上位。\n    *   追い切りでは高い集中力を見せ、自己ベストを更新する好時計をマーク。鞍上の津村騎手も「一段階上がっている」「抜群だった」と高評価。\n    *   調教では右回りの課題も克服し、素晴らしい動きを連発している。\n    *   馬体診断でA+評価を受けている。\n    *   手塚師は「距離は持つと思う」とコメント。\n*   **マイナス材料:**\n    *   共同通信杯はスローの前残りで展開の恩恵が大きかったとの見方がある。\n    *   どちらかというとマイル向きで、距離延長はプラスとは言えない可能性。\n    *   過剰人気しやすい傾向も指摘されている。\n    *   芦毛のため馬体が良く見えにくいタイプという意見もあるが、調子は上がっている。\n\n### サノノグレーター (Sanono Greater)\n*   **プラス材料:**\n    *   中山2000mの葉牡丹賞が優秀で、舞台適性がある。\n    *   追い切りでは田辺騎手を背にリズム良く加速しており、尾形師も「今日はいい感じで走れていた」と評価。\n    *   落ち着きがあり、馬体重も予定通りに仕上がっている。\n    *   スプリングSでは不利があったものの、ロスなく運べていれば上位評価だったという見方もある。\n*   **マイナス材料:**\n    *   共同通信杯やスプリングSでは上位馬との差が見られた。\n    *   どちらかというと東京コースの方が得意かもしれないという意見もある。\n\n### ゾロアストロ (Zoroastro)\n*   **プラス材料:**\n    *   きさらぎ賞の勝ち馬。\n    *   モーリス産駒らしい前躯の厚みとトモの力感が目立ち、全身に実が入っていて見映えが良い。\n    *   中山向きの力強さがあり、持続戦に寄った時に浮上する余地がある。\n    *   調教爆穴として評価されている。\n*   **マイナス材料:**\n    *   コンパクトな馬体で、成長力という点で懸念があるという意見も。\n    *   東スポ杯でパントルナイーフに先着を許している。\n\n### アドマイヤクワッズ (Admire Quads)\n*   **プラス材料:**\n    *   デイリー杯2歳ステークスをレコードで制している。\n    *   友道調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価。\n    *   叩き2戦目の上積みが見込めるとの評価。\n    *   馬体診断ではA評価を受けている。\n    *   追い切りでは古馬OP馬に先着する動きを見せている。\n*   **マイナス材料:**\n    *   進路が空いたことで結果に繋がった印象のレースが多く、能力そのものの評価が難しい。\n    *   弥生賞でバステールに完敗している。\n    *   体形的にはマイラーっぽいとの見方もある。\n\n### グリーンエナジー (Green Energy)\n*   **プラス材料:**\n    *   京成杯を中山芝2000mで差し切っており、コース適性を結果で示している。\n    *   マイル実績中心の人気馬より皐月賞向きの土台がはっきりしている。\n    *   京成杯では11番手付近から上がり勝負にも対応しており、直線の短い中山でも位置を悪くしすぎない競馬ができるのは魅力。\n    *   馬体診断でA評価を受けている。\n    *   1週前追い切りで自己ベストを更新する絶好時計をマークしている。\n*   **マイナス材料:**\n    *   16日の追い切りではフォルテアンジェロに遅れを取っている。\n\n### バステール (Bastille)\n*   **プラス材料:**\n    *   弥生賞ディープインパクト記念を制し、未勝利から連勝している。\n    *   馬体診断ではA+評価を受けており、全体のシルエットが非常に美しく、前後のつながりに無駄がない好馬体とされている。\n    *   父キタサンブラック譲りの持続力に期待。\n    *   馬体回復と成長を優先した調整過程が理にかなっており、走りも一段上へ。\n    *   追い切りではサウンドムーブをアオる勢いを見せ、精神面の成長がうかがえる。\n*   **マイナス材料:**\n    *   未勝利・弥生賞と連勝だが、展開がハマった印象もあり、馬体にもまだ若さが見られる。\n    *   大外枠はプラスとマイナスの両面がある。\n\n### パントルナイーフ (Peintre Naif)\n*   **プラス材料:**\n    *   東スポ杯2歳Sの勝ち馬。スローペースを差して勝利した内容を評価する声がある。\n    *   弥生賞を回避したものの、木村師は「大きな問題ではない」とコメント。\n    *   馬体診断でA評価を受けており、見た目が良く、透き通るような毛艶が特徴。\n    *   ルメール騎手とのコンビは評価S。\n*   **マイナス材料:**\n    *   東スポ杯で勝ったエコロアルバが朝日杯で離された4着であることから、力関係的には低く見積もれないという見方もある。\n    *   追い切りがイマイチという評価もある。\n\n### フォルテアンジェロ (Forte Angelo)\n*   **プラス材料:**\n    *   ホープフルSではロブチェンに差されたものの、勝ちに等しい内容と評価されている。\n    *   連対率100%で、成績・馬体的にも穴が少ない印象。立ち回り次第で勝ちまでありそう。\n    *   上原佑師は「凄く器用。展開に左右されないと思うし、狭い所を抜けてこられるので、どの条件でも走れる」「このコースはむしろこの器用な馬にとってプラス」と高く評価。\n    *   調教爆穴として評価されている。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   京成杯の追い切りでグリーンエナジーに半馬身遅れを取った。\n\n### マテンロウゲイル (Matenro Gale)\n*   **プラス材料:**\n    *   若葉S勝ち、京成杯2着の内容から2000m適性は高い。\n    *   派手な切れ味よりも、好位から長く脚を使うタイプで、皐月賞のようなロンスパ戦では浮上しやすい。\n    *   人気以上に評価したい地味な実力馬とされている。\n    *   連対率100%で、勢いは侮れない。\n    *   中山経験があることもプラス。\n    *   調教爆穴として評価されている。\n    *   馬体診断でA評価を受けている。\n*   **マイナス材料:**\n    *   勝ち味に遅い感じがあるという意見も。\n\n### ライヒスアドラー (Reichsadler)\n*   **プラス材料:**\n    *   弥生賞2着と中山で結果を残しており、近年の皐月賞に直結するトライアルで好走している点は強み。\n    *   コース適性の高さは十分で、本番でも注目の一頭。\n    *   フォトパドックで前走から良くなっているように見えると評価されている。\n    *   上原佑師は「ポテンシャルは負けてない」と上積みに期待。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   東スポ杯でパントルナイーフに先着を許している。\n    *   京成杯の追い切りでグリーンエナジーに手応え劣勢だった。\n\n### サウンドムーブ (Sound Move)\n*   **プラス材料:**\n    *   斉藤崇師は「機動力があり、そつなくレースができる。中山も向く」と中山適性を評価。\n    *   1枠2番という内枠を引けたことで「ロスなく運べれば」と期待されている。\n    *   追い切りで僚馬2頭に頭差先着しており、「先週より走っている時のバランスが良かった。しっかり(姿勢が)起きた中で反応も良かった」と進化が確認されている。\n    *   スプリングSでは不利な大外枠スタート、外目追走、4角もさらに外々と距離ロスが大きかったため、スプリングS組では最上位に評価する意見もある。\n*   **マイナス材料:**\n    *   レース内容としては目立つ部分が少ない印象。\n    *   スプリングSでアスクエジンバラ、アクロフェイズに負けており、そこからの強調材料は少ないという見方もある。\n\n### アスクエジンバラ (Ask Edinburgh)\n*   **プラス材料:**\n    *   ホープフルS3着、スプリングS2着と中山の重賞で安定した成績を残しており、コース相性の良さが光る。\n    *   調教後馬体重もしっかり増えており、成長が見られる。\n    *   間隔が詰まっての出走でもハードな調教が出来ており、前走以上が期待できる。\n    *   福永師は「不安な面は少ない」と好気配。\n    *   調教爆穴として評価されている。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   序盤は行きたがる面があったが、最近は中団で脚を溜める形に変わってきている。\n    *   スプリングSは勝ち馬の一つ内をロスなく立ち回っており、能力を出し切ったレース内容に見えるため、他の馬よりはやや評価を下げたいという意見もある。\n    *   位置取り次第では伸び切れない可能性も。\n\n### ロードフィレール (Lord Filaire)\n*   **プラス材料:**\n    *   武豊騎手騎乗。田嶋助手は「状態は上がっている」とコメント。\n*   **マイナス材料:**\n    *   具体的なプラス評価が少ない。\n\n### アクロフェイズ (Acrophetus)\n*   **プラス材料:**\n    *   坂でも減速せず、むしろ伸びているような走りで内容は良い。\n    *   先行・中団どちらからでも競馬ができ、大外を回しても脚を使える。\n    *   早めに動いても粘れる形があり、同じ競馬が続いている印象。\n*   **マイナス材料:**\n    *   中4週で追い切り2本と調教本数が少なめ。\n    *   1週前追い切りで併せ馬に遅れており、最終追い切りも流す程度であることから、使い詰めの影響が懸念される。\n\n### アルトラムス (Altrams)\n*   **プラス材料:**\n    *   外から伸びる形の競馬はできている。\n    *   馬体診断でB+評価を受けている。\n    *   横山武史騎手とのコンビは評価S。\n*   **マイナス材料:**\n    *   同じ形の競馬が今回も作れるかは未知数で、位置取りによって印象が変わりそう。\n    *   毎日杯を勝ったが、相手強化と初の2ターン戦が課題。\n    *   中2週のため、中間は調整程度の内容であり、良くて前走同様までという評価。\n\n### ラージアンサンブル (Large Ensemble)\n*   **プラス材料:**\n    *   武井師は「期待以上に充実している」「想像の1つ2つ上」とコメント。\n*   **マイナス材料:**\n    *   具体的なプラス評価が少ない。\n\n### オルフセン (Olufsen)\n*   言及されている情報が少ない。\n\n### カヴァレリッツォ (Cavalierizzo)\n（上記に詳細あり）\n\n### ロブチェン (Robuchen)\n（上記に詳細あり）\n\n---\n\n**その他、全体の傾向や注目点**\n\n*   今年の皐月賞は明確な逃げ馬不在で展開が読みにくく、Cコース替わりで内有利とはいえ、ハイレベルな馬が揃っており、展開次第でどの馬が来てもおかしくない大混戦ムード。\n*   人気サイドも不安材料を抱えている馬が多く、オッズが割れる可能性が高い。\n*   過去10年で7・8・9番人気が1勝ずつ挙げており、穴狙いも可能なレースだが、二桁人気の大穴はほとんど馬券になっていない。\n*   データでは外枠有利、脚質は前後互角という見方もある。\n*   共同通信杯組や弥生賞ディープインパクト記念組が活躍する傾向にある。\n*   前走3着以下の馬は好走率が低い。\n*   馬体面では大型でパワー型の好素材が多く、中山の坂に強い馬が注目される。機動力と持続力の両立が大きなポイント。\n\n---\n\n上記の情報は、2026年皐月賞の予想や各馬の分析記事からの抜粋です。最終的な判断は、枠順、馬場状態、当日のオッズなども考慮して行う必要があります。",
+      "source_type": "web"
+    },
+    {
+      "title": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_name": "vertexaisearch.cloud.google.com",
+      "snippet": "2026年の皐月賞について、各馬の評価や分析をまとめました。多くの情報が追い切り評価や馬体診断、過去のレース内容、騎手との相性、コース適性などに触れています。\n\n---\n\n**各馬の評価（プラス材料・マイナス材料）**\n\n### カヴァレリッツォ (Cavalierizzo)\n*   **プラス材料:**\n    *   前走の朝日杯FSを快勝しており、重馬場の中団から一際抜けた脚で差し切った内容は世代トップクラスの能力を示す。\n    *   2歳マイル王に上り詰めた実績は高く評価される。\n    *   父サートゥルナーリアも皐月賞を制しており、血統背景から中距離適性も期待されている。\n    *   馬体診断ではA+評価を受けており、全体のシルエットが非常に美しく、前後のつながりに無駄がない好馬体と評価されている。\n    *   馬自身でペースを作れる点は印象的。\n    *   好天予報とCコース替わりも追い風になりうる。\n    *   D.レーン騎手が「これだけチャンスのある馬に騎乗できることがうれしい」「レースのたびに良くなっていて、ポテンシャルの高い馬」と評価。\n    *   調教後馬体重はプラス10キロで成長が見られる。\n*   **マイナス材料:**\n    *   2000mという距離は未経験であり、これが最大の懸念点。過去、皐月賞の勝ち馬はすべて「前走までに1800m以上の距離を経験」しているデータがある。\n    *   これまでの勝利は直線が長く脚を伸ばしやすいコースであり、直線が短い中山芝2000mへの対応力が問われる。\n    *   追い切りで併せ馬に遅れるなど、調教の動きが微妙な印象を持たれることがある。\n    *   早熟で朝日杯からの成長が物足りないという見方もある。\n    *   朝日杯FSからの直行ローテでの1番人気は過去に例がない。\n\n### ロブチェン (Robuchen)\n*   **プラス材料:**\n    *   ホープフルSを勝ち、中山2000mの適性は証明済み。\n    *   共同通信杯での3着内容から地力上位と評価されている。\n    *   叩き2戦目で上積みが見込め、調教でも完成度の高さがうかがえる。\n    *   安定感と再現性があり、軸として信頼できる存在。\n    *   追い切りでは終い11.1秒をマークし、併せ馬を置き去りにする動きを見せており、G1を勝った2走前と遜色ない仕上がり。\n    *   馬体診断でA+評価を受けている。\n    *   ゲート練習も入念に行い、万全の態勢を整えている。\n*   **マイナス材料:**\n    *   ホープフルSのレベルにはやや疑問の声もある。\n    *   共同通信杯は前が止まらない競馬で長く脚を使わされる展開がきつかった。\n    *   データ上、「前走GI勝ちから臨む牡馬」は好走データがある一方、ロブチェンには「0.0.0.9」というデータ上の高い壁が指摘されている。\n    *   鞍上のG1連勝があるかどうかが気になる点。\n\n### リアライズシリウス (Realize Sirius)\n*   **プラス材料:**\n    *   共同通信杯を早め先頭で制しており、能力は上位。\n    *   追い切りでは高い集中力を見せ、自己ベストを更新する好時計をマーク。鞍上の津村騎手も「一段階上がっている」「抜群だった」と高評価。\n    *   調教では右回りの課題も克服し、素晴らしい動きを連発している。\n    *   馬体診断でA+評価を受けている。\n    *   手塚師は「距離は持つと思う」とコメント。\n*   **マイナス材料:**\n    *   共同通信杯はスローの前残りで展開の恩恵が大きかったとの見方がある。\n    *   どちらかというとマイル向きで、距離延長はプラスとは言えない可能性。\n    *   過剰人気しやすい傾向も指摘されている。\n    *   芦毛のため馬体が良く見えにくいタイプという意見もあるが、調子は上がっている。\n\n### サノノグレーター (Sanono Greater)\n*   **プラス材料:**\n    *   中山2000mの葉牡丹賞が優秀で、舞台適性がある。\n    *   追い切りでは田辺騎手を背にリズム良く加速しており、尾形師も「今日はいい感じで走れていた」と評価。\n    *   落ち着きがあり、馬体重も予定通りに仕上がっている。\n    *   スプリングSでは不利があったものの、ロスなく運べていれば上位評価だったという見方もある。\n*   **マイナス材料:**\n    *   共同通信杯やスプリングSでは上位馬との差が見られた。\n    *   どちらかというと東京コースの方が得意かもしれないという意見もある。\n\n### ゾロアストロ (Zoroastro)\n*   **プラス材料:**\n    *   きさらぎ賞の勝ち馬。\n    *   モーリス産駒らしい前躯の厚みとトモの力感が目立ち、全身に実が入っていて見映えが良い。\n    *   中山向きの力強さがあり、持続戦に寄った時に浮上する余地がある。\n    *   調教爆穴として評価されている。\n*   **マイナス材料:**\n    *   コンパクトな馬体で、成長力という点で懸念があるという意見も。\n    *   東スポ杯でパントルナイーフに先着を許している。\n\n### アドマイヤクワッズ (Admire Quads)\n*   **プラス材料:**\n    *   デイリー杯2歳ステークスをレコードで制している。\n    *   友道調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価。\n    *   叩き2戦目の上積みが見込めるとの評価。\n    *   馬体診断ではA評価を受けている。\n    *   追い切りでは古馬OP馬に先着する動きを見せている。\n*   **マイナス材料:**\n    *   進路が空いたことで結果に繋がった印象のレースが多く、能力そのものの評価が難しい。\n    *   弥生賞でバステールに完敗している。\n    *   体形的にはマイラーっぽいとの見方もある。\n\n### グリーンエナジー (Green Energy)\n*   **プラス材料:**\n    *   京成杯を中山芝2000mで差し切っており、コース適性を結果で示している。\n    *   マイル実績中心の人気馬より皐月賞向きの土台がはっきりしている。\n    *   京成杯では11番手付近から上がり勝負にも対応しており、直線の短い中山でも位置を悪くしすぎない競馬ができるのは魅力。\n    *   馬体診断でA評価を受けている。\n    *   1週前追い切りで自己ベストを更新する絶好時計をマークしている。\n*   **マイナス材料:**\n    *   16日の追い切りではフォルテアンジェロに遅れを取っている。\n\n### バステール (Bastille)\n*   **プラス材料:**\n    *   弥生賞ディープインパクト記念を制し、未勝利から連勝している。\n    *   馬体診断ではA+評価を受けており、全体のシルエットが非常に美しく、前後のつながりに無駄がない好馬体とされている。\n    *   父キタサンブラック譲りの持続力に期待。\n    *   馬体回復と成長を優先した調整過程が理にかなっており、走りも一段上へ。\n    *   追い切りではサウンドムーブをアオる勢いを見せ、精神面の成長がうかがえる。\n*   **マイナス材料:**\n    *   未勝利・弥生賞と連勝だが、展開がハマった印象もあり、馬体にもまだ若さが見られる。\n    *   大外枠はプラスとマイナスの両面がある。\n\n### パントルナイーフ (Peintre Naif)\n*   **プラス材料:**\n    *   東スポ杯2歳Sの勝ち馬。スローペースを差して勝利した内容を評価する声がある。\n    *   弥生賞を回避したものの、木村師は「大きな問題ではない」とコメント。\n    *   馬体診断でA評価を受けており、見た目が良く、透き通るような毛艶が特徴。\n    *   ルメール騎手とのコンビは評価S。\n*   **マイナス材料:**\n    *   東スポ杯で勝ったエコロアルバが朝日杯で離された4着であることから、力関係的には低く見積もれないという見方もある。\n    *   追い切りがイマイチという評価もある。\n\n### フォルテアンジェロ (Forte Angelo)\n*   **プラス材料:**\n    *   ホープフルSではロブチェンに差されたものの、勝ちに等しい内容と評価されている。\n    *   連対率100%で、成績・馬体的にも穴が少ない印象。立ち回り次第で勝ちまでありそう。\n    *   上原佑師は「凄く器用。展開に左右されないと思うし、狭い所を抜けてこられるので、どの条件でも走れる」「このコースはむしろこの器用な馬にとってプラス」と高く評価。\n    *   調教爆穴として評価されている。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   京成杯の追い切りでグリーンエナジーに半馬身遅れを取った。\n\n### マテンロウゲイル (Matenro Gale)\n*   **プラス材料:**\n    *   若葉S勝ち、京成杯2着の内容から2000m適性は高い。\n    *   派手な切れ味よりも、好位から長く脚を使うタイプで、皐月賞のようなロンスパ戦では浮上しやすい。\n    *   人気以上に評価したい地味な実力馬とされている。\n    *   連対率100%で、勢いは侮れない。\n    *   中山経験があることもプラス。\n    *   調教爆穴として評価されている。\n    *   馬体診断でA評価を受けている。\n*   **マイナス材料:**\n    *   勝ち味に遅い感じがあるという意見も。\n\n### ライヒスアドラー (Reichsadler)\n*   **プラス材料:**\n    *   弥生賞2着と中山で結果を残しており、近年の皐月賞に直結するトライアルで好走している点は強み。\n    *   コース適性の高さは十分で、本番でも注目の一頭。\n    *   フォトパドックで前走から良くなっているように見えると評価されている。\n    *   上原佑師は「ポテンシャルは負けてない」と上積みに期待。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   東スポ杯でパントルナイーフに先着を許している。\n    *   京成杯の追い切りでグリーンエナジーに手応え劣勢だった。\n\n### サウンドムーブ (Sound Move)\n*   **プラス材料:**\n    *   斉藤崇師は「機動力があり、そつなくレースができる。中山も向く」と中山適性を評価。\n    *   1枠2番という内枠を引けたことで「ロスなく運べれば」と期待されている。\n    *   追い切りで僚馬2頭に頭差先着しており、「先週より走っている時のバランスが良かった。しっかり(姿勢が)起きた中で反応も良かった」と進化が確認されている。\n    *   スプリングSでは不利な大外枠スタート、外目追走、4角もさらに外々と距離ロスが大きかったため、スプリングS組では最上位に評価する意見もある。\n*   **マイナス材料:**\n    *   レース内容としては目立つ部分が少ない印象。\n    *   スプリングSでアスクエジンバラ、アクロフェイズに負けており、そこからの強調材料は少ないという見方もある。\n\n### アスクエジンバラ (Ask Edinburgh)\n*   **プラス材料:**\n    *   ホープフルS3着、スプリングS2着と中山の重賞で安定した成績を残しており、コース相性の良さが光る。\n    *   調教後馬体重もしっかり増えており、成長が見られる。\n    *   間隔が詰まっての出走でもハードな調教が出来ており、前走以上が期待できる。\n    *   福永師は「不安な面は少ない」と好気配。\n    *   調教爆穴として評価されている。\n    *   馬体診断でB+評価を受けている。\n*   **マイナス材料:**\n    *   序盤は行きたがる面があったが、最近は中団で脚を溜める形に変わってきている。\n    *   スプリングSは勝ち馬の一つ内をロスなく立ち回っており、能力を出し切ったレース内容に見えるため、他の馬よりはやや評価を下げたいという意見もある。\n    *   位置取り次第では伸び切れない可能性も。\n\n### ロードフィレール (Lord Filaire)\n*   **プラス材料:**\n    *   武豊騎手騎乗。田嶋助手は「状態は上がっている」とコメント。\n*   **マイナス材料:**\n    *   具体的なプラス評価が少ない。\n\n### アクロフェイズ (Acrophetus)\n*   **プラス材料:**\n    *   坂でも減速せず、むしろ伸びているような走りで内容は良い。\n    *   先行・中団どちらからでも競馬ができ、大外を回しても脚を使える。\n    *   早めに動いても粘れる形があり、同じ競馬が続いている印象。\n*   **マイナス材料:**\n    *   中4週で追い切り2本と調教本数が少なめ。\n    *   1週前追い切りで併せ馬に遅れており、最終追い切りも流す程度であることから、使い詰めの影響が懸念される。\n\n### アルトラムス (Altrams)\n*   **プラス材料:**\n    *   外から伸びる形の競馬はできている。\n    *   馬体診断でB+評価を受けている。\n    *   横山武史騎手とのコンビは評価S。\n*   **マイナス材料:**\n    *   同じ形の競馬が今回も作れるかは未知数で、位置取りによって印象が変わりそう。\n    *   毎日杯を勝ったが、相手強化と初の2ターン戦が課題。\n    *   中2週のため、中間は調整程度の内容であり、良くて前走同様までという評価。\n\n### ラージアンサンブル (Large Ensemble)\n*   **プラス材料:**\n    *   武井師は「期待以上に充実している」「想像の1つ2つ上」とコメント。\n*   **マイナス材料:**\n    *   具体的なプラス評価が少ない。\n\n### オルフセン (Olufsen)\n*   言及されている情報が少ない。\n\n### カヴァレリッツォ (Cavalierizzo)\n（上記に詳細あり）\n\n### ロブチェン (Robuchen)\n（上記に詳細あり）\n\n---\n\n**その他、全体の傾向や注目点**\n\n*   今年の皐月賞は明確な逃げ馬不在で展開が読みにくく、Cコース替わりで内有利とはいえ、ハイレベルな馬が揃っており、展開次第でどの馬が来てもおかしくない大混戦ムード。\n*   人気サイドも不安材料を抱えている馬が多く、オッズが割れる可能性が高い。\n*   過去10年で7・8・9番人気が1勝ずつ挙げており、穴狙いも可能なレースだが、二桁人気の大穴はほとんど馬券になっていない。\n*   データでは外枠有利、脚質は前後互角という見方もある。\n*   共同通信杯組や弥生賞ディープインパクト記念組が活躍する傾向にある。\n*   前走3着以下の馬は好走率が低い。\n*   馬体面では大型でパワー型の好素材が多く、中山の坂に強い馬が注目される。機動力と持続力の両立が大きなポイント。\n\n---\n\n上記の情報は、2026年皐月賞の予想や各馬の分析記事からの抜粋です。最終的な判断は、枠順、馬場状態、当日のオッズなども考慮して行う必要があります。",
+      "source_type": "web"
+    },
+    {
+      "title": "【皐月賞予想】高速馬場の皐月賞は外枠有利",
+      "url": "https://news.sp.netkeiba.com/?pid=column_view&wid=CH108",
+      "source_name": "news.sp.netkeiba.com",
+      "snippet": "2024年の皐月賞はそれまでのレースレコードを0.7秒も更新する1分57秒1で決着。2025年はそのレコードをさらに更新する1分57秒0で決着した。 2023年5回開催以降は路盤の",
       "source_type": "web"
     }
   ],
@@ -2580,6 +3684,102 @@
   ],
   "training_items": [
     {
+      "馬名": "アクロフェイズ",
+      "評価内容": "調教本数が少ないこと",
+      "種別": "マイナス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "調教本数が少ないこと",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "調教本数の少なさ",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "追い切り2本と調教本数が少なめです",
+      "種別": "マイナス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "1週前追い切りで併せ馬に遅れており",
+      "種別": "マイナス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "最終追い切りも流す程度であることから",
+      "種別": "マイナス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "追い切り2本と調教本数が少なめです",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "1週前追い切りで併せ馬に遅れており",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "最終追い切りも流す程度であることから",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "追い切り2本と調教本数が少なめ",
+      "種別": "マイナス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "1週前追い切りで併せ馬に遅れており",
+      "種別": "マイナス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アクロフェイズ",
+      "評価内容": "最終追い切りも流す程度であることから",
+      "種別": "マイナス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
       "馬名": "アスクエジンバラ",
       "評価内容": "調教師が騎手・調教師として史上2人目の快挙を目指すという状況も期待感を高めます",
       "種別": "プラス",
@@ -2588,11 +3788,227 @@
       "source_type": "web"
     },
     {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "追い切りで最高の「S」評価を得ており",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教ができている点も好材料です",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "追い切りで最高の「S」評価を得ており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教ができている点も好材料です",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "追い切りで最高の「S」評価を得ており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教ができている点も好材料です",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教後馬体重もしっかり増えており成長が見られ",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教が出来ており前走以上が期待できます",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教爆穴として評価され",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教後馬体重もしっかり増えており成長が見られ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教が出来ており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教爆穴としても評価されています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教後馬体重もしっかり増えており成長が見られ",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教が出来ており前走以上が期待できる",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクエジンバラ",
+      "評価内容": "調教爆穴",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
       "馬名": "アドマイヤクワッズ",
       "評価内容": "1週前には古馬のオープン馬と併せて最先着を果たすなど",
       "種別": "プラス",
       "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
       "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "追い切り評価は「S」で",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "追い切り評価は「S」で",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "追い切り評価は「S」で",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価しており",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "追い切りでは古馬OP馬に先着する動きを見せています",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価しています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "追い切りでは古馬OP馬に先着する動きを見せています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "調教師は「一瞬の脚が使える」「中山の2000mは大丈夫」と中山適性と瞬発力を評価",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アドマイヤクワッズ",
+      "評価内容": "追い切りでは古馬OP馬に先着する動きを見せている",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "評価内容": "追い切りで「A」評価を得ており",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "評価内容": "追い切りで「A」評価を得ており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アルトラムス",
+      "評価内容": "追い切りで「A」評価を得ており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
       "source_type": "web"
     },
     {
@@ -2636,6 +4052,86 @@
       "source_type": "web"
     },
     {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "調教",
+      "種別": "マイナス",
+      "情報源": "皐月賞の単勝・複勝・枠連オッズ【2026年4月19日中山11R】",
+      "url": "https://www.keibalab.jp/db/race/202604190611/odds.html",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "調教で格下馬に遅れを取ったことがあり",
+      "種別": "マイナス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "調教で格下馬に遅れを取ったことがあり",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "調教で格下馬に遅れを取ったことがあり",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "調教後馬体重もプラス10キロと成長が見られます",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "追い切りで併せ馬に遅れるなど調教の動きが微妙な印象があり",
+      "種別": "マイナス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "調教後馬体重はプラス10キロと成長が見られ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "追い切りで併せ馬に遅れるなど調教の動きが微妙な印象を持たれることもあり",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "調教後馬体重はプラス10キロで成長が見られる",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "評価内容": "追い切りで併せ馬に遅れるなど調教の動きが微妙な印象があり",
+      "種別": "マイナス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
       "馬名": "グリーンエナジー",
       "評価内容": "前走の京成杯（1着）では、前進気勢を見せながらも後方のインでじっくりと脚を溜め、4コーナーで内があく絶好の展開を活かしてスムーズに馬群を捌き快勝しました。完璧に立ち回れた恩恵は大きいですが、ラストの伸び脚自体は強烈で、前向きさが強い分、ペースが上がりやすいG1向きの馬と言えます。2走前の未勝利戦も直線手応え十分でまともに追われることなく完勝しています。",
       "種別": "プラス",
@@ -2668,12 +4164,364 @@
       "source_type": "web"
     },
     {
+      "馬名": "グリーンエナジー",
+      "評価内容": "調教では好時計をマークし",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "調教では好時計をマークし",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "調教では好時計をマークし",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "1週前追い切りで自己ベストを更新する絶好時計をマークしています",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "追い切りではフォルテアンジェロに遅れを取っています",
+      "種別": "マイナス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "1週前追い切りで自己ベストを更新する絶好時計をマークしています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "追い切りではフォルテアンジェロに遅れを取っています",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "1週前追い切りで自己ベストを更新する絶好時計をマークしている",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "グリーンエナジー",
+      "評価内容": "追い切りではフォルテアンジェロに遅れを取っている",
+      "種別": "マイナス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "評価内容": "調教",
+      "種別": "マイナス",
+      "情報源": "皐月賞の単勝・複勝・枠連オッズ【2026年4月19日中山11R】",
+      "url": "https://www.keibalab.jp/db/race/202604190611/odds.html",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "評価内容": "追い切りで僚馬2頭に頭差先着しており「先週より走っている時のバランスが良かった",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "評価内容": "追い切りで僚馬2頭に頭差先着しており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サウンドムーブ",
+      "評価内容": "追い切りで僚馬2頭に頭差先着しており",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "調教",
+      "種別": "マイナス",
+      "情報源": "皐月賞の単勝・複勝・枠連オッズ【2026年4月19日中山11R】",
+      "url": "https://www.keibalab.jp/db/race/202604190611/odds.html",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "坂路を力強く登坂しリズム良く加速できる点で仕上がりは好感触です",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "追い切りでもウッドでしっかり負荷をかけまずまずの動きを見せており",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "坂路を力強く登坂し",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "追い切りでもウッドでしっかり負荷をかけ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "坂路を力強く登坂し",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "追い切りでもウッドでしっかり負荷をかけ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "追い切りでは田辺騎手を背にリズム良く加速しており",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "追い切りでは田辺騎手を背にリズム良く加速しており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サノノグレーター",
+      "評価内容": "追い切りでは田辺騎手を背にリズム良く加速しており尾形師も「今日はいい感じで走れていた」と評価",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "追い切りでは「抜群」と高評価を受けています",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "調教爆穴候補としても挙げられています",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "追い切りでは「抜群」と高評価を受けています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "調教爆穴候補としても挙げられています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "追い切りでは「抜群」と高評価を受けています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "調教爆穴候補としても挙げられています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "調教爆穴として評価されています",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "調教爆穴として評価されています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ゾロアストロ",
+      "評価内容": "調教爆穴として評価されている",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
       "馬名": "バステール",
       "評価内容": "タコルの本命馬。前走弥生賞ディープ記念(G2)を1着。後方から脚を溜め、直線で外からぶつけられる不利がありながらも、怯まず上がり最速で差し切り勝ちを収めた。時計面で不安視する声もあるが、非常に余裕のある勝ち方であり、過度な心配は不要。馬体が完成していないという評価は以前からあるが、弥生賞勝利時も同様の指摘があり、今後成長すれば非常に強い馬になるポテンシャルを持つ。内での揉まれ合いより、大外から脚を伸ばす展開が得意。",
       "種別": "プラス",
       "情報源": "【皐月賞2026・予想】群雄割拠の牡馬クラシック１冠目！今年最初の頂点に立つのはあの馬！！昨年総回収1,000万超のけんしろうと昨年秋8連続G1的中のアキラと最強の予想家達が本命を大公開！！",
       "url": "https://www.youtube.com/watch?v=MZopAaHrOlY",
       "source_type": "youtube"
+    },
+    {
+      "馬名": "バステール",
+      "評価内容": "調教では精神面の成長も感じさせ",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "評価内容": "調教では精神面の成長も感じさせ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "評価内容": "調教では精神面の成長も感じさせ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "評価内容": "追い切りではサウンドムーブをアオる勢いを見せ",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "評価内容": "追い切りではサウンドムーブをアオる勢いを見せ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バステール",
+      "評価内容": "追い切りではサウンドムーブをアオる勢いを見せ",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "評価内容": "調教がイマイチという評価や",
+      "種別": "マイナス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "評価内容": "調教がイマイチという評価や",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "評価内容": "調教がイマイチという評価や",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "評価内容": "追い切りがイマイチという評価も指摘されています",
+      "種別": "マイナス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "評価内容": "追い切りがイマイチという評価もあります",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パントルナイーフ",
+      "評価内容": "追い切りがイマイチという評価もある",
+      "種別": "マイナス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
     },
     {
       "馬名": "フォルテアンジェロ",
@@ -2708,12 +4556,132 @@
       "source_type": "web"
     },
     {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "調教でも特A評価を受けており",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "調教でも特A評価を受けています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "調教でも特A評価を受けており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "調教爆穴として評価されています",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "追い切りでグリーンエナジーに半馬身遅れを取っています",
+      "種別": "マイナス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "調教爆穴としても評価されています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "追い切りでグリーンエナジーに半馬身遅れを取ったことが懸念点です",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "調教爆穴として評価され",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "フォルテアンジェロ",
+      "評価内容": "追い切りでグリーンエナジーに半馬身遅れを取った",
+      "種別": "マイナス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
       "馬名": "マテンロウゲイル",
       "評価内容": "調教師は「もう一段階上がある」とコメント",
       "種別": "プラス",
       "情報源": "【皐月賞2026・予想】群雄割拠の牡馬クラシック１冠目！今年最初の頂点に立つのはあの馬！！昨年総回収1,000万超のけんしろうと昨年秋8連続G1的中のアキラと最強の予想家達が本命を大公開！！",
       "url": "https://www.youtube.com/watch?v=MZopAaHrOlY",
       "source_type": "youtube"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "評価内容": "調教爆穴候補にも挙げられています",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "評価内容": "調教爆穴候補にも挙げられています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "評価内容": "調教爆穴候補にも挙げられています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "評価内容": "調教爆穴として評価され",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "評価内容": "調教爆穴としても評価され",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マテンロウゲイル",
+      "評価内容": "調教爆穴",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
     },
     {
       "馬名": "ライヒスアドラー",
@@ -2756,11 +4724,203 @@
       "source_type": "web"
     },
     {
+      "馬名": "ライヒスアドラー",
+      "評価内容": "追い切りでグリーンエナジーに手応え劣勢だった点が懸念されます",
+      "種別": "マイナス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "評価内容": "追い切りでグリーンエナジーに手応え劣勢だったことが懸念されます",
+      "種別": "マイナス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ライヒスアドラー",
+      "評価内容": "追い切りでグリーンエナジーに手応え劣勢だった",
+      "種別": "マイナス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
       "馬名": "リアライズシリウス",
       "評価内容": "今週も余力を残して好時計を出しており",
       "種別": "プラス",
       "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
       "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "追い切りでは「A」評価で",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教でも好感触で",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "仕上がりで",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教では特S評価を受けています",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "追い切りでは「A」評価で",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教でも好感触で",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "仕上がりです",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教では特S評価を受けており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "追い切りでは「A」評価で",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "最終と1週前追い切りで終い11.0～11.1秒を記録するなど素晴らしい動きを見せています",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教でも好感触で",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "仕上がりです",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教では特S評価を受けており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "追い切りでは高い集中力を見せ",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教では右回りの課題も克服し素晴らしい動きを連発しており",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "追い切りでは高い集中力を見せ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教では右回りの課題も克服し素晴らしい動きを連発しており",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "追い切りでは高い集中力を見せ自己ベストを更新する好時計をマークし",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リアライズシリウス",
+      "評価内容": "調教では右回りの課題も克服しており",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
       "source_type": "web"
     },
     {
@@ -2785,6 +4945,94 @@
       "種別": "プラス",
       "情報源": "【皐月賞】レジェンド・中野栄治元調教師が皐月賞で乗りたい馬はまさかの大穴！？ | ナカノコール！ | 競馬ラボ",
       "url": "https://www.keibalab.jp/yosou/nakano/90/",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "追い切りでは「A」評価で",
+      "種別": "プラス",
+      "情報源": "sponichi.co.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHxhdbjrYVFlYD7wjsBcwIWO2VL2AaKFN3W7rCmj8Ep8AnrQrJx3Cu0M0qxcFiKize0NjLDQRyBB3ANwF6vTkqvbyOhi_LWDGaaIIhZzUYmG5vMP2dHToAPOzc-exmDO46PioPvrl4WdFZB269LnDMP9nFxQw==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "追い切りでは「A」評価で",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGKV5oS6Gmo4STix1HCNiJDF03yhyPZo7i7x2ULJd_1SGmiUCYfl8VzTaVpMoNPUzAD0EMd9rQbsn1chVT7I7lCmjCc5sNiDRh2zrUptsQ-TpFN-lKImbZdDKf9kciu1rLH4QhJHWbS438",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "追い切りでは「A」評価で",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHFiJBWvOPnbi1wGlEwbrq6VBcQ1nhZAjc1atIY3xQJ8IcsQyuoPsy-cg3kTkrJCn-sx_ZVqWeuFlTDOjUh7nma7YwyTFRfGG4p6549qcVXm-9jpqLyvN4FAgooz6ba8Xhsm9f-uji5XjQ=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "調教でも完成度の高さがうかがえます",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "追い切りでは終い11.1秒をマークし",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "併せ馬を置き去りにする動きを見せており",
+      "種別": "プラス",
+      "情報源": "netkeiba.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE46eRDCcYxdCTLc5ZT_VcpyQAux_DB5oK4nH8BkiIBMssd6YSev9pzsyUn5J_vHQjXOZtMi9uTRRISP92BJOMQsVNUzLJ5E_wxu0_eMVfPgDzbEgFD54Pc9sV6hyETDJ8oq7_kDicTxE1aDTc=",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "調教でも完成度の高さがうかがえ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "追い切りでは終い11.1秒をマークし併せ馬を置き去りにする動きを見せ",
+      "種別": "プラス",
+      "情報源": "note.com",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE45--Zg6CwTjhVEkUeM49p99BAAX0JKmlnU9v8ieTdoA2r5PD5iCo5CYfjkXVF6lsHqaTHx2bn7xpVzb9baba3J2jBrzkE4GY13fWkLnI194i4MUeb5H4KE-vox_1xciXTlNIUyESVOR1S",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "調教でも完成度の高さがうかがえる",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "追い切りでは終い11.1秒をマークし",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロブチェン",
+      "評価内容": "併せ馬を置き去りにする動きを見せておりG1を勝った2走前と遜色ない仕上がり",
+      "種別": "プラス",
+      "情報源": "spread-sports.jp",
+      "url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ==",
       "source_type": "web"
     }
   ],
@@ -3583,6 +5831,21 @@
       "source_type": "umasiru",
       "source_title": "【皐月賞2026追い切り評価／全頭診断】穴馬候補の〝この3頭〟にトップ評価「Ｓ」 | うましる",
       "source_url": "https://umasiru.com/archives/19540"
+    },
+    {
+      "馬名": "ロブチェン",
+      "時期": "不明",
+      "場所": "—",
+      "6F": "—",
+      "5F": "—",
+      "4F": "—",
+      "3F": "—",
+      "2F": "—",
+      "1F": "11.1",
+      "脚色": "不明",
+      "source_type": "web",
+      "source_title": "spread-sports.jp",
+      "source_url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEbLOK4j_dSMVLu69xoEHdNPu5618ezkh1lDV2CuPpESSlYgfrwgm9Qwyj52KbBrku3gbjJZgf_8yedftZmMMQmsOF7ZoR1Rowm5IA5ozp0w-OHc-xwQERgZwlfpVKiaDlteQ=="
     },
     {
       "馬名": "ロードフィレール",
