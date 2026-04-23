@@ -1,7 +1,7 @@
 {
   "meta": {
     "race_key": "2026-04-19_中山_皐月賞",
-    "last_updated": "2026-04-24T00:10:01",
+    "last_updated": "2026-04-24T02:04:07",
     "web_article_count": 74,
     "youtube_video_count": 0,
     "x_tweet_count": 70,
@@ -9,7 +9,8 @@
     "training_item_count": 438,
     "training_time_row_count": 57,
     "yt_video_conclusion_count": 8,
-    "bet_plan_ticket_count": 10
+    "bet_plan_ticket_count": 10,
+    "recent_runs_horse_count": 0
   },
   "web_raw": [
     {
@@ -11748,5 +11749,6 @@
     "馬連": {},
     "三連複": {},
     "三連単": {}
-  }
+  },
+  "recent_runs": {}
 }
