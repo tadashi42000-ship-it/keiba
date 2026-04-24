@@ -1,7 +1,7 @@
 {
   "meta": {
     "race_key": "2026-04-26_東京_3歳未勝利_4R",
-    "last_updated": "2026-04-25T02:14:49",
+    "last_updated": "2026-04-25T02:16:42",
     "web_article_count": 0,
     "youtube_video_count": 0,
     "x_tweet_count": 0,
@@ -160,7 +160,18 @@
   "training_time_rows": [],
   "yt_detail_analysis": {},
   "yt_video_conclusions": {},
-  "latest_odds": {},
+  "latest_odds": {
+    "アグアフレスカ": "20.1",
+    "イブキ": "3.2",
+    "ウルフマン": "7.8",
+    "カゲムシャ": "26.9",
+    "ガードオブオナー": "1.9",
+    "クライングナウ": "47.9",
+    "ボンボンベイビー": "36.4",
+    "マーゴットドライ": "8.2",
+    "ルージュダズリング": "113.2",
+    "レフィノス": "84.3"
+  },
   "latest_odds_error": "",
   "bet_plan_settings": {},
   "bet_plan_result": {},
