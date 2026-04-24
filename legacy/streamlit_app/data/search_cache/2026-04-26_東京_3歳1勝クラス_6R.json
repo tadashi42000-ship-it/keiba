@@ -1,7 +1,7 @@
 {
   "meta": {
     "race_key": "2026-04-26_東京_3歳1勝クラス_6R",
-    "last_updated": "2026-04-25T01:35:54",
+    "last_updated": "2026-04-25T02:03:52",
     "web_article_count": 3,
     "youtube_video_count": 0,
     "x_tweet_count": 0,
@@ -392,6 +392,13 @@
         ]
       }
     ]
+  },
+  "race_metadata": {
+    "start_time": "12:55",
+    "weather": "",
+    "track_conditions": {},
+    "race_data01": "12:55発走 / 芝1600m (左 A)",
+    "race_data02": "2回 東京 2日目 8頭 本賞金:820,330,210,120,82万円"
   },
   "doc_horse_raw": [],
   "x_raw": [],
