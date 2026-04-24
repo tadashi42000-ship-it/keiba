@@ -1,7 +1,7 @@
 {
   "meta": {
     "race_key": "2026-04-26_東京_3歳1勝クラス_6R",
-    "last_updated": "2026-04-25T01:24:29",
+    "last_updated": "2026-04-25T01:28:10",
     "web_article_count": 3,
     "youtube_video_count": 0,
     "x_tweet_count": 0,
@@ -228,6 +228,14 @@
       "source_url": "https://db.netkeiba.com/horse/result/2023103413/",
       "source_title": "馬データ: マツリダイコ",
       "source_type": "web_profile"
+    },
+    {
+      "馬名": "アルデキングダム",
+      "プラス情報": "前走ダート1800mの未勝利戦を0.6秒差で勝利し、初勝利を挙げた。3走前にも中山ダート1800mで1着の実績があり、ダートでの安定した走りを見せている。前走で馬体重が大幅に増加しており、馬体成長が見られる。",
+      "マイナス情報": "芝レースでの勝ち鞍がなく、今回芝1600mへの距離短縮となるが、過去の芝レースでは掲示板止まりの成績であり芝適性は未知数。中1週とローテーションが詰まっている点が懸念される。",
+      "source_url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020206",
+      "source_title": "出馬表+過去: ３歳１勝クラス 5走表示 | 2026年4月26日 東京6R レース情報(JRA) - netkeiba",
+      "source_type": "web"
     }
   ],
   "youtube_raw": [],
