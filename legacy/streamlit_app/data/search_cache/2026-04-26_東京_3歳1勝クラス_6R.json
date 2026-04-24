@@ -1,7 +1,7 @@
 {
   "meta": {
     "race_key": "2026-04-26_東京_3歳1勝クラス_6R",
-    "last_updated": "2026-04-24T11:36:11",
+    "last_updated": "2026-04-24T11:36:21",
     "web_article_count": 0,
     "youtube_video_count": 0,
     "x_tweet_count": 0,
@@ -153,7 +153,16 @@
   "training_time_rows": [],
   "yt_detail_analysis": {},
   "yt_video_conclusions": {},
-  "latest_odds": {},
+  "latest_odds": {
+    "アルデキングダム": "16.0",
+    "エルハーベン": "34.8",
+    "グランセレスト": "19.6",
+    "サレジオ": "2.7",
+    "シュテルン": "738.8",
+    "フジガイフウ": "3.1",
+    "ブルースカイブルー": "6.0",
+    "マツリダイコ": "4.1"
+  },
   "latest_odds_error": "",
   "bet_plan_settings": {},
   "bet_plan_result": {},
