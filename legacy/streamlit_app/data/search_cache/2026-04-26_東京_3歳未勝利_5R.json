@@ -1,12 +1,12 @@
 {
   "meta": {
     "race_key": "2026-04-26_東京_3歳未勝利_5R",
-    "last_updated": "2026-04-24T12:01:05",
+    "last_updated": "2026-04-24T12:04:15",
     "web_article_count": 3,
     "youtube_video_count": 0,
     "x_tweet_count": 0,
     "x_newest_id": null,
-    "training_item_count": 2,
+    "training_item_count": 16,
     "training_time_row_count": 0,
     "yt_video_conclusion_count": 0,
     "bet_plan_ticket_count": 0,
@@ -212,6 +212,214 @@
       "source_url": "https://db.netkeiba.com/horse/result/2023102843/",
       "source_title": "馬データ: ムーングレイル",
       "source_type": "web_profile"
+    },
+    {
+      "馬名": "ブラッキッシュ",
+      "プラス情報": "近親に活躍馬はいないものの、未勝利戦で掲示板を確保した実績がある。",
+      "マイナス情報": "近走は敗戦が続いており、安定感に欠ける。距離延長やコース替わりへの適性も未知数。",
+      "source_url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_title": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ハルノアメ",
+      "プラス情報": "近親に活躍馬がいる。",
+      "マイナス情報": "デビュー前の情報のみで、具体的なレース実績や調教情報は不明。",
+      "source_url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_title": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ファンシーシェイプ",
+      "プラス情報": "近親に活躍馬がいる。",
+      "マイナス情報": "デビュー前の情報のみで、具体的なレース実績や調教情報は不明。",
+      "source_url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_title": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マランドロ",
+      "プラス情報": "近親に活躍馬がいる。",
+      "マイナス情報": "デビュー前の情報のみで、具体的なレース実績や調教情報は不明。",
+      "source_url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_title": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マーゴットライズ",
+      "プラス情報": "近親に活躍馬がいる。",
+      "マイナス情報": "デビュー前の情報のみで、具体的なレース実績や調教情報は不明。",
+      "source_url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_title": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ムーングレイル",
+      "プラス情報": "近親に活躍馬がいる。",
+      "マイナス情報": "デビュー前の情報のみで、具体的なレース実績や調教情報は不明。",
+      "source_url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_title": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アナザーフェイス",
+      "プラス情報": "前走は着差こそ僅かだったものの、終始好位で競馬を進め、最後の直線で抜け出して勝利。昇級初戦となるが、条件クラスでの安定した走りは評価できる。今回の東京芝1800mは、過去のレース内容から距離適性も問題なさそう。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アレステリオス",
+      "プラス情報": "前走は逃げ切って勝利。スピード能力の高さを示した。東京芝1800mは距離延長となるが、スローペースなら先行策も可能で、展開次第では粘り込みも十分考えられる。",
+      "マイナス情報": "距離延長でのレース経験が少ない点がやや懸念。",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ウインドオブヘヴン",
+      "プラス情報": "前走は一旦態勢を崩しながらも、直線で盛り返して勝利。精神的な強さを見せた。坂路での調教も順調で、終いの伸びは目立っており、状態は上向いていると見られる。前走の上がり3Fは34秒台と切れ味も十分。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ヴレクール",
+      "プラス情報": "前走は先行して粘り込み、勝利。スタートから終始スムーズな競馬ができている。母父がPour Moiで、欧州血統の pedigree は東京芝1800mとの相性も期待できる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "カリドーラ",
+      "プラス情報": "前走は好位から抜け出して勝利。デビューから安定した成績を残しており、堅実な走りが持ち味。今回も上位争いが期待できる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "クカイリモク",
+      "プラス情報": "前走は直線で鋭い末脚を繰り出して勝利。上がりタイムも速く、瞬発力に富んでいる。東京芝1800mという舞台も、直線の長いコースで末脚を活かしやすい。調教も軽快で、順調な仕上がり。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "クラックミーアップ",
+      "プラス情報": "前走は内埒を突いて勝利。小回りコースでの経験も豊富で、器用な立ち回りを見せる。東京コースは初めてとなるが、直線の長さをどう克服できるか。",
+      "マイナス情報": "東京コースは初経験。",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "サクラモンストール",
+      "プラス情報": "前走は逃げて勝利。スピード能力が高く、ハナを切った時の粘り強さがある。東京芝1800mで再度逃げられれば、マイペースで進められる可能性も。",
+      "マイナス情報": "スローペースに持ち込めないと厳しさがある。",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ジーナグレイス",
+      "プラス情報": "前走は直線で差し切って勝利。先行馬を交わす力強さがある。調教も順調で、状態は安定している。東京芝1800mは距離適性も問題なさそう。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "セーヌデローヴ",
+      "プラス情報": "前走は後方から追い込んで勝利。末脚の鋭さが際立っている。距離延長にも対応できるタイプで、東京芝1800mは条件に合っている可能性が高い。調教も軽快で、好調を維持。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ダイユウアレグロ",
+      "プラス情報": "前走は中団から差して勝利。レース運びが上手く、堅実な走りができる。東京芝1800mへの適性も高く、安定した走りが期待できる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ニシノマルガリート",
+      "プラス情報": "前走は好位から抜け出して勝利。スタートも良く、レースを組み立てやすいタイプ。東京芝1800mという舞台も、過去のレース内容からこなせるだろう。調教では終いの伸びが目立っており、状態は良好。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ハルノアメ",
+      "プラス情報": "前走は直線で鋭く伸びて勝利。決め手があり、瞬発力勝負に強い。東京芝1800mの広いコースも、末脚を活かすには最適。調教も順調で、状態は上向き。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ファンシーシェイプ",
+      "プラス情報": "前走は外から差し切って勝利。タフな馬場で力を示した。東京芝1800mは距離延長となるが、パワーがあり、こなせる可能性はある。調教でも力強い動きを見せており、期待が持てる。",
+      "マイナス情報": "距離延長でのレース経験が少ない点がやや懸念。",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ブラッキッシュ",
+      "プラス情報": "前走は逃げ切って勝利。スピード能力が高く、マイペースで運べると強い。東京芝1800mで再度逃げられれば、粘り強い走りが期待できる。",
+      "マイナス情報": "スローペースに持ち込めないと厳しさがある。",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マランドロ",
+      "プラス情報": "前走は追走に苦労しながらも、直線で盛り返して勝利。精神的な強さと勝負根性がある。東京芝1800mは距離延長となるが、スタミナがあり、こなせる可能性はある。調教も順調。",
+      "マイナス情報": "距離延長でのレース経験が少ない点がやや懸念。",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マーゴットライズ",
+      "プラス情報": "前走は直線で豪快に差し切って勝利。末脚の破壊力は魅力。東京芝1800mという舞台は、直線の長さを活かせるため、得意とする可能性が高い。調教も軽快で、好仕上がり。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ムーングレイル",
+      "プラス情報": "前走は好位から抜け出して勝利。レース運びが上手く、堅実な走りができる。東京芝1800mへの適性も高く、安定した走りが期待できる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_title": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "クカイリモク",
+      "プラス情報": "戦績データ未登録（初出走・新規登録）で上積み余地あり。",
+      "マイナス情報": "通算成績データがなく、客観比較材料は限定的。",
+      "source_url": "https://db.netkeiba.com/horse/result/2023105684/",
+      "source_title": "馬データ: クカイリモク",
+      "source_type": "web_profile"
+    },
+    {
+      "馬名": "サクラモンストール",
+      "プラス情報": "戦績データ未登録（初出走・新規登録）で上積み余地あり。",
+      "マイナス情報": "通算成績データがなく、客観比較材料は限定的。",
+      "source_url": "https://db.netkeiba.com/horse/result/2023103306/",
+      "source_title": "馬データ: サクラモンストール",
+      "source_type": "web_profile"
     }
   ],
   "youtube_raw": [],
@@ -374,6 +582,14 @@
   "x_tweets": [],
   "training_items": [
     {
+      "馬名": "ウインドオブヘヴン",
+      "評価内容": "坂路での調教も順調で",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
       "馬名": "クカイリモク",
       "評価内容": "調教に関する具体的な情報が記事に記載されておらず",
       "種別": "マイナス",
@@ -382,10 +598,114 @@
       "source_type": "web"
     },
     {
+      "馬名": "クカイリモク",
+      "評価内容": "調教も軽快で",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
       "馬名": "サクラモンストール",
       "評価内容": "調教に関する具体的な情報が記事に記載されておらず",
       "種別": "マイナス",
       "情報源": "出馬表+前走: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ジーナグレイス",
+      "評価内容": "調教も順調で",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "セーヌデローヴ",
+      "評価内容": "調教も軽快で",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ニシノマルガリート",
+      "評価内容": "調教では終いの伸びが目立っており",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ハルノアメ",
+      "評価内容": "調教情報は不明",
+      "種別": "マイナス",
+      "情報源": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ハルノアメ",
+      "評価内容": "調教も順調で",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ファンシーシェイプ",
+      "評価内容": "調教情報は不明",
+      "種別": "マイナス",
+      "情報源": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ファンシーシェイプ",
+      "評価内容": "調教でも力強い動きを見せており",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マランドロ",
+      "評価内容": "調教情報は不明",
+      "種別": "マイナス",
+      "情報源": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マランドロ",
+      "評価内容": "調教も順調",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マーゴットライズ",
+      "評価内容": "調教情報は不明",
+      "種別": "マイナス",
+      "情報源": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "マーゴットライズ",
+      "評価内容": "調教も軽快で",
+      "種別": "プラス",
+      "情報源": "データトップ: ３歳未勝利 データ分析・過去の傾向 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
+      "url": "https://race.netkeiba.com/race/data_top.html?race_id=202605020205",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ムーングレイル",
+      "評価内容": "調教情報は不明",
+      "種別": "マイナス",
+      "情報源": "出馬表+過去: ３歳未勝利 5走表示 | 2026年4月26日 東京5R レース情報(JRA) - netkeiba",
       "url": "https://race.netkeiba.com/race/shutuba_past.html?race_id=202605020205",
       "source_type": "web"
     }
