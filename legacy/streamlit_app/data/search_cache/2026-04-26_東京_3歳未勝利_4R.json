@@ -1,7 +1,7 @@
 {
   "meta": {
     "race_key": "2026-04-26_東京_3歳未勝利_4R",
-    "last_updated": "2026-04-25T02:22:59",
+    "last_updated": "2026-04-25T02:33:12",
     "web_article_count": 0,
     "youtube_video_count": 0,
     "x_tweet_count": 0,
@@ -173,9 +173,42 @@
     "レフィノス": "84.3"
   },
   "latest_odds_error": "",
-  "bet_plan_settings": {},
-  "bet_plan_result": {},
-  "bet_type_odds": {},
+  "bet_plan_settings": {
+    "budget": 5000,
+    "stake_unit": 500,
+    "slider": 50,
+    "bet_types": [
+      "単勝",
+      "複勝",
+      "ワイド",
+      "馬連",
+      "三連複",
+      "三連単"
+    ],
+    "anchor_mode": "auto",
+    "anchor_horse": "自動",
+    "max_points": 10
+  },
+  "bet_plan_result": {
+    "summary": {},
+    "tickets": [],
+    "horse_scores": [],
+    "warnings": [
+      "馬スコアを算出できませんでした。出馬表を確認してください。",
+      "出馬表の馬番が不足しているため、オッズの突合に失敗する可能性があります。",
+      "単勝オッズを取得できませんでした。",
+      "以下券種のオッズは現在未公開です（発売前または更新待ち）: 複勝 / ワイド / 馬連 / 三連複 / 三連単"
+    ],
+    "generated_at": "2026-04-25T02:33:12"
+  },
+  "bet_type_odds": {
+    "単勝": {},
+    "複勝": {},
+    "ワイド": {},
+    "馬連": {},
+    "三連複": {},
+    "三連単": {}
+  },
   "recent_runs": {
     "アグアフレスカ": {
       "前走": "26/02/21 6 3歳未勝利 芝2400/良",
