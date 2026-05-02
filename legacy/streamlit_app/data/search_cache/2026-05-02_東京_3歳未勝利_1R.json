@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "race_key": "2026-05-02_東京_3歳未勝利_1R",
+    "last_updated": "2026-05-02T18:00:35",
+    "web_article_count": 0,
+    "youtube_video_count": 0,
+    "x_tweet_count": 0,
+    "x_newest_id": null,
+    "training_item_count": 0,
+    "training_time_row_count": 0,
+    "yt_video_conclusion_count": 0,
+    "bet_plan_ticket_count": 0,
+    "recent_runs_horse_count": 0
+  },
+  "web_raw": [],
+  "youtube_raw": [],
+  "web_articles": [],
+  "race_characteristics": null,
+  "race_metadata": {
+    "start_time": "10:05",
+    "weather": "晴",
+    "track_conditions": {},
+    "race_data01": "10:05発走 / ダ1400m (左) / 天候:晴 / 馬場:重",
+    "race_data02": "2回 東京 3日目 サラ系３歳 未勝利 牝[指] 馬齢 16頭 本賞金:590,240,150,89,59万円"
+  },
+  "doc_horse_raw": [],
+  "x_raw": [],
+  "x_tweets": [],
+  "training_items": [],
+  "training_time_rows": [],
+  "yt_detail_analysis": {},
+  "yt_video_conclusions": {},
+  "latest_odds": {},
+  "latest_odds_error": "",
+  "bet_plan_settings": {},
+  "bet_plan_result": {},
+  "bet_type_odds": {},
+  "recent_runs": {}
+}
