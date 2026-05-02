@@ -8,6 +8,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 .Python
+.pytest_cache/
 venv/
 .venv/
 env/
@@ -26,11 +27,24 @@ legacy/streamlit_app/data/*
 *.csv
 !legacy/streamlit_app/february_s_info.csv
 *.log
+*.pid
+
+# Local verification artifacts
+tmp/
+.playwright-mcp/
+/mobile-*.png
+/same_day_*.png
+/debug_*.png
+/training_tab_*.png
+verify_screenshot.png
 
 # Node / build artifacts
 node_modules/
 .next/
 dist/
 build/
+frontend/public/sw.js
+frontend/public/workbox-*.js
+frontend/public/fallback-*.js
 
 .DS_Store

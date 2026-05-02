@@ -24,7 +24,7 @@ import html
 from difflib import SequenceMatcher
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urlparse, urljoin, parse_qs
-from collections import defaultdict
+from collections import Counter, defaultdict
 from bs4 import BeautifulSoup
 import requests
 from dotenv import load_dotenv
@@ -41,12 +41,24 @@ from google.genai import types as genai_types
 from race_catalog import (
     RaceInfo,
     get_upcoming_races,
+    fetch_races_by_date,
+    group_races_by_venue,
     resolve_race_id,
     ensure_data_dir,
     clear_fetch_graded_races_cache,
+    clear_fetch_races_by_date_cache,
     clear_resolve_race_id_cache,
 )
-from get_keiba_info import fetch_race_csv
+from get_keiba_info import fetch_race_csv, fetch_race_metadata, fetch_recent_runs
+from same_day_sources import (
+    build_requests_session,
+    fetch_course_stats,
+    fetch_horse_profile,
+    fetch_netkeiba_race_column,
+    fetch_oikiri_comments,
+    fetch_race_horse_ids,
+    fetch_umanity_flat_racecard,
+)
 
 # .env ファイルからAPIキーを読み込む（app.py と同じフォルダに .env を置くこと）
 BASE_DIR = Path(__file__).resolve().parent
@@ -82,14 +94,28 @@ def _get_secret(key: str, default: str = "") -> str:
     except Exception:
         return default
 
+
+def _get_int_secret(key: str, default: int, *, min_value: int, max_value: int) -> int:
+    raw = _get_secret(key, str(default))
+    try:
+        value = int(str(raw).strip())
+    except (TypeError, ValueError):
+        value = default
+    return max(min_value, min(max_value, value))
+
+
 YOUTUBE_API_KEY = _get_secret("YOUTUBE_API_KEY")
 GEMINI_API_KEY = _get_secret("GEMINI_API_KEY")
 GEMINI_MODEL = _get_secret("GEMINI_MODEL", "gemini-2.5-flash")
 # YouTube解析専用モデル（未設定時は安定利用中の2.5系Flashへフォールバック）
 # 例: GEMINI_MODEL_YOUTUBE=gemini-2.5-flash
 GEMINI_MODEL_YOUTUBE = _get_secret("GEMINI_MODEL_YOUTUBE", _get_secret("YOUTUBE_GEMINI_MODEL", "gemini-2.5-flash"))
+# Web解析専用モデル（未設定時は共通モデル→2.5 Flashへフォールバック）
+GEMINI_MODEL_WEB = _get_secret("GEMINI_MODEL_WEB", _get_secret("WEB_GEMINI_MODEL", GEMINI_MODEL))
+GEMINI_MODEL_WEB_FALLBACK = _get_secret("GEMINI_MODEL_WEB_FALLBACK", "gemini-2.5-flash-lite")
 TAVILY_API_KEY = _get_secret("TAVILY_API_KEY")
 X_BEARER_TOKEN = _get_secret("X_BEARER_TOKEN")
+X_MAX_REQUESTS_PER_UPDATE = _get_int_secret("X_MAX_REQUESTS_PER_UPDATE", 4, min_value=1, max_value=20)
 
 _TRAINING_KEYWORDS = re.compile(r'追切|追い切り|調教|時計|仕上がり|動き[がをは]|坂路|ウッド|CW')
 _TRAINING_STRONG_CONTEXT_PAT = re.compile(
@@ -139,6 +165,14 @@ WEB_SEARCH_PRIORITY_DOMAINS = [
     "spaia-keiba.com",
     "sports.yahoo.co.jp",
 ]
+WEB_SEARCH_EXCLUDED_HOSTS = {
+    "en.netkeiba.com",
+    "en.wikipedia.org",
+    "wikipedia.org",
+    "www.wikipedia.org",
+    "timeanddate.com",
+    "www.timeanddate.com",
+}
 TRAINING_FALLBACK_ALLOWLIST = [
     "umasiru.com",
     "netkeiba.com",
@@ -151,10 +185,14 @@ TRAINING_FALLBACK_ALLOWLIST = [
     "pluskeiba.com",
 ]
 TRAINING_PHASE_ORDER = ["直近", "1週前", "前走最終", "不明"]
-MAX_ANALYZE_ARTICLES_PER_QUERY = 3
+MAX_ANALYZE_ARTICLES_PER_QUERY = 5
+WEB_BULK_MAX_QUERIES = 12
+WEB_BULK_MAX_ANALYZE_CALLS = 36
+WEB_BULK_MAX_SECONDS = 240
 BET_STAKE_UNIT_YEN = 500
 BET_MAX_POINTS = 10
 BET_TYPES_ALL = ["単勝", "複勝", "ワイド", "馬連", "三連複", "三連単"]
+SAME_DAY_COURSE_STATS_RC_VERSION = "same_day_course_stats_v3"
 BET_POINT_PROFILE_HIT = {"単勝": 2, "複勝": 4, "ワイド": 3, "馬連": 1, "三連複": 0, "三連単": 0}
 BET_POINT_PROFILE_ROI = {"単勝": 1, "複勝": 0, "ワイド": 1, "馬連": 2, "三連複": 3, "三連単": 3}
 BET_ODDS_TYPE_CODE_CANDIDATES = {
@@ -166,6 +204,7 @@ BET_ODDS_TYPE_CODE_CANDIDATES = {
     "三連複": ["b7", "b8"],
     "三連単": ["b8", "b9"],
 }
+JRA_VENUE_NAMES = ["札幌", "函館", "福島", "新潟", "東京", "中山", "中京", "京都", "阪神", "小倉"]
 
 UMANITY_BASE_URL = "https://umanity.jp"
 UMANITY_HEADERS = {
@@ -189,6 +228,7 @@ RACE_SESSION_KEYS = [
     'horse_df', 'youtube_videos', 'youtube_raw', 'youtube_summary_df',
     'web_articles', 'web_raw', 'race_characteristics', 'gates_saved',
     'race_characteristics_enriched', 'race_characteristics_last_attempt', 'race_characteristics_last_error',
+    'race_metadata',
     'yt_detail_analysis', 'yt_video_conclusions', 'doc_horse_raw', 'win_rates', 'latest_odds_error',
     'latest_odds', 'combined_keyword', 'yt_detail_keyword',
     'x_tweets', 'x_raw', 'x_newest_id',
@@ -218,10 +258,47 @@ def get_race_display_name() -> str:
     return f"{r.race_name} {r.date.year}" if r else "レース未選択"
 
 
+def _build_race_context_query() -> str:
+    """同名レース混入を抑えるためのコンテキスト付きクエリを返す。"""
+    r = get_race_config()
+    if not r:
+        return get_race_display_name()
+
+    parts: list[str] = []
+    race_date = getattr(r, "date", None)
+    if isinstance(race_date, date):
+        parts.append(race_date.strftime("%Y/%m/%d"))
+
+    for value in (
+        str(getattr(r, "venue", "") or "").strip(),
+        str(getattr(r, "race_number", "") or "").strip(),
+        str(getattr(r, "race_name", "") or "").strip(),
+    ):
+        if value:
+            parts.append(value)
+
+    query = " ".join(parts).strip()
+    return query or get_race_display_name()
+
+
+def get_youtube_default_keyword() -> str:
+    base = _build_race_context_query().strip()
+    return f"{base} 予想".strip() if base else "競馬 予想"
+
+
 def get_csv_path() -> str:
     """選択中レースのCSVパスを返す"""
     r = get_race_config()
     return r.csv_file if r else ""
+
+
+def get_race_mode() -> str:
+    mode = _to_text(st.session_state.get("race_mode") or "graded")
+    return mode if mode in {"graded", "same_day"} else "graded"
+
+
+def is_same_day_mode() -> bool:
+    return get_race_mode() == "same_day"
 
 
 def get_race_url() -> str:
@@ -288,14 +365,331 @@ def _load_last_selected_race_key() -> str:
 
 
 def _raw_fingerprint(item: dict) -> str:
-    """重複判定キー: source_url が空なら source_title+馬名をフォールバックに使う"""
+    """重複判定キー。URLが同一でも馬名が異なる行は別レコードとして扱う。"""
     url = (item.get('source_url') or item.get('url') or '').strip()
+    horse = (item.get('馬名') or '').strip()
+    title = (item.get('source_title') or item.get('title') or '').strip()
     if url:
+        if horse:
+            return f"{url}::{horse}"
+        if title:
+            return f"{url}::{title}"
         return url
     # URLなし: タイトル＋馬名の複合キーで同タイトル別馬の誤重複を回避
-    title = (item.get('source_title') or item.get('title') or '').strip()
-    horse = (item.get('馬名') or '').strip()
     return f"{title}::{horse}" if title or horse else ""  # 全空 = "" → 常に追加扱い
+
+
+def _recent_runs_session_key(race_key: str) -> str:
+    return f"recent_runs::{_to_text(race_key)}"
+
+
+def _classify_corner_style(corner_text: str, field_size: str = "") -> str:
+    values = [int(x) for x in re.findall(r"\d{1,2}", _to_text(corner_text))]
+    if not values:
+        return ""
+    # 4角通過順は通過順列の最後の値を使う。頭数が取れない場合だけ絶対値で控えめに推定する。
+    pos_4 = values[-1]
+    field_count = 0
+    try:
+        field_count = int(_to_text(field_size))
+    except (TypeError, ValueError):
+        field_count = 0
+
+    if pos_4 <= 1:
+        return "逃げ"
+
+    if field_count > 0:
+        pos_ratio = pos_4 / field_count
+        if pos_ratio <= 0.30:
+            return "先行"
+        if pos_ratio <= 0.65:
+            return "差し"
+        return "追込"
+
+    if pos_4 <= 3:
+        return "先行"
+    if pos_4 <= 7:
+        return "差し"
+    return "追込"
+
+
+def classify_running_style(recent_runs: dict | None) -> str:
+    """
+    近3走の通過順から脚質を推定する。
+    - 1位: 逃げ
+    - 2-3位: 先行
+    - 中団: 差し
+    - 後方: 追込
+    3走すべて異なる場合のみ「自在」。
+    """
+    if not isinstance(recent_runs, dict):
+        return ""
+
+    corners = recent_runs.get("corners")
+    if isinstance(corners, str):
+        corner_values = [x.strip() for x in re.split(r"[,\s/]+", corners) if x.strip()]
+    elif isinstance(corners, list):
+        corner_values = [_to_text(x) for x in corners]
+    else:
+        corner_values = []
+
+    field_sizes = recent_runs.get("field_sizes")
+    if isinstance(field_sizes, str):
+        field_size_values = [x.strip() for x in re.split(r"[,\s/]+", field_sizes)]
+    elif isinstance(field_sizes, list):
+        field_size_values = [_to_text(x) for x in field_sizes]
+    else:
+        field_size_values = []
+
+    while len(field_size_values) < len(corner_values):
+        field_size_values.append("")
+
+    styles: list[str] = []
+    for corner, field_size in zip(corner_values[:3], field_size_values[:3]):
+        style = _classify_corner_style(corner, field_size)
+        if not style:
+            continue
+
+        styles.append(style)
+
+    if not styles:
+        return ""
+
+    if len(styles) >= 3 and styles[0] == styles[1] == styles[2]:
+        return styles[0]
+    if len(styles) >= 2 and styles[0] == styles[1]:
+        return styles[0]
+    if len(styles) >= 3 and styles[0] == styles[2]:
+        return styles[0]
+    if len(styles) >= 3 and len(set(styles[:3])) == 3:
+        return "自在"
+    return styles[0]
+
+
+def _recent_last3f_values(recent_runs: dict | None, max_runs: int = 3) -> list[str]:
+    if not isinstance(recent_runs, dict):
+        return [""] * max_runs
+    values = recent_runs.get("last3fs")
+    if isinstance(values, str):
+        result = [x.strip() for x in re.split(r"[,\s/]+", values) if x.strip()]
+    elif isinstance(values, list):
+        result = [_to_text(x) for x in values]
+    else:
+        result = []
+    explicit_cols = ("前走上り", "2走前上り", "3走前上り")
+    for idx, col in enumerate(explicit_cols):
+        if idx >= max_runs:
+            break
+        val = _to_text(recent_runs.get(col))
+        if not val:
+            continue
+        while len(result) <= idx:
+            result.append("")
+        result[idx] = val
+    while len(result) < max_runs:
+        result.append("")
+    return result[:max_runs]
+
+
+def _merge_recent_runs_into_df(df: pd.DataFrame, race_key: str, *, fill_only_blank: bool = True) -> pd.DataFrame:
+    """
+    セッション上の recent_runs を DataFrame に反映する。
+    """
+    if not isinstance(df, pd.DataFrame) or df.empty or "馬名" not in df.columns:
+        return df
+
+    payload = st.session_state.get(_recent_runs_session_key(race_key))
+    if not isinstance(payload, dict) or not payload:
+        return df
+
+    merged = df.copy()
+    for col in ("前走", "2走前", "3走前", "前走上り", "2走前上り", "3走前上り"):
+        if col not in merged.columns:
+            merged[col] = ""
+    if "脚質" not in merged.columns:
+        merged["脚質"] = ""
+
+    # 馬名正規化で突合
+    row_index_by_key = {}
+    for idx, row in merged.iterrows():
+        horse = _to_text(row.get("馬名"))
+        key = _normalize_horse_token(horse)
+        if key and key not in row_index_by_key:
+            row_index_by_key[key] = idx
+
+    for horse_name, runs in payload.items():
+        if not isinstance(runs, dict):
+            continue
+        idx = row_index_by_key.get(_normalize_horse_token(horse_name))
+        if idx is None:
+            continue
+        for col in ("前走", "2走前", "3走前"):
+            val = _to_text(runs.get(col))
+            if not val:
+                continue
+            if fill_only_blank:
+                current = _to_text(merged.at[idx, col])
+                if current:
+                    continue
+            merged.at[idx, col] = val
+
+        for col, val in zip(("前走上り", "2走前上り", "3走前上り"), _recent_last3f_values(runs)):
+            if not val:
+                continue
+            if fill_only_blank:
+                current = _to_text(merged.at[idx, col])
+                if current:
+                    continue
+            merged.at[idx, col] = val
+
+        style_label = classify_running_style(runs)
+        if style_label:
+            if fill_only_blank:
+                current_style = _to_text(merged.at[idx, "脚質"])
+                if current_style:
+                    continue
+            merged.at[idx, "脚質"] = style_label
+
+    return merged
+
+
+def _write_recent_runs_to_csv(csv_path: str, race_key: str, *, fill_only_blank: bool = True) -> bool:
+    """
+    セッション上の recent_runs を CSV へ反映する。更新があれば True。
+    """
+    if not csv_path or not os.path.exists(csv_path):
+        return False
+    try:
+        csv_df = pd.read_csv(csv_path, encoding="utf-8-sig")
+    except Exception:
+        return False
+
+    merged = _merge_recent_runs_into_df(csv_df, race_key, fill_only_blank=fill_only_blank)
+    if merged is None or merged.empty:
+        return False
+    if merged.equals(csv_df):
+        return False
+
+    merged.to_csv(csv_path, index=False, encoding="utf-8-sig")
+    return True
+
+
+@st.cache_data(ttl=3600)
+def _fetch_recent_runs_cached(race_id: str) -> dict:
+    return fetch_recent_runs(race_id) or {}
+
+
+def _extract_numeric_odds_from_csv(csv_path: str) -> dict[str, str]:
+    if not csv_path or not os.path.exists(csv_path):
+        return {}
+    try:
+        csv_df = pd.read_csv(csv_path, encoding="utf-8-sig")
+    except Exception:
+        return {}
+    if "馬名" not in csv_df.columns or "オッズ" not in csv_df.columns:
+        return {}
+    odds_map: dict[str, str] = {}
+    for _, row in csv_df.iterrows():
+        horse = _to_text(row.get("馬名"))
+        odds = _to_text(row.get("オッズ")).replace(",", "")
+        if horse and re.match(r"^\d+(\.\d+)?$", odds):
+            odds_map[horse] = odds
+    return odds_map
+
+
+def _csv_has_recent_run_values(csv_path: str) -> bool:
+    if not csv_path or not os.path.exists(csv_path):
+        return False
+    try:
+        csv_df = pd.read_csv(csv_path, encoding="utf-8-sig")
+    except Exception:
+        return False
+    recent_cols = [c for c in ("前走", "2走前", "3走前") if c in csv_df.columns]
+    if not recent_cols:
+        return False
+    for col in recent_cols:
+        if csv_df[col].astype(str).map(_to_text).replace({"nan": ""}).astype(bool).any():
+            return True
+    return False
+
+
+def _csv_needs_running_style_refresh(csv_path: str) -> bool:
+    """
+    脚質判定ロジック修正前のCSV（例: ほぼ全頭「追込」）を読み込んだ時に、
+    近走データから脚質を再計算するための安全弁。
+    """
+    if not csv_path or not os.path.exists(csv_path):
+        return False
+    try:
+        csv_df = pd.read_csv(csv_path, encoding="utf-8-sig")
+    except Exception:
+        return False
+    if csv_df.empty or "脚質" not in csv_df.columns:
+        return False
+
+    styles = [
+        _to_text(v)
+        for v in csv_df["脚質"].tolist()
+        if _to_text(v) and _to_text(v) not in {"-", "nan", "None"}
+    ]
+    if len(styles) < 5:
+        return False
+
+    counts = Counter(styles)
+    top_style, top_count = counts.most_common(1)[0]
+    top_ratio = top_count / len(styles)
+    if len(counts) == 1:
+        return True
+    # 修正前の典型パターンは「追込」過多。80%以上なら古いキャッシュとして再計算する。
+    return top_style == "追込" and top_ratio >= 0.8
+
+
+def _csv_needs_gate_values(csv_path: str) -> bool:
+    """枠番/馬番が未確定なら、当日読込時に軽量再取得を試す。"""
+    if not csv_path or not os.path.exists(csv_path):
+        return False
+    try:
+        csv_df = pd.read_csv(csv_path, encoding="utf-8-sig")
+    except Exception:
+        return False
+    if csv_df.empty or "馬番" not in csv_df.columns:
+        return True
+    umaban_num = pd.to_numeric(csv_df["馬番"], errors="coerce")
+    return int(umaban_num.notna().sum()) == 0
+
+
+def _ensure_same_day_initial_entry_fields(race: RaceInfo | None, csv_path: str) -> None:
+    """
+    当日モードではレース読込直後に出馬表判断で必要な最低限の列をそろえる。
+    Web/Geminiは使わず、netkeiba static の近3走とCSV内オッズだけを反映する。
+    """
+    if not is_same_day_mode() or not race or not race.race_id or not csv_path:
+        return
+
+    restored_odds = _extract_numeric_odds_from_csv(csv_path)
+    if restored_odds and not st.session_state.get("latest_odds"):
+        st.session_state["latest_odds"] = restored_odds
+        st.session_state.pop("latest_odds_error", None)
+    needs_gates = _csv_needs_gate_values(csv_path)
+    if (needs_gates or not restored_odds) and "gates_saved" not in st.session_state:
+        _auto_fetch_initial_gates_and_odds(csv_path, race.race_key)
+
+    recent_key = _recent_runs_session_key(race.race_key)
+    needs_style_refresh = _csv_needs_running_style_refresh(csv_path)
+    needs_recent = not isinstance(st.session_state.get(recent_key), dict) or not st.session_state.get(recent_key)
+    needs_recent = needs_recent or not _csv_has_recent_run_values(csv_path)
+    needs_recent = needs_recent or needs_style_refresh
+    if needs_recent:
+        recent_runs = st.session_state.get(recent_key)
+        if not isinstance(recent_runs, dict) or not recent_runs:
+            with st.spinner("近3走・脚質を自動補完中..."):
+                recent_runs = _fetch_recent_runs_cached(race.race_id)
+        if recent_runs:
+            st.session_state[recent_key] = recent_runs
+            if _write_recent_runs_to_csv(csv_path, race.race_key, fill_only_blank=not needs_style_refresh):
+                load_race_data.clear()
+                get_all_horse_names.clear()
+            save_race_cache(race.race_key)
 
 
 def save_race_cache(race_key: str) -> None:
@@ -314,11 +708,13 @@ def save_race_cache(race_key: str) -> None:
             "training_time_row_count": len(st.session_state.get('training_time_rows') or []),
             "yt_video_conclusion_count": len(st.session_state.get('yt_video_conclusions') or {}),
             "bet_plan_ticket_count": len((st.session_state.get('bet_plan_result') or {}).get('tickets') or []),
+            "recent_runs_horse_count": len(st.session_state.get(_recent_runs_session_key(race_key)) or {}),
         },
         "web_raw": st.session_state.get('web_raw') or [],
         "youtube_raw": st.session_state.get('youtube_raw') or [],
         "web_articles": st.session_state.get('web_articles') or [],
         "race_characteristics": st.session_state.get('race_characteristics'),
+        "race_metadata": st.session_state.get('race_metadata') or {},
         "doc_horse_raw": st.session_state.get('doc_horse_raw') or [],
         "x_raw": st.session_state.get('x_raw') or [],
         "x_tweets": st.session_state.get('x_tweets') or [],
@@ -331,6 +727,7 @@ def save_race_cache(race_key: str) -> None:
         "bet_plan_settings": st.session_state.get('bet_plan_settings') or {},
         "bet_plan_result": st.session_state.get('bet_plan_result') or {},
         "bet_type_odds": st.session_state.get('bet_type_odds') or {},
+        "recent_runs": st.session_state.get(_recent_runs_session_key(race_key)) or {},
     }
     tmp_path = cache_path + ".tmp"
     try:
@@ -374,6 +771,7 @@ def load_race_cache(race_key: str) -> bool:
     st.session_state['web_raw'] = data.get('web_raw', [])
     st.session_state['youtube_raw'] = data.get('youtube_raw', [])
     st.session_state['web_articles'] = data.get('web_articles', [])
+    st.session_state['race_metadata'] = data.get('race_metadata', {}) or {}
     st.session_state['doc_horse_raw'] = data.get('doc_horse_raw', [])
     st.session_state['x_raw'] = data.get('x_raw', [])
     st.session_state['x_tweets'] = data.get('x_tweets', [])
@@ -384,6 +782,12 @@ def load_race_cache(race_key: str) -> bool:
     st.session_state['bet_plan_settings'] = data.get('bet_plan_settings', {}) or {}
     st.session_state['bet_plan_result'] = data.get('bet_plan_result', {}) or {}
     st.session_state['bet_type_odds'] = data.get('bet_type_odds', {}) or {}
+    recent_key = _recent_runs_session_key(race_key)
+    recent_runs_payload = data.get('recent_runs')
+    if isinstance(recent_runs_payload, dict):
+        st.session_state[recent_key] = recent_runs_payload
+    else:
+        st.session_state.pop(recent_key, None)
     if data.get('latest_odds_error'):
         st.session_state['latest_odds_error'] = data.get('latest_odds_error')
     else:
@@ -467,6 +871,80 @@ def _to_text(value) -> str:
     if isinstance(value, dict):
         return json.dumps(value, ensure_ascii=False).strip()
     return str(value).strip()
+
+
+def _split_body_weight_text(text: str) -> tuple[str, str]:
+    normalized = re.sub(r"\s+", "", _to_text(text))
+    if not normalized or normalized in {"-", "--", "---", "計不"}:
+        return "", ""
+    match = re.match(r"(?P<weight>\d{3})(?:\((?P<delta>[+-]?\d+)\))?", normalized)
+    if not match:
+        return normalized, ""
+    weight = match.group("weight") or ""
+    delta = match.group("delta") or ""
+    if delta and not delta.startswith(("+", "-")):
+        delta = f"+{delta}"
+    return weight, delta
+
+
+def _format_style_distribution(df: pd.DataFrame) -> str:
+    if df is None or df.empty:
+        return ""
+    style_col = next((c for c in ("脚質", "戦法", "脚質傾向") if c in df.columns), None)
+    if not style_col:
+        return ""
+    order = ("逃げ", "先行", "差し", "追込", "自在")
+    counts = {label: 0 for label in order}
+    unknown = 0
+    for value in df[style_col].astype(str).tolist():
+        text = _to_text(value)
+        matched = False
+        for label in order:
+            if label in text:
+                counts[label] += 1
+                matched = True
+                break
+        if not matched:
+            unknown += 1
+    parts = [f"{label}{count}" for label, count in counts.items() if count > 0]
+    if unknown:
+        parts.append(f"未判定{unknown}")
+    return " / ".join(parts)
+
+
+def _format_race_metadata_line(race: RaceInfo | None, metadata: dict | None) -> str:
+    metadata = metadata if isinstance(metadata, dict) else {}
+    parts: list[str] = []
+    start_time = _to_text(metadata.get("start_time"))
+    if start_time:
+        parts.append(f"発走 {start_time}")
+    weather = _to_text(metadata.get("weather"))
+    if weather:
+        parts.append(f"天候 {weather}")
+    track_conditions = metadata.get("track_conditions")
+    surface = _to_text(getattr(race, "surface", "")) if race else ""
+    if isinstance(track_conditions, dict):
+        condition = ""
+        if surface:
+            condition = _to_text(track_conditions.get(surface))
+            if not condition and surface == "ダート":
+                condition = _to_text(track_conditions.get("ダ"))
+        if condition:
+            parts.append(f"{surface} {condition}")
+        else:
+            for key in ("芝", "ダート", "障害"):
+                value = _to_text(track_conditions.get(key))
+                if value:
+                    parts.append(f"{key} {value}")
+    raw = _to_text(metadata.get("race_data01"))
+    if raw and not parts:
+        parts.append(raw)
+    return " / ".join(parts)
+
+
+@st.cache_data(ttl=300)
+def _fetch_race_metadata_cached(race_id: str) -> dict:
+    return fetch_race_metadata(race_id) or {}
 
 
 def _find_balanced_json_block(text: str, opening: str, closing: str) -> str:
@@ -784,6 +1262,59 @@ def _extract_youtube_analysis_payload(response_text: str) -> tuple[list[dict], d
     return _normalize_youtube_analysis_rows(cleaned, horse_names), conclusion
 
 
+def _derive_video_conclusion_from_rows(rows: list[dict], horse_names: list[str]) -> dict:
+    """馬別抽出結果から本命/対抗/単穴の最低限の結論を推定する。"""
+    if not rows:
+        return {}
+
+    horse_scores = defaultdict(float)
+    horse_penalty = defaultdict(float)
+
+    for item in rows:
+        if not isinstance(item, dict):
+            continue
+        horse = _match_horse_name_from_text(_to_text(item.get("馬名")), horse_names)
+        if not horse:
+            continue
+
+        plus = _to_text(item.get("プラス情報"))
+        minus = _to_text(item.get("マイナス情報"))
+        if plus and not _is_unknown_like_text(plus) and plus != "特になし":
+            horse_scores[horse] += 1.0
+        if minus and not _is_unknown_like_text(minus) and minus != "特になし":
+            horse_scores[horse] -= 0.45
+            horse_penalty[horse] += 1.0
+
+    if not horse_scores:
+        return {}
+
+    ranked = sorted(
+        horse_scores.items(),
+        key=lambda x: (x[1], -horse_penalty.get(x[0], 0.0), len(_to_text(x[0]))),
+        reverse=True,
+    )
+    ordered_horses = [horse for horse, score in ranked if score > 0]
+    if not ordered_horses:
+        ordered_horses = [horse for horse, _ in ranked]
+    if not ordered_horses:
+        return {}
+
+    conclusion = {"本命": ordered_horses[0]}
+    if len(ordered_horses) >= 2:
+        conclusion["対抗"] = ordered_horses[1]
+    if len(ordered_horses) >= 3:
+        conclusion["単穴"] = ordered_horses[2]
+    if len(ordered_horses) >= 4:
+        conclusion["連下"] = "、".join(ordered_horses[3:7])
+
+    if horse_penalty:
+        danger_horses = sorted(horse_penalty.items(), key=lambda x: x[1], reverse=True)
+        danger = [horse for horse, penalty in danger_horses if penalty > 0 and horse not in ordered_horses[:3]]
+        if danger:
+            conclusion["危険な人気馬"] = danger[0]
+    return conclusion
+
+
 def _youtube_model_candidates() -> list[str]:
     """YouTube解析で利用するモデル候補を優先順で返す。"""
     models = []
@@ -823,6 +1354,61 @@ def _generate_content_with_youtube_model(client, contents):
     if last_error:
         raise last_error
     raise RuntimeError("Failed to generate content with YouTube model")
+
+
+def _web_model_candidates() -> list[str]:
+    """Web記事解析で利用するモデル候補を優先順で返す。"""
+    models = []
+    for model_name in (GEMINI_MODEL_WEB, GEMINI_MODEL):
+        name = (model_name or "").strip()
+        if name and name not in models:
+            models.append(name)
+
+    # Pro系が詰まったときはFlash系に切り替える
+    if models:
+        primary = models[0]
+        if "pro" in primary and "flash" not in primary:
+            flash_variant = primary.replace("pro", "flash")
+            if flash_variant and flash_variant not in models:
+                models.append(flash_variant)
+
+    # gemini-2.0 系は新規ユーザーで 404 になりやすいため候補から除外する
+    for fallback in (GEMINI_MODEL_WEB_FALLBACK,):
+        name = (fallback or "").strip()
+        if name and name not in models:
+            models.append(name)
+    return models
+
+
+def _generate_content_with_web_model(client, contents):
+    """
+    Web記事解析は高負荷で503が出やすいため、モデルを段階的にフォールバックする。
+    """
+    candidates = _web_model_candidates()
+    if not candidates:
+        raise ValueError("Gemini model is not configured for web analysis")
+
+    last_error = None
+    for idx, model_name in enumerate(candidates):
+        try:
+            return client.models.generate_content(
+                model=model_name,
+                contents=contents
+            )
+        except Exception as e:
+            last_error = e
+            msg = (str(e) or "").lower()
+            is_model_error = any(token in msg for token in ("not found", "unknown model", "unsupported model", "404"))
+            is_transient_error = _is_transient_gemini_error(msg)
+            if idx < len(candidates) - 1 and (is_model_error or is_transient_error):
+                if is_transient_error:
+                    time.sleep(1.2)
+                continue
+            raise
+
+    if last_error:
+        raise last_error
+    raise RuntimeError("Failed to generate content with web model")
 
 # ====================
 # 全出走馬名取得
@@ -930,6 +1516,53 @@ def _text_contains_term(text: str, term: str) -> bool:
     return False
 
 
+def _build_youtube_search_keyword(user_keyword: str) -> str:
+    """
+    YouTube検索語をコンテキスト補強する。
+    同名平レース向けに、開催日・会場・R番号・レース名が欠けていれば補完する。
+    """
+    base = unicodedata.normalize("NFKC", str(user_keyword or "")).strip()
+    if not base:
+        return get_youtube_default_keyword()
+
+    r = get_race_config()
+    if not r:
+        return base
+
+    additions: list[str] = []
+    seen: set[str] = set()
+
+    race_date = getattr(r, "date", None)
+    if isinstance(race_date, date):
+        additions.extend([
+            race_date.strftime("%Y/%m/%d"),
+            f"{race_date.month}/{race_date.day}",
+        ])
+    additions.extend([
+        str(getattr(r, "venue", "") or "").strip(),
+        str(getattr(r, "race_number", "") or "").strip(),
+        str(getattr(r, "race_name", "") or "").strip(),
+        "予想",
+    ])
+
+    missing_terms: list[str] = []
+    for term in additions:
+        candidate = term.strip()
+        if not candidate:
+            continue
+        normalized = _normalize_text_for_match(candidate)[1]
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        if _text_contains_term(base, candidate):
+            continue
+        missing_terms.append(candidate)
+
+    if not missing_terms:
+        return base
+    return f"{base} {' '.join(missing_terms)}".strip()
+
+
 def _build_youtube_race_terms() -> list[str]:
     r = get_race_config()
     if not r:
@@ -950,6 +1583,131 @@ def _build_youtube_race_terms() -> list[str]:
             continue
         terms.append(val)
     return terms[:8]
+
+
+def _is_generic_race_name(race_name: str) -> bool:
+    normalized = unicodedata.normalize("NFKC", str(race_name or ""))
+    if not normalized:
+        return False
+    keywords = (
+        "未勝利",
+        "新馬",
+        "1勝クラス",
+        "2勝クラス",
+        "3勝クラス",
+        "4歳以上",
+        "3歳以上",
+        "障害",
+        "平場",
+    )
+    if any(k in normalized for k in keywords):
+        return True
+    return bool(re.search(r"\d歳", normalized))
+
+
+def _build_youtube_context_terms() -> dict:
+    r = get_race_config()
+    if not r:
+        return {
+            "generic_race": False,
+            "target_venue": "",
+            "target_date": None,
+            "venue_terms": [],
+            "race_number_terms": [],
+            "date_terms": [],
+        }
+
+    race_name = str(getattr(r, "race_name", "") or "").strip()
+    venue = str(getattr(r, "venue", "") or "").strip()
+    race_number = str(getattr(r, "race_number", "") or "").strip()
+    race_date = getattr(r, "date", None)
+
+    venue_terms = [venue, f"{venue}競馬場"] if venue else []
+
+    race_number_terms: list[str] = []
+    m = re.search(r"(\d{1,2})", race_number)
+    if m:
+        n = int(m.group(1))
+        race_number_terms = [f"{n}R", f"{n:02d}R", f"第{n}レース", f"{n}レース"]
+
+    date_terms: list[str] = []
+    if isinstance(race_date, date):
+        date_terms = [
+            race_date.strftime("%Y/%m/%d"),
+            race_date.strftime("%Y-%m-%d"),
+            f"{race_date.month}/{race_date.day}",
+            f"{race_date.month:02d}/{race_date.day:02d}",
+            f"{race_date.month}月{race_date.day}日",
+        ]
+
+    return {
+        "generic_race": _is_generic_race_name(race_name),
+        "target_venue": venue,
+        "target_date": race_date if isinstance(race_date, date) else None,
+        "venue_terms": venue_terms,
+        "race_number_terms": race_number_terms,
+        "date_terms": date_terms,
+    }
+
+
+def _has_non_target_venue_mention(text: str, target_venue: str) -> bool:
+    target = unicodedata.normalize("NFKC", str(target_venue or "")).strip()
+    mentioned = [venue for venue in JRA_VENUE_NAMES if _text_contains_term(text, venue)]
+    if not mentioned:
+        return False
+    if not target:
+        return False
+    return any(venue != target for venue in mentioned)
+
+
+def _extract_date_mentions(text: str) -> list[tuple[int | None, int, int]]:
+    normalized = unicodedata.normalize("NFKC", str(text or ""))
+    mentions: list[tuple[int | None, int, int]] = []
+    seen: set[tuple[int | None, int, int]] = set()
+
+    patterns = [
+        (r"(20\d{2})[/-](\d{1,2})[/-](\d{1,2})", True),
+        (r"(\d{1,2})月(\d{1,2})日", False),
+        (r"(?<!\d)(\d{1,2})/(\d{1,2})(?!\d)", False),
+    ]
+
+    for pattern, has_year in patterns:
+        for match in re.finditer(pattern, normalized):
+            try:
+                if has_year:
+                    yy = int(match.group(1))
+                    mm = int(match.group(2))
+                    dd = int(match.group(3))
+                else:
+                    yy = None
+                    mm = int(match.group(1))
+                    dd = int(match.group(2))
+                if not (1 <= mm <= 12 and 1 <= dd <= 31):
+                    continue
+                key = (yy, mm, dd)
+                if key in seen:
+                    continue
+                seen.add(key)
+                mentions.append(key)
+            except ValueError:
+                continue
+    return mentions
+
+
+def _has_non_target_date_mention(text: str, target_date: date | None) -> bool:
+    if not isinstance(target_date, date):
+        return False
+    mentions = _extract_date_mentions(text)
+    if not mentions:
+        return False
+
+    has_target = False
+    for yy, mm, dd in mentions:
+        if mm == target_date.month and dd == target_date.day and (yy in (None, target_date.year)):
+            has_target = True
+            continue
+        return True
+    return not has_target
 
 
 def _extract_race_like_mentions(text: str) -> list[str]:
@@ -1006,6 +1764,14 @@ def filter_relevant_videos(videos):
     if not race_terms:
         race_terms = ["競馬", "予想"]
 
+    context_terms = _build_youtube_context_terms()
+    generic_race = bool(context_terms.get("generic_race"))
+    target_venue = str(context_terms.get("target_venue") or "")
+    target_date = context_terms.get("target_date")
+    venue_terms = list(context_terms.get("venue_terms") or [])
+    race_number_terms = list(context_terms.get("race_number_terms") or [])
+    date_terms = list(context_terms.get("date_terms") or [])
+
     scored = []
     desc_only_candidates = []
 
@@ -1018,16 +1784,34 @@ def filter_relevant_videos(videos):
         if any(token in channel for token in [t.lower() for t in exclude_channel_tokens]):
             continue
 
+        context_has_venue = any(_text_contains_term(text, term) for term in venue_terms) if venue_terms else False
+        context_has_race_no = any(_text_contains_term(text, term) for term in race_number_terms) if race_number_terms else False
+        context_has_date = any(_text_contains_term(text, term) for term in date_terms) if date_terms else False
+        strong_context = (context_has_venue and context_has_race_no) or (context_has_date and context_has_race_no)
+
+        if generic_race:
+            if _has_non_target_venue_mention(text, target_venue):
+                continue
+            if _has_non_target_date_mention(text, target_date):
+                continue
+            if race_number_terms and venue_terms and not strong_context:
+                continue
+
         title_has_target = any(_text_contains_term(title_raw, term) for term in race_terms)
         desc_has_target = any(_text_contains_term(desc_raw, term) for term in race_terms)
         text_has_target = title_has_target or desc_has_target
 
         if strict_race and not text_has_target:
-            continue
+            if generic_race and strong_context:
+                pass
+            else:
+                continue
         if strict_race and not title_has_target:
             if _title_has_non_target_race_mentions(title_raw, race_terms):
                 continue
             if desc_has_target:
+                desc_only_candidates.append((2 if strong_context else 1, v))
+            elif generic_race and strong_context:
                 desc_only_candidates.append((1, v))
             continue
 
@@ -1042,6 +1826,13 @@ def filter_relevant_videos(videos):
         for k in exclude_keywords:
             if _text_contains_term(text, k):
                 score -= 3
+        if generic_race:
+            if context_has_venue:
+                score += 2
+            if context_has_race_no:
+                score += 2
+            if context_has_date:
+                score += 1
 
         threshold = 3 if strict_race else 2
         if score >= threshold:
@@ -1212,7 +2003,7 @@ def _analyze_video_with_direct_url(video: dict, prompt: str) -> tuple[list[dict]
     return [], {}
 
 
-def analyze_video_with_gemini(video):
+def analyze_video_with_gemini(video, suppress_streamlit_warning: bool = False, horse_names: list[str] | None = None):
     """
     Gemini APIを使って動画のタイトルと概要欄を解析し、馬名とプラス/マイナス情報を抽出する関数
 
@@ -1226,7 +2017,8 @@ def analyze_video_with_gemini(video):
     if GEMINI_API_KEY == "YOUR_GEMINI_API_KEY_HERE" or not GEMINI_API_KEY:
         return [], {}
 
-    horse_names = get_all_horse_names()
+    if horse_names is None:
+        horse_names = get_all_horse_names()
 
     def _build_prompt(content_label: str, content: str) -> str:
         # Gemini に送るプロンプトを作成（前走成績・調教・調子を具体的に抽出）
@@ -1398,54 +2190,71 @@ def analyze_video_with_gemini(video):
         if _is_transient_gemini_error(error_msg):
             raise
         # それ以外の予期しないエラーのみ表示
-        st.warning(f"⚠️ 動画の解析をスキップしました: {type(e).__name__}")
+        if not suppress_streamlit_warning:
+            st.warning(f"⚠️ 動画の解析をスキップしました: {type(e).__name__}")
         return [], {}
 
 
-def _analyze_one_video_worker(video, prompt_template):
+def _build_youtube_summary_dataframe(all_analysis_results: list[dict]) -> pd.DataFrame:
+    """YouTube生データから表示用summary DataFrameを生成する。"""
+    if not all_analysis_results:
+        return pd.DataFrame(columns=['馬名', 'プラス情報', 'プラス出典', 'マイナス情報', 'マイナス出典'])
+
+    df_data = []
+    for result in all_analysis_results:
+        if not isinstance(result, dict):
+            continue
+        title = _to_text(result.get('video_title'))
+        url = _to_text(result.get('video_url'))
+        source_label = f"[{title[:40]}...]({url})" if title or url else ""
+        row = {
+            '馬名': _to_text(result.get('馬名')) or '不明',
+            'プラス情報': _to_text(result.get('プラス情報')) or '特になし',
+            'プラス出典': source_label,
+            'マイナス情報': _to_text(result.get('マイナス情報')) or '特になし',
+            'マイナス出典': source_label,
+        }
+        df_data.append(row)
+    if not df_data:
+        return pd.DataFrame(columns=['馬名', 'プラス情報', 'プラス出典', 'マイナス情報', 'マイナス出典'])
+    return pd.DataFrame(df_data)
+
+
+def _analyze_one_video_worker(video: dict, horse_names: list[str]) -> tuple[list[dict], dict]:
     """
     1動画を解析するワーカー関数。ThreadPoolExecutorから呼ばれる。
     Streamlit APIは呼ばない（スレッドアンセーフのため）。
     """
-    client = google_genai.Client(api_key=GEMINI_API_KEY)
-    for retry in range(3):
-        try:
-            response = _generate_content_with_youtube_model(
-                client,
-                [
-                    genai_types.Part(
-                        file_data=genai_types.FileData(
-                            file_uri=video['video_url'],
-                            mime_type='video/mp4'
-                        )
-                    ),
-                    prompt_template
-                ]
+    try:
+        analysis_results, video_conclusion = analyze_video_with_gemini(
+            video,
+            suppress_streamlit_warning=True,
+            horse_names=horse_names,
+        )
+        analysis_results = _normalize_youtube_analysis_rows(analysis_results, horse_names)
+        for item in analysis_results:
+            item['video_url'] = _to_text(video.get('video_url'))
+            item['video_title'] = _to_text(video.get('title'))
+
+        text_hint = "\n".join([
+            _to_text(video.get('title')),
+            _to_text(video.get('description'))[:1200],
+        ])
+        rule_conclusion = _extract_video_conclusion_from_text(text_hint, horse_names)
+        merged_conclusion = _merge_video_conclusion(video_conclusion, rule_conclusion)
+        if not _has_meaningful_video_conclusion(merged_conclusion):
+            merged_conclusion = _merge_video_conclusion(
+                merged_conclusion,
+                _derive_video_conclusion_from_rows(analysis_results, horse_names),
             )
-            response_text = response.text or ""
-            results = _parse_gemini_json_response(response_text, expected="list")
-            for r in results:
-                r['video_url'] = video['video_url']
-                r['video_title'] = video['title']
-            return results
-        except (json.JSONDecodeError, ValueError):
-            return []
-        except Exception as e:
-            error_msg = str(e)
-            if _is_transient_gemini_error(error_msg):
-                if retry < 2:
-                    time.sleep(3 * (retry + 1))  # 3秒、6秒で再試行
-                else:
-                    return []
-            else:
-                return []
-    return []
+        return analysis_results, merged_conclusion
+    except Exception:
+        return [], {}
 
 
 def analyze_all_videos_with_gemini(videos, horse_names=None, status_placeholder=None):
     """
-    YouTube動画リストをGemini APIで解析する。
-    各動画のURLをGeminiに直接渡して動画を視聴・解析させる（1動画1APIコール）。
+    YouTube動画リストをGemini APIで解析する（2並列）。
 
     引数:
         videos (list): 動画情報のリスト
@@ -1453,52 +2262,24 @@ def analyze_all_videos_with_gemini(videos, horse_names=None, status_placeholder=
         status_placeholder: st.empty()のプレースホルダー（進捗表示用、省略可）
 
     戻り値:
-        list: 抽出された情報のリスト（馬名、プラス情報、マイナス情報、video_url、video_titleを含む辞書）
+        tuple: (summary_df, raw_results, conclusion_map)
     """
+    empty_df = pd.DataFrame(columns=['馬名', 'プラス情報', 'プラス出典', 'マイナス情報', 'マイナス出典'])
     if not videos or not GEMINI_API_KEY:
-        return []
+        return empty_df, [], {}
 
     if horse_names is None:
         horse_names = get_all_horse_names()
 
-    race_name = get_race_display_name()
-    all_horses_str = "\n".join([f"- {name}" for name in horse_names])
-
-    prompt_template = f"""この動画は{race_name}の競馬予想動画です。
-動画の内容を視聴し、以下の出走馬について評価情報を抽出してください。
-
-# {race_name} 全出走馬リスト
-{all_horses_str}
-
-# 抽出してほしい情報（各馬について）
-プラス情報: 前走・近走の成績、調教・追切の様子、追切タイム（数値を保持）、体調・調子、コース・距離適性、騎手・厩舎の強み
-マイナス情報: 前走・近走での敗因、調教不安、コース・距離の不安、枠順・展開の不安
-
-# 出力形式
-```json
-[
-  {{
-    "馬名": "馬の名前",
-    "プラス情報": "具体的な好材料を2～3文で記載（追切タイムがあれば数値を含める）",
-    "マイナス情報": "具体的な懸念点を記載（なければ「特になし」）"
-  }}
-]
-```
-
-# 注意事項
-- 動画で言及されている馬のみ出力（言及のない馬は出力しない）
-- 1本の動画に複数の馬が登場する場合は複数エントリーを出力
-- JSONのみ出力し、前後に説明文を付けないこと
-"""
-
-    MAX_WORKERS = 2  # 2並列（レート制限リスクと速度のバランス）
+    max_workers = 2  # 2並列（レート制限リスクと速度のバランス）
     total = len(videos)
-    all_results = []
+    all_results: list[dict] = []
+    conclusion_map: dict[str, dict] = {}
     completed = 0
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_video = {
-            executor.submit(_analyze_one_video_worker, v, prompt_template): v
+            executor.submit(_analyze_one_video_worker, v, horse_names): v
             for v in videos
         }
         for future in as_completed(future_to_video):
@@ -1506,16 +2287,22 @@ def analyze_all_videos_with_gemini(videos, horse_names=None, status_placeholder=
             video = future_to_video[future]
             if status_placeholder:
                 status_placeholder.info(
-                    f"🎬 {completed}/{total}件完了 | 最新: {video['title'][:35]}..."
+                    f"🎬 {completed}/{total}件完了 | 最新: {_to_text(video.get('title'))[:35]}..."
                 )
             try:
-                results = future.result()
-                if results:
-                    all_results.extend(results)
+                results, conclusion = future.result()
             except Exception:
-                pass
+                continue
+            if results:
+                all_results.extend(results)
+            if conclusion:
+                vid_key = _to_text(video.get('video_id') or video.get('video_url'))
+                if vid_key:
+                    existing = conclusion_map.get(vid_key, {})
+                    conclusion_map[vid_key] = _merge_video_conclusion(existing, conclusion)
 
-    return all_results
+    summary_df = _build_youtube_summary_dataframe(all_results)
+    return summary_df, all_results, conclusion_map
 
 
 def create_summary_dataframe(videos):
@@ -1536,33 +2323,22 @@ def create_summary_dataframe(videos):
     est_min = max(1, (n + 1) // 2) * 3  # 2並列、1動画3分として計算
     status_text.info(f"⏱️ {n}件を2並列で解析します（推定 {est_min}〜{est_min + 3} 分）")
 
-    # 各動画のURLをGeminiに直接渡して2並列解析（1動画1APIコール）
-    all_analysis_results = analyze_all_videos_with_gemini(
+    # 各動画を2並列解析
+    summary_df, all_analysis_results, conclusion_map = analyze_all_videos_with_gemini(
         videos, horse_names=horse_names, status_placeholder=status_text
     )
+    if conclusion_map:
+        st.session_state.setdefault('yt_video_conclusions', {})
+        st.session_state['yt_video_conclusions'].update(conclusion_map)
 
     status_text.empty()
 
-    # 解析結果をデータフレーム形式に変換
-    df_data = []
-    for result in all_analysis_results:
-        row = {
-            '馬名': result.get('馬名', '不明'),
-            'プラス情報': result.get('プラス情報', '特になし'),
-            'プラス出典': f"[{result.get('video_title', '')[:40]}...]({result.get('video_url', '')})",
-            'マイナス情報': result.get('マイナス情報', '特になし'),
-            'マイナス出典': f"[{result.get('video_title', '')[:40]}...]({result.get('video_url', '')})"
-        }
-        df_data.append(row)
-
-    if df_data:
-        df = pd.DataFrame(df_data)
-        st.success(f"✅ {len(videos)}本の動画の解析が完了しました！（合計 {len(df_data)} 件の情報を抽出）")
+    if not summary_df.empty:
+        st.success(f"✅ {len(videos)}本の動画の解析が完了しました！（合計 {len(summary_df)} 件の情報を抽出）")
     else:
-        df = pd.DataFrame(columns=['馬名', 'プラス情報', 'プラス出典', 'マイナス情報', 'マイナス出典'])
         st.warning("⚠️ 解析結果が空です。Gemini APIキーが設定されているか確認してください。")
 
-    return df, all_analysis_results
+    return summary_df, all_analysis_results
 
 
 @st.cache_data(ttl=3600)
@@ -1662,13 +2438,14 @@ def normalize_tavily_results(results, query):
         seen_urls.add(url)
 
         title = (item.get("title") or "").strip() or url
-        snippet = (
-            (item.get("raw_content") or "").strip()[:3500]
-            or (item.get("content") or "").strip()
-            or f"Tavily検索結果: {query}"
-        )
-        snippet = re.sub(r'\s+', ' ', snippet).strip()
         domain = urlparse(url).netloc.replace("www.", "") if url else "tavily"
+        domain_l = _to_text(domain).lower()
+        if domain_l in WEB_SEARCH_EXCLUDED_HOSTS:
+            continue
+
+        snippet = _select_best_tavily_snippet(item, query)
+        if _estimate_mojibake_score(f"{title} {snippet}") >= 14 and not _contains_japanese_text(title + snippet):
+            continue
 
         articles.append({
             "title": title,
@@ -1679,6 +2456,56 @@ def normalize_tavily_results(results, query):
         })
 
     return articles
+
+
+def _estimate_mojibake_score(text: str) -> int:
+    """文字化けらしさを雑に点数化する。"""
+    t = _to_text(text)
+    if not t:
+        return 0
+    suspicious_tokens = ("繝", "縺", "荳", "螳", "逧", "鬥ｬ", "譛", "邨", "霑", "�")
+    score = 0
+    for token in suspicious_tokens:
+        score += t.count(token)
+    return score
+
+
+def _clean_web_text(text: str) -> str:
+    cleaned = _to_text(text)
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned
+
+
+def _select_best_tavily_snippet(item: dict, query: str) -> str:
+    """
+    Tavilyのcontent/raw_contentから、文字化けが少なく情報量のある方を選ぶ。
+    """
+    content = _clean_web_text(item.get("content"))
+    raw_content = _clean_web_text(item.get("raw_content"))[:3500]
+
+    candidates = []
+    if content:
+        candidates.append(("content", content))
+    if raw_content:
+        candidates.append(("raw", raw_content))
+
+    if not candidates:
+        return f"Tavily検索結果: {query}"
+
+    def _quality(payload: str) -> int:
+        score = 0
+        length = len(payload)
+        if length >= 120:
+            score += 2
+        elif length >= 40:
+            score += 1
+        if _contains_japanese_text(payload):
+            score += 2
+        score -= min(12, _estimate_mojibake_score(payload))
+        return score
+
+    best_payload = max(candidates, key=lambda x: _quality(x[1]))[1]
+    return best_payload
 
 
 def _is_transient_gemini_error(error_msg: str) -> bool:
@@ -1735,6 +2562,49 @@ def _extract_query_tokens(query: str) -> list[str]:
     return tokens[:12]
 
 
+def _get_uncovered_horse_names(all_horse_names: list[str]) -> list[str]:
+    """
+    現在のhorse_df上で、プラス/マイナス情報が未取得の馬名を返す。
+    初回（horse_df未作成時）は全馬を未カバーとして扱う。
+    """
+    normalized_names = []
+    seen = set()
+    for horse in all_horse_names or []:
+        name = _to_text(horse)
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        normalized_names.append(name)
+
+    if not normalized_names:
+        return []
+
+    horse_df = st.session_state.get('horse_df')
+    if horse_df is None or horse_df.empty or '馬名' not in horse_df.columns:
+        return normalized_names
+
+    # horse_dfを馬名->行に正規化（同名重複時は最初の1件を採用）
+    row_map = {}
+    for _, row in horse_df.iterrows():
+        name = _to_text(row.get('馬名'))
+        if not name or name in row_map:
+            continue
+        row_map[name] = row
+
+    uncovered = []
+    for horse in normalized_names:
+        row = row_map.get(horse)
+        if row is None:
+            uncovered.append(horse)
+            continue
+        plus_count = _count_info_items(row.get('メリット'))
+        minus_count = _count_info_items(row.get('デメリット'))
+        if (plus_count + minus_count) <= 0:
+            uncovered.append(horse)
+
+    return uncovered
+
+
 def _select_articles_for_analysis(
     articles,
     race_name: str,
@@ -1751,7 +2621,8 @@ def _select_articles_for_analysis(
 
     race_tokens = [race_name, race_name.replace(" 2026", "").strip(), race_name.replace(" 2025", "").strip()]
     race_tokens = [t for t in race_tokens if t]
-    horse_tokens = [h for h in (horse_names or [])[:12] if h]
+    horse_tokens = [h for h in (horse_names or [])[:18] if h]
+    uncovered_horse_tokens = set(_get_uncovered_horse_names(horse_names))
     query_tokens = _extract_query_tokens(query)
     expect_ja = _contains_japanese_text(" ".join(race_tokens) + " " + query)
 
@@ -1766,10 +2637,18 @@ def _select_articles_for_analysis(
         host = (parsed.netloc or "").lower() if parsed else ""
         path = (parsed.path or "/") if parsed else "/"
 
+        race_hits = sum(1 for token in race_tokens if token and token in text)
+        horse_hits = sum(1 for horse in horse_tokens if horse and horse in text)
+        uncovered_hits = sum(1 for horse in uncovered_horse_tokens if horse and horse in text)
+        query_hits = sum(1 for token in query_tokens if token and token in text_l)
+
         score = 0
-        score += sum(1 for token in race_tokens if token in text) * 3
-        score += sum(1 for horse in horse_tokens if horse in text) * 2
-        score += sum(1 for token in query_tokens if token and token in text_l) * 2
+        score += race_hits * 3
+        score += horse_hits * 2
+        if uncovered_hits > 0:
+            # 未カバー馬への言及を優先して、全頭カバー率を改善する
+            score += 2.0
+        score += query_hits * 2
         if "/db/race/" in url or "/race/" in url:
             score += 2
         if "/racedata/graderace/" in url or "/race_newsdet.php" in url:
@@ -1782,24 +2661,30 @@ def _select_articles_for_analysis(
             score -= 4
         if "日本最大の競馬情報サービス" in title:
             score -= 3
+        if "race program" in text_l or "calendar" in text_l:
+            score -= 6
         if len(snippet) < 120:
             score -= 1
+        if race_hits == 0 and horse_hits == 0:
+            score -= 3
         if expect_ja and not _contains_japanese_text(text):
             score -= 5
+        if host in WEB_SEARCH_EXCLUDED_HOSTS and expect_ja:
+            score -= 10
         if "en.netkeiba.com" in host and expect_ja:
-            score -= 6
+            score -= 10
+        if _estimate_mojibake_score(text) >= 10:
+            score -= 8
 
         scored.append((score, article))
 
     scored.sort(key=lambda x: x[0], reverse=True)
     selected = [article for score, article in scored if score >= 0][:max_items]
-    if not selected:
-        selected = [scored[0][1]]
     return selected
 
 
 @st.cache_data(ttl=1800)
-def search_web_articles_with_tavily(query, max_articles=5, include_domains=None):
+def search_web_articles_with_tavily(query, max_articles=5, include_domains=None, topic="news"):
     """
     Tavily APIでWeb記事を検索する関数。
     """
@@ -1813,7 +2698,7 @@ def search_web_articles_with_tavily(query, max_articles=5, include_domains=None)
         "search_depth": "advanced",
         "include_answer": False,
         "include_raw_content": True,
-        "topic": "general",
+        "topic": topic or "news",
     }
     if include_domains:
         payload["include_domains"] = include_domains
@@ -1903,10 +2788,7 @@ def analyze_web_article_with_gemini(article_info):
 - 馬名が全く見当たらない場合のみ「全体的な予想」として1件だけ出力
 - JSONのみ出力し、前後に説明文を付けないこと
 """
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt
-        )
+        response = _generate_content_with_web_model(client, prompt)
 
         response_text = response.text
         if not response_text:
@@ -2384,6 +3266,242 @@ def search_x_tweets(race_name, accounts, max_tweets=30, since_id=None):
             break
 
     return all_tweets, newest_id
+
+
+def _build_x_broad_query(
+    race_name: str,
+    jockey_names: list[str],
+    *,
+    include_lang_ja: bool,
+    max_query_len: int = 512,
+) -> str:
+    race_terms = _build_x_race_terms(race_name)
+    base_race = race_terms[0] if race_terms else _to_text(race_name).replace('"', "").strip()
+    if not base_race:
+        return ""
+
+    cleaned_jockeys = []
+    seen = set()
+    for jockey in jockey_names or []:
+        name = _to_text(jockey).replace('"', "").strip()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        cleaned_jockeys.append(name)
+
+    topic_expr = "(予想 OR 本命 OR 印 OR 展開 OR 調教 OR 追い切り OR 追切 OR 馬券)"
+    suffix = f"{topic_expr} -is:retweet"
+    if include_lang_ja:
+        suffix += " lang:ja"
+
+    # 512文字制限に収まるまで騎手名を削減する
+    entity_terms = [base_race] + cleaned_jockeys
+    while entity_terms:
+        or_expr = " OR ".join(f"\"{term}\"" for term in entity_terms if term)
+        query = f"({or_expr}) {suffix}".strip()
+        if len(query) <= max_query_len:
+            return query
+        if len(entity_terms) == 1:
+            break
+        entity_terms.pop()
+
+    # 最小構成（レース名のみ）
+    query = f"(\"{base_race}\") -is:retweet"
+    if include_lang_ja:
+        query += " lang:ja"
+    return query if len(query) <= max_query_len else ""
+
+
+def search_x_tweets_broad(race_name: str, jockey_names: list[str], max_tweets: int = 50, since_id=None):
+    """
+    X API v2 recent search の広域モード。
+    クエリ: ("レース名" OR "騎手名1" OR ...) lang:ja -is:retweet
+    """
+    if not X_BEARER_TOKEN:
+        return [], None
+
+    headers = {"Authorization": f"Bearer {X_BEARER_TOKEN}"}
+    api_endpoints = [
+        "https://api.x.com/2/tweets/search/recent",
+        "https://api.twitter.com/2/tweets/search/recent",
+    ]
+    active_api_url = api_endpoints[0]
+
+    queries = []
+    for include_lang in (True, False):
+        q = _build_x_broad_query(race_name, jockey_names, include_lang_ja=include_lang, max_query_len=512)
+        if q:
+            queries.append(q)
+    # フォールバック: race_name のみ
+    fallback_q = _build_x_broad_query(race_name, [], include_lang_ja=True, max_query_len=512)
+    if fallback_q:
+        queries.append(fallback_q)
+    queries = list(dict.fromkeys([q for q in queries if q]))
+    if not queries:
+        return [], None
+
+    all_tweets = []
+    seen_ids: set[str] = set()
+    newest_id = None
+    request_count = 0
+
+    def _request_with_fallback(params: dict):
+        nonlocal active_api_url
+        try:
+            return requests.get(active_api_url, headers=headers, params=params, timeout=15), None
+        except requests.RequestException as first_error:
+            if active_api_url != api_endpoints[0]:
+                return None, first_error
+            try:
+                resp = requests.get(api_endpoints[1], headers=headers, params=params, timeout=15)
+                active_api_url = api_endpoints[1]
+                st.info("ℹ️ api.x.com への接続が不安定なため api.twitter.com にフォールバックしました。")
+                return resp, None
+            except requests.RequestException as fallback_error:
+                return None, fallback_error
+
+    for query in queries:
+        next_token = None
+        while len(all_tweets) < max_tweets and request_count < X_MAX_REQUESTS_PER_UPDATE:
+            params = {
+                "query": query,
+                "max_results": min(100, max_tweets - len(all_tweets)),
+                "tweet.fields": "created_at,public_metrics,author_id",
+                "expansions": "author_id",
+                "user.fields": "username",
+            }
+            if since_id:
+                params["since_id"] = str(since_id)
+            if next_token:
+                params["next_token"] = next_token
+
+            resp, req_error = _request_with_fallback(params)
+            request_count += 1
+            if req_error is not None:
+                st.warning(f"⚠️ X API接続エラー: {req_error}")
+                break
+            if resp is None:
+                break
+            if resp.status_code in {401, 403}:
+                st.error("❌ X API認証エラー: Bearer Tokenを確認してください")
+                return [], None
+            if resp.status_code == 429:
+                st.warning("⚠️ X APIレート制限に達しました。時間をおいて再試行してください。")
+                return all_tweets, newest_id
+            if resp.status_code != 200:
+                # 1クエリ失敗でも次クエリを試す
+                break
+
+            data = resp.json()
+            users = {u.get("id"): u.get("username", "") for u in data.get("includes", {}).get("users", [])}
+            tweets = data.get("data", [])
+            if not tweets:
+                break
+
+            for tw in tweets:
+                if len(all_tweets) >= max_tweets:
+                    break
+                tweet_id = _to_text(tw.get("id"))
+                if not tweet_id or tweet_id in seen_ids:
+                    continue
+                seen_ids.add(tweet_id)
+                username = _to_text(users.get(tw.get("author_id", "")))
+                all_tweets.append(
+                    {
+                        "tweet_id": tweet_id,
+                        "text": _to_text(tw.get("text")),
+                        "author_username": username,
+                        "author_label": username,
+                        "created_at": _to_text(tw.get("created_at")),
+                        "url": f"https://x.com/{username}/status/{tweet_id}" if username else "",
+                        "public_metrics": tw.get("public_metrics", {}),
+                    }
+                )
+                if _is_newer_tweet_id(tweet_id, newest_id):
+                    newest_id = tweet_id
+
+            next_token = _to_text(data.get("meta", {}).get("next_token"))
+            if not next_token:
+                break
+
+        if len(all_tweets) >= max_tweets or request_count >= X_MAX_REQUESTS_PER_UPDATE:
+            break
+
+    if request_count >= X_MAX_REQUESTS_PER_UPDATE and len(all_tweets) < max_tweets:
+        st.caption(f"ℹ️ X検索はコスト上限 ({X_MAX_REQUESTS_PER_UPDATE} リクエスト) に達したため途中で終了しました。")
+
+    return all_tweets, newest_id
+
+
+def fetch_and_analyze_x_tweets_broad(race_name: str, jockey_names: list[str], max_tweets: int = 50):
+    """
+    same-day モード向け広域X検索 + Gemini馬別解析。
+    """
+    if not X_BEARER_TOKEN:
+        st.warning("⚠️ X_BEARER_TOKENが未設定です。.envファイルを確認してください。")
+        return [], []
+
+    since_id = st.session_state.get('x_newest_id')
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    status_text.info("𝕏 same-day 広域検索を実行中...")
+    progress_bar.progress(0.2)
+
+    tweets = []
+    newest_id = None
+    for attempt in range(2):
+        try:
+            tweets, newest_id = search_x_tweets_broad(race_name, jockey_names, max_tweets=max_tweets, since_id=since_id)
+            break
+        except Exception as e:
+            if attempt == 1:
+                st.warning(f"⚠️ same-day X検索に失敗しました: {type(e).__name__} ({str(e)[:120]})")
+                progress_bar.empty()
+                status_text.empty()
+                return [], []
+            time.sleep(2)
+
+    if not tweets and since_id:
+        status_text.info("𝕏 差分検索0件のため same-day 全件再検索中...")
+        try:
+            tweets, newest_id = search_x_tweets_broad(race_name, jockey_names, max_tweets=max_tweets, since_id=None)
+        except Exception:
+            pass
+
+    if tweets:
+        tweets, dropped_count = _filter_x_tweets_by_race_name(tweets, race_name)
+        if dropped_count > 0:
+            st.caption(f"ℹ️ 対象レース外の投稿を {dropped_count} 件除外しました。")
+
+    progress_bar.progress(0.5)
+    if not tweets:
+        progress_bar.empty()
+        status_text.empty()
+        st.info("ℹ️ same-day 広域検索で該当ツイートを取得できませんでした。")
+        return [], []
+
+    status_text.info(f"𝕏 {len(tweets)}件のツイートを解析中...")
+    horse_names = get_all_horse_names()
+    raw_results = []
+    for attempt in range(3):
+        try:
+            raw_results = analyze_x_tweets_with_gemini(tweets, horse_names)
+            break
+        except Exception as e:
+            if attempt < 2 and _is_transient_gemini_error(str(e)):
+                time.sleep(2)
+                continue
+            st.warning(f"⚠️ X投稿のGemini解析に失敗しました: {type(e).__name__} ({str(e)[:120]})")
+            break
+
+    if newest_id:
+        st.session_state['x_newest_id'] = newest_id
+
+    progress_bar.progress(1.0)
+    progress_bar.empty()
+    status_text.empty()
+    return tweets, raw_results
 
 
 def analyze_x_tweets_with_gemini(tweets, horse_names):
@@ -3041,8 +4159,18 @@ def _match_horse_name_from_text(text: str, horse_names: list[str]) -> str:
             if score > best_score:
                 best_score = score
                 best_name = horse
-        if best_name and best_score >= 0.6:
-            return best_name
+        if best_name:
+            if best_score >= 0.6:
+                return best_name
+            norm_best = _normalize_horse_token(best_name)
+            common_prefix = 0
+            for c1, c2 in zip(norm_head, norm_best):
+                if c1 != c2:
+                    break
+                common_prefix += 1
+            # 先頭一致が十分ある場合は、1〜2文字の誤記を許容
+            if best_score >= 0.52 and common_prefix >= 4:
+                return best_name
     return ""
 
 
@@ -3838,7 +4966,7 @@ def _build_tavily_domain_plans(include_domains) -> list[list[str] | None]:
     """
     Tavily検索のドメイン制約プランを返す。
     - 明示指定あり: その指定のみ
-    - 未指定: 非Umanity優先 → 既定allowlist → 制限なし
+    - 未指定: 非Umanity優先 → 既定allowlist
     """
     if include_domains is not None:
         cleaned = []
@@ -3854,7 +4982,6 @@ def _build_tavily_domain_plans(include_domains) -> list[list[str] | None]:
     plans_raw = [
         list(WEB_SEARCH_PRIORITY_DOMAINS),
         list(WEB_SEARCH_ALLOWLIST),
-        None,
     ]
     plans = []
     seen_plan_keys = set()
@@ -3931,6 +5058,17 @@ def fetch_and_analyze_web_articles(
     race_name = get_race_display_name()
     all_horse_names = get_all_horse_names()
 
+    # クエリ重複を除去して処理時間を抑える
+    deduped_queries = []
+    seen_queries = set()
+    for q in queries:
+        normalized = _to_text(q)
+        if not normalized or normalized in seen_queries:
+            continue
+        seen_queries.add(normalized)
+        deduped_queries.append(normalized)
+    queries = deduped_queries
+
     # 全馬名を4頭ずつグループ化した馬別クエリを自動追加
     if auto_add_horse_queries:
         batch_size = 4
@@ -3939,10 +5077,42 @@ def fetch_and_analyze_web_articles(
             horses_str = " ".join(batch)
             queries = list(queries) + [f"{race_name} {horses_str} 予想 評価 分析"]
 
+    # 追加後も重複除去
+    deduped_queries = []
+    seen_queries = set()
+    for q in queries:
+        normalized = _to_text(q)
+        if not normalized or normalized in seen_queries:
+            continue
+        seen_queries.add(normalized)
+        deduped_queries.append(normalized)
+    queries = deduped_queries
+
+    truncated_query_count = 0
+    if WEB_BULK_MAX_QUERIES > 0 and len(queries) > WEB_BULK_MAX_QUERIES:
+        truncated_query_count = len(queries) - WEB_BULK_MAX_QUERIES
+        queries = queries[:WEB_BULK_MAX_QUERIES]
+
     all_articles = []
     all_web_raw = []
     seen_article_keys = set()
     tavily_domain_plans = _build_tavily_domain_plans(include_domains)
+    analyze_call_count = 0
+    started_at = time.monotonic()
+    budget_stop_reason = ""
+
+    def _current_budget_stop_reason() -> str:
+        nonlocal budget_stop_reason
+        if budget_stop_reason:
+            return budget_stop_reason
+        elapsed = time.monotonic() - started_at
+        if WEB_BULK_MAX_SECONDS > 0 and elapsed >= WEB_BULK_MAX_SECONDS:
+            budget_stop_reason = f"実行時間が上限（{WEB_BULK_MAX_SECONDS}秒）に達した"
+            return budget_stop_reason
+        if WEB_BULK_MAX_ANALYZE_CALLS > 0 and analyze_call_count >= WEB_BULK_MAX_ANALYZE_CALLS:
+            budget_stop_reason = f"Web記事解析回数が上限（{WEB_BULK_MAX_ANALYZE_CALLS}回）に達した"
+            return budget_stop_reason
+        return ""
 
     progress_bar = st.progress(0)
     status_text = st.empty()
@@ -3952,8 +5122,14 @@ def fetch_and_analyze_web_articles(
         status_text.empty()
         return [], []
     tavily_warned = False
+    if truncated_query_count > 0:
+        st.info(f"ℹ️ Web一括検索の安定化のため、クエリを {total_queries} 件に絞って実行します（{truncated_query_count}件省略）。")
 
     for q_idx, query in enumerate(queries):
+        stop_reason = _current_budget_stop_reason()
+        if stop_reason:
+            st.info(f"ℹ️ Web一括検索を途中終了しました（{stop_reason}）。")
+            break
         if len(all_articles) >= total_article_limit:
             break
 
@@ -3963,7 +5139,7 @@ def fetch_and_analyze_web_articles(
         if remaining == 0:
             break
 
-        # 1) Tavily優先（既定時は非Umanity優先 → allowlist全体 → 制限なし）
+        # 1) Tavily優先（既定時は非Umanity優先 → allowlist全体）
         tavily_error = None
         if TAVILY_API_KEY:
             for plan_idx, domain_plan in enumerate(tavily_domain_plans):
@@ -4037,7 +5213,8 @@ def fetch_and_analyze_web_articles(
         # レース/馬名との関連が高い記事を優先して複数件解析する
         articles = articles[:max(remaining, 5)]
         limit_items = min(MAX_ANALYZE_ARTICLES_PER_QUERY, remaining)
-        candidate_limit = min(max(6, limit_items * 3), max(remaining, 6))
+        analyze_attempt_limit = min(max(limit_items * 4, limit_items + 4), max(remaining, 10))
+        candidate_limit = min(max(8, analyze_attempt_limit + 2), max(remaining + 4, 10))
         unique_articles = _select_articles_for_analysis(
             articles,
             race_name=race_name,
@@ -4068,11 +5245,11 @@ def fetch_and_analyze_web_articles(
             selected_article_keys.add(article_key)
             if domain:
                 selected_domains.add(domain)
-            if len(selected_articles) >= limit_items:
+            if len(selected_articles) >= analyze_attempt_limit:
                 break
 
         # 2パス目: 不足分を関連度順で補充
-        if len(selected_articles) < limit_items:
+        if len(selected_articles) < analyze_attempt_limit:
             for article in unique_articles:
                 url_key = _to_text(article.get("url", "")).strip().lower()
                 title_key = _to_text(article.get("title", "")).strip().lower()
@@ -4083,7 +5260,7 @@ def fetch_and_analyze_web_articles(
                     continue
                 selected_articles.append(article)
                 selected_article_keys.add(article_key)
-                if len(selected_articles) >= limit_items:
+                if len(selected_articles) >= analyze_attempt_limit:
                     break
 
         for key in selected_article_keys:
@@ -4109,7 +5286,7 @@ def fetch_and_analyze_web_articles(
                         continue
                     seen_article_keys.add(article_key)
                     selected_articles.append(article)
-                    if len(selected_articles) >= limit_items:
+                    if len(selected_articles) >= analyze_attempt_limit:
                         break
                 if selected_articles:
                     status_text.info("↪ Tavily関連薄のため Gemini検索結果で補完しました")
@@ -4122,34 +5299,378 @@ def fetch_and_analyze_web_articles(
         progress_bar.progress((q_idx + 0.5) / total_queries)
 
         successful_articles = []
-        for a_idx, article in enumerate(selected_articles):
+        skipped_no_horse_rows = 0
+        for article in selected_articles:
+            stop_reason = _current_budget_stop_reason()
+            if stop_reason:
+                break
+            if len(successful_articles) >= limit_items:
+                break
             article_title = _to_text(article.get('title', '')) if isinstance(article, dict) else ""
             status_text.info(f"🤖 Web記事を解析中... {(article_title or '無題')[:30]}...")
             results = []
             analyze_error = None
-            for retry in range(3):
+            max_retries = 4
+            for retry in range(max_retries):
+                stop_reason = _current_budget_stop_reason()
+                if stop_reason:
+                    break
                 try:
+                    analyze_call_count += 1
                     results = analyze_web_article_with_gemini(article)
                     break
                 except Exception as e:
                     analyze_error = e
-                    if retry < 2:
-                        time.sleep(2)
+                    if retry < max_retries - 1:
+                        if _is_transient_gemini_error(str(e)):
+                            wait_sec = min(12, 3 * (retry + 1))
+                            status_text.info(f"⏳ Gemini高負荷のため再試行中... ({retry + 1}/{max_retries - 1})")
+                            time.sleep(wait_sec)
+                            continue
+                        # 非一時エラー（404 等）はリトライしても無駄 → 即 break
+                        break
             if not results and analyze_error:
                 msg = str(analyze_error)
-                st.warning(f"⚠️ Web記事解析に失敗しました: {type(analyze_error).__name__} ({msg[:120]})")
+                if "no horse-level web analysis rows" in msg.lower():
+                    skipped_no_horse_rows += 1
+                elif _is_transient_gemini_error(msg):
+                    st.info("ℹ️ Gemini混雑のため一部記事の解析をスキップしました。")
+                else:
+                    st.warning(f"⚠️ Web記事解析に失敗しました: {type(analyze_error).__name__} ({msg[:120]})")
             if results:
                 all_web_raw.extend(results)
                 successful_articles.append(article)
+        if skipped_no_horse_rows:
+            st.info(f"ℹ️ 馬別情報が抽出できないWeb記事を{skipped_no_horse_rows}件スキップしました。")
 
         if successful_articles:
             all_articles.extend(successful_articles)
 
         progress_bar.progress((q_idx + 1) / total_queries)
 
+        stop_reason = _current_budget_stop_reason()
+        if stop_reason:
+            st.info(f"ℹ️ Web一括検索を途中終了しました（{stop_reason}）。")
+            break
+
     progress_bar.empty()
     status_text.empty()
     return all_articles, all_web_raw
+
+
+@st.cache_data(ttl=86400)
+def _fetch_horse_profile_cached(horse_id: str, _session: requests.Session | None = None) -> dict:
+    """
+    馬プロフィールを horse_id 単位でキャッシュする。
+    _session はキャッシュキーから除外し、未ヒット時のみ Keep-Alive 接続で取得する。
+    """
+    return fetch_horse_profile(horse_id, session=_session)
+
+
+def _to_float(value, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def _build_horse_profile_raw_rows(horse_profiles: list[dict], race: RaceInfo | None = None) -> list[dict]:
+    """
+    馬プロフィール統計を、馬別のプラス/マイナス情報へ整形する。
+    """
+    target_surface = ""
+    target_distance = None
+    target_venue = ""
+    if race:
+        target_surface = "芝" if "芝" in _to_text(getattr(race, "surface", "")) else (
+            "ダート" if "ダ" in _to_text(getattr(race, "surface", "")) else ""
+        )
+        m = re.search(r"(\d{3,4})", _to_text(getattr(race, "distance", "")))
+        if m:
+            try:
+                target_distance = int(m.group(1))
+            except ValueError:
+                target_distance = None
+        target_venue = _to_text(getattr(race, "venue", ""))
+
+    rows: list[dict] = []
+    for profile in horse_profiles:
+        if not isinstance(profile, dict):
+            continue
+        horse_name = _to_text(profile.get("horse_name"))
+        if not horse_name:
+            continue
+
+        total_starts = int(profile.get("total_starts") or 0)
+        wins = int(profile.get("wins") or 0)
+        top3 = int(profile.get("top3") or 0)
+        win_rate = _to_float(profile.get("win_rate"))
+        top3_rate = _to_float(profile.get("top3_rate"))
+        if total_starts <= 0:
+            # 新馬・初出走などで戦績ゼロでも、馬別情報ゼロ件化を避けるため最小情報を残す。
+            rows.append(
+                {
+                    "馬名": horse_name,
+                    "プラス情報": "戦績データ未登録（初出走・新規登録）で上積み余地あり。",
+                    "マイナス情報": "通算成績データがなく、客観比較材料は限定的。",
+                    "source_url": _to_text(profile.get("url")),
+                    "source_title": f"馬データ: {horse_name}",
+                    "source_type": "web_profile",
+                }
+            )
+            continue
+
+        plus_points = [f"通算{total_starts}戦{wins}勝・複勝率{top3_rate:.1f}%。"]
+        minus_points: list[str] = []
+
+        if win_rate >= 20.0:
+            plus_points.append(f"勝率{win_rate:.1f}%で勝ち切る力がある。")
+        elif total_starts >= 6 and win_rate <= 5.0:
+            minus_points.append(f"勝率{win_rate:.1f}%で勝ち切り実績は少なめ。")
+
+        if top3_rate >= 40.0:
+            plus_points.append("複勝圏への安定感が高い。")
+        elif total_starts >= 6 and top3_rate < 20.0:
+            minus_points.append("複勝圏率が低く、安定感に課題。")
+
+        surface_stats = profile.get("surface_stats") if isinstance(profile.get("surface_stats"), dict) else {}
+        if target_surface and target_surface in surface_stats:
+            s_stat = surface_stats.get(target_surface) or {}
+            s_starts = int(s_stat.get("starts") or 0)
+            s_rate = _to_float(s_stat.get("top3_rate"))
+            if s_starts >= 2:
+                if s_rate >= 40.0:
+                    plus_points.append(f"{target_surface}で複勝率{s_rate:.1f}%。馬場適性が高い。")
+                elif s_rate < 20.0:
+                    minus_points.append(f"{target_surface}で複勝率{s_rate:.1f}%。馬場適性に不安。")
+
+        venue_stats = profile.get("venue_stats") if isinstance(profile.get("venue_stats"), dict) else {}
+        if target_venue and target_venue in venue_stats:
+            v_stat = venue_stats.get(target_venue) or {}
+            v_starts = int(v_stat.get("starts") or 0)
+            v_rate = _to_float(v_stat.get("top3_rate"))
+            if v_starts >= 1:
+                if v_rate >= 40.0:
+                    plus_points.append(f"{target_venue}実績あり（{v_starts}戦・複勝率{v_rate:.1f}%）。")
+                elif v_starts >= 2 and v_rate < 20.0:
+                    minus_points.append(f"{target_venue}実績は低調（{v_starts}戦・複勝率{v_rate:.1f}%）。")
+
+        distance_stats = profile.get("distance_stats") if isinstance(profile.get("distance_stats"), dict) else {}
+        if target_distance and distance_stats:
+            distance_candidates = []
+            for key, stat in distance_stats.items():
+                try:
+                    dist = int(key)
+                except (TypeError, ValueError):
+                    continue
+                distance_candidates.append((abs(dist - target_distance), dist, stat))
+            if distance_candidates:
+                distance_candidates.sort(key=lambda x: x[0])
+                diff, dist, d_stat = distance_candidates[0]
+                d_starts = int((d_stat or {}).get("starts") or 0)
+                d_rate = _to_float((d_stat or {}).get("top3_rate"))
+                if d_starts >= 2 and diff <= 200:
+                    if d_rate >= 40.0:
+                        plus_points.append(f"{dist}m前後で複勝率{d_rate:.1f}%。距離適性は高め。")
+                    elif d_rate < 20.0:
+                        minus_points.append(f"{dist}m前後で複勝率{d_rate:.1f}%。距離対応は課題。")
+
+        recent_runs = profile.get("recent_runs") if isinstance(profile.get("recent_runs"), list) else []
+        recent_finishes = []
+        for run in recent_runs[:5]:
+            if not isinstance(run, dict):
+                continue
+            try:
+                recent_finishes.append(int(run.get("finish")))
+            except (TypeError, ValueError):
+                continue
+        if len(recent_finishes) >= 3:
+            recent_top3 = sum(1 for x in recent_finishes if x <= 3)
+            if recent_top3 >= 2:
+                plus_points.append("近走で複勝圏が複数あり、近況は上向き。")
+            elif len(recent_finishes) >= 5 and recent_top3 == 0:
+                minus_points.append("近5走で複勝圏がなく、近況は強調しづらい。")
+
+        plus_text = " ".join(dict.fromkeys([p for p in plus_points if _to_text(p)]))
+        minus_text = " ".join(dict.fromkeys([m for m in minus_points if _to_text(m)])) or "特になし"
+
+        rows.append(
+            {
+                "馬名": horse_name,
+                "プラス情報": plus_text or "特になし",
+                "マイナス情報": minus_text,
+                "source_url": _to_text(profile.get("url")),
+                "source_title": f"馬データ: {horse_name}",
+                "source_type": "web_profile",
+            }
+        )
+
+    return rows
+
+
+def _build_oikiri_raw_rows(oikiri_items: list[dict]) -> list[dict]:
+    """
+    追切コメントを馬別評価へ整形する（追切以外コメントは除外）。
+    """
+    rows: list[dict] = []
+    for item in oikiri_items or []:
+        if not isinstance(item, dict):
+            continue
+        horse_name = _to_text(item.get("horse_name"))
+        comment = _to_text(item.get("comment"))
+        rank = _to_text(item.get("rank")).upper()
+        if not horse_name or not comment:
+            continue
+        if not _is_training_comment_candidate(comment):
+            continue
+
+        is_negative_rank = rank in {"C", "D", "E"}
+        has_negative_word = bool(re.search(r"遅れ|平凡|不安|物足り|鈍い|重い|下降|割引", comment))
+        if is_negative_rank or has_negative_word:
+            plus_info = "特になし"
+            minus_info = f"{comment}（評価{rank or '-'}）"
+        else:
+            plus_info = f"{comment}（評価{rank or '-'}）"
+            minus_info = "特になし"
+
+        rows.append(
+            {
+                "馬名": horse_name,
+                "プラス情報": plus_info,
+                "マイナス情報": minus_info,
+                "source_url": _to_text(item.get("source_url")),
+                "source_title": _to_text(item.get("source_title")) or f"追切コメント: {horse_name}",
+                "source_type": "oikiri",
+            }
+        )
+    return rows
+
+
+def fetch_and_analyze_same_day_sources(
+    race_id: str,
+    *,
+    race: RaceInfo | None = None,
+    max_analyze: int = 3,
+    max_profile_horses: int = 18,
+) -> tuple[list[dict], list[dict], list[str]]:
+    """
+    当日モード向け:
+    - netkeiba レース詳細ページのGemini解析
+    - 馬データページの統計整形
+    - 追切コメント（公開時のみ）の整形
+    """
+    session = build_requests_session()
+    articles = fetch_netkeiba_race_column(race_id, session=session)
+    # Umanity平レースは現時点でURL未確定。将来実装時の呼び出し口だけ保持。
+    _ = fetch_umanity_flat_racecard(race_id)
+
+    picked_articles = articles[: max(1, int(max_analyze))] if articles else []
+    all_raw: list[dict] = []
+    warnings: list[str] = []
+
+    # 1) Web記事（従来）
+    if picked_articles:
+        for article in picked_articles:
+            title = _to_text(article.get("title")) or "無題"
+            results = []
+            last_error = None
+            for retry in range(3):
+                try:
+                    results = analyze_web_article_with_gemini(article)
+                    break
+                except Exception as e:
+                    last_error = e
+                    if retry < 2 and _is_transient_gemini_error(str(e)):
+                        time.sleep(2 * (retry + 1))
+                        continue
+                    break
+
+            if results:
+                all_raw.extend(results)
+            elif last_error is not None:
+                warnings.append(f"{title}: {type(last_error).__name__} ({str(last_error)[:120]})")
+    else:
+        warnings.append("netkeiba の当日ソース（記事）を取得できませんでした。")
+
+    # 2) 馬データページ（horse_id -> profile）
+    horse_entries = fetch_race_horse_ids(race_id, session=session)
+    horse_profiles: list[dict] = []
+    cache_rehydrated = False
+    if horse_entries:
+        limit = max(1, min(int(max_profile_horses), len(horse_entries)))
+        for idx, entry in enumerate(horse_entries[:limit]):
+            horse_id = _to_text(entry.get("horse_id"))
+            horse_name = _to_text(entry.get("horse_name"))
+            if not horse_id:
+                continue
+            try:
+                profile = _fetch_horse_profile_cached(horse_id, _session=session) or {}
+            except Exception:
+                profile = {}
+
+            # 以前の失敗結果（空キャッシュ）が残っている場合は、当該セッションで復旧を試みる。
+            starts = int(profile.get("total_starts") or 0) if isinstance(profile, dict) else 0
+            if starts <= 0:
+                if not cache_rehydrated:
+                    try:
+                        _fetch_horse_profile_cached.clear()
+                    except Exception:
+                        pass
+                    cache_rehydrated = True
+                    try:
+                        profile = _fetch_horse_profile_cached(horse_id, _session=session) or {}
+                    except Exception:
+                        profile = {}
+                    starts = int(profile.get("total_starts") or 0) if isinstance(profile, dict) else 0
+                if starts <= 0:
+                    try:
+                        direct_profile = fetch_horse_profile(horse_id, session=session) or {}
+                    except Exception:
+                        direct_profile = {}
+                    if isinstance(direct_profile, dict) and direct_profile:
+                        profile = direct_profile
+
+            if profile:
+                if not _to_text(profile.get("horse_name")) and horse_name:
+                    profile["horse_name"] = horse_name
+                horse_profiles.append(profile)
+            if idx < (limit - 1):
+                time.sleep(0.6)
+    else:
+        warnings.append("出馬表から horse_id を解決できませんでした。")
+
+    profile_rows = _build_horse_profile_raw_rows(horse_profiles, race=race)
+    all_raw.extend(profile_rows)
+    if horse_entries and not profile_rows:
+        warnings.append("馬データページから有効な馬別情報を整形できませんでした。")
+
+    # 3) 追切コメント（公開時のみ）
+    try:
+        oikiri_items = fetch_oikiri_comments(race_id, session=session)
+    except Exception:
+        oikiri_items = []
+    oikiri_rows = _build_oikiri_raw_rows(oikiri_items)
+    all_raw.extend(oikiri_rows)
+    if not oikiri_items:
+        warnings.append("追切コメントは未公開または取得不可でした（公開時に自動反映されます）。")
+
+    # 最終重複排除
+    deduped_raw: list[dict] = []
+    seen_keys: set[str] = set()
+    for item in all_raw:
+        if not isinstance(item, dict):
+            continue
+        fp = _raw_fingerprint(item)
+        if fp and fp in seen_keys:
+            continue
+        if fp:
+            seen_keys.add(fp)
+        deduped_raw.append(item)
+
+    if not deduped_raw and not warnings:
+        warnings.append("当日ソースの解析結果が空でした。")
+
+    return picked_articles, deduped_raw, warnings
 
 
 def extract_text_from_uploaded_file(uploaded_file):
@@ -4587,6 +6108,193 @@ def _format_rate_row(row: dict, label_col: str) -> str:
     if record:
         parts.append(f"着別{record}")
     return "（".join([parts[0], " / ".join(parts[1:])]) + "）" if len(parts) > 1 else parts[0]
+
+
+@st.cache_data(ttl=86400)
+def _fetch_course_stats_cached(venue: str, distance: str, surface: str) -> dict:
+    """
+    会場×距離×馬場のコース統計を24時間キャッシュする。
+    """
+    session = build_requests_session()
+    return fetch_course_stats(venue, distance, surface, session=session)
+
+
+def _format_course_stat_line(row: dict) -> str:
+    label = _to_text((row or {}).get("label"))
+    starts = int((row or {}).get("starts") or 0)
+    top3 = int((row or {}).get("top3") or 0)
+    rate = _to_float((row or {}).get("top3_rate"))
+    if not label or starts <= 0:
+        return ""
+    return f"{label}（複勝率{rate:.1f}% / {top3}-{max(starts - top3, 0)}）"
+
+
+def _build_course_stats_table(section: str, label_name: str, rows: list[dict]) -> dict:
+    table_rows = []
+    for row in rows or []:
+        label = _to_text((row or {}).get("label"))
+        starts = int((row or {}).get("starts") or 0)
+        wins = int((row or {}).get("wins") or 0)
+        top3 = int((row or {}).get("top3") or 0)
+        outside_top3 = int((row or {}).get("outside_top3") or max(starts - top3, 0))
+        win_rate = _to_float((row or {}).get("win_rate"), (wins / starts) * 100 if starts > 0 else 0.0)
+        rate = _to_float((row or {}).get("top3_rate"))
+        outside_rate = _to_float((row or {}).get("outside_top3_rate"), (outside_top3 / starts) * 100 if starts > 0 else 0.0)
+        if not label or starts <= 0:
+            continue
+        row_data = {
+            label_name: label,
+            "着別度数": f"{top3}-{max(starts - top3, 0)}",
+            "複勝率": f"{rate:.1f}%",
+        }
+        if section == "枠順別成績":
+            row_data.update({
+                "1着": wins,
+                "1着率": f"{win_rate:.1f}%",
+                "それ以外": outside_top3,
+                "それ以外率": f"{outside_rate:.1f}%",
+            })
+        table_rows.append(row_data)
+    headers = [label_name, "着別度数", "複勝率"]
+    if section == "枠順別成績":
+        headers = [label_name, "1着", "1着率", "着別度数", "複勝率", "それ以外", "それ以外率"]
+    return {
+        "section": section,
+        "headers": headers,
+        "rows": table_rows,
+    }
+
+
+def _build_frame_rate_markdown(rows: list[dict]) -> str:
+    lines = ["| 枠 | 1着 | 複勝 | それ以外 | 出走数 |", "|---|---:|---:|---:|---:|"]
+    added = 0
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        label = _to_text(row.get("label"))
+        starts = int(row.get("starts") or 0)
+        if not label or starts <= 0:
+            continue
+        wins = int(row.get("wins") or 0)
+        top3 = int(row.get("top3") or 0)
+        outside_top3 = int(row.get("outside_top3") or max(starts - top3, 0))
+        win_rate = _to_float(row.get("win_rate"), (wins / starts) * 100 if starts > 0 else 0.0)
+        top3_rate = _to_float(row.get("top3_rate"))
+        outside_rate = _to_float(row.get("outside_top3_rate"), (outside_top3 / starts) * 100 if starts > 0 else 0.0)
+        lines.append(
+            f"| {label} | {win_rate:.1f}% ({wins}) | {top3_rate:.1f}% ({top3}) | "
+            f"{outside_rate:.1f}% ({outside_top3}) | {starts} |"
+        )
+        added += 1
+    return "\n".join(lines) if added else ""
+
+
+def get_race_characteristics_from_course_stats(
+    course_stats: dict,
+    race_name: str = "",
+    grade: str = "",
+    venue: str = "",
+    distance: str = "",
+    surface: str = "",
+    date_str: str = "",
+) -> dict:
+    """
+    netkeibaコース統計を既存 race_characteristics スキーマへ整形する。
+    """
+    if not isinstance(course_stats, dict) or not course_stats:
+        return {}
+
+    target = course_stats.get("target") if isinstance(course_stats.get("target"), dict) else {}
+    venue_text = _to_text(target.get("venue") or venue)
+    distance_text = _to_text(target.get("distance") or distance)
+    surface_text = _to_text(target.get("surface") or surface)
+    sample_count = int(course_stats.get("sample_race_count") or 0)
+    source_url = _to_text(course_stats.get("race_list_url"))
+
+    frame_rows = [r for r in (course_stats.get("frame_stats") or []) if isinstance(r, dict)]
+    style_rows = [r for r in (course_stats.get("style_stats") or []) if isinstance(r, dict)]
+    pop_rows = [r for r in (course_stats.get("popularity_stats") or []) if isinstance(r, dict)]
+    pace_tendency = _to_text(course_stats.get("pace_tendency"))
+
+    frame_sorted = sorted(frame_rows, key=lambda x: _to_float(x.get("top3_rate")), reverse=True)
+    style_sorted = sorted(style_rows, key=lambda x: _to_float(x.get("top3_rate")), reverse=True)
+    pop_sorted = sorted(pop_rows, key=lambda x: _to_float(x.get("top3_rate")), reverse=True)
+
+    frame_top = [x for x in frame_sorted[:2] if _to_text(x.get("label"))]
+    frame_bottom = [x for x in frame_sorted[-2:] if _to_text(x.get("label"))] if len(frame_sorted) >= 2 else []
+    style_top = [x for x in style_sorted[:2] if _to_text(x.get("label"))]
+    style_bottom = [x for x in style_sorted[-2:] if _to_text(x.get("label"))] if len(style_sorted) >= 2 else []
+
+    win_lines = [_format_course_stat_line(row) for row in style_top]
+    win_lines = [line for line in win_lines if line]
+    lose_lines = [_format_course_stat_line(row) for row in style_bottom]
+    lose_lines = [line for line in lose_lines if line]
+    favored_style_labels = [_to_text(row.get("label")) for row in style_top if _to_text(row.get("label"))]
+
+    past_lines: list[str] = []
+    if sample_count > 0:
+        past_lines.append(f"集計対象: 近年 {sample_count} レース（netkeiba race_list/result）")
+    if pop_sorted:
+        pop_line = _format_course_stat_line(pop_sorted[0])
+        if pop_line:
+            past_lines.append(f"人気傾向: {pop_line}")
+    if pace_tendency:
+        past_lines.append(f"勝ち馬脚質傾向: {pace_tendency}")
+
+    frame_top_text = " / ".join([_format_course_stat_line(x) for x in frame_top if _format_course_stat_line(x)])
+    frame_bottom_text = " / ".join([_format_course_stat_line(x) for x in frame_bottom if _format_course_stat_line(x)])
+    if not frame_bottom_text:
+        frame_bottom_text = "大きな偏りは見られません。"
+
+    if not win_lines:
+        win_lines = ["脚質データ不足のため、出馬表の近3走通過順を重視。"]
+    if not lose_lines:
+        lose_lines = ["極端に割引く脚質傾向は見られません。"]
+
+    data_tables = [
+        _build_course_stats_table("枠順別成績", "枠", frame_rows),
+        _build_course_stats_table("脚質別成績", "脚質", style_rows),
+        _build_course_stats_table("人気別成績", "人気帯", pop_rows),
+    ]
+    data_tables = [table for table in data_tables if table.get("rows")]
+
+    course_label = " ".join([x for x in (venue_text, f"{surface_text}{distance_text}") if x]).strip()
+    if not course_label:
+        course_label = "当該コース"
+
+    return {
+        "レース名": race_name,
+        "グレード": grade,
+        "開催日": date_str,
+        "開催場所": venue_text,
+        "距離": distance_text,
+        "馬場": surface_text,
+        "コース特徴": f"{course_label} の過去傾向を静的集計しました。",
+        "過去の傾向": "\n".join(past_lines) if past_lines else "集計データ不足のため傾向を判定できませんでした。",
+        "勝ちやすい馬のタイプ": "\n".join(win_lines),
+        "苦手な馬のタイプ": "\n".join(lose_lines),
+        "枠順有利": frame_top_text or "有利枠は判定不能（データ不足）",
+        "枠順不利": frame_bottom_text,
+        "枠別割合表": _build_frame_rate_markdown(frame_rows),
+        "騎手厩舎傾向": "人気・脚質・枠順を中心に算出。個別の騎手厩舎傾向は別途Web情報で補完してください。",
+        "注目ポイント": (
+            (
+                f"複勝率ベースでは{'・'.join(favored_style_labels)}が安定。"
+                + (f"勝ち切り傾向は{pace_tendency}のため、軸候補と相手候補を分けて評価してください。" if pace_tendency else "")
+            )
+            if favored_style_labels else
+            (
+                f"{pace_tendency}。近3走由来の脚質判定と組み合わせて評価してください。"
+                if pace_tendency else
+                "脚質傾向はサンプル数の影響を受けるため、馬別情報と合わせて判断してください。"
+            )
+        ),
+        "情報ソース": "netkeiba コース別成績（race_list/result静的集計）",
+        "情報ソースURL": source_url,
+        "情報取得方式": "netkeiba static scrape",
+        "schema_version": SAME_DAY_COURSE_STATS_RC_VERSION,
+        "データ分析テーブル": data_tables,
+    }
 
 
 def _build_race_characteristics_from_umanity(
@@ -5115,7 +6823,7 @@ def load_race_data(file_path, mtime=None):  # noqa: ARG001
         st.error(f"❌ データ読み込みエラー: {e}")
         return None
 
-def fetch_odds_and_gates(max_retries: int = 3, require_odds: bool = True):
+def fetch_odds_and_gates(max_retries: int = 3, require_odds: bool = True, allow_playwright: bool = True):
     """
     netkeiba.com から最新の枠番・馬番・オッズを取得する。
     netkeiba はJS描画のため Playwright を使用。
@@ -5155,17 +6863,21 @@ def fetch_odds_and_gates(max_retries: int = 3, require_odds: bool = True):
             waku_td = _find_td_by_class_prefix(row, "Waku")
             umaban_td = _find_td_by_class_prefix(row, "Umaban")
             odds_td = row.select_one('td.Txt_R.Popular') or row.select_one('td.Popular')
+            weight_td = row.find('td', class_='Weight')
 
             waku = waku_td.get_text(strip=True) if waku_td else ''
             umaban = umaban_td.get_text(strip=True) if umaban_td else ''
             odds = odds_td.get_text(strip=True) if odds_td else '---.-'
+            body_weight, body_delta = _split_body_weight_text(weight_td.get_text(" ", strip=True) if weight_td else "")
             if re.match(r'^\d+(\.\d+)?$', odds):
                 numeric_odds_count += 1
 
             result[horse_name] = {
                 '枠番': waku,
                 '馬番': umaban,
-                'オッズ': odds
+                'オッズ': odds,
+                '馬体重': body_weight,
+                '増減': body_delta,
             }
 
         if len(result) < 8:
@@ -5194,6 +6906,19 @@ def _find_td_by_class_prefix(row, prefix):
             return td
     return None
 
+def _split_body_weight_text(text):
+    normalized = re.sub(r'\s+', '', str(text or ''))
+    if not normalized or normalized in {'-', '--', '---', '計不'}:
+        return '', ''
+    m = re.match(r'(?P<weight>\d{3})(?:\((?P<delta>[+-]?\d+)\))?', normalized)
+    if not m:
+        return normalized, ''
+    weight = m.group('weight') or ''
+    delta = m.group('delta') or ''
+    if delta and not delta.startswith(('+', '-')):
+        delta = '+' + delta
+    return weight, delta
+
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=True)
     page = browser.new_page()
@@ -5220,10 +6945,14 @@ for row in table.find_all('tr'):
     waku_td = _find_td_by_class_prefix(row, "Waku")
     umaban_td = _find_td_by_class_prefix(row, "Umaban")
     odds_td = row.select_one('td.Txt_R.Popular') or row.select_one('td.Popular')
+    weight_td = row.find('td', class_='Weight')
+    body_weight, body_delta = _split_body_weight_text(weight_td.get_text(" ", strip=True) if weight_td else "")
     result[horse_name] = {
         "枠番": waku_td.get_text(strip=True) if waku_td else "",
         "馬番": umaban_td.get_text(strip=True) if umaban_td else "",
-        "オッズ": odds_td.get_text(strip=True) if odds_td else "---.-"
+        "オッズ": odds_td.get_text(strip=True) if odds_td else "---.-",
+        "馬体重": body_weight,
+        "増減": body_delta
     }
 
 print(json.dumps(result, ensure_ascii=False))
@@ -5241,57 +6970,58 @@ print(json.dumps(result, ensure_ascii=False))
             raise RuntimeError("subprocess returned empty output")
         return json.loads(payload)
 
-    for attempt in range(1, max_retries + 1):
-        browser = None
-        try:
-            from playwright.sync_api import sync_playwright
-            with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
-                page = browser.new_page()
-                page.goto(get_race_url(), wait_until='domcontentloaded', timeout=30000)
-                page.wait_for_selector('table.Shutuba_Table', timeout=15000)
-                page.wait_for_timeout(2500)  # オッズ描画待ち
-                content = page.content()
-                browser.close()
-                browser = None
-
-            result = _extract_from_html(content, require_odds)
-            return result, ""
-
-        except Exception as e:
-            errors.append(f"[{attempt}/{max_retries}] Playwright {type(e).__name__}: {e}")
-            if attempt < max_retries:
-                time.sleep(1.2 * attempt)
-        finally:
-            if browser:
-                try:
+    if allow_playwright:
+        for attempt in range(1, max_retries + 1):
+            browser = None
+            try:
+                from playwright.sync_api import sync_playwright
+                with sync_playwright() as p:
+                    browser = p.chromium.launch(headless=True)
+                    page = browser.new_page()
+                    page.goto(get_race_url(), wait_until='domcontentloaded', timeout=30000)
+                    page.wait_for_selector('table.Shutuba_Table', timeout=15000)
+                    page.wait_for_timeout(2500)  # オッズ描画待ち
+                    content = page.content()
                     browser.close()
-                except Exception:
-                    pass
+                    browser = None
 
-    # Streamlitの実行スレッドでPlaywrightが動かない環境向け（別プロセスで実行）
-    try:
-        result = _fetch_with_playwright_subprocess()
-        if require_odds:
-            numeric_odds_count = sum(
-                1 for v in result.values()
-                if re.match(r'^\d+(\.\d+)?$', str(v.get('オッズ', '')).strip())
-            )
-            min_required = max(5, len(result) // 2)
-            if numeric_odds_count < min_required:
-                raise RuntimeError(
-                    f"subprocess Playwright: オッズが十分取得できませんでした: {numeric_odds_count}/{len(result)}頭"
+                result = _extract_from_html(content, require_odds)
+                return result, ""
+
+            except Exception as e:
+                errors.append(f"[{attempt}/{max_retries}] Playwright {type(e).__name__}: {e}")
+                if attempt < max_retries:
+                    time.sleep(1.2 * attempt)
+            finally:
+                if browser:
+                    try:
+                        browser.close()
+                    except Exception:
+                        pass
+
+        # Streamlitの実行スレッドでPlaywrightが動かない環境向け（別プロセスで実行）
+        try:
+            result = _fetch_with_playwright_subprocess()
+            if require_odds:
+                numeric_odds_count = sum(
+                    1 for v in result.values()
+                    if re.match(r'^\d+(\.\d+)?$', str(v.get('オッズ', '')).strip())
                 )
-        return result, ""
-    except Exception as e:
-        errors.append(f"[subprocess] Playwright {type(e).__name__}: {e}")
+                min_required = max(5, len(result) // 2)
+                if numeric_odds_count < min_required:
+                    raise RuntimeError(
+                        f"subprocess Playwright: オッズが十分取得できませんでした: {numeric_odds_count}/{len(result)}頭"
+                    )
+            return result, ""
+        except Exception as e:
+            errors.append(f"[subprocess] Playwright {type(e).__name__}: {e}")
 
     # Playwrightが使えない環境向けフォールバック（Windowsイベントループ差異の回避）
     try:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
-        resp = requests.get(get_race_url(), headers=headers, timeout=20)
+        resp = requests.get(get_race_url(), headers=headers, timeout=(20 if allow_playwright else 8))
         resp.encoding = 'EUC-JP'
         result = _extract_from_html(resp.text, require_odds)
         return result, ""
@@ -5300,6 +7030,112 @@ print(json.dumps(result, ensure_ascii=False))
         errors.append(traceback.format_exc(limit=2))
 
     return {}, "\n".join(errors)
+
+
+def _auto_fetch_initial_gates_and_odds(csv_path: str, race_key: str) -> bool:
+    """
+    初回表示後に枠番・馬番・公開済みオッズ/馬体重を軽量取得する。
+    Playwright は使わず、未公開時の長時間ブロックを避ける。
+    """
+    if 'gates_saved' in st.session_state:
+        return False
+
+    def _is_missing_gate_value(v) -> bool:
+        text = str(v).strip() if v is not None else ""
+        return (text == "") or (text.lower() in {"nan", "none"}) or (text == "不明")
+
+    def _extract_numeric_odds_map(df_: pd.DataFrame) -> dict[str, str]:
+        odds_map = {}
+        if 'オッズ' not in df_.columns or '馬名' not in df_.columns:
+            return odds_map
+        for _, row in df_.iterrows():
+            horse = str(row.get('馬名', '')).strip()
+            odds = str(row.get('オッズ', '')).strip()
+            if horse and re.match(r'^\d+(\.\d+)?$', odds):
+                odds_map[horse] = odds
+        return odds_map
+
+    should_rerun = False
+    try:
+        csv_df = pd.read_csv(csv_path, encoding='utf-8-sig')
+        cached_latest_odds = st.session_state.get('latest_odds', {}) or {}
+        csv_numeric_odds = _extract_numeric_odds_map(csv_df)
+
+        with st.spinner("🏇 枠順・オッズを軽量確認中...（初回のみ）"):
+            gate_data, gate_error = fetch_odds_and_gates(
+                max_retries=1,
+                require_odds=False,
+                allow_playwright=False,
+            )
+
+        csv_updated = False
+        latest_numeric_odds: dict[str, str] = {}
+
+        if gate_data:
+            for col in ('馬体重', '増減'):
+                if col not in csv_df.columns:
+                    csv_df[col] = ""
+                    csv_updated = True
+
+            for idx, row in csv_df.iterrows():
+                horse = str(row.get('馬名', '')).strip()
+                if not horse or horse not in gate_data:
+                    continue
+                fetched = gate_data[horse]
+
+                waku = str(fetched.get('枠番', '')).strip()
+                umaban = str(fetched.get('馬番', '')).strip()
+                odds = str(fetched.get('オッズ', '')).strip()
+                body_weight = str(fetched.get('馬体重', '')).strip()
+                body_delta = str(fetched.get('増減', '')).strip()
+
+                if '枠番' in csv_df.columns and _is_missing_gate_value(row.get('枠番')) and waku:
+                    csv_df.at[idx, '枠番'] = waku
+                    csv_updated = True
+                if '馬番' in csv_df.columns and _is_missing_gate_value(row.get('馬番')) and umaban:
+                    csv_df.at[idx, '馬番'] = umaban
+                    csv_updated = True
+                if 'オッズ' in csv_df.columns and re.match(r'^\d+(\.\d+)?$', odds):
+                    latest_numeric_odds[horse] = odds
+                    if str(row.get('オッズ', '')).strip() != odds:
+                        csv_df.at[idx, 'オッズ'] = odds
+                        csv_updated = True
+                if body_weight and str(row.get('馬体重', '')).strip() != body_weight:
+                    csv_df.at[idx, '馬体重'] = body_weight
+                    csv_updated = True
+                if body_delta and str(row.get('増減', '')).strip() != body_delta:
+                    csv_df.at[idx, '増減'] = body_delta
+                    csv_updated = True
+
+            if csv_updated:
+                csv_df.to_csv(csv_path, index=False, encoding='utf-8-sig')
+                load_race_data.clear()
+                should_rerun = True
+
+        # オッズは「最新取得 > キャッシュ > CSV既存」の優先順で復元
+        if latest_numeric_odds:
+            st.session_state['latest_odds'] = latest_numeric_odds
+            st.session_state.pop('latest_odds_error', None)
+        elif cached_latest_odds:
+            st.session_state['latest_odds'] = cached_latest_odds
+            if gate_error:
+                st.session_state['latest_odds_error'] = gate_error
+        elif csv_numeric_odds:
+            st.session_state['latest_odds'] = csv_numeric_odds
+            st.session_state.pop('latest_odds_error', None)
+        elif gate_error:
+            st.session_state['latest_odds_error'] = gate_error
+
+        if gate_data and csv_updated:
+            st.toast(f"✅ {len(gate_data)}頭の枠順/馬番/オッズを更新しました", icon="🏇")
+
+        if gate_data or st.session_state.get('latest_odds'):
+            save_race_cache(race_key)
+
+    except Exception:
+        pass
+    st.session_state['gates_saved'] = True
+    return should_rerun
 
 
 # ====================
@@ -5672,15 +7508,34 @@ def _format_bet_type_list(items: list[str]) -> str:
 def _looks_like_unpublished_odds_html(html: str) -> bool:
     if not html:
         return False
-    text = re.sub(r'\s+', ' ', BeautifulSoup(html, 'html.parser').get_text(" ", strip=True))
+    soup = BeautifulSoup(html, 'html.parser')
+    text = re.sub(r'\s+', ' ', soup.get_text(" ", strip=True))
     hints = (
         "馬券発売開始後",
         "順次公開",
         "発売開始日時",
         "オッズは現在",
         "更新待ち",
+        "結果オッズ",
+        "公開されていません",
     )
-    return any(h in text for h in hints)
+    if any(h in text for h in hints):
+        return True
+
+    # odds table が存在するのに数値がなく placeholder だけの場合も未公開扱い
+    odds_cells = soup.select('td[cart-item], td[name*="_b"]')
+    if len(odds_cells) >= 20:
+        numeric_count = 0
+        placeholder_count = 0
+        for cell in odds_cells:
+            val = _to_text(cell.get_text(" ", strip=True))
+            if _safe_odds_float(val):
+                numeric_count += 1
+            elif "---" in val:
+                placeholder_count += 1
+        if numeric_count == 0 and placeholder_count >= max(12, int(len(odds_cells) * 0.6)):
+            return True
+    return False
 
 
 def fetch_multi_bet_type_odds(df_active: pd.DataFrame, selected_bet_types: list[str]) -> tuple[dict[str, dict[str, float]], list[str]]:
@@ -5720,15 +7575,10 @@ def fetch_multi_bet_type_odds(df_active: pd.DataFrame, selected_bet_types: list[
             warnings.append("単勝オッズを取得できませんでした。")
 
     non_single_types = [bt for bt in selected if bt != "単勝"]
+    api_unpublished_hint = False
     if non_single_types:
         api_status, api_reason = _check_jra_odds_api_status(str(r.race_id))
-        odds_unpublished = api_status in {"middle", "ng"} and ("empty" in api_reason or "result odds empty" in api_reason)
-        if odds_unpublished:
-            warnings.append("単勝以外の券種オッズは現在未公開です（発売前または更新待ち）。")
-            for bt in non_single_types:
-                odds_by_type[bt] = {}
-            return odds_by_type, warnings
-
+        api_unpublished_hint = api_status in {"middle", "ng"} and ("empty" in api_reason or "result odds empty" in api_reason)
         # 単勝以外のオッズURL候補を収集
         candidates, discover_warnings = _discover_bet_type_url_candidates(get_race_url(), str(r.race_id))
         warnings.extend(discover_warnings)
@@ -5769,7 +7619,7 @@ def fetch_multi_bet_type_odds(df_active: pd.DataFrame, selected_bet_types: list[
 
         odds_by_type[bet_type] = parsed
         if not parsed:
-            if unpublished_hint:
+            if unpublished_hint or api_unpublished_hint:
                 unpublished_types.append(bet_type)
             else:
                 detail = last_err.splitlines()[-1] if last_err else ""
@@ -5801,9 +7651,78 @@ def _count_info_items(text: str) -> int:
     return len(parts) if parts else 1
 
 
+_FRAME_PATTERN = re.compile(r'(\d)\s*枠')
+_STYLE_KEYWORDS = ("逃げ", "先行", "差し", "追込")
+
+
+def _extract_favored_frames(text: str) -> set[int]:
+    frames = set()
+    for m in _FRAME_PATTERN.finditer(_to_text(text)):
+        try:
+            n = int(m.group(1))
+            if 1 <= n <= 8:
+                frames.add(n)
+        except ValueError:
+            continue
+    return frames
+
+
+def _extract_favored_styles(text: str) -> set[str]:
+    t = _to_text(text)
+    return {kw for kw in _STYLE_KEYWORDS if kw in t}
+
+
+def _extract_frame_bonus_map(rc: dict, df_active: pd.DataFrame) -> dict[str, float]:
+    bonus: dict[str, float] = {}
+    if not isinstance(rc, dict) or df_active is None or df_active.empty:
+        return bonus
+    good_frames = _extract_favored_frames(rc.get('枠順有利', ''))
+    bad_frames = _extract_favored_frames(rc.get('枠順不利', ''))
+    if not good_frames and not bad_frames:
+        return bonus
+    if '馬名' not in df_active.columns or '枠番' not in df_active.columns:
+        return bonus
+    for _, row in df_active.iterrows():
+        horse = _to_text(row.get('馬名'))
+        if not horse:
+            continue
+        try:
+            waku = int(_to_text(row.get('枠番')).strip() or 0)
+        except ValueError:
+            continue
+        if waku in good_frames:
+            bonus[horse] = bonus.get(horse, 0.0) + 0.35
+        if waku in bad_frames:
+            bonus[horse] = bonus.get(horse, 0.0) - 0.25
+    return bonus
+
+
+def _extract_style_bonus_map(rc: dict, df_active: pd.DataFrame) -> dict[str, float]:
+    bonus: dict[str, float] = {}
+    if not isinstance(rc, dict) or df_active is None or df_active.empty:
+        return bonus
+    favored_styles = _extract_favored_styles(rc.get('勝ちやすい馬のタイプ', ''))
+    if not favored_styles:
+        return bonus
+    style_col = next((c for c in ('脚質', '戦法', '脚質傾向') if c in df_active.columns), None)
+    if not style_col or '馬名' not in df_active.columns:
+        return bonus
+    for _, row in df_active.iterrows():
+        horse = _to_text(row.get('馬名'))
+        if not horse:
+            continue
+        style_text = _to_text(row.get(style_col))
+        if any(kw in style_text for kw in favored_styles):
+            bonus[horse] = 0.30
+    return bonus
+
+
 def _extract_horse_scores_for_bet_plan(df_active: pd.DataFrame) -> list[dict]:
     horse_to_umaban, _ = _build_horse_umaban_maps(df_active)
     horse_names = sorted(horse_to_umaban.keys())
+    if not horse_names and df_active is not None and not df_active.empty and '馬名' in df_active.columns:
+        # 枠順公開前でも候補馬ランキングだけは出せるよう、馬名ベースでスコア化する。
+        horse_names = sorted({_to_text(x) for x in df_active['馬名'].tolist() if _to_text(x)})
     if not horse_names:
         return []
 
@@ -5817,12 +7736,21 @@ def _extract_horse_scores_for_bet_plan(df_active: pd.DataFrame) -> list[dict]:
             "training_plus": 0,
             "training_minus": 0,
             "yt_bonus": 0.0,
+            "frame_bonus": 0.0,
+            "style_bonus": 0.0,
             "odds": None,
             "score": 0.0,
             "prob": 0.0,
         }
         for h in horse_names
     }
+
+    rc = st.session_state.get('race_characteristics') or {}
+    frame_bonus_map = _extract_frame_bonus_map(rc, df_active)
+    style_bonus_map = _extract_style_bonus_map(rc, df_active)
+    for horse in horse_names:
+        stats[horse]["frame_bonus"] = frame_bonus_map.get(horse, 0.0)
+        stats[horse]["style_bonus"] = style_bonus_map.get(horse, 0.0)
 
     horse_df = st.session_state.get('horse_df')
     if horse_df is not None and not horse_df.empty and '馬名' in horse_df.columns:
@@ -5858,9 +7786,19 @@ def _extract_horse_scores_for_bet_plan(df_active: pd.DataFrame) -> list[dict]:
             text = _to_text(conclusion.get(key))
             if not text:
                 continue
-            for horse in horse_names:
-                if horse in text:
-                    stats[horse]["yt_bonus"] += weight
+            matched_horses = _find_horses_in_text(text, horse_names, limit=8)
+            if not matched_horses:
+                tokens = [t for t in re.split(r"[、,／/\s]+", text) if t]
+                for token in tokens[:8]:
+                    horse = _match_horse_name_from_text(token, horse_names)
+                    if horse and horse not in matched_horses:
+                        matched_horses.append(horse)
+            if not matched_horses:
+                horse = _match_horse_name_from_text(text, horse_names)
+                if horse:
+                    matched_horses = [horse]
+            for horse in matched_horses:
+                stats[horse]["yt_bonus"] += weight
 
     latest_odds = st.session_state.get('latest_odds', {}) or {}
     for horse in horse_names:
@@ -5877,9 +7815,23 @@ def _extract_horse_scores_for_bet_plan(df_active: pd.DataFrame) -> list[dict]:
             + 0.35 * stats[horse]["training_plus"]
             - 0.30 * stats[horse]["training_minus"]
             + stats[horse]["yt_bonus"]
+            + stats[horse]["frame_bonus"]
+            + stats[horse]["style_bonus"]
             + odds_boost
         )
         stats[horse]["score"] = max(0.05, base)
+
+    # データ 0 件馬のフロア補正（情報ありの平均の 0.7 倍、下限 0.3）
+    informed_scores = [
+        s["score"] for s in stats.values()
+        if (s["plus_count"] + s["minus_count"] + s["source_count"]) > 0
+    ]
+    if informed_scores:
+        avg_informed = sum(informed_scores) / len(informed_scores)
+        floor = max(0.3, avg_informed * 0.7)
+        for s in stats.values():
+            if s["plus_count"] + s["minus_count"] + s["source_count"] == 0:
+                s["score"] = max(s["score"], floor)
 
     total = sum(max(0.05, x["score"]) for x in stats.values())
     if total <= 0:
@@ -5890,24 +7842,32 @@ def _extract_horse_scores_for_bet_plan(df_active: pd.DataFrame) -> list[dict]:
     return sorted(stats.values(), key=lambda x: x["prob"], reverse=True)
 
 
+def _get_ticket_pool_size(bet_type: str) -> int:
+    return {
+        "単勝": 8, "複勝": 8, "ワイド": 8, "馬連": 8,
+        "三連複": 10, "三連単": 8,
+    }.get(bet_type, 8)
+
+
 def _build_ticket_candidates(
     bet_type: str,
     horse_scores: list[dict],
     odds_map: dict[str, float],
     anchor_umaban: str = "",
 ) -> list[dict]:
+    pool_size = _get_ticket_pool_size(bet_type)
     entries = [x for x in horse_scores if _normalize_umaban(x.get("umaban"))]
-    entries = entries[:6]  # 上位馬を中心に候補生成
+    entries = entries[:pool_size]  # 券種別の上位馬を候補生成
     if not entries:
         return []
 
     if anchor_umaban:
-        # 軸馬が上位6頭にいない場合は強制的に含める
+        # 軸馬がプールにいない場合は強制的に含める
         if all(_normalize_umaban(x.get("umaban")) != anchor_umaban for x in entries):
             anchor_entry = next((x for x in horse_scores if _normalize_umaban(x.get("umaban")) == anchor_umaban), None)
             if anchor_entry:
                 entries = [anchor_entry] + [x for x in entries if _normalize_umaban(x.get("umaban")) != anchor_umaban]
-                entries = entries[:6]
+                entries = entries[:pool_size]
 
     candidates = []
     is_combo_type = bet_type in {"ワイド", "馬連", "三連複", "三連単"}
@@ -5971,6 +7931,76 @@ def _build_ticket_candidates(
         if (not old) or (c["raw_roi"] > old["raw_roi"]):
             dedup[key] = c
     return list(dedup.values())
+
+
+def _build_modeled_odds_map(bet_type: str, horse_scores: list[dict]) -> dict[str, float]:
+    """
+    公式オッズが不足する場合の推定オッズを生成する。
+    競合比較用のバックアップであり、公式オッズがある場合はそちらを優先する。
+    """
+    pool_size = _get_ticket_pool_size(bet_type)
+    entries = [x for x in (horse_scores or []) if _normalize_umaban(x.get("umaban"))]
+    entries = entries[:pool_size]
+    if not entries:
+        return {}
+
+    prob_map = {}
+    for e in entries:
+        umaban = _normalize_umaban(e.get("umaban"))
+        if not umaban:
+            continue
+        prob = float(e.get("prob") or 0.0)
+        if prob <= 0:
+            prob = max(1e-6, float(e.get("score") or 0.0))
+        prob_map[umaban] = prob
+
+    if not prob_map:
+        return {}
+
+    total_prob = sum(prob_map.values())
+    if total_prob <= 0:
+        uniform = 1.0 / float(len(prob_map))
+        for k in list(prob_map.keys()):
+            prob_map[k] = uniform
+    else:
+        for k in list(prob_map.keys()):
+            prob_map[k] = prob_map[k] / total_prob
+
+    modeled = {}
+
+    def _put(nums: list[str], *, ordered: bool, factor: float, min_odds: float, max_odds: float):
+        p = 1.0
+        for n in nums:
+            p *= max(1e-8, float(prob_map.get(n, 0.0)))
+        if p <= 0:
+            return
+        odds = factor / max(p, 1e-8)
+        odds = max(min_odds, min(max_odds, odds))
+        key = _ticket_key(nums, ordered=ordered)
+        if key:
+            modeled[key] = round(float(odds), 1)
+
+    umabans = [_normalize_umaban(e.get("umaban")) for e in entries if _normalize_umaban(e.get("umaban"))]
+    if bet_type == "単勝":
+        for n in umabans:
+            _put([n], ordered=False, factor=0.85, min_odds=1.1, max_odds=9999.0)
+    elif bet_type == "複勝":
+        for n in umabans:
+            _put([n], ordered=False, factor=0.42, min_odds=1.1, max_odds=80.0)
+    elif bet_type == "ワイド":
+        for a, b in itertools.combinations(umabans, 2):
+            _put([a, b], ordered=False, factor=0.05, min_odds=1.5, max_odds=200.0)
+    elif bet_type == "馬連":
+        for a, b in itertools.combinations(umabans, 2):
+            _put([a, b], ordered=False, factor=0.11, min_odds=2.0, max_odds=1200.0)
+    elif bet_type == "三連複":
+        for a, b, c in itertools.combinations(umabans, 3):
+            _put([a, b, c], ordered=False, factor=0.20, min_odds=5.0, max_odds=15000.0)
+    elif bet_type == "三連単":
+        for a, b, c in itertools.permutations(umabans[:5], 3):
+            _put([a, b, c], ordered=True, factor=0.35, min_odds=8.0, max_odds=80000.0)
+
+    return modeled
 
 
 def _allocate_point_targets(
@@ -6081,6 +8111,17 @@ def build_budget_bet_plan(
     horse_scores = _extract_horse_scores_for_bet_plan(df_active)
     if not horse_scores:
         return {"summary": {}, "tickets": [], "horse_scores": [], "warnings": ["馬スコアを算出できませんでした。出馬表を確認してください。"], "generated_at": datetime.now().isoformat(timespec="seconds")}
+    if not any(_normalize_umaban(x.get("umaban")) for x in horse_scores):
+        return {
+            "summary": {},
+            "tickets": [],
+            "horse_scores": horse_scores,
+            "warnings": warnings + [
+                "馬番/枠番が未確定のため、正式な買い目番号は生成できません。候補馬ランキングを暫定表示します。",
+            ],
+            "provisional_only": True,
+            "generated_at": datetime.now().isoformat(timespec="seconds"),
+        }
 
     horse_to_umaban, umaban_to_horse = _build_horse_umaban_maps(df_active)
     anchor_umaban = ""
@@ -6093,9 +8134,20 @@ def build_budget_bet_plan(
     candidates_by_type = {}
     missing_odds_types = []
     candidate_short_types = []
+    modeled_odds_types = []
     for bt in selected_bet_types:
-        odds_map = odds_by_type.get(bt, {}) if isinstance(odds_by_type, dict) else {}
+        official_odds_map = odds_by_type.get(bt, {}) if isinstance(odds_by_type, dict) else {}
+        odds_map = dict(official_odds_map or {})
         cands = _build_ticket_candidates(bt, horse_scores, odds_map, anchor_umaban=anchor_umaban)
+        if not cands and bt != "単勝":
+            modeled_map = _build_modeled_odds_map(bt, horse_scores)
+            if modeled_map:
+                merged_map = dict(modeled_map)
+                merged_map.update(odds_map)  # 公式があるキーは公式値を優先
+                odds_map = merged_map
+                cands = _build_ticket_candidates(bt, horse_scores, odds_map, anchor_umaban=anchor_umaban)
+                if cands:
+                    modeled_odds_types.append(bt)
         if not cands:
             if odds_map:
                 candidate_short_types.append(bt)
@@ -6103,6 +8155,8 @@ def build_budget_bet_plan(
                 missing_odds_types.append(bt)
         candidates_by_type[bt] = cands
 
+    if modeled_odds_types:
+        warnings.append(f"公式オッズ未取得の券種は推定オッズで補完しました: {_format_bet_type_list(modeled_odds_types)}")
     if missing_odds_types:
         warnings.append(f"オッズ未取得のため買い目を生成できない券種: {_format_bet_type_list(missing_odds_types)}")
     if candidate_short_types:
@@ -6285,6 +8339,9 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
         return "rank-other"
 
     def render_past_race_cell(raw_val: str) -> str:
+        return render_past_race_cell_with_last3f(raw_val, "")
+
+    def render_past_race_cell_with_last3f(raw_val: str, last3f: str = "") -> str:
         raw = _to_text(raw_val)
         if not raw or raw in {"-", "nan", "None"}:
             return '<span class="past-race-empty">-</span>'
@@ -6300,7 +8357,7 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
         rest = match.group("rest").strip()
         race_name = rest
         course_info = ""
-        course_match = re.search(r"(.+?)\s+([^\s]*／[^\s]+)$", rest)
+        course_match = re.search(r"(.+?)\s+([^\s]*[／/][^\s]+)$", rest)
         if course_match:
             race_name = course_match.group(1).strip()
             course_info = course_match.group(2).strip()
@@ -6309,14 +8366,36 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
         race_name_escaped = html.escape(race_name)
         course_escaped = html.escape(course_info)
         course_html = f'<div class="past-race-course">{course_escaped}</div>' if course_info else ""
+        last3f_text = _to_text(last3f)
+        last3f_html = f'<div class="past-race-last3f">上り {html.escape(last3f_text)}</div>' if last3f_text and last3f_text != "-" else ""
         return (
             '<div class="past-race-box">'
             f'<div class="past-race-date">{date}</div>'
             f'<div class="past-race-main"><span class="past-race-rank {rank_class}">{rank_num}着</span>'
             f'<span class="past-race-name">{race_name_escaped}</span></div>'
             f'{course_html}'
+            f'{last3f_html}'
             '</div>'
         )
+
+    def render_body_weight_cell(weight: str, delta: str) -> str:
+        weight_text = safe(weight)
+        delta_text = safe(delta)
+        if weight_text == "-":
+            return '<span class="body-weight-empty">-</span>'
+        delta_html = ""
+        if delta_text != "-":
+            cls = "body-delta-normal"
+            try:
+                delta_num = int(float(delta_text.replace("+", "")))
+                if delta_num >= 10:
+                    cls = "body-delta-up"
+                elif delta_num <= -10:
+                    cls = "body-delta-down"
+            except ValueError:
+                pass
+            delta_html = f'<span class="body-delta {cls}">{html.escape(delta_text)}</span>'
+        return f'<div class="body-weight-cell"><span class="body-weight">{html.escape(weight_text)}kg</span>{delta_html}</div>'
 
     rows_html = []
     for _, row in df.iterrows():
@@ -6326,9 +8405,15 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
         seage = safe(row.get('性齢', ''))
         kin   = safe(pick(row, ['斤量', '負担重量']))
         jockey = safe(pick(row, ['騎手', '騎手名']))
+        style = safe(pick(row, ['脚質', '戦法', '脚質傾向']))
         prev1 = safe(row.get('前走', ''))
         prev2 = safe(row.get('2走前', ''))
         prev3 = safe(row.get('3走前', ''))
+        prev1_last3f = safe(row.get('前走上り', ''))
+        prev2_last3f = safe(row.get('2走前上り', ''))
+        prev3_last3f = safe(row.get('3走前上り', ''))
+        body_weight = row.get('馬体重', '')
+        body_delta = row.get('増減', '')
         odds  = safe(pick(row, ['オッズ', '単勝オッズ']))
 
         waku_cls = WAKU_COLORS.get(waku, 'waku-x')
@@ -6342,10 +8427,12 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
   <td class="horse-name-cell">{name}</td>
   <td>{seage}</td>
   <td class="kinryo-cell">{kin}</td>
+  <td>{render_body_weight_cell(body_weight, body_delta)}</td>
   <td>{jockey}</td>
-  <td class="past-race-cell">{render_past_race_cell(prev1)}</td>
-  <td class="past-race-cell">{render_past_race_cell(prev2)}</td>
-  <td class="past-race-cell">{render_past_race_cell(prev3)}</td>
+  <td>{style}</td>
+  <td class="past-race-cell">{render_past_race_cell_with_last3f(prev1, prev1_last3f)}</td>
+  <td class="past-race-cell">{render_past_race_cell_with_last3f(prev2, prev2_last3f)}</td>
+  <td class="past-race-cell">{render_past_race_cell_with_last3f(prev3, prev3_last3f)}</td>
   <td>{odds_cell}</td>
 </tr>""")
 
@@ -6355,7 +8442,7 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
 <thead>
 <tr>
   <th>枠</th><th>番</th><th>馬名</th><th>性齢</th>
-  <th>斤量</th><th>騎手</th><th class="past-col">前走</th><th class="past-col">2走前</th><th class="past-col">3走前</th><th>単勝オッズ</th>
+  <th>斤量</th><th>馬体重</th><th>騎手</th><th>脚質</th><th class="past-col">前走</th><th class="past-col">2走前</th><th class="past-col">3走前</th><th>単勝オッズ</th>
 </tr>
 </thead>
 <tbody>
@@ -6366,7 +8453,7 @@ def render_horse_table_html(df: pd.DataFrame) -> str:
     return table
 
 
-def display_main_content(df):
+def _display_main_content(df, race: RaceInfo | None = None, race_widget_scope: str | None = None):
     """
     メインエリアに出馬表と分析結果を表示する関数
 
@@ -6524,6 +8611,17 @@ html, body, [class*="css"] { font-family: 'Noto Sans JP', sans-serif; }
     font-size: 0.7rem;
     color: #475569;
 }
+.past-race-last3f {
+    display: inline-flex;
+    margin-top: 3px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #0f766e;
+    background: #ccfbf1;
+    border: 1px solid #99f6e4;
+}
 .past-race-plain {
     font-size: 0.72rem;
     color: #334155;
@@ -6531,6 +8629,32 @@ html, body, [class*="css"] { font-family: 'Noto Sans JP', sans-serif; }
 .past-race-empty {
     color: #94a3b8;
     font-size: 0.72rem;
+}
+
+.body-weight-cell {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    min-width: 52px;
+}
+.body-weight {
+    font-weight: 800;
+    color: #0f172a;
+}
+.body-delta {
+    display: inline-flex;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 900;
+}
+.body-delta-normal { background: #eef2ff; color: #3730a3; }
+.body-delta-up { background: #fff1f2; color: #be123c; }
+.body-delta-down { background: #eff6ff; color: #1d4ed8; }
+.body-weight-empty {
+    color: #94a3b8;
+    font-size: 0.78rem;
 }
 
 /* 枠番バッジ（日本競馬の伝統的な枠色） */
@@ -6643,7 +8767,7 @@ div[data-testid="metric-container"] {
 """, unsafe_allow_html=True)
 
     # ヒーローバナー
-    r = get_race_config()
+    r = race or get_race_config()
     if r:
         hero_label = f"🏇 JRA {r.grade} {r.surface}競走"
         hero_title = f"🏆 {r.race_name}"
@@ -6683,14 +8807,19 @@ div[data-testid="metric-container"] {
         return source_df[umaban_num.notna()].copy().reset_index(drop=True)
 
     df_active = get_active_race_df(df)
+    if r:
+        df_active = _merge_recent_runs_into_df(df_active, r.race_key, fill_only_blank=False)
     df_active_enriched = enrich_entry_table_with_umanity(
         df_active,
         race_name=(r.race_name if r else ""),
     )
+    if r:
+        # Umanity近3走が空の場合のみ、same-day取得分で補完する
+        df_active_enriched = _merge_recent_runs_into_df(df_active_enriched, r.race_key, fill_only_blank=True)
     active_horse_names = set(df_active_enriched['馬名'].astype(str).tolist()) if (
         df_active_enriched is not None and not df_active_enriched.empty and '馬名' in df_active_enriched.columns
     ) else set()
-    race_widget_scope = r.race_key if r else "default"
+    race_widget_scope = race_widget_scope or (r.race_key if r else "default")
 
     # タブを作成
     tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
@@ -6706,6 +8835,9 @@ div[data-testid="metric-container"] {
     # ===== タブ1: 出馬表 =====
     with tab1:
         st.markdown("### 📊 出走予定馬一覧")
+        race_meta_line = _format_race_metadata_line(r, st.session_state.get('race_metadata'))
+        if race_meta_line:
+            st.caption(race_meta_line)
 
         # データが空でないか確認
         if df_active_enriched is not None and not df_active_enriched.empty:
@@ -6766,16 +8898,33 @@ div[data-testid="metric-container"] {
                 df_display = df_display.drop(columns=drop_cols)
             df_display = df_display.reset_index(drop=True)
 
+            simple_entry_view = st.checkbox(
+                "スマホ向け簡易表示（馬番・馬名・騎手・オッズ・脚質・前走）",
+                value=is_same_day_mode(),
+                key=f"entry_simple_view::{race_widget_scope}",
+            )
+            render_df = df_display
+            if simple_entry_view:
+                simple_cols = [c for c in ("馬番", "馬名", "騎手", "オッズ", "脚質", "前走") if c in df_display.columns]
+                if simple_cols:
+                    render_df = df_display[simple_cols].copy()
+
             # 出馬表を HTML カードテーブルで表示
-            st.markdown(render_horse_table_html(df_display), unsafe_allow_html=True)
+            st.markdown(render_horse_table_html(render_df), unsafe_allow_html=True)
+            style_summary = _format_style_distribution(df_display)
+            if style_summary:
+                st.info(f"脚質分布: {style_summary}")
             if {"前走", "2走前", "3走前"}.issubset(set(df_display.columns)):
-                st.caption("近3走データは Umanity racecard を優先して表示しています。")
+                if is_same_day_mode():
+                    st.caption("近3走データは netkeiba shutuba_past / horse.result 取得分です。脚質は通過順（3〜4角）から自動判定し、取得できた上がり3Fを併記します。")
+                else:
+                    st.caption("近3走データは Umanity racecard を優先して表示しています。")
 
             # オッズ取得ボタン
             st.markdown("---")
             col_btn, col_info = st.columns([1, 4])
             with col_btn:
-                if st.button("🔄 最新オッズを取得", key="fetch_odds_btn"):
+                if st.button("🔄 最新オッズを取得", key=f"fetch_odds_btn::{race_widget_scope}", use_container_width=True):
                     with st.spinner("netkeiba からオッズを取得中..."):
                         odds_data, odds_error = fetch_odds_and_gates()
                     if odds_data:
@@ -6845,6 +8994,110 @@ div[data-testid="metric-container"] {
         st.markdown("### 📥 情報入力")
         st.info("💡 Web・ドキュメントから情報を収集します。収集後、「総合予想（馬別）」「レース特徴・傾向」タブで結果を確認できます。")
 
+        if is_same_day_mode() and r and r.race_id:
+            st.markdown("#### 🧩 当日モード: 基本情報")
+            st.caption("当日モードでは netkeiba を主ソースとして、出馬表 + 近3走 + レース詳細ページ解析を実行します。")
+            success_flag_key = f"same_day_basic_success::{race_widget_scope}"
+            if st.session_state.pop(success_flag_key, False):
+                st.success("✅ 基本情報を更新しました（出馬表 + 近3走 + 馬場/発走情報）。")
+            sd_col1, sd_col2 = st.columns(2)
+            basic_fetch_clicked = sd_col1.button(
+                "🏁 基本情報取得",
+                key=f"same_day_basic_fetch::{race_widget_scope}",
+                use_container_width=True,
+            )
+            net_fetch_clicked = sd_col2.button(
+                "📡 ネット情報取得",
+                key=f"same_day_net_fetch::{race_widget_scope}",
+                use_container_width=True,
+            )
+
+            if basic_fetch_clicked:
+                csv_path_local = get_csv_path()
+                try:
+                    with st.spinner("出馬表を更新中..."):
+                        fetch_race_csv(r.race_id, csv_path_local)
+                    with st.spinner("レース基本情報を取得中..."):
+                        st.session_state['race_metadata'] = fetch_race_metadata(r.race_id) or {}
+                    with st.spinner("近3走データを取得中..."):
+                        recent_runs = fetch_recent_runs(r.race_id)
+                    st.session_state[_recent_runs_session_key(r.race_key)] = recent_runs or {}
+
+                    if csv_path_local:
+                        updated = _write_recent_runs_to_csv(csv_path_local, r.race_key, fill_only_blank=False)
+                        if updated:
+                            load_race_data.clear()
+                            get_all_horse_names.clear()
+                    save_race_cache(r.race_key)
+                    st.session_state[success_flag_key] = True
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"❌ 基本情報取得に失敗しました: {type(e).__name__} ({str(e)[:160]})")
+
+            if net_fetch_clicked:
+                with st.spinner("netkeiba 当日ソースを解析中..."):
+                    sd_articles, sd_raw, sd_warnings = fetch_and_analyze_same_day_sources(
+                        r.race_id,
+                        race=r,
+                        max_analyze=3,
+                    )
+                try:
+                    course_stats = _fetch_course_stats_cached(r.venue, r.distance, r.surface)
+                    same_day_rc = get_race_characteristics_from_course_stats(
+                        course_stats,
+                        race_name=r.race_name,
+                        grade=r.grade,
+                        venue=r.venue,
+                        distance=r.distance,
+                        surface=r.surface,
+                        date_str=r.date_str,
+                    )
+                    if same_day_rc:
+                        st.session_state['race_characteristics'] = same_day_rc
+                        st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(same_day_rc)
+                except Exception as e:
+                    sd_warnings.append(f"コース統計取得失敗: {type(e).__name__} ({str(e)[:120]})")
+
+                existing_web_raw = st.session_state.get('web_raw', [])
+                existing_fp = {_raw_fingerprint(item) for item in existing_web_raw if _raw_fingerprint(item)}
+                added_raw = [item for item in sd_raw if not _raw_fingerprint(item) or _raw_fingerprint(item) not in existing_fp]
+
+                existing_article_urls = {
+                    _to_text(item.get('url'))
+                    for item in st.session_state.get('web_articles', [])
+                    if _to_text(item.get('url'))
+                }
+                added_articles = [
+                    item for item in sd_articles
+                    if not _to_text(item.get('url')) or _to_text(item.get('url')) not in existing_article_urls
+                ]
+
+                merged_web_raw = existing_web_raw + added_raw
+                merged_articles = st.session_state.get('web_articles', []) + added_articles
+                merged_horse_df = aggregate_horse_analysis(
+                    st.session_state.get('youtube_raw', []),
+                    merged_web_raw,
+                    st.session_state.get('doc_horse_raw', []),
+                    st.session_state.get('x_raw', []),
+                )
+                if active_horse_names and not merged_horse_df.empty and '馬名' in merged_horse_df.columns:
+                    merged_horse_df = merged_horse_df[
+                        merged_horse_df['馬名'].astype(str).isin(active_horse_names)
+                    ].reset_index(drop=True)
+
+                st.session_state['web_raw'] = merged_web_raw
+                st.session_state['web_articles'] = merged_articles
+                st.session_state['horse_df'] = merged_horse_df
+                refresh_training_state(preserve_existing_time_rows=True)
+                save_race_cache(r.race_key)
+
+                st.success(f"✅ 当日ソース解析が完了しました（記事 {len(sd_articles)}件 / 馬別情報 {len(added_raw)}件）")
+                for warn_msg in sd_warnings:
+                    st.warning(warn_msg)
+
+            st.markdown("---")
+            st.caption("注: Tavily / X / YouTube は当日平レースではノイズが増える場合があります（補助ソース扱い）。")
+
         # ===== Section 1: Web 一括検索 =====
         st.markdown("#### 🔍 Web 一括検索")
 
@@ -6852,8 +9105,8 @@ div[data-testid="metric-container"] {
         with col_s1:
             combined_keyword = st.text_input(
                 "検索キーワード",
-                value=f"{get_race_display_name()} 予想",
-                help="Web検索に使用するキーワード",
+                value=get_youtube_default_keyword(),
+                help="Web検索に使用するキーワード（開催日・会場・R番号込みを推奨）",
                 key=f"combined_keyword::{race_widget_scope}"
             )
         with col_s3:
@@ -6863,25 +9116,30 @@ div[data-testid="metric-container"] {
                 max_value=100,
                 value=20,
                 help="最終的に取得するWeb記事件数の上限",
-                key="combined_max_web"
+                key=f"combined_max_web::{race_widget_scope}"
             )
-        col_yt1, col_yt2 = st.columns([2, 1])
-        with col_yt1:
-            combined_auto_youtube = st.checkbox(
-                "Web一括検索時にYouTube動画も同時取得",
-                value=True,
-                key="combined_auto_youtube",
-                help="ON時はWeb検索と同時にYouTube動画候補を取得します（動画の馬別解析はタブ5で実行）。",
-            )
-        with col_yt2:
-            combined_max_youtube = st.number_input(
-                "YouTube件数",
-                min_value=1,
-                max_value=10,
-                value=3,
-                key="combined_max_youtube",
-                disabled=not combined_auto_youtube,
-            )
+        if is_same_day_mode():
+            combined_auto_youtube = False
+            combined_max_youtube = 0
+            st.caption("当日モードのWeb一括検索ではYouTube同時取得を行いません。必要な場合は「YouTubeから情報入手」タブで個別に実行してください。")
+        else:
+            col_yt1, col_yt2 = st.columns([2, 1])
+            with col_yt1:
+                combined_auto_youtube = st.checkbox(
+                    "Web一括検索時にYouTube動画も同時取得",
+                    value=True,
+                    key=f"combined_auto_youtube::{race_widget_scope}",
+                    help="ON時はWeb一括検索と同時にYouTube動画を取得し、馬別解析まで自動実行します。",
+                )
+            with col_yt2:
+                combined_max_youtube = st.number_input(
+                    "YouTube件数",
+                    min_value=1,
+                    max_value=10,
+                    value=3,
+                    key=f"combined_max_youtube::{race_widget_scope}",
+                    disabled=not combined_auto_youtube,
+                )
 
         # 前回の保存情報を表示
         if r:
@@ -6900,7 +9158,7 @@ div[data-testid="metric-container"] {
                 except Exception:
                     pass
 
-        if st.button("🔍 Web 一括検索", type="primary", key="combined_search"):
+        if st.button("🔍 Web 一括検索", type="primary", key=f"combined_search::{race_widget_scope}"):
             st.info("⏳ Web の解析には30秒〜1分程度かかります。しばらくお待ちください。")
 
             # Phase 1: Web検索・解析
@@ -6943,7 +9201,7 @@ div[data-testid="metric-container"] {
             # Phase 1.5: YouTube動画候補（任意）
             if combined_auto_youtube:
                 st.markdown("#### YouTube動画を検索中...")
-                youtube_keyword = combined_keyword or f"{rl} 予想"
+                youtube_keyword = _build_youtube_search_keyword(combined_keyword or "")
                 videos = search_youtube_videos(youtube_keyword, int(combined_max_youtube))
                 before_filter = len(videos)
                 videos = filter_relevant_videos(videos)
@@ -6970,6 +9228,30 @@ div[data-testid="metric-container"] {
                 filtered_out = before_filter - len(videos)
                 if filtered_out > 0:
                     st.caption(f"無関係動画として {filtered_out}件を除外しました。")
+
+                # 新規動画だけ馬別解析（差分解析でコスト最小化）
+                if added_videos:
+                    with st.spinner(f"YouTube動画 {len(added_videos)}件を馬別解析中..."):
+                        new_yt_summary_df, new_yt_raw, new_yt_conclusions = analyze_all_videos_with_gemini(added_videos)
+                    existing_yt_raw = st.session_state.get('youtube_raw', []) or []
+                    st.session_state['youtube_raw'] = existing_yt_raw + (new_yt_raw or [])
+                    existing_yt_df = st.session_state.get('youtube_summary_df')
+                    if isinstance(existing_yt_df, pd.DataFrame) and not existing_yt_df.empty \
+                       and isinstance(new_yt_summary_df, pd.DataFrame) and not new_yt_summary_df.empty:
+                        st.session_state['youtube_summary_df'] = pd.concat(
+                            [existing_yt_df, new_yt_summary_df], ignore_index=True)
+                    elif isinstance(new_yt_summary_df, pd.DataFrame):
+                        st.session_state['youtube_summary_df'] = new_yt_summary_df
+                    if new_yt_conclusions:
+                        conclusion_map = st.session_state.get('yt_video_conclusions', {}) or {}
+                        for video_key, conclusion in new_yt_conclusions.items():
+                            merged_conclusion = _merge_video_conclusion(
+                                conclusion_map.get(video_key, {}),
+                                conclusion,
+                            )
+                            if merged_conclusion:
+                                conclusion_map[video_key] = merged_conclusion
+                        st.session_state['yt_video_conclusions'] = conclusion_map
             else:
                 st.session_state.setdefault('youtube_videos', [])
 
@@ -7008,13 +9290,16 @@ div[data-testid="metric-container"] {
         st.markdown("#### 𝕏 X (Twitter) 予想投稿")
 
         x_accounts = _load_x_accounts()
+        same_day_x_mode = is_same_day_mode()
         x_disabled = False
         if not X_BEARER_TOKEN:
             st.warning("⚠️ X_BEARER_TOKENが未設定です。.envファイルを確認してください。")
             x_disabled = True
-        elif not x_accounts:
+        elif (not same_day_x_mode) and (not x_accounts):
             st.warning("⚠️ x_accounts.json が見つからないか、アカウントが未登録です。")
             x_disabled = True
+        elif same_day_x_mode:
+            st.caption("same-dayモードでは「レース名 + 騎手名 OR」の広域検索を使用します。")
         else:
             st.caption(f"登録アカウント: {', '.join('@' + a['username'] for a in x_accounts)}")
 
@@ -7024,7 +9309,7 @@ div[data-testid="metric-container"] {
             min_value=10,
             max_value=100,
             value=x_default_max,
-            key="x_max_tweets",
+            key=f"x_max_tweets::{race_widget_scope}",
         )
 
         # キャッシュ情報表示
@@ -7032,11 +9317,30 @@ div[data-testid="metric-container"] {
         if x_tweets_cached:
             st.info(f"💾 取得済みX投稿: {len(x_tweets_cached)}件")
 
-        if st.button("𝕏 X投稿を検索", key="x_search", disabled=x_disabled):
+        if st.button("𝕏 X投稿を検索", key=f"x_search::{race_widget_scope}", disabled=x_disabled):
             with st.spinner("𝕏 X投稿を検索・解析中..."):
-                new_tweets, new_x_raw = fetch_and_analyze_x_tweets(
-                    r.race_name, max_tweets=x_max
-                )
+                if same_day_x_mode:
+                    jockey_names = []
+                    if isinstance(df_active, pd.DataFrame):
+                        jockey_col = next((c for c in ("騎手", "騎手名") if c in df_active.columns), None)
+                        if jockey_col:
+                            seen_jockey = set()
+                            for val in df_active[jockey_col].tolist():
+                                name = _to_text(val)
+                                if not name or name in seen_jockey:
+                                    continue
+                                seen_jockey.add(name)
+                                jockey_names.append(name)
+                    same_day_query = _build_race_context_query()
+                    new_tweets, new_x_raw = fetch_and_analyze_x_tweets_broad(
+                        same_day_query,
+                        jockey_names,
+                        max_tweets=x_max,
+                    )
+                else:
+                    new_tweets, new_x_raw = fetch_and_analyze_x_tweets(
+                        r.race_name, max_tweets=x_max
+                    )
 
             if new_tweets:
                 # 差分マージ: x_raw は _raw_fingerprint で重複排除
@@ -7104,7 +9408,7 @@ div[data-testid="metric-container"] {
                         cols[2].caption(f"[元の投稿]({url})")
                     st.markdown("---")
 
-                if st.button("🗑️ X情報をリセット", key="x_reset"):
+                if st.button("🗑️ X情報をリセット", key=f"x_reset::{race_widget_scope}"):
                     st.session_state.pop('x_raw', None)
                     st.session_state.pop('x_tweets', None)
                     st.session_state.pop('x_newest_id', None)
@@ -7134,7 +9438,7 @@ div[data-testid="metric-container"] {
             "ファイルを選択",
             type=["pdf", "txt"],
             help="PDF または テキストファイル（.txt）をアップロードしてください",
-            key="doc_uploader"
+            key=f"doc_uploader::{race_widget_scope}"
         )
 
         col_doc1, col_doc2 = st.columns(2)
@@ -7142,13 +9446,13 @@ div[data-testid="metric-container"] {
             analyze_doc_race = st.button(
                 "📊 ドキュメントからレース特徴を抽出",
                 disabled=(uploaded_file is None),
-                key="btn_doc_race"
+                key=f"btn_doc_race::{race_widget_scope}"
             )
         with col_doc2:
             analyze_doc_horses = st.button(
                 "🐴 ドキュメントから馬別情報を抽出（総合予想に統合）",
                 disabled=(uploaded_file is None),
-                key="btn_doc_horses"
+                key=f"btn_doc_horses::{race_widget_scope}"
             )
 
         if uploaded_file is not None and (analyze_doc_race or analyze_doc_horses):
@@ -7207,7 +9511,7 @@ div[data-testid="metric-container"] {
                     st.write(f"✅ {item.get('プラス情報', '')}")
                     st.write(f"⚠️ {item.get('マイナス情報', '')}")
                     st.markdown("---")
-                if st.button("🗑️ ドキュメント馬別情報をリセット", key="btn_doc_horse_reset"):
+                if st.button("🗑️ ドキュメント馬別情報をリセット", key=f"btn_doc_horse_reset::{race_widget_scope}"):
                     st.session_state.pop('doc_horse_raw', None)
                     st.session_state.pop('horse_df', None)
                     if r:
@@ -7218,15 +9522,27 @@ div[data-testid="metric-container"] {
 
         # ===== Section 3: レース特徴リセット =====
         st.markdown("#### 🏟️ レース特徴・傾向")
-        st.info("💡 レース特徴はアプリ起動時に「Umanityスクレイピング優先」で自動取得されます。")
-        if st.button("🔄 レース特徴を再取得（Umanity優先）", key="btn_race_refresh"):
-            st.session_state.pop('race_characteristics', None)
-            st.session_state.pop('race_characteristics_enriched', None)
-            st.session_state.pop('race_characteristics_last_attempt', None)
-            st.session_state.pop('race_characteristics_last_error', None)
-            if r:
-                save_race_cache(r.race_key)  # キャッシュからもrace_characteristicsを削除→次回ロード時にAPI再実行
-            st.rerun()
+        if is_same_day_mode():
+            st.info("💡 当日モードでは netkeiba コース統計（会場×距離）を自動取得します。必要時は再取得してください。")
+            if st.button("🔄 当日コース統計を再取得", key=f"btn_race_refresh::{race_widget_scope}"):
+                st.session_state.pop('race_characteristics', None)
+                st.session_state['race_characteristics_enriched'] = False
+                st.session_state.pop('race_characteristics_last_attempt', None)
+                st.session_state.pop('race_characteristics_last_error', None)
+                _fetch_course_stats_cached.clear()
+                if r:
+                    save_race_cache(r.race_key)
+                st.rerun()
+        else:
+            st.info("💡 レース特徴はアプリ起動時に「Umanityスクレイピング優先」で自動取得されます。")
+            if st.button("🔄 レース特徴を再取得（Umanity優先）", key=f"btn_race_refresh::{race_widget_scope}"):
+                st.session_state.pop('race_characteristics', None)
+                st.session_state.pop('race_characteristics_enriched', None)
+                st.session_state.pop('race_characteristics_last_attempt', None)
+                st.session_state.pop('race_characteristics_last_error', None)
+                if r:
+                    save_race_cache(r.race_key)  # キャッシュからもrace_characteristicsを削除→次回ロード時にAPI再実行
+                st.rerun()
 
     # ===== タブ3: 総合予想（馬別） =====
     with tab3:
@@ -7357,11 +9673,17 @@ div[data-testid="metric-container"] {
             source_method = _to_text(race_info.get('情報取得方式'))
 
             if source_url:
-                st.link_button("🔗 参照元を開く（ウマニティ）", source_url, use_container_width=True)
+                link_label = "🔗 参照元を開く"
+                if "ウマニティ" in source_name:
+                    link_label = "🔗 参照元を開く（ウマニティ）"
+                elif "netkeiba" in source_name.lower():
+                    link_label = "🔗 参照元を開く（netkeiba）"
+                st.link_button(link_label, source_url, use_container_width=True)
             if source_name or source_method:
                 st.caption(" / ".join([x for x in (source_name, source_method) if x]))
 
-            summary_tab, data_tab = st.tabs(["🧭 傾向サマリー", "📊 Umanityデータ分析"])
+            data_tab_title = "📊 Umanityデータ分析" if "ウマニティ" in source_name else "📊 参照データ"
+            summary_tab, data_tab = st.tabs(["🧭 傾向サマリー", data_tab_title])
 
             with summary_tab:
                 if race_info.get('コース特徴'):
@@ -7390,6 +9712,10 @@ div[data-testid="metric-container"] {
                         st.markdown("#### ⚠️ 枠順：不利")
                         st.error(race_info['枠順不利'])
 
+                if race_info.get('枠別割合表'):
+                    st.markdown("#### 📊 枠別成績割合")
+                    st.markdown(race_info['枠別割合表'])
+
                 if race_info.get('過去の傾向'):
                     st.markdown("#### 📊 過去の傾向・データ")
                     for line in _as_lines(race_info.get('過去の傾向')):
@@ -7408,7 +9734,7 @@ div[data-testid="metric-container"] {
             with data_tab:
                 data_tables = race_info.get('データ分析テーブル')
                 if isinstance(data_tables, list) and data_tables:
-                    st.caption("ウマニティ「データ分析」ページの主要テーブルをそのまま表示しています。")
+                    st.caption("取得済みの統計テーブルを表示しています。")
                     for idx, table_info in enumerate(data_tables):
                         section_title = _to_text(table_info.get("section")) or f"データ分析 {idx + 1}"
                         rows = table_info.get("rows")
@@ -7426,7 +9752,10 @@ div[data-testid="metric-container"] {
                     st.info("Umanityデータ分析テーブルが未取得のため、サマリー情報のみ表示しています。")
 
         else:
-            st.info("👆 起動時の自動取得（Umanity優先）を待つか、「情報入力」タブの再取得ボタンを実行してください")
+            if is_same_day_mode():
+                st.info("👆 netkeibaコース統計の自動取得を待つか、「情報入力」タブの再取得ボタンを実行してください")
+            else:
+                st.info("👆 起動時の自動取得（Umanity優先）を待つか、「情報入力」タブの再取得ボタンを実行してください")
 
     # ===== タブ5: YouTube詳細 =====
     with tab5:
@@ -7439,8 +9768,8 @@ div[data-testid="metric-container"] {
         with col_search1:
             search_keyword = st.text_input(
                 "検索キーワード",
-                value=f"{get_race_display_name()} 予想",
-                help="YouTubeで検索したいキーワードを入力",
+                value=get_youtube_default_keyword(),
+                help="YouTubeで検索したいキーワードを入力（不足する開催日・会場・R番号は自動補完）",
                 key=f"yt_detail_keyword::{race_widget_scope}"
             )
 
@@ -7451,13 +9780,14 @@ div[data-testid="metric-container"] {
                 max_value=10,
                 value=5,
                 help="取得する動画の件数",
-                key="yt_detail_max"
+                key=f"yt_detail_max::{race_widget_scope}"
             )
 
         # 検索ボタン（検索のみ）
-        if st.button("🔍 YouTube検索", type="primary", key="yt_detail_search"):
+        if st.button("🔍 YouTube検索", type="primary", key=f"yt_detail_search::{race_widget_scope}"):
+            effective_search_keyword = _build_youtube_search_keyword(search_keyword)
             with st.spinner("YouTube動画を検索中..."):
-                videos = search_youtube_videos(search_keyword, max_videos)
+                videos = search_youtube_videos(effective_search_keyword, max_videos)
                 before_filter = len(videos)
                 videos = filter_relevant_videos(videos)
             if videos:
@@ -7531,7 +9861,7 @@ div[data-testid="metric-container"] {
                 col_video1, col_video2 = st.columns([1, 2])
                 with col_video1:
                     st.image(video['thumbnail_url'], use_container_width=True)
-                    if st.button("読み込み+概要取得", key=f"yt_load_{video['video_id']}", use_container_width=True):
+                    if st.button("読み込み+概要取得", key=f"yt_load_{video['video_id']}::{race_widget_scope}", use_container_width=True):
                         with st.spinner("動画を解析中..."):
                             try:
                                 analysis_results, video_conclusion = analyze_video_with_gemini(video)
@@ -8141,7 +10471,12 @@ div[data-testid="metric-container"] {
                     st.warning("券種を1つ以上選択してください。")
                 else:
                     with st.spinner("買い目プランを生成中..."):
-                        fetched_odds, odds_warnings = fetch_multi_bet_type_odds(df_active, selected_bet_types)
+                        has_umaban_for_bet = bool(_build_horse_umaban_maps(df_active)[0])
+                        if has_umaban_for_bet:
+                            fetched_odds, odds_warnings = fetch_multi_bet_type_odds(df_active, selected_bet_types)
+                        else:
+                            fetched_odds = {}
+                            odds_warnings = ["馬番/枠番が未確定のため、券種別オッズ取得をスキップしました。"]
                         merged_odds = st.session_state.get('bet_type_odds') or {}
                         for bt, v in fetched_odds.items():
                             merged_odds[bt] = v
@@ -8229,7 +10564,40 @@ div[data-testid="metric-container"] {
                     },
                 )
             else:
-                st.info("「買い目プランを生成」を押すと、ここに提案が表示されます。")
+                if horse_scores and plan_result.get("provisional_only"):
+                    st.warning("馬番/枠番がまだ未確定のため、正式な買い目ではなく候補馬ランキングを表示しています。")
+                    provisional_df = pd.DataFrame(horse_scores).head(10)
+                    provisional_cols = [
+                        c for c in [
+                            "horse", "odds", "prob", "score", "plus_count", "minus_count",
+                            "source_count", "training_plus", "training_minus", "yt_bonus",
+                            "frame_bonus", "style_bonus",
+                        ]
+                        if c in provisional_df.columns
+                    ]
+                    st.markdown("#### 🐴 暫定候補馬ランキング")
+                    st.dataframe(
+                        provisional_df[provisional_cols],
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config={
+                            "horse": st.column_config.TextColumn("馬名", width="medium"),
+                            "odds": st.column_config.NumberColumn("単勝オッズ", format="%.1f"),
+                            "prob": st.column_config.NumberColumn("評価比率", format="%.3f"),
+                            "score": st.column_config.NumberColumn("スコア", format="%.3f"),
+                            "plus_count": st.column_config.NumberColumn("プラス", format="%d"),
+                            "minus_count": st.column_config.NumberColumn("マイナス", format="%d"),
+                            "source_count": st.column_config.NumberColumn("情報源", format="%d"),
+                            "training_plus": st.column_config.NumberColumn("追切+", format="%d"),
+                            "training_minus": st.column_config.NumberColumn("追切-", format="%d"),
+                            "yt_bonus": st.column_config.NumberColumn("YT補正", format="%.2f"),
+                            "frame_bonus": st.column_config.NumberColumn("枠補正", format="%.2f"),
+                            "style_bonus": st.column_config.NumberColumn("脚質補正", format="%.2f"),
+                        },
+                    )
+                    st.caption("馬番が取れたら「最新オッズを取得」またはレース再読込後に、正式な買い目プランを再生成してください。")
+                else:
+                    st.info("「買い目プランを生成」を押すと、ここに提案が表示されます。")
 
             if horse_scores:
                 with st.expander("🐴 馬スコア内訳", expanded=False):
@@ -8255,6 +10623,13 @@ div[data-testid="metric-container"] {
             use_container_width=True,
         )
 
+
+def display_main_content(df):
+    """互換用ラッパー: 現在選択レースでメイン表示を行う。"""
+    current_race = get_race_config()
+    current_scope = current_race.race_key if current_race else "default"
+    _display_main_content(df, race=current_race, race_widget_scope=current_scope)
+
 # ====================
 # メイン処理
 # ====================
@@ -8265,8 +10640,29 @@ def _on_race_change():
         st.session_state.pop(key, None)
     # Race-scoped widget keys (e.g. combined_keyword::<race_key>) も掃除する
     for prefix in (
+        "recent_runs::",
+        "fetch_odds_btn::",
         "combined_keyword::",
+        "combined_max_web::",
+        "combined_auto_youtube::",
+        "combined_max_youtube::",
+        "combined_search::",
         "yt_detail_keyword::",
+        "yt_detail_max::",
+        "yt_detail_search::",
+        "yt_load_",
+        "x_max_tweets::",
+        "x_search::",
+        "x_reset::",
+        "doc_uploader::",
+        "btn_doc_race::",
+        "btn_doc_horses::",
+        "btn_doc_horse_reset::",
+        "btn_race_refresh::",
+        "same_day_basic_fetch::",
+        "same_day_basic_success::",
+        "same_day_net_fetch::",
+        "same_day_recent_refresh::",
         "bet_budget::",
         "bet_slider::",
         "bet_types::",
@@ -8281,14 +10677,14 @@ def _on_race_change():
     load_race_data.clear()
 
 
-def _display_race_selector():
+def _display_graded_race_selector():
     """サイドバーにレースセレクターを表示し、選択されたレースをセッションに保存する"""
     st.sidebar.subheader("🏇 レース選択")
     # 起動時に前回レースキーを1回だけ復元
     if '_last_loaded_race_key' not in st.session_state:
         st.session_state['_last_loaded_race_key'] = _load_last_selected_race_key()
 
-    if st.sidebar.button("🔄 重賞一覧を再取得", key="refresh_upcoming_races"):
+    if st.sidebar.button("🔄 重賞一覧を再取得", key="refresh_upcoming_races", use_container_width=True):
         clear_fetch_graded_races_cache()
         st.rerun()
 
@@ -8330,7 +10726,7 @@ def _display_race_selector():
         # 手動入力フォールバック
         manual_id = st.sidebar.text_input("レースIDを手動入力", placeholder="例: 202605010811")
         manual_name = st.sidebar.text_input("レース名", placeholder="例: フェブラリーステークス")
-        if manual_id and manual_name and st.sidebar.button("このレースを使用"):
+        if manual_id and manual_name and st.sidebar.button("このレースを使用", use_container_width=True):
             from datetime import date as _date
             today = _date.today()
             ensure_data_dir()
@@ -8355,16 +10751,16 @@ def _display_race_selector():
         return
 
     # セレクトボックスで表示（選択だけでは読み込まない）
-    labels = [r.display_label for r in races]
+    labels = [race.display_label for race in races]
     loaded_race = get_race_config()
     pending_key = st.session_state.get('_pending_race_key')
     last_key = st.session_state.get('_last_loaded_race_key')
     target_key = pending_key or (loaded_race.race_key if loaded_race else None) or (last_key or None)
     default_idx = 0
     if target_key:
-        for i, r in enumerate(races):
-            if r.race_key == target_key:
-                default_idx = i
+        for idx, race in enumerate(races):
+            if race.race_key == target_key:
+                default_idx = idx
                 break
 
     selected_idx = st.sidebar.selectbox(
@@ -8391,7 +10787,6 @@ def _display_race_selector():
         and not st.session_state.get('_initial_race_autoloaded', False)
     ):
         st.session_state['_initial_race_autoloaded'] = True
-        # 前回レースが race_id 未解決だった場合、起動時に1回だけ解決を試みる。
         if not pending_race.race_id:
             resolved_id = resolve_race_id(pending_race)
             if resolved_id:
@@ -8403,12 +10798,11 @@ def _display_race_selector():
         _save_last_selected_race_key(pending_race.race_key)
         st.rerun()
 
-    if st.sidebar.button("✅ このレースを読み込む", key="load_selected_race"):
+    if st.sidebar.button("✅ このレースを読み込む", key="load_selected_race", use_container_width=True):
         prev_loaded = get_race_config()
         if not prev_loaded or prev_loaded.race_key != pending_race.race_key:
             _on_race_change()
 
-        # race_id は読み込みボタン押下時にのみ解決する
         if not pending_race.race_id:
             with st.spinner(f"🔍 {pending_race.race_name} のレースIDを取得中..."):
                 resolved_id = resolve_race_id(pending_race)
@@ -8426,7 +10820,7 @@ def _display_race_selector():
     with st.sidebar.expander("📝 レースIDを手動入力"):
         manual_id = st.text_input("レースID", placeholder="例: 202605010811", key="manual_race_id")
         manual_name = st.text_input("レース名", placeholder="例: 高松宮記念", key="manual_race_name")
-        if manual_id and manual_name and st.button("このレースを使用", key="use_manual_race"):
+        if manual_id and manual_name and st.button("このレースを使用", key="use_manual_race", use_container_width=True):
             from datetime import date as _date
             today = _date.today()
             ensure_data_dir()
@@ -8450,6 +10844,106 @@ def _display_race_selector():
             _save_last_selected_race_key(race.race_key)
             st.rerun()
 
+
+def _display_same_day_race_selector():
+    st.sidebar.subheader("🏇 レース選択")
+
+    if st.sidebar.button("🔄 当日レース一覧を再取得", key="refresh_same_day_races", use_container_width=True):
+        clear_fetch_races_by_date_cache()
+        st.rerun()
+
+    default_date = st.session_state.get("same_day_date")
+    if not isinstance(default_date, date):
+        default_date = date.today()
+    target_date = st.sidebar.date_input("開催日", value=default_date, key="same_day_date")
+
+    with st.spinner("当日レース一覧を取得中..."):
+        races = fetch_races_by_date(target_date)
+    grouped = group_races_by_venue(races)
+
+    if not grouped:
+        st.sidebar.warning("指定日のレース一覧を取得できませんでした")
+        st.sidebar.caption("休催日または公開前の可能性があります。")
+        return
+
+    venues = list(grouped.keys())
+    current_venue = _to_text(st.session_state.get("same_day_venue"))
+    venue_idx = venues.index(current_venue) if current_venue in venues else 0
+    selected_venue = st.sidebar.selectbox("会場", venues, index=venue_idx, key="same_day_venue")
+
+    venue_races = grouped.get(selected_venue, [])
+    st.session_state["same_day_races"] = venue_races
+
+    if not venue_races:
+        st.sidebar.warning("選択した会場のレースが見つかりませんでした")
+        return
+
+    labels = [
+        f"{_to_text(r.race_number) or '--'} {r.race_name} ({r.surface}{r.distance})".strip()
+        for r in venue_races
+    ]
+    loaded_race = get_race_config()
+    target_key = st.session_state.get("_pending_race_key") or (loaded_race.race_key if loaded_race else "")
+    default_idx = 0
+    if target_key:
+        for idx, race in enumerate(venue_races):
+            if race.race_key == target_key:
+                default_idx = idx
+                break
+
+    selected_idx = st.sidebar.selectbox(
+        "当日レース",
+        range(len(labels)),
+        format_func=lambda i: labels[i],
+        index=default_idx,
+        key="same_day_race_selector",
+    )
+    pending_race = venue_races[selected_idx]
+    st.session_state["_pending_race_key"] = pending_race.race_key
+
+    if loaded_race and loaded_race.race_key == pending_race.race_key:
+        st.sidebar.caption(f"現在読み込み中: {pending_race.display_name}")
+    else:
+        st.sidebar.caption(f"選択中: {pending_race.display_name}")
+
+    if st.sidebar.button("✅ このレースを読み込む", key="load_same_day_race", use_container_width=True):
+        prev_loaded = get_race_config()
+        if not prev_loaded or prev_loaded.race_key != pending_race.race_key:
+            _on_race_change()
+
+        st.session_state["selected_race"] = pending_race
+        st.session_state["_prev_race_key"] = pending_race.race_key
+        st.session_state["_pending_race_key"] = pending_race.race_key
+        st.session_state["_last_loaded_race_key"] = pending_race.race_key
+        st.session_state["same_day_selected_race_key"] = pending_race.race_key
+        _save_last_selected_race_key(pending_race.race_key)
+        st.rerun()
+
+
+def _display_race_selector():
+    mode = st.sidebar.radio(
+        "モード",
+        options=["graded", "same_day"],
+        format_func=lambda v: "🏆 重賞モード" if v == "graded" else "🗓️ 当日レースモード",
+        key="race_mode",
+    )
+
+    prev_mode = _to_text(st.session_state.get("_prev_race_mode"))
+    if prev_mode and prev_mode != mode:
+        _on_race_change()
+        st.session_state.pop("selected_race", None)
+        st.session_state.pop("_pending_race_key", None)
+        st.session_state.pop("_prev_race_key", None)
+        st.session_state.pop("same_day_races", None)
+        st.session_state.pop("same_day_selected_race_key", None)
+
+    st.session_state["_prev_race_mode"] = mode
+
+    if mode == "same_day":
+        _display_same_day_race_selector()
+    else:
+        _display_graded_race_selector()
+        return
 
 def main():
     """
@@ -8508,128 +11002,96 @@ def main():
     if 'web_raw' not in st.session_state:
         load_race_cache(r.race_key)
 
-    # レース特徴を自動初期化（初回のみ）
-    if 'race_characteristics' not in st.session_state:
-        st.session_state['race_characteristics'] = get_minimal_race_characteristics()
-    if 'race_characteristics_enriched' not in st.session_state:
-        st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(
-            st.session_state.get('race_characteristics')
-        )
-
-    # 既存キャッシュがGemini由来でも、Umanityで解決可能な重賞は主ソースへ置き換える
-    current_rc = st.session_state.get('race_characteristics') or {}
-    current_source = _to_text(current_rc.get('情報ソース'))
-    if st.session_state.get('race_characteristics_enriched') and "ウマニティ" not in current_source:
+    if r.race_id and not st.session_state.get('race_metadata'):
         try:
-            if resolve_umanity_race_info(r.race_name):
-                st.session_state['race_characteristics_enriched'] = False
+            st.session_state['race_metadata'] = _fetch_race_metadata_cached(r.race_id)
         except Exception:
-            pass
+            st.session_state['race_metadata'] = {}
 
-    # 取得失敗時も一定間隔で自動再試行（初回失敗で固着させない）
-    if not st.session_state.get('race_characteristics_enriched'):
-        now_ts = time.time()
-        last_attempt = float(st.session_state.get('race_characteristics_last_attempt') or 0.0)
-        if now_ts - last_attempt >= 20.0:
-            st.session_state['race_characteristics_last_attempt'] = now_ts
+    _ensure_same_day_initial_entry_fields(r, csv_path)
+
+    if not is_same_day_mode():
+        # レース特徴を自動初期化（初回のみ）
+        if 'race_characteristics' not in st.session_state:
+            st.session_state['race_characteristics'] = get_minimal_race_characteristics()
+        if 'race_characteristics_enriched' not in st.session_state:
+            st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(
+                st.session_state.get('race_characteristics')
+            )
+
+        # 既存キャッシュがGemini由来でも、Umanityで解決可能な重賞は主ソースへ置き換える
+        current_rc = st.session_state.get('race_characteristics') or {}
+        current_source = _to_text(current_rc.get('情報ソース'))
+        if st.session_state.get('race_characteristics_enriched') and "ウマニティ" not in current_source:
             try:
-                with st.spinner("📡 レース特徴を取得中（Umanity優先 / Geminiフォールバック）..."):
-                    web_info = get_race_characteristics_primary(
-                        race_name=r.race_name, grade=r.grade, venue=r.venue,
-                        distance=r.distance, surface=r.surface, date_str=r.date_str,
-                    )
-                if web_info:
-                    merged_rc = dict(st.session_state.get('race_characteristics') or {})
-                    for k, v in (web_info or {}).items():
-                        if _to_text(v):
-                            merged_rc[k] = v
-                    st.session_state['race_characteristics'] = merged_rc
-                    st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(merged_rc)
-                    st.session_state.pop('race_characteristics_last_error', None)
-                    if st.session_state['race_characteristics_enriched']:
-                        save_race_cache(r.race_key)
-            except Exception as e:
-                st.session_state['race_characteristics_last_error'] = f"{type(e).__name__}: {str(e)[:160]}"
+                if resolve_umanity_race_info(r.race_name):
+                    st.session_state['race_characteristics_enriched'] = False
+            except Exception:
+                pass
 
-    # 枠番・馬番・オッズを初回表示時に自動取得（レースごとに1回）
-    if 'gates_saved' not in st.session_state:
-        def _is_missing_gate_value(v) -> bool:
-            text = str(v).strip() if v is not None else ""
-            return (text == "") or (text.lower() in {"nan", "none"}) or (text == "不明")
+        # 取得失敗時も一定間隔で自動再試行（初回失敗で固着させない）
+        if not st.session_state.get('race_characteristics_enriched'):
+            now_ts = time.time()
+            last_attempt = float(st.session_state.get('race_characteristics_last_attempt') or 0.0)
+            if now_ts - last_attempt >= 20.0:
+                st.session_state['race_characteristics_last_attempt'] = now_ts
+                try:
+                    with st.spinner("📡 レース特徴を取得中（Umanity優先 / Geminiフォールバック）..."):
+                        web_info = get_race_characteristics_primary(
+                            race_name=r.race_name, grade=r.grade, venue=r.venue,
+                            distance=r.distance, surface=r.surface, date_str=r.date_str,
+                        )
+                    if web_info:
+                        merged_rc = dict(st.session_state.get('race_characteristics') or {})
+                        for k, v in (web_info or {}).items():
+                            if _to_text(v):
+                                merged_rc[k] = v
+                        st.session_state['race_characteristics'] = merged_rc
+                        st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(merged_rc)
+                        st.session_state.pop('race_characteristics_last_error', None)
+                        if st.session_state['race_characteristics_enriched']:
+                            save_race_cache(r.race_key)
+                except Exception as e:
+                    st.session_state['race_characteristics_last_error'] = f"{type(e).__name__}: {str(e)[:160]}"
+    else:
+        # 当日モード: netkeibaコース統計を自動取得（24h cache）
+        if 'race_characteristics' not in st.session_state:
+            st.session_state['race_characteristics'] = {}
+        if 'race_characteristics_enriched' not in st.session_state:
+            st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(
+                st.session_state.get('race_characteristics')
+            )
+        current_rc = st.session_state.get('race_characteristics') or {}
+        current_source = _to_text(current_rc.get('情報ソース'))
+        if "netkeiba コース別成績" in current_source and current_rc.get("schema_version") != SAME_DAY_COURSE_STATS_RC_VERSION:
+            # 旧キャッシュは脚質メモの表現が矛盾しうるため、当日モードでは安全に再生成する。
+            st.session_state['race_characteristics_enriched'] = False
 
-        def _extract_numeric_odds_map(df_: pd.DataFrame) -> dict[str, str]:
-            odds_map = {}
-            if 'オッズ' not in df_.columns or '馬名' not in df_.columns:
-                return odds_map
-            for _, row in df_.iterrows():
-                horse = str(row.get('馬名', '')).strip()
-                odds = str(row.get('オッズ', '')).strip()
-                if horse and re.match(r'^\d+(\.\d+)?$', odds):
-                    odds_map[horse] = odds
-            return odds_map
-
-        try:
-            csv_df = pd.read_csv(csv_path, encoding='utf-8-sig')
-            cached_latest_odds = st.session_state.get('latest_odds', {}) or {}
-            csv_numeric_odds = _extract_numeric_odds_map(csv_df)
-
-            with st.spinner("🏇 枠順・オッズを自動取得中...（初回のみ）"):
-                gate_data, gate_error = fetch_odds_and_gates(require_odds=False)
-
-            csv_updated = False
-            latest_numeric_odds: dict[str, str] = {}
-
-            if gate_data:
-                for idx, row in csv_df.iterrows():
-                    horse = str(row.get('馬名', '')).strip()
-                    if not horse or horse not in gate_data:
-                        continue
-                    fetched = gate_data[horse]
-
-                    waku = str(fetched.get('枠番', '')).strip()
-                    umaban = str(fetched.get('馬番', '')).strip()
-                    odds = str(fetched.get('オッズ', '')).strip()
-
-                    if '枠番' in csv_df.columns and _is_missing_gate_value(row.get('枠番')) and waku:
-                        csv_df.at[idx, '枠番'] = waku
-                        csv_updated = True
-                    if '馬番' in csv_df.columns and _is_missing_gate_value(row.get('馬番')) and umaban:
-                        csv_df.at[idx, '馬番'] = umaban
-                        csv_updated = True
-                    if 'オッズ' in csv_df.columns and re.match(r'^\d+(\.\d+)?$', odds):
-                        latest_numeric_odds[horse] = odds
-                        if str(row.get('オッズ', '')).strip() != odds:
-                            csv_df.at[idx, 'オッズ'] = odds
-                            csv_updated = True
-
-                if csv_updated:
-                    csv_df.to_csv(csv_path, index=False, encoding='utf-8-sig')
-                    load_race_data.clear()
-
-            # オッズは「最新取得 > キャッシュ > CSV既存」の優先順で復元
-            if latest_numeric_odds:
-                st.session_state['latest_odds'] = latest_numeric_odds
-                st.session_state.pop('latest_odds_error', None)
-            elif cached_latest_odds:
-                st.session_state['latest_odds'] = cached_latest_odds
-                if gate_error:
-                    st.session_state['latest_odds_error'] = gate_error
-            elif csv_numeric_odds:
-                st.session_state['latest_odds'] = csv_numeric_odds
-                st.session_state.pop('latest_odds_error', None)
-            elif gate_error:
-                st.session_state['latest_odds_error'] = gate_error
-
-            if gate_data and csv_updated:
-                st.toast(f"✅ {len(gate_data)}頭の枠順/馬番/オッズを更新しました", icon="🏇")
-
-            # 自動取得結果（特に latest_odds）を次回用に永続化
-            if gate_data or st.session_state.get('latest_odds'):
-                save_race_cache(r.race_key)
-
-        except Exception:
-            pass
-        st.session_state['gates_saved'] = True
+        if not st.session_state.get('race_characteristics_enriched'):
+            now_ts = time.time()
+            last_attempt = float(st.session_state.get('race_characteristics_last_attempt') or 0.0)
+            if now_ts - last_attempt >= 20.0:
+                st.session_state['race_characteristics_last_attempt'] = now_ts
+                try:
+                    with st.spinner("📡 当日コース傾向を取得中（netkeiba static）..."):
+                        course_stats = _fetch_course_stats_cached(r.venue, r.distance, r.surface)
+                        same_day_rc = get_race_characteristics_from_course_stats(
+                            course_stats,
+                            race_name=r.race_name,
+                            grade=r.grade,
+                            venue=r.venue,
+                            distance=r.distance,
+                            surface=r.surface,
+                            date_str=r.date_str,
+                        )
+                    if same_day_rc:
+                        st.session_state['race_characteristics'] = same_day_rc
+                        st.session_state['race_characteristics_enriched'] = _has_meaningful_race_characteristics(same_day_rc)
+                        st.session_state.pop('race_characteristics_last_error', None)
+                        if st.session_state['race_characteristics_enriched']:
+                            save_race_cache(r.race_key)
+                except Exception as e:
+                    st.session_state['race_characteristics_last_error'] = f"{type(e).__name__}: {str(e)[:160]}"
 
     # サイドバーを表示
     display_sidebar()
@@ -8641,6 +11103,8 @@ def main():
     # メインコンテンツを表示
     if df is not None:
         display_main_content(df)
+        if not is_same_day_mode() and _auto_fetch_initial_gates_and_odds(csv_path, r.race_key):
+            st.rerun()
     else:
         st.error("### ⚠️ データを読み込めませんでした")
         st.info(

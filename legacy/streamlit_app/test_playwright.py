@@ -70,7 +70,9 @@ def test_widget_key_format():
         "[NG] combined_keyword widget key not race-scoped"
     assert "yt_detail_keyword::{race_widget_scope}" in src, \
         "[NG] yt_detail_keyword widget key not race-scoped"
-    assert 'race_widget_scope = r.race_key if r else' in src, \
+    has_legacy_scope_def = 'race_widget_scope = r.race_key if r else' in src
+    has_new_scope_def = 'race_widget_scope = race_widget_scope or (r.race_key if r else "default")' in src
+    assert has_legacy_scope_def or has_new_scope_def, \
         "[NG] race_widget_scope definition not found"
     print("T4 [OK]: widget key format race-scoped")
 
@@ -108,9 +110,10 @@ def test_app_helper_functions():
     """app.py に必要なヘルパー関数が存在し、削除対象定数が無いこと"""
     src = (PROJECT / "app.py").read_text(encoding="utf-8")
 
-    for fn in ["get_race_config", "get_race_display_name", "get_csv_path",
+    for fn in ["get_race_config", "get_race_display_name", "get_youtube_default_keyword", "get_csv_path",
                "get_race_url", "get_minimal_race_characteristics",
-               "_on_race_change", "_display_race_selector"]:
+               "_on_race_change", "_display_race_selector", "_build_youtube_search_keyword",
+               "_build_youtube_context_terms"]:
         assert f"def {fn}" in src, f"[NG] {fn} not found in app.py"
 
     for dead in ["FEATURED_HORSES", "HORSE_NAME_ALIASES", "RACE_INFO_FROM_DOC"]:
