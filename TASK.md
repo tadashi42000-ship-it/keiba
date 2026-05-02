@@ -22,6 +22,9 @@
   - Session-MOBILE-SD-004 で東京全12Rの現地用記録シート生成を実装・実行。`data/same_day_sheets/2026-04-26_tokyo_same_day_sheet.md/json` を作成
   - Session-MOBILE-SD-005 でPWA内に全Rシートページを追加。キャッシュ優先APIで5秒以内に東京12R一覧をスマホ幅表示確認
   - Session-REPO-001 で検証副産物のGit管理混入を整理。`tmp/` とPlaywright/スクショ生成物を追跡対象外へ移行し、backend/frontend検証を再実行
+  - Session-MOBILE-SD-014 で 5/3 東京現地運用向けに全Rシート/詳細キャッシュを調整。候補指数表示、localStorage詳細キャッシュ、オッズのみ軽量更新を確認
+  - Session-MOBILE-SD-016 で5R以降の全Rシートキャッシュを確認し、詳細ページ初回もサーバー側シートキャッシュから即表示するよう変更
+  - Session-MOBILE-SD-017 で当日モード詳細に近3走の走破タイム/タイム指数/レースレベル/着差を追加。5/3東京シートキャッシュを新形式へ更新
 
 ## Milestones
 | ID | Milestone | Target state | Progress % | Status | Due | Notes |
@@ -32,7 +35,7 @@
 | M4 | External API migration | Tavily/Gemini/YouTube/X moved to backend services | 85 | InProgress | 2026-05-25 | YouTube relevance and fallback hardening completed in legacy flow |
 | M5 | Deployment operations | Vercel/Render operational verification | 78 | InProgress | 2026-04-30 | full local stack checks passed; staging URL run pending |
 | M6 | Legacy Streamlit stabilization | Satsuki Sho tabs (YouTube/report/bet plan) stable for practical use | 100 | Done | 2026-04-22 | Playwright E2E + cache verification completed (Web/YouTube/report/bet-plan/training sanity) |
-| M7 | Mobile same-day mode | On-site 30-min-before flow in Next.js PWA | 97 | InProgress | 2026-04-26 | All Tokyo races pre-exported and visible in PWA. Remaining: official odds/body-weight publication smoke |
+| M7 | Mobile same-day mode | On-site 30-min-before flow in Next.js PWA | 99 | InProgress | 2026-04-26 | 5/3 Tokyo 5R+ cached with odds, course stats, candidate ranking, and recent-run time/index details |
 
 ## Task Board
 | TaskID | Area | Task | Status | Progress % | Priority | Depends on | Next action | Owner |
@@ -99,6 +102,9 @@
 | M-SD-06 | Mobile QA | 実装計画との差分検証 + 4/26東京4R/5R/6R API実測 | Done | 100 | P0 | M-SD-05 | 計画項目をコード/API/UI/テスト観点で照合。東京4R/5R/6Rで entry/course-stats/bet-plan を直接検証。`pytest` 39/39、`lint/build` PASS。 | Codex |
 | M-SD-07 | Mobile Ops | 東京全12Rの現地用記録シート生成 | Done | 100 | P0 | M-SD-06 | `scripts/export_same_day_sheet.py` を追加し、2026-04-26東京12R分をMarkdown/JSONへ出力。Python UTF-8読込で全12R・候補上位・脚質分布を確認。 | Codex |
 | M-SD-08 | Mobile Frontend | PWA内の全Rシート閲覧ページ | Done | 100 | P0 | M-SD-07 | `/same-day-sheet` を追加。通常は生成済みJSONキャッシュを即表示し、必要時のみ全R再生成。Playwrightスマホ幅で東京12R表示確認。 | Codex |
+| M-SD-09 | Mobile Frontend/Backend | 5/3東京現地運用向けキャッシュ/オッズ更新調整 | Done | 100 | P0 | M-SD-08 | 全Rシートは候補指数表示、refreshは既存キャッシュのオッズのみ軽量更新、詳細はlocalStorageへ静的情報保存。`pytest` 42/42、`lint/build`、Playwright/tunnel確認済み。 | Codex |
+| M-SD-10 | Mobile Frontend | 5R以降の詳細ページをシートキャッシュ優先表示 | Done | 100 | P0 | M-SD-09 | localStorage未保存でも `/same-day-sheet` キャッシュから該当Rの entry/course_stats/bet_plan を即表示。5Rでオッズ/特徴をPlaywright確認。 | Codex |
+| M-SD-11 | Mobile Backend/Frontend | 近3走の走破タイム・タイム指数・レースレベル追加 | Done | 100 | P0 | M-SD-10 | `recent_run_details` を追加し、詳細ページに小チップ表示。候補指数へ小幅反映。5/3東京5R実測 + 5R〜12Rキャッシュ更新、`pytest/lint/build` PASS。 | Codex |
 
 ## Issue / Blocker Log
 | IssueID | Date | Issue | Impact | Temporary action | Permanent fix | Status |
@@ -782,3 +788,101 @@
   - 最初に `$env:PYTHONPATH='.'` でpytestを実行したため `ModuleNotFoundError: No module named 'app'` が発生。正しい実行方法は `$env:PYTHONPATH='backend'`。
 - 次回着手:
   - コミット前に `git status --short` を確認し、ソース追加分と `tmp/` 追跡解除をまとめてコミットする。
+
+### 2026-05-02 / Session-MOBILE-SD-014
+- 実施内容:
+  - 2026-05-03 東京向け Next.js/PWA 一時URLを再発行。
+  - 全Rシートの `0.223` などの生スコア表示を、スマホで意味が分かる `候補指数` 表示へ変更。
+  - 詳細ページの保存先を `sessionStorage` から `localStorage` に変更し、同じ端末/ブラウザならタブを閉じても静的情報が残るようにした。
+  - 詳細キャッシュ保存時はオッズを保存対象外にし、最新オッズは更新ボタンで再取得する運用へ寄せた。
+  - 全Rシートの `refresh=true` を「重い全再生成」ではなく、既存キャッシュに対する単勝オッズのみ軽量更新に変更。
+  - netkeibaオッズAPI用の構造化パーサーを追加し、公開後に `horse_list + odds[1]` 形式を馬名へマッピングできるようにした。
+  - 低速なJRA総当たりフォールバックを通常経路から外し、オッズ未公開時でも更新が数秒で返るようにした。
+- 結果:
+  - 現時点のnetkeiba APIは `result odds empty` のため、5/3東京の単勝オッズはまだ0頭。これは公開前/空レスポンスによるもの。
+  - 公開後は全Rシートの更新リンク、または各R詳細の `最新オッズ・基本情報を取得` で再取得する。
+  - 新しい一時URL: `https://significantly-vatican-website-observed.trycloudflare.com/same-day-sheet?date=2026-05-03&venue=%E6%9D%B1%E4%BA%AC`
+- Verification:
+  - Backend: `$env:PYTHONPATH='backend'; python -m pytest backend\tests -q` passed（42/42）。
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Tunnel `/health` returned 200。
+  - Tunnel `/same-day-sheet?date=2026-05-03&venue=東京` returned 200、`候補指数` 表示あり、`0.223` 生表示なし。
+  - Tunnel `refresh=true` returned 200 in 3.9s。
+  - Playwright: 1R詳細を初回表示後、同一URL再読込で `保存済みデータを即表示中` を確認。
+- 発生課題:
+  - `scripts/export_same_day_sheet.py` による全R再生成はコース統計取得込みで3分超過しタイムアウト。現地運用は既存シートキャッシュ + オッズ軽量更新を優先する。
+- 次回着手:
+  - 明日の現地ではPCをスリープさせず、オッズ公開後に全Rシートの更新リンクを押して単勝オッズ反映を確認する。
+
+### 2026-05-02 / Session-MOBILE-SD-015
+- 実施内容:
+  - netkeiba出馬表ではオッズが表示されているのにPWAで取得できない問題を調査。
+  - 原因は、出馬表HTML初期表示が `---.-` で返り、その後JavaScriptが `api_get_jra_odds.html` の圧縮レスポンスを展開してオッズを埋める仕様だったこと。
+  - backendのnetkeibaオッズAPI呼び出しを `type=1&action=init&sort=odds&compress=1` へ修正。
+  - zlib + base64 の圧縮 `data` をPython側で展開し、`odds["1"]` の馬番別単勝オッズを `__umaban__:{馬番}` としてマージする処理を追加。
+  - 馬名マップがない場合でも馬番で `entry.horses` とCSVへ反映できるよう `_merge_odds_into_horses` / `_write_odds_to_csv` を拡張。
+- 結果:
+  - `202605020406`（5/3東京6R）で単勝オッズ16頭分を取得。
+  - 例: `チームユートピア 1.6`、`ワンモメンタム 7.3`、`スーパーガール 57.0`。
+  - 新しい一時URL: `https://darwin-nav-lying-dakota.trycloudflare.com/same-day-sheet?date=2026-05-03&venue=%E6%9D%B1%E4%BA%AC`
+- Verification:
+  - Backend direct: `_fetch_win_odds_map("202605020406")` returned 16 odds from `netkeiba odds API`。
+  - Backend entry API: `/api/v1/races/202605020406/entry` returned `odds_count=16`, `warnings=[]`。
+  - Backend: `$env:PYTHONPATH='backend'; python -m pytest backend\tests -q` passed（44/44）。
+  - Frontend: `npm run lint` passed。
+  - Tunnel `/health` returned 200。
+  - Tunnel `/same-day-sheet?...&refresh=true` returned 200 in 2.6s and contains `チームユートピア` / `1.6`。
+  - Playwright local PWA: 6R詳細画面に `チームユートピア` / `1.6` が含まれることを確認。
+- 発生課題:
+  - Playwright MCPから新Cloudflare URLへの名前解決が一時的に失敗したため、Playwright画面確認は `http://127.0.0.1:3000` で実施。PowerShellではCloudflare URLも200確認済み。
+- 次回着手:
+  - 明日は最新URLをスマホで開き、全Rシートの更新リンクを押してオッズ反映を確認する。
+
+### 2026-05-02 / Session-MOBILE-SD-016
+- 実施内容:
+  - 5R以降の東京全Rシートキャッシュを確認し、entry / course_stats / bet_plan / 単勝オッズが揃っていることを検証。
+  - 詳細ページ初回表示時に、localStorage未保存でも同日同場の `/same-day-sheet` キャッシュから該当レースを抽出して表示する経路を追加。
+  - 詳細ページのlocalStorage保存はオッズも含めて保存する方針に変更（最新化は手動更新ボタンで上書き）。
+  - 新しい一時URLを再発行。
+- 結果:
+  - 5R〜12Rは全て `entry.horses`、単勝オッズ、枠別/脚質等のレース特徴、候補ランキングがキャッシュ済み。
+  - 5R〜12Rのオッズ取得頭数: `15,16,15,9,18,16,15,13`。
+  - 新しい一時URL: `https://scenes-shoppers-hop-impression.trycloudflare.com/same-day-sheet?date=2026-05-03&venue=%E6%9D%B1%E4%BA%AC`
+- Verification:
+  - Backend API direct: 5R〜12Rの `/entry` が全て `warnings=0` かつ単勝オッズ取得済み。
+  - Backend sheet cache: 5R〜12Rの `course_stats.frame_stats=8`、`bet_plan.ranking` は各頭数分あり。
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Backend: `$env:PYTHONPATH='backend'; python -m pytest backend\tests -q` passed（44/44）。
+  - Tunnel `/same-day-sheet?date=2026-05-03&venue=東京` returned 200 and includes 5R/6R odds data。
+  - Playwright: localStorage clear後、5R詳細初回表示で `保存済みデータを即表示中`、単勝オッズ、`コース特徴`、`枠別成績割合` を確認。
+- 発生課題:
+  - 詳細初回は完全なブラウザ内保存ではなく、まずサーバー側シートキャッシュJSONを1回読む。ただし重いnetkeiba/Gemini等の再取得は走らない。
+- 次回着手:
+  - 明日は5R以降は全Rシートから詳細へ入り、必要時だけ `最新オッズ・基本情報を取得` を押して上書きする。
+
+### 2026-05-02 / Session-MOBILE-SD-017
+- 実施内容:
+  - 当日モード詳細の各馬近3走に `走破タイム / タイム指数 / レースレベル / 着差` を追加する安全実装を実施。
+  - `fetch_recent_runs()` の戻り値に後方互換の `horse_id` を追加し、backend側で `db.netkeiba.com/horse/result/{horse_id}/` から詳細を補完。
+  - APIレスポンスに `recent_run_details` を追加し、既存の `recent_runs / last3fs / corners / field_sizes` は維持。
+  - 候補指数へタイム指数補正を小幅反映（最大+0.12 / 最小-0.03）し、強い場合のみ理由へ `指数A` / `近走指数強め` を追加。
+  - 詳細ページは旧localStorage/旧シートキャッシュに `recent_run_details` が無い場合は直接API取得へフォールバックするよう変更。
+- 結果:
+  - 5/3東京5Rの実測で `1:48.3 / 指数73 C / 着差0.6` のような詳細が取得できることを確認。
+  - 5/3東京5R〜12Rのシートキャッシュを新形式へ更新。詳細取得頭数は全レース出走頭数分、タイム指数も概ね取得済み。
+  - 5R〜12Rの詳細/指数/オッズ取得状況: `5R 15/15/15`, `6R 16/16/16`, `7R 15/14/15`, `8R 9/8/9`, `9R 18/18/18`, `10R 16/15/16`, `11R 15/15/15`, `12R 13/13/13`（details/indexes/odds）。
+- Verification:
+  - Backend: `python -m py_compile backend\app\services\same_day_service.py backend\app\schemas\races.py legacy\streamlit_app\get_keiba_info.py` passed。
+  - Backend: `$env:PYTHONPATH='backend'; python -m pytest backend\tests -q` passed（46/46, pandas FutureWarning 1件は既存のCSVオッズ書き戻し由来）。
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Direct check: `get_entry_snapshot("202605020405")` returned 15 horses, warnings 0, recent run details and index-based ranking reasons.
+  - PWA restart: 変更前の `next start` が古いビルドを掴んでいたため再起動し、新URLで5R詳細に `1:48.3` / `指数73 C` / `着差0.6` / `指数85 A` が表示されることをPlaywrightで確認。
+  - User check: ユーザー端末でも近3走チップ表示が確認できた。
+- 発生課題:
+  - PowerShellに直接 `東京` を埋め込むと文字化けし、誤った `venue` キャッシュ名が作られることを確認。該当の一時ファイルは削除済み。今後スクリプト経由ではUnicode escapeまたは既存のURLエンコードを使う。
+  - 画面変更後は起動中の `next start` を再起動しないと旧ビルドが表示され続ける。現地用URLも再起動ごとに変わる。
+- 次回着手:
+  - 明日は最新URLを開き、必要に応じて `最新オッズ・基本情報を取得` で直前オッズへ上書きする。

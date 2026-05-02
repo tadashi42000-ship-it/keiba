@@ -24,6 +24,11 @@ function formatOdds(value: number | null): string {
   return value.toFixed(1);
 }
 
+function formatCandidateIndex(value: number): string {
+  if (!Number.isFinite(value)) return "-";
+  return `${Math.round(value * 100)}`;
+}
+
 const WAKU_BADGE_CLASS: Record<string, string> = {
   "1": "border-slate-400 bg-white text-slate-950",
   "2": "border-slate-950 bg-slate-950 text-white",
@@ -259,7 +264,10 @@ function RankingRow({ item, index }: { item: BetRankingItem; index: number }) {
           {item.umaban || "-"}番 / {item.style || "-"} / 単勝 {formatOdds(item.odds)}
         </p>
       </div>
-      <p className="text-sm font-black text-emerald-700">{item.score.toFixed(3)}</p>
+      <div className="shrink-0 text-right">
+        <p className="text-sm font-black text-emerald-700">{formatCandidateIndex(item.score)}</p>
+        <p className="text-[10px] font-bold text-slate-400">候補指数</p>
+      </div>
     </div>
   );
 }

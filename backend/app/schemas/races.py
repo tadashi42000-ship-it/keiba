@@ -49,6 +49,20 @@ class OddsResponse(BaseModel):
     horses: list[OddsHorse]
 
 
+class RecentRunDetail(BaseModel):
+    date: str = ""
+    finish: str = ""
+    race_name: str = ""
+    course: str = ""
+    race_time: str = ""
+    margin: str = ""
+    time_index: float | None = None
+    race_level: str = ""
+    last3f: str = ""
+    corner: str = ""
+    field_size: str = ""
+
+
 class SameDayRacesResponse(BaseModel):
     date: str
     venue: str = ""
@@ -71,6 +85,7 @@ class EntryHorse(BaseModel):
     last3fs: list[str] = Field(default_factory=list)
     corners: list[str] = Field(default_factory=list)
     field_sizes: list[str] = Field(default_factory=list)
+    recent_run_details: list[RecentRunDetail] = Field(default_factory=list)
 
 
 class RaceEntryResponse(BaseModel):

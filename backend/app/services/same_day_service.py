@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import math
+import base64
 import json
 import re
 import sys
+import zlib
 from functools import lru_cache
 from collections import Counter
 from datetime import date, datetime
@@ -162,10 +164,14 @@ def build_same_day_sheet_snapshot(
     budget_yen: int = 3000,
     refresh: bool = False,
 ) -> dict[str, Any]:
-    if not refresh:
-        cached = _load_same_day_sheet_cache(target_date, venue)
-        if cached:
-            return cached
+    cached = _load_same_day_sheet_cache(target_date, venue)
+    cached_has_run_details = _same_day_sheet_has_recent_run_details(cached) if cached else False
+    if cached and cached_has_run_details and not refresh:
+        return cached
+    if cached and cached_has_run_details and refresh:
+        refreshed = _refresh_same_day_sheet_odds(cached, budget_yen=budget_yen)
+        _save_same_day_sheet_cache(refreshed)
+        return refreshed
 
     races_response = get_same_day_races(target_date=target_date, venue=venue)
     snapshots: list[dict[str, Any]] = []
@@ -205,6 +211,39 @@ def build_same_day_sheet_snapshot(
     return snapshot
 
 
+def _refresh_same_day_sheet_odds(snapshot: dict[str, Any], budget_yen: int = 3000) -> dict[str, Any]:
+    """Refresh only volatile win odds while keeping expensive static race data cached."""
+    updated_snapshot = dict(snapshot)
+    races: list[dict[str, Any]] = []
+    for item in snapshot.get("races", []):
+        if not isinstance(item, dict):
+            continue
+        updated_item = dict(item)
+        race = updated_item.get("race") if isinstance(updated_item.get("race"), dict) else {}
+        race_id = _to_text(race.get("race_id"))
+        entry = updated_item.get("entry") if isinstance(updated_item.get("entry"), dict) else None
+        if race_id and entry:
+            odds_map, odds_note = _fetch_win_odds_map(race_id)
+            if odds_map:
+                horses = entry.get("horses") if isinstance(entry.get("horses"), list) else []
+                _merge_odds_into_horses(horses, odds_map, overwrite=True)
+                entry["warnings"] = [
+                    warning
+                    for warning in entry.get("warnings", [])
+                    if "単勝オッズ" not in _to_text(warning) and "odds" not in _to_text(warning).lower()
+                ]
+                updated_item["bet_plan"] = _build_bet_plan_from_entry(entry, budget_yen=budget_yen)
+            elif odds_note:
+                warnings = list(entry.get("warnings") or [])
+                if odds_note not in warnings:
+                    warnings.append(odds_note)
+                entry["warnings"] = warnings
+        races.append(updated_item)
+    updated_snapshot["races"] = races
+    updated_snapshot["generated_at"] = datetime.now().isoformat(timespec="seconds")
+    return updated_snapshot
+
+
 def _same_day_sheet_cache_paths(target_date: date, venue: str) -> list[Path]:
     date_text = target_date.isoformat()
     venue_token = _safe_path_token(venue)
@@ -219,7 +258,7 @@ def _safe_path_token(value: str) -> str:
 
 
 def _ascii_venue_alias(venue: str) -> str:
-    aliases = {"??": "tokyo", "??": "kyoto", "??": "fukushima", "??": "nakayama", "??": "hanshin"}
+    aliases = {"東京": "tokyo", "京都": "kyoto", "福島": "fukushima", "中山": "nakayama", "阪神": "hanshin"}
     return aliases.get(venue, re.sub(r"[^A-Za-z0-9_-]+", "_", venue).strip("_") or "venue")
 
 
@@ -235,6 +274,25 @@ def _load_same_day_sheet_cache(target_date: date, venue: str) -> dict[str, Any] 
             payload["cache_path"] = str(path)
             return payload
     return None
+
+
+def _same_day_sheet_has_recent_run_details(snapshot: dict[str, Any] | None) -> bool:
+    if not isinstance(snapshot, dict):
+        return False
+    races = snapshot.get("races")
+    if not isinstance(races, list):
+        return False
+    for item in races:
+        if not isinstance(item, dict):
+            continue
+        entry = item.get("entry")
+        if not isinstance(entry, dict):
+            continue
+        horses = entry.get("horses")
+        if not isinstance(horses, list) or not horses:
+            continue
+        return all(isinstance(horse, dict) and "recent_run_details" in horse for horse in horses)
+    return False
 
 
 def _save_same_day_sheet_cache(snapshot: dict[str, Any]) -> None:
@@ -257,7 +315,13 @@ def get_entry_snapshot(race_id: str) -> dict[str, Any]:
     df = pd.read_csv(csv_path, encoding="utf-8-sig")
     metadata = legacy_fetch_race_metadata(race_id) or {}
     recent_runs = legacy_fetch_recent_runs(race_id) or {}
-    horses = _build_entry_horses(df, recent_runs)
+    horse_id_map = {
+        name: _to_text(payload.get("horse_id"))
+        for name, payload in recent_runs.items()
+        if isinstance(payload, dict) and _to_text(payload.get("horse_id"))
+    }
+    run_details_map = _fetch_run_details_for_race(horse_id_map) if horse_id_map else {}
+    horses = _build_entry_horses(df, recent_runs, run_details_map)
     odds_map, odds_note = _fetch_win_odds_map(race_id)
     if odds_map:
         _merge_odds_into_horses(horses, odds_map)
@@ -403,7 +467,7 @@ def _race_to_dict(race: Any) -> dict[str, Any]:
     }
 
 
-def _fetch_win_odds_map(race_id: str) -> tuple[dict[str, float], str]:
+def _fetch_win_odds_map(race_id: str, allow_jra_fallback: bool = False) -> tuple[dict[str, float], str]:
     """
     出馬表CSVの単勝オッズが未更新の時に、netkeibaのオッズ専用ページ/APIを軽量確認する。
     取得元が空の場合も理由を返し、UIで「未公開」と「取得元が空」を区別できるようにする。
@@ -417,14 +481,23 @@ def _fetch_win_odds_map(race_id: str) -> tuple[dict[str, float], str]:
     try:
         resp = session.get(
             "https://race.netkeiba.com/api/api_get_jra_odds.html",
-            params={"race_id": race_id, "sort": "ninki", "odds_type": "all", "compress": "true"},
+            params={
+                "pid": "api_get_jra_odds",
+                "input": "UTF-8",
+                "output": "json",
+                "race_id": race_id,
+                "type": "1",
+                "action": "init",
+                "sort": "odds",
+                "compress": "1",
+            },
             headers=headers,
             timeout=8,
         )
         if resp.status_code == 200:
             payload = resp.json()
             api_reason = _to_text(payload.get("reason")) if isinstance(payload, dict) else ""
-            api_odds = _extract_odds_from_any_payload(payload)
+            api_odds = _extract_netkeiba_api_odds(payload) or _extract_odds_from_any_payload(payload)
             if api_odds:
                 return api_odds, "netkeiba odds API"
     except Exception as exc:
@@ -446,14 +519,69 @@ def _fetch_win_odds_map(race_id: str) -> tuple[dict[str, float], str]:
     except Exception as exc:
         return {}, f"netkeiba odds page {type(exc).__name__}"
 
-    jra_odds, jra_note = _fetch_jra_win_odds_map(race_id)
-    if jra_odds:
-        return jra_odds, jra_note
+    jra_note = ""
+    if allow_jra_fallback:
+        jra_odds, jra_note = _fetch_jra_win_odds_map(race_id)
+        if jra_odds:
+            return jra_odds, jra_note
 
     suffix = f" ({api_reason})" if api_reason else ""
     if jra_note:
         suffix = f"{suffix}; {jra_note}"
     return {}, f"単勝オッズ取得元は空でした{suffix}"
+
+
+def _extract_netkeiba_api_odds(payload: Any) -> dict[str, float]:
+    if not isinstance(payload, dict):
+        return {}
+    data = payload.get("data")
+    if isinstance(data, str):
+        data = _decode_netkeiba_compressed_data(data)
+    if not isinstance(data, dict):
+        return {}
+    horse_list = data.get("horse_list") or data.get("horseList")
+    odds_payload = data.get("odds")
+    if not isinstance(odds_payload, dict):
+        return {}
+    win_rows = odds_payload.get("1") or odds_payload.get(1)
+    if not isinstance(win_rows, dict):
+        return {}
+    result: dict[str, float] = {}
+    for key, row in win_rows.items():
+        if not isinstance(row, list) or len(row) < 1:
+            continue
+        value = _to_float(row[0])
+        if value is None:
+            continue
+        horse = None
+        if isinstance(horse_list, dict) and len(row) >= 4:
+            horse = horse_list.get(_to_text(row[3]))
+        name = _to_text(horse.get("Bamei") or horse.get("Bamei9")) if isinstance(horse, dict) else ""
+        if name:
+            result[name] = value
+        else:
+            umaban = _to_text(key).lstrip("0")
+            if umaban:
+                result[f"__umaban__:{umaban}"] = value
+    return result
+
+
+def _decode_netkeiba_compressed_data(data: str) -> dict[str, Any]:
+    text = _to_text(data)
+    if not text:
+        return {}
+    try:
+        loaded = json.loads(text)
+        return loaded if isinstance(loaded, dict) else {}
+    except Exception:
+        pass
+    try:
+        raw = base64.b64decode(text)
+        decoded = zlib.decompress(raw).decode("utf-8")
+        loaded = json.loads(decoded)
+        return loaded if isinstance(loaded, dict) else {}
+    except Exception:
+        return {}
 
 
 def _extract_odds_from_any_payload(payload: Any) -> dict[str, float]:
@@ -628,12 +756,15 @@ def _extract_jra_win_odds_from_html(html_text: str) -> dict[str, float]:
     return odds
 
 
-def _merge_odds_into_horses(horses: list[dict[str, Any]], odds_map: dict[str, float]) -> None:
-    normalized = {_horse_token(name): value for name, value in odds_map.items()}
+def _merge_odds_into_horses(horses: list[dict[str, Any]], odds_map: dict[str, float], overwrite: bool = False) -> None:
+    normalized = {_horse_token(name): value for name, value in odds_map.items() if not str(name).startswith("__umaban__:")}
+    by_umaban = {str(name).split(":", 1)[1].lstrip("0"): value for name, value in odds_map.items() if str(name).startswith("__umaban__:")}
     for horse in horses:
-        if horse.get("odds") is not None:
+        if horse.get("odds") is not None and not overwrite:
             continue
         odds = normalized.get(_horse_token(horse.get("horse_name")))
+        if odds is None:
+            odds = by_umaban.get(_to_text(horse.get("umaban")).lstrip("0"))
         if odds is not None:
             horse["odds"] = odds
 
@@ -650,10 +781,14 @@ def _write_odds_to_csv(csv_path: Path, odds_map: dict[str, float]) -> None:
     if not odds_col:
         odds_col = "オッズ"
         df[odds_col] = ""
-    normalized = {_horse_token(name): value for name, value in odds_map.items()}
+    normalized = {_horse_token(name): value for name, value in odds_map.items() if not str(name).startswith("__umaban__:")}
+    by_umaban = {str(name).split(":", 1)[1].lstrip("0"): value for name, value in odds_map.items() if str(name).startswith("__umaban__:")}
     updated = False
     for idx, row in df.iterrows():
         odds = normalized.get(_horse_token(row.get(horse_col)))
+        if odds is None:
+            umaban_col = _first_column(df, ["馬番", "逡ｪ", "umaban"])
+            odds = by_umaban.get(_to_text(row.get(umaban_col)).lstrip("0")) if umaban_col else None
         if odds is None:
             continue
         if _to_float(row.get(odds_col)) != odds:
@@ -663,7 +798,11 @@ def _write_odds_to_csv(csv_path: Path, odds_map: dict[str, float]) -> None:
         df.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
 
-def _build_entry_horses(df: pd.DataFrame, recent_runs: dict[str, dict]) -> list[dict[str, Any]]:
+def _build_entry_horses(
+    df: pd.DataFrame,
+    recent_runs: dict[str, dict],
+    run_details_map: dict[str, list[dict[str, Any]]] | None = None,
+) -> list[dict[str, Any]]:
     cols = {
         "waku": _first_column(df, ["枠番", "枠", "譫逡ｪ", "waku"]),
         "umaban": _first_column(df, ["馬番", "番", "鬥ｬ逡ｪ", "umaban"]),
@@ -678,6 +817,11 @@ def _build_entry_horses(df: pd.DataFrame, recent_runs: dict[str, dict]) -> list[
     if not cols["horse_name"]:
         return []
     recent_by_horse = {_horse_token(name): payload for name, payload in recent_runs.items()}
+    details_by_horse = {
+        _horse_token(name): payload
+        for name, payload in (run_details_map or {}).items()
+        if isinstance(payload, list)
+    }
     horses: list[dict[str, Any]] = []
     for _, row in df.iterrows():
         horse_name = _to_text(row.get(cols["horse_name"]))
@@ -686,6 +830,20 @@ def _build_entry_horses(df: pd.DataFrame, recent_runs: dict[str, dict]) -> list[
         recent = recent_by_horse.get(_horse_token(horse_name), {})
         style = classify_running_style(recent) or _to_text(row.get("脚質"))
         last3fs = _recent_list(recent, "last3fs", ["前走上り", "2走前上り", "3走前上り"])
+        corners = _recent_list(recent, "corners", [])
+        field_sizes = _recent_list(recent, "field_sizes", [])
+        recent_run_values = [
+            _to_text(recent.get("前走") or row.get("前走")),
+            _to_text(recent.get("2走前") or row.get("2走前")),
+            _to_text(recent.get("3走前") or row.get("3走前")),
+        ]
+        recent_run_details = _build_recent_run_details(
+            recent_run_values,
+            last3fs,
+            corners,
+            field_sizes,
+            details_by_horse.get(_horse_token(horse_name), []),
+        )
         horses.append({
             "horse_name": horse_name,
             "waku": _to_text(row.get(cols["waku"])) if cols["waku"] else "",
@@ -697,14 +855,11 @@ def _build_entry_horses(df: pd.DataFrame, recent_runs: dict[str, dict]) -> list[
             "jockey": _to_text(row.get(cols["jockey"])) if cols["jockey"] else "",
             "style": style,
             "odds": _to_float(row.get(cols["odds"])) if cols["odds"] else None,
-            "recent_runs": [
-                _to_text(recent.get("前走") or row.get("前走")),
-                _to_text(recent.get("2走前") or row.get("2走前")),
-                _to_text(recent.get("3走前") or row.get("3走前")),
-            ],
+            "recent_runs": recent_run_values,
             "last3fs": last3fs,
-            "corners": _recent_list(recent, "corners", []),
-            "field_sizes": _recent_list(recent, "field_sizes", []),
+            "corners": corners,
+            "field_sizes": field_sizes,
+            "recent_run_details": recent_run_details,
         })
     return horses
 
@@ -722,6 +877,187 @@ def _recent_list(recent: dict, key: str, fallback_keys: list[str]) -> list[str]:
     return result[:3]
 
 
+def _fetch_run_details_for_race(
+    horse_id_map: dict[str, str],
+    n_recent: int = 3,
+) -> dict[str, list[dict[str, Any]]]:
+    details: dict[str, list[dict[str, Any]]] = {}
+    for horse_name, horse_id in horse_id_map.items():
+        fetched = _fetch_horse_run_details_cached(_to_text(horse_id), n_recent)
+        if fetched:
+            details[horse_name] = list(fetched)
+    return details
+
+
+@lru_cache(maxsize=512)
+def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[dict[str, Any], ...]:
+    if not horse_id:
+        return tuple()
+    try:
+        session = build_requests_session()
+        resp = session.get(f"https://db.netkeiba.com/horse/result/{horse_id}/", timeout=8)
+    except Exception:
+        return tuple()
+    if resp.status_code != 200:
+        return tuple()
+    if not resp.encoding or resp.encoding.lower() in {"iso-8859-1", "ascii"}:
+        resp.encoding = "EUC-JP"
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+    table = soup.select_one("table.db_h_race_results")
+    if not table:
+        return tuple()
+
+    header_row = table.select_one("tr")
+    headers = [_to_text(cell.get_text(" ", strip=True)) for cell in header_row.find_all(["th", "td"])] if header_row else []
+    idx = {
+        "date": _header_index(headers, ["日付"]),
+        "finish": _header_index(headers, ["着順"]),
+        "race_name": _header_index(headers, ["レース名"]),
+        "distance": _header_index(headers, ["距離"]),
+        "track": _header_index(headers, ["馬場"]),
+        "race_time": _header_index(headers, ["タイム"], exclude=["指数"]),
+        "margin": _header_index(headers, ["着差"]),
+        "time_index": _header_index(headers, ["タイム指数"]),
+        "corner": _header_index(headers, ["通過"]),
+        "last3f": _header_index(headers, ["上り", "上がり"]),
+        "field_size": _header_index(headers, ["頭数"]),
+    }
+
+    details: list[dict[str, Any]] = []
+    for row in table.select("tr")[1:]:
+        cells = row.find_all("td")
+        if not cells:
+            continue
+        date_text = _cell_text(cells, idx["date"])
+        if not re.match(r"\d{4}/\d{1,2}/\d{1,2}", date_text):
+            continue
+        distance = _cell_text(cells, idx["distance"])
+        track = _cell_text(cells, idx["track"])
+        course = f"{distance}/{track}" if distance and track else distance
+        time_index = _to_float(_cell_text(cells, idx["time_index"]))
+        details.append(
+            {
+                "date": _short_date(date_text),
+                "finish": _cell_text(cells, idx["finish"]),
+                "race_name": _cell_text(cells, idx["race_name"]),
+                "course": course,
+                "race_time": _cell_text(cells, idx["race_time"]),
+                "margin": _cell_text(cells, idx["margin"]),
+                "time_index": time_index,
+                "race_level": _classify_race_level(time_index),
+                "last3f": _cell_text(cells, idx["last3f"]),
+                "corner": _cell_text(cells, idx["corner"]).replace(" ", ""),
+                "field_size": _cell_text(cells, idx["field_size"]),
+            }
+        )
+        if len(details) >= n_recent:
+            break
+    return tuple(details)
+
+
+def _header_index(headers: list[str], includes: list[str], exclude: list[str] | None = None) -> int | None:
+    exclude = exclude or []
+    for idx, header in enumerate(headers):
+        normalized = re.sub(r"\s+", "", header)
+        if all(word in normalized for word in includes) and not any(word in normalized for word in exclude):
+            return idx
+    return None
+
+
+def _cell_text(cells: list[Any], idx: int | None) -> str:
+    if idx is None or idx < 0 or idx >= len(cells):
+        return ""
+    return re.sub(r"\s+", " ", cells[idx].get_text(" ", strip=True)).strip()
+
+
+def _short_date(date_text: str) -> str:
+    match = re.search(r"(\d{4})/(\d{1,2})/(\d{1,2})", _to_text(date_text))
+    if not match:
+        return _to_text(date_text)
+    return f"{match.group(1)[2:]}/{int(match.group(2)):02d}/{int(match.group(3)):02d}"
+
+
+def _build_recent_run_details(
+    recent_runs: list[str],
+    last3fs: list[str],
+    corners: list[str],
+    field_sizes: list[str],
+    fetched_details: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    details: list[dict[str, Any]] = []
+    for idx in range(3):
+        summary = _parse_recent_run_summary(recent_runs[idx] if idx < len(recent_runs) else "")
+        fetched = fetched_details[idx] if idx < len(fetched_details) and isinstance(fetched_details[idx], dict) else {}
+        time_index = _to_float(fetched.get("time_index"))
+        detail = {
+            "date": _to_text(fetched.get("date")) or summary.get("date", ""),
+            "finish": _to_text(fetched.get("finish")) or summary.get("finish", ""),
+            "race_name": _to_text(fetched.get("race_name")) or summary.get("race_name", ""),
+            "course": _to_text(fetched.get("course")) or summary.get("course", ""),
+            "race_time": _to_text(fetched.get("race_time")),
+            "margin": _to_text(fetched.get("margin")),
+            "time_index": time_index,
+            "race_level": _classify_race_level(time_index),
+            "last3f": _to_text(fetched.get("last3f")) or (last3fs[idx] if idx < len(last3fs) else ""),
+            "corner": _to_text(fetched.get("corner")) or (corners[idx] if idx < len(corners) else ""),
+            "field_size": _to_text(fetched.get("field_size")) or (field_sizes[idx] if idx < len(field_sizes) else ""),
+        }
+        details.append(detail)
+    return details
+
+
+def _parse_recent_run_summary(text: str) -> dict[str, str]:
+    value = _to_text(text)
+    match = re.match(r"^(\d{2}/\d{2}/\d{2})\s+(\S+)\s+(.+)$", value)
+    if not match:
+        return {}
+    rest = match.group(3).strip()
+    tokens = rest.split()
+    course = tokens[-1] if tokens else ""
+    race_name = " ".join(tokens[:-1]) if len(tokens) > 1 else rest
+    return {
+        "date": match.group(1),
+        "finish": match.group(2),
+        "race_name": race_name,
+        "course": course,
+    }
+
+
+def _classify_race_level(time_index: float | None) -> str:
+    if time_index is None:
+        return "指数なし"
+    if time_index >= 95:
+        return "S"
+    if time_index >= 85:
+        return "A"
+    if time_index >= 75:
+        return "B"
+    if time_index >= 65:
+        return "C"
+    return "D"
+
+
+def _time_level_bonus(details: list[dict[str, Any]]) -> tuple[float, str]:
+    weights = [0.5, 0.3, 0.2]
+    valid: list[tuple[float, float]] = []
+    for detail, weight in zip(details[:3], weights):
+        time_index = _to_float(detail.get("time_index")) if isinstance(detail, dict) else None
+        if time_index is not None:
+            valid.append((time_index, weight))
+    if not valid:
+        return 0.0, ""
+    weight_sum = sum(weight for _, weight in valid)
+    weighted_index = sum(time_index * weight for time_index, weight in valid) / weight_sum
+    bonus = max(-0.03, min(0.12, (weighted_index - 70.0) / 100.0))
+    level = _classify_race_level(weighted_index)
+    if level in {"S", "A"}:
+        return bonus, f"指数{level}"
+    if weighted_index >= 75:
+        return bonus, "近走指数強め"
+    return bonus, ""
+
+
 def _style_distribution(horses: list[dict[str, Any]]) -> dict[str, int]:
     counts = Counter(_to_text(horse.get("style")) for horse in horses)
     return {style: int(counts.get(style, 0)) for style in STYLE_ORDER if counts.get(style, 0)}
@@ -735,7 +1071,8 @@ def _rank_horses(horses: list[dict[str, Any]]) -> list[dict[str, Any]]:
         odds_score = max(0.0, min(1.0, 1.0 / max(odds_num, 1.0)))
         style_bonus = {"逃げ": 0.08, "先行": 0.10, "差し": 0.07, "自在": 0.05, "追込": 0.02}.get(_to_text(horse.get("style")), 0.0)
         recent_bonus = _recent_finish_bonus(horse.get("recent_runs") or [])
-        score = round(odds_score + style_bonus + recent_bonus, 4)
+        time_bonus, time_reason = _time_level_bonus(horse.get("recent_run_details") or [])
+        score = round(odds_score + style_bonus + recent_bonus + time_bonus, 4)
         ranked.append({
             "horse_name": horse.get("horse_name"),
             "umaban": horse.get("umaban"),
@@ -743,7 +1080,7 @@ def _rank_horses(horses: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "odds": horse.get("odds"),
             "style": horse.get("style"),
             "score": score,
-            "reason": _rank_reason(horse, recent_bonus),
+            "reason": _rank_reason(horse, recent_bonus, time_reason),
         })
     ranked.sort(key=lambda item: item["score"], reverse=True)
     return ranked
@@ -764,7 +1101,7 @@ def _recent_finish_bonus(recent_runs: list[str]) -> float:
     return bonus
 
 
-def _rank_reason(horse: dict[str, Any], recent_bonus: float) -> str:
+def _rank_reason(horse: dict[str, Any], recent_bonus: float, time_reason: str = "") -> str:
     parts = []
     if horse.get("odds") is not None:
         parts.append(f"単勝{float(horse['odds']):.1f}")
@@ -772,6 +1109,8 @@ def _rank_reason(horse: dict[str, Any], recent_bonus: float) -> str:
         parts.append(f"脚質{horse['style']}")
     if recent_bonus > 0:
         parts.append("近走評価あり")
+    if time_reason:
+        parts.append(time_reason)
     return " / ".join(parts) or "出馬表情報ベース"
 
 

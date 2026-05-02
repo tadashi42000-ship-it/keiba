@@ -56,6 +56,20 @@ export type OddsResponse = {
   horses: OddsHorse[];
 };
 
+export type RecentRunDetail = {
+  date: string;
+  finish: string;
+  race_name: string;
+  course: string;
+  race_time: string;
+  margin: string;
+  time_index: number | null;
+  race_level: string;
+  last3f: string;
+  corner: string;
+  field_size: string;
+};
+
 export type SameDayRacesResponse = {
   date: string;
   venue: string;
@@ -78,6 +92,7 @@ export type EntryHorse = {
   last3fs: string[];
   corners: string[];
   field_sizes: string[];
+  recent_run_details?: RecentRunDetail[];
 };
 
 export type RaceEntryResponse = {

@@ -8,6 +8,7 @@ import { ExternalWorkbenchCard } from "@/components/mobile/external-workbench-ca
 import {
   getRaceCourseStats,
   getRaceEntry,
+  getSameDaySheet,
   getUpcomingRaces,
   postRaceBetPlan,
   resolveRaceId,
@@ -17,6 +18,8 @@ import type {
   EntryHorse,
   RaceCourseStatsResponse,
   RaceEntryResponse,
+  RecentRunDetail,
+  SameDaySheetRace,
   UpcomingRace,
 } from "@/lib/api/types";
 
@@ -54,6 +57,11 @@ function statusText(loading: boolean, error: string | null): string {
 function formatOdds(value: number | null): string {
   if (typeof value !== "number" || Number.isNaN(value)) return "未公開";
   return value.toFixed(1);
+}
+
+function formatCandidateIndex(value: number): string {
+  if (!Number.isFinite(value)) return "-";
+  return `${Math.round(value * 100)}`;
 }
 
 const WAKU_BADGE_CLASS: Record<string, string> = {
@@ -138,10 +146,11 @@ function detailCacheKey(meta: RaceMeta, raceKey: string): string {
 function readDetailCache(meta: RaceMeta, raceKey: string): RaceDetailCachePayload | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.sessionStorage.getItem(detailCacheKey(meta, raceKey));
+    const raw = window.localStorage.getItem(detailCacheKey(meta, raceKey));
     if (!raw) return null;
     const payload = JSON.parse(raw) as RaceDetailCachePayload;
     if (!payload || !payload.race || !payload.entry) return null;
+    if (!entryHasRecentRunDetailShape(payload.entry)) return null;
     return payload;
   } catch {
     return null;
@@ -152,11 +161,49 @@ function writeDetailCache(meta: RaceMeta, payload: Omit<RaceDetailCachePayload, 
   if (typeof window === "undefined") return null;
   const savedAt = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
   try {
-    window.sessionStorage.setItem(detailCacheKey(meta, meta.race_key), JSON.stringify({ ...payload, savedAt }));
+    window.localStorage.setItem(
+      detailCacheKey(meta, meta.race_key),
+      JSON.stringify({ ...payload, savedAt }),
+    );
     return savedAt;
   } catch {
     return null;
   }
+}
+
+function detailPayloadFromSheetItem(item: SameDaySheetRace): Omit<RaceDetailCachePayload, "savedAt"> {
+  const meta = metaFromUpcoming(item.race);
+  return {
+    race: meta,
+    entry: item.entry,
+    courseStats: item.course_stats,
+    betPlan: item.bet_plan,
+  };
+}
+
+async function readDetailFromSheetCache(meta: RaceMeta, raceKey: string): Promise<Omit<RaceDetailCachePayload, "savedAt"> | null> {
+  if (!meta.date_iso || !meta.venue) return null;
+  try {
+    const sheet = await getSameDaySheet(meta.date_iso, meta.venue, 3000, false);
+    const item = sheet.races.find((candidate) => {
+      const candidateRace = candidate.race;
+      return (
+        (meta.race_id && candidateRace.race_id === meta.race_id) ||
+        candidateRace.race_key === raceKey ||
+        candidateRace.race_key === meta.race_key
+      );
+    });
+    if (!item || !item.entry) return null;
+    if (!entryHasRecentRunDetailShape(item.entry)) return null;
+    return detailPayloadFromSheetItem(item);
+  } catch {
+    return null;
+  }
+}
+
+function entryHasRecentRunDetailShape(entry: RaceEntryResponse): boolean {
+  if (!entry.horses.length) return true;
+  return entry.horses.every((horse) => Array.isArray(horse.recent_run_details));
 }
 
 export default function RaceDetailPage() {
@@ -196,6 +243,19 @@ export default function RaceDetailPage() {
           setRefreshing(false);
           return;
         }
+        const sheetCached = await readDetailFromSheetCache(resolvedMeta, raceKey);
+        if (sheetCached) {
+          setRace(sheetCached.race);
+          setEntry(sheetCached.entry);
+          setCourseStats(sheetCached.courseStats);
+          setBetPlan(sheetCached.betPlan);
+          const savedAt = writeDetailCache(sheetCached.race, sheetCached);
+          setCacheSavedAt(savedAt);
+          setLoadedFromCache(true);
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
       }
       if (!resolvedMeta.race_id) {
         const resolved = await resolveRaceId(raceKey);
@@ -209,6 +269,19 @@ export default function RaceDetailPage() {
           setCourseStats(cached.courseStats);
           setBetPlan(cached.betPlan);
           setCacheSavedAt(cached.savedAt);
+          setLoadedFromCache(true);
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
+        const sheetCached = await readDetailFromSheetCache(resolvedMeta, raceKey);
+        if (sheetCached) {
+          setRace(sheetCached.race);
+          setEntry(sheetCached.entry);
+          setCourseStats(sheetCached.courseStats);
+          setBetPlan(sheetCached.betPlan);
+          const savedAt = writeDetailCache(sheetCached.race, sheetCached);
+          setCacheSavedAt(savedAt);
           setLoadedFromCache(true);
           setLoading(false);
           setRefreshing(false);
@@ -415,6 +488,7 @@ function HorseCard({ horse }: { horse: EntryHorse }) {
             label={idx === 0 ? "前走" : `${idx + 1}走前`}
             run={run}
             last3f={horse.last3fs[idx]}
+            detail={horse.recent_run_details?.[idx]}
           />
         ))}
       </div>
@@ -422,9 +496,37 @@ function HorseCard({ horse }: { horse: EntryHorse }) {
   );
 }
 
-function RecentRunLine({ label, run, last3f }: { label: string; run: string; last3f?: string }) {
+function raceLevelColor(level: string): string {
+  switch (level) {
+    case "S":
+      return "bg-purple-100 text-purple-800";
+    case "A":
+      return "bg-blue-100 text-blue-800";
+    case "B":
+      return "bg-emerald-50 text-emerald-700";
+    case "C":
+      return "bg-yellow-50 text-yellow-700";
+    case "D":
+      return "bg-slate-100 text-slate-500";
+    default:
+      return "bg-slate-100 text-slate-400";
+  }
+}
+
+function RecentRunLine({
+  label,
+  run,
+  last3f,
+  detail,
+}: {
+  label: string;
+  run: string;
+  last3f?: string;
+  detail?: RecentRunDetail;
+}) {
   const text = run || "-";
   const match = text.match(/^(\d{2}\/\d{2}\/\d{2})\s+(\d{1,2})\s+(.+)$/);
+  const hasDetailChips = Boolean(detail?.race_time || detail?.time_index != null || detail?.margin);
   return (
     <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-700">
       <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -439,6 +541,25 @@ function RecentRunLine({ label, run, last3f }: { label: string; run: string; las
         ) : null}
         {last3f ? <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-bold text-emerald-700">上り {last3f}</span> : null}
       </div>
+      {hasDetailChips ? (
+        <div className="mb-1 flex flex-wrap gap-1">
+          {detail?.race_time ? (
+            <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-slate-700 ring-1 ring-slate-200">
+              {detail.race_time}
+            </span>
+          ) : null}
+          {detail?.time_index != null ? (
+            <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${raceLevelColor(detail.race_level)}`}>
+              指数{detail.time_index} {detail.race_level}
+            </span>
+          ) : null}
+          {detail?.margin ? (
+            <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-bold text-sky-700">
+              着差{detail.margin}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <p>{match ? match[3] : text}</p>
     </div>
   );
@@ -517,7 +638,10 @@ function BetTab({ betPlan }: { betPlan: BetPlanResponse | null }) {
                   {item.umaban || "-"}番 / {item.style || "-"} / {item.reason}
                 </p>
               </div>
-              <p className="text-sm font-black text-emerald-700">{item.score.toFixed(3)}</p>
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-black text-emerald-700">{formatCandidateIndex(item.score)}</p>
+                <p className="text-[10px] font-bold text-slate-400">候補指数</p>
+              </div>
             </div>
           ))}
         </div>

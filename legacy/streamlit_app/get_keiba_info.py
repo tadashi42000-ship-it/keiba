@@ -308,6 +308,8 @@ def _fetch_recent_runs_from_shutuba_past(race_id: str, max_runs: int = 3) -> dic
         horse_name = re.sub(r"\s+", " ", str(horse_name or "")).strip()
         if not horse_name:
             continue
+        horse_id_match = re.search(r"/horse/(\d+)", horse_link.get("href", "") if horse_link else "")
+        horse_id = horse_id_match.group(1) if horse_id_match else ""
 
         cells = row.find_all("td")
         run_values: list[str] = []
@@ -344,6 +346,7 @@ def _fetch_recent_runs_from_shutuba_past(race_id: str, max_runs: int = 3) -> dic
             "corners": corner_values[:max_runs],
             "last3fs": last3f_values[:max_runs],
             "field_sizes": field_size_values[:max_runs],
+            "horse_id": horse_id,
         }
 
     return result
@@ -444,6 +447,7 @@ def _fetch_recent_runs_via_horse_pages(race_id: str, max_runs: int = 3) -> dict[
             "corners": corner_values[:max_runs],
             "last3fs": last3f_values[:max_runs],
             "field_sizes": field_size_values[:max_runs],
+            "horse_id": horse_id,
         }
     return result
 
