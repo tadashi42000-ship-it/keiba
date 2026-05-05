@@ -58,6 +58,7 @@ export type OddsResponse = {
 
 export type RecentRunDetail = {
   date: string;
+  venue?: string;
   finish: string;
   race_name: string;
   course: string;
@@ -103,6 +104,8 @@ export type RaceEntryResponse = {
   track_conditions: Record<string, string>;
   race_data01: string;
   race_data02: string;
+  odds_updated_at?: string;
+  body_updated_at?: string;
   horses: EntryHorse[];
   style_distribution: Record<string, number>;
   style_distribution_label: string;
@@ -295,4 +298,13 @@ export type XSummaryResponse = XSearchResponse & {
 export type XHorseAnalysisResponse = XSearchResponse & {
   analysis_items: HorseAnalysisItem[];
   warnings: string[];
+};
+
+export type ExternalSnapshot = {
+  youtubeSummary: YouTubeSummaryResponse | null;
+  youtubeHorseAnalysis: YouTubeHorseAnalysisResponse | null;
+  xSummary: XSummaryResponse | null;
+  xHorseAnalysis: XHorseAnalysisResponse | null;
+  webSummary: string | null;
+  updatedAt: string | null;
 };

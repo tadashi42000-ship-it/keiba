@@ -212,7 +212,7 @@ def build_same_day_sheet_snapshot(
 
 
 def _refresh_same_day_sheet_odds(snapshot: dict[str, Any], budget_yen: int = 3000) -> dict[str, Any]:
-    """Refresh only volatile win odds while keeping expensive static race data cached."""
+    """Refresh volatile win odds/body weight while keeping expensive static race data cached."""
     updated_snapshot = dict(snapshot)
     races: list[dict[str, Any]] = []
     for item in snapshot.get("races", []):
@@ -223,21 +223,33 @@ def _refresh_same_day_sheet_odds(snapshot: dict[str, Any], budget_yen: int = 300
         race_id = _to_text(race.get("race_id"))
         entry = updated_item.get("entry") if isinstance(updated_item.get("entry"), dict) else None
         if race_id and entry:
+            horses = entry.get("horses") if isinstance(entry.get("horses"), list) else []
+            body_map, body_note = _fetch_body_weight_map(race_id)
+            if body_map and horses:
+                _merge_body_weight_into_horses(horses, body_map, overwrite=True)
+                entry["body_updated_at"] = _now_time_label()
+            elif body_note:
+                warnings = list(entry.get("warnings") or [])
+                if body_note not in warnings:
+                    warnings.append(body_note)
+                entry["warnings"] = warnings
+
             odds_map, odds_note = _fetch_win_odds_map(race_id)
             if odds_map:
-                horses = entry.get("horses") if isinstance(entry.get("horses"), list) else []
                 _merge_odds_into_horses(horses, odds_map, overwrite=True)
+                entry["odds_updated_at"] = _now_time_label()
                 entry["warnings"] = [
                     warning
                     for warning in entry.get("warnings", [])
                     if "単勝オッズ" not in _to_text(warning) and "odds" not in _to_text(warning).lower()
                 ]
-                updated_item["bet_plan"] = _build_bet_plan_from_entry(entry, budget_yen=budget_yen)
             elif odds_note:
                 warnings = list(entry.get("warnings") or [])
                 if odds_note not in warnings:
                     warnings.append(odds_note)
                 entry["warnings"] = warnings
+            if body_map or odds_map:
+                updated_item["bet_plan"] = _build_bet_plan_from_entry(entry, budget_yen=budget_yen)
         races.append(updated_item)
     updated_snapshot["races"] = races
     updated_snapshot["generated_at"] = datetime.now().isoformat(timespec="seconds")
@@ -291,7 +303,12 @@ def _same_day_sheet_has_recent_run_details(snapshot: dict[str, Any] | None) -> b
         horses = entry.get("horses")
         if not isinstance(horses, list) or not horses:
             continue
-        return all(isinstance(horse, dict) and "recent_run_details" in horse for horse in horses)
+        return all(
+            isinstance(horse, dict)
+            and isinstance(horse.get("recent_run_details"), list)
+            and all(isinstance(detail, dict) and "venue" in detail for detail in horse.get("recent_run_details") or [])
+            for horse in horses
+        )
     return False
 
 
@@ -326,6 +343,8 @@ def get_entry_snapshot(race_id: str) -> dict[str, Any]:
     if odds_map:
         _merge_odds_into_horses(horses, odds_map)
         _write_odds_to_csv(csv_path, odds_map)
+    odds_updated_at = _now_time_label() if any(horse.get("odds") is not None for horse in horses) else ""
+    body_updated_at = _now_time_label() if any(horse.get("body_weight") for horse in horses) else ""
     style_distribution = _style_distribution(horses)
     warnings: list[str] = []
     if not any(horse.get("umaban") for horse in horses):
@@ -344,6 +363,8 @@ def get_entry_snapshot(race_id: str) -> dict[str, Any]:
         "track_conditions": metadata.get("track_conditions") if isinstance(metadata.get("track_conditions"), dict) else {},
         "race_data01": _to_text(metadata.get("race_data01")),
         "race_data02": _to_text(metadata.get("race_data02")),
+        "odds_updated_at": odds_updated_at,
+        "body_updated_at": body_updated_at,
         "horses": horses,
         "style_distribution": style_distribution,
         "style_distribution_label": " / ".join(
@@ -756,6 +777,36 @@ def _extract_jra_win_odds_from_html(html_text: str) -> dict[str, float]:
     return odds
 
 
+def _now_time_label() -> str:
+    return datetime.now().strftime("%H:%M")
+
+
+def _fetch_body_weight_map(race_id: str) -> tuple[dict[str, tuple[str, str]], str]:
+    if not race_id:
+        return {}, ""
+    csv_path = BACKEND_DATA_DIR / f"race_{race_id}.csv"
+    try:
+        legacy_fetch_race_csv(race_id, str(csv_path))
+        df = pd.read_csv(csv_path, encoding="utf-8-sig")
+    except Exception as exc:
+        return {}, f"馬体重更新: {type(exc).__name__}"
+
+    rows = _build_entry_horses(df, {}, {})
+    result: dict[str, tuple[str, str]] = {}
+    for row in rows:
+        body_weight = _to_text(row.get("body_weight"))
+        body_delta = _to_text(row.get("body_delta"))
+        if not body_weight:
+            continue
+        horse_name = _to_text(row.get("horse_name"))
+        umaban = _to_text(row.get("umaban")).lstrip("0")
+        if horse_name:
+            result[horse_name] = (body_weight, body_delta)
+        if umaban:
+            result[f"__umaban__:{umaban}"] = (body_weight, body_delta)
+    return result, ""
+
+
 def _merge_odds_into_horses(horses: list[dict[str, Any]], odds_map: dict[str, float], overwrite: bool = False) -> None:
     normalized = {_horse_token(name): value for name, value in odds_map.items() if not str(name).startswith("__umaban__:")}
     by_umaban = {str(name).split(":", 1)[1].lstrip("0"): value for name, value in odds_map.items() if str(name).startswith("__umaban__:")}
@@ -767,6 +818,32 @@ def _merge_odds_into_horses(horses: list[dict[str, Any]], odds_map: dict[str, fl
             odds = by_umaban.get(_to_text(horse.get("umaban")).lstrip("0"))
         if odds is not None:
             horse["odds"] = odds
+
+
+def _merge_body_weight_into_horses(
+    horses: list[dict[str, Any]],
+    body_map: dict[str, tuple[str, str]],
+    overwrite: bool = False,
+) -> None:
+    normalized = {
+        _horse_token(name): value
+        for name, value in body_map.items()
+        if not str(name).startswith("__umaban__:")
+    }
+    by_umaban = {
+        str(name).split(":", 1)[1].lstrip("0"): value
+        for name, value in body_map.items()
+        if str(name).startswith("__umaban__:")
+    }
+    for horse in horses:
+        if horse.get("body_weight") and not overwrite:
+            continue
+        body = normalized.get(_horse_token(horse.get("horse_name")))
+        if body is None:
+            body = by_umaban.get(_to_text(horse.get("umaban")).lstrip("0"))
+        if body is None:
+            continue
+        horse["body_weight"], horse["body_delta"] = body
 
 
 def _write_odds_to_csv(csv_path: Path, odds_map: dict[str, float]) -> None:
@@ -912,13 +989,14 @@ def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[d
     headers = [_to_text(cell.get_text(" ", strip=True)) for cell in header_row.find_all(["th", "td"])] if header_row else []
     idx = {
         "date": _header_index(headers, ["日付"]),
+        "venue": _header_index_any(headers, [(["開催"], None), (["場所"], None), (["競馬場"], None)]),
         "finish": _header_index(headers, ["着順"]),
         "race_name": _header_index(headers, ["レース名"]),
         "distance": _header_index(headers, ["距離"]),
         "track": _header_index(headers, ["馬場"]),
         "race_time": _header_index(headers, ["タイム"], exclude=["指数"]),
         "margin": _header_index(headers, ["着差"]),
-        "time_index": _header_index(headers, ["タイム指数"]),
+        "time_index": _header_index_any(headers, [(["タイム指数"], None), (["指数"], ["PCI", "ペース"])]),
         "corner": _header_index(headers, ["通過"]),
         "last3f": _header_index(headers, ["上り", "上がり"]),
         "field_size": _header_index(headers, ["頭数"]),
@@ -939,6 +1017,7 @@ def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[d
         details.append(
             {
                 "date": _short_date(date_text),
+                "venue": _normalize_run_venue(_cell_text(cells, idx["venue"])),
                 "finish": _cell_text(cells, idx["finish"]),
                 "race_name": _cell_text(cells, idx["race_name"]),
                 "course": course,
@@ -956,6 +1035,14 @@ def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[d
     return tuple(details)
 
 
+def _header_index_any(headers: list[str], rules: list[tuple[list[str], list[str] | None]]) -> int | None:
+    for includes, exclude in rules:
+        idx = _header_index(headers, includes, exclude=exclude)
+        if idx is not None:
+            return idx
+    return None
+
+
 def _header_index(headers: list[str], includes: list[str], exclude: list[str] | None = None) -> int | None:
     exclude = exclude or []
     for idx, header in enumerate(headers):
@@ -969,6 +1056,14 @@ def _cell_text(cells: list[Any], idx: int | None) -> str:
     if idx is None or idx < 0 or idx >= len(cells):
         return ""
     return re.sub(r"\s+", " ", cells[idx].get_text(" ", strip=True)).strip()
+
+
+def _normalize_run_venue(value: str) -> str:
+    text = _to_text(value)
+    for venue in ("札幌", "函館", "福島", "新潟", "東京", "中山", "中京", "京都", "阪神", "小倉"):
+        if venue in text:
+            return venue
+    return text
 
 
 def _short_date(date_text: str) -> str:
@@ -992,6 +1087,7 @@ def _build_recent_run_details(
         time_index = _to_float(fetched.get("time_index"))
         detail = {
             "date": _to_text(fetched.get("date")) or summary.get("date", ""),
+            "venue": _to_text(fetched.get("venue")) or summary.get("venue", ""),
             "finish": _to_text(fetched.get("finish")) or summary.get("finish", ""),
             "race_name": _to_text(fetched.get("race_name")) or summary.get("race_name", ""),
             "course": _to_text(fetched.get("course")) or summary.get("course", ""),
@@ -1018,6 +1114,7 @@ def _parse_recent_run_summary(text: str) -> dict[str, str]:
     race_name = " ".join(tokens[:-1]) if len(tokens) > 1 else rest
     return {
         "date": match.group(1),
+        "venue": "",
         "finish": match.group(2),
         "race_name": race_name,
         "course": course,

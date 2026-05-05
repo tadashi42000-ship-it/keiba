@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 
@@ -16,6 +16,7 @@ import {
 import type {
   BetPlanResponse,
   EntryHorse,
+  ExternalSnapshot,
   RaceCourseStatsResponse,
   RaceEntryResponse,
   RecentRunDetail,
@@ -44,9 +45,11 @@ type RaceDetailCachePayload = {
   entry: RaceEntryResponse | null;
   courseStats: RaceCourseStatsResponse | null;
   betPlan: BetPlanResponse | null;
+  externalSnapshot?: ExternalSnapshot | null;
 };
 
 const DETAIL_CACHE_PREFIX = "keiba:same-day:race-detail:";
+const DETAIL_CACHE_EVENT = "keiba:same-day-detail-cache-updated";
 
 function statusText(loading: boolean, error: string | null): string {
   if (loading) return "取得中...";
@@ -165,6 +168,7 @@ function writeDetailCache(meta: RaceMeta, payload: Omit<RaceDetailCachePayload, 
       detailCacheKey(meta, meta.race_key),
       JSON.stringify({ ...payload, savedAt }),
     );
+    window.dispatchEvent(new Event(DETAIL_CACHE_EVENT));
     return savedAt;
   } catch {
     return null;
@@ -178,6 +182,7 @@ function detailPayloadFromSheetItem(item: SameDaySheetRace): Omit<RaceDetailCach
     entry: item.entry,
     courseStats: item.course_stats,
     betPlan: item.bet_plan,
+    externalSnapshot: null,
   };
 }
 
@@ -206,6 +211,212 @@ function entryHasRecentRunDetailShape(entry: RaceEntryResponse): boolean {
   return entry.horses.every((horse) => Array.isArray(horse.recent_run_details));
 }
 
+function mdCell(value: unknown): string {
+  const text = value == null || value === "" ? "-" : String(value);
+  return text.replace(/\|/g, "/").replace(/\r?\n/g, " ").trim() || "-";
+}
+
+function mdText(value: unknown, fallback = "未取得"): string {
+  const text = value == null ? "" : String(value).trim();
+  return text || fallback;
+}
+
+function trackTextFromEntry(entry: RaceEntryResponse | null): string {
+  const direct = Object.entries(entry?.track_conditions ?? {})
+    .map(([key, value]) => `${key}:${value}`)
+    .join(" / ");
+  if (direct) return direct;
+  const raceData = entry?.race_data01 ?? "";
+  const match = raceData.match(/馬場\s*[:：]\s*([^\s/]+)/);
+  return match?.[1] ?? "";
+}
+
+function formatRunDetail(detail?: RecentRunDetail): string {
+  if (!detail) return "詳細未取得";
+  const parts = [
+    detail.venue ? `場所 ${detail.venue}` : "",
+    detail.race_time ? `走破タイム ${detail.race_time}` : "",
+    detail.time_index != null ? `指数${detail.time_index} ${detail.race_level || ""}`.trim() : "",
+    detail.margin ? `着差${detail.margin}` : "",
+    detail.last3f ? `上り${detail.last3f}` : "",
+    detail.corner ? `通過${detail.corner}` : "",
+    detail.field_size ? `${detail.field_size}頭` : "",
+  ].filter(Boolean);
+  return parts.length ? parts.join(" / ") : "詳細未取得";
+}
+
+function buildRaceResearchMarkdown({
+  race,
+  entry,
+  courseStats,
+  betPlan,
+  externalSnapshot,
+}: {
+  race: RaceMeta | null;
+  entry: RaceEntryResponse | null;
+  courseStats: RaceCourseStatsResponse | null;
+  betPlan: BetPlanResponse | null;
+  externalSnapshot: ExternalSnapshot | null;
+}): string {
+  const lines: string[] = [];
+  const title = `${race?.race_number ? `${race.race_number} ` : ""}${race?.race_name || "レース詳細"}`;
+
+  lines.push("# AI共有用レース分析資料");
+  lines.push("");
+  lines.push("## レース情報");
+  lines.push(`- レース: ${mdText(title)}`);
+  lines.push(`- 日付: ${mdText(race?.date_str || race?.date_iso)}`);
+  lines.push(`- 会場: ${mdText(race?.venue)}`);
+  lines.push(`- 条件: ${mdText(`${race?.surface || ""}${race?.distance || ""}`)}`);
+  lines.push(`- グレード: ${mdText(race?.grade)}`);
+  lines.push(`- 発走: ${mdText(entry?.start_time)}`);
+  lines.push(`- 天気: ${mdText(entry?.weather)}`);
+  lines.push(`- 馬場: ${mdText(trackTextFromEntry(entry))}`);
+  lines.push("");
+
+  lines.push("## 出馬表");
+  if (entry?.horses.length) {
+    lines.push("| 枠 | 馬番 | 馬名 | 騎手 | 単勝 | 脚質 | 斤量 | 馬体重 |");
+    lines.push("|---|---:|---|---|---:|---|---:|---|");
+    entry.horses.forEach((horse) => {
+      lines.push(
+        `| ${mdCell(horse.waku)} | ${mdCell(horse.umaban)} | ${mdCell(horse.horse_name)} | ${mdCell(horse.jockey)} | ${mdCell(formatOdds(horse.odds))} | ${mdCell(horse.style)} | ${mdCell(horse.weight)} | ${mdCell(`${horse.body_weight || "-"}${horse.body_delta ? ` (${horse.body_delta})` : ""}`)} |`,
+      );
+    });
+  } else {
+    lines.push("未取得");
+  }
+  lines.push("");
+
+  lines.push("## 近3走・指数");
+  if (entry?.horses.length) {
+    entry.horses.forEach((horse) => {
+      lines.push(`### ${mdText(horse.umaban, "-")} ${mdText(horse.horse_name)}`);
+      const runs = horse.recent_runs.length ? horse.recent_runs : ["", "", ""];
+      runs.slice(0, 3).forEach((run, idx) => {
+        const label = idx === 0 ? "前走" : `${idx + 1}走前`;
+        lines.push(`- ${label}: ${mdText(run)} / ${formatRunDetail(horse.recent_run_details?.[idx])}`);
+      });
+      lines.push("");
+    });
+  } else {
+    lines.push("未取得");
+    lines.push("");
+  }
+
+  lines.push("## コース特徴");
+  if (courseStats) {
+    lines.push(`- コース要約: ${mdText(courseStats.summary.course)}`);
+    lines.push(`- 脚質傾向: ${mdText(courseStats.summary.winning_type)}`);
+    lines.push(`- ペース傾向: ${mdText(courseStats.summary.pace_note || courseStats.pace_tendency)}`);
+    lines.push(`- 参照レース数: ${mdText(courseStats.sample_race_count)}`);
+    lines.push("");
+    lines.push("### 枠別成績");
+    lines.push("| 枠 | 1着率 | 複勝率 | 圏外率 | 頭数 |");
+    lines.push("|---|---:|---:|---:|---:|");
+    courseStats.frame_stats.forEach((row) => {
+      lines.push(
+        `| ${mdCell(row.label)} | ${mdCell(row.win_rate)}% | ${mdCell(row.top3_rate)}% | ${mdCell(row.outside_top3_rate)}% | ${mdCell(row.starts)} |`,
+      );
+    });
+  } else {
+    lines.push("未取得");
+  }
+  lines.push("");
+
+  lines.push("## 候補馬ランキング");
+  if (betPlan?.ranking.length) {
+    lines.push("| 順位 | 馬番 | 馬名 | 単勝 | 脚質 | 候補指数 | 理由 |");
+    lines.push("|---:|---:|---|---:|---|---:|---|");
+    betPlan.ranking.forEach((item, idx) => {
+      lines.push(
+        `| ${idx + 1} | ${mdCell(item.umaban)} | ${mdCell(item.horse_name)} | ${mdCell(formatOdds(item.odds))} | ${mdCell(item.style)} | ${mdCell(formatCandidateIndex(item.score))} | ${mdCell(item.reason)} |`,
+      );
+    });
+  } else {
+    lines.push("未取得");
+  }
+  lines.push("");
+
+  lines.push("## 買い目");
+  if (betPlan?.tickets.length) {
+    lines.push(`- 予算: ${betPlan.budget_yen.toLocaleString("ja-JP")}円`);
+    lines.push(`- 暫定表示: ${betPlan.provisional_only ? "はい" : "いいえ"}`);
+    lines.push("| 券種 | 買い目 | 金額 | 理由 |");
+    lines.push("|---|---|---:|---|");
+    betPlan.tickets.forEach((ticket) => {
+      lines.push(`| ${mdCell(ticket.type)} | ${mdCell(ticket.selection)} | ${mdCell(`${ticket.amount_yen}円`)} | ${mdCell(ticket.reason)} |`);
+    });
+  } else {
+    lines.push("未取得");
+  }
+  if (betPlan?.warnings.length) {
+    lines.push("");
+    lines.push("### 買い目生成時の警告");
+    betPlan.warnings.forEach((warning) => lines.push(`- ${warning}`));
+  }
+  lines.push("");
+
+  lines.push("## 外部情報");
+  lines.push("### YouTube");
+  if (externalSnapshot?.youtubeSummary || externalSnapshot?.youtubeHorseAnalysis) {
+    if (externalSnapshot.youtubeSummary) {
+      lines.push(`- 検索語: ${mdText(externalSnapshot.youtubeSummary.query)}`);
+      lines.push(`- 要約: ${mdText(externalSnapshot.youtubeSummary.summary)}`);
+      lines.push("- 取得動画:");
+      externalSnapshot.youtubeSummary.videos.forEach((video) => {
+        lines.push(`  - ${video.title} / ${video.channel_title} / ${video.video_url}`);
+      });
+    }
+    if (externalSnapshot.youtubeHorseAnalysis?.video_conclusions.length) {
+      lines.push("");
+      lines.push("#### 動画ごとの結論");
+      externalSnapshot.youtubeHorseAnalysis.video_conclusions.forEach((item) => {
+        lines.push(`- ${mdText(item.video_title)}: 本命=${mdText(item.head_pick, "-")} / 対抗=${mdText(item.second_pick, "-")} / 単穴=${mdText(item.dark_horse, "-")} / 危険=${mdText(item.danger_horse, "-")} / ${mdText(item.bet_strategy, "-")}`);
+      });
+    }
+    if (externalSnapshot.youtubeHorseAnalysis?.analysis_items.length) {
+      lines.push("");
+      lines.push("#### 馬別分析");
+      externalSnapshot.youtubeHorseAnalysis.analysis_items.forEach((item) => {
+        lines.push(`- ${mdText(item.horse)}: + ${mdText(item.plus, "-")} / - ${mdText(item.minus, "-")} / ${mdText(item.source_title, "-")} ${mdText(item.source_url, "")}`);
+      });
+    }
+  } else {
+    lines.push("未取得");
+  }
+  lines.push("");
+
+  lines.push("### X");
+  if (externalSnapshot?.xSummary || externalSnapshot?.xHorseAnalysis) {
+    if (externalSnapshot.xSummary) {
+      lines.push(`- 要約: ${mdText(externalSnapshot.xSummary.summary)}`);
+      lines.push(`- 取得ツイート: ${externalSnapshot.xSummary.tweets.length}件 / 除外 ${externalSnapshot.xSummary.dropped_count}件`);
+      externalSnapshot.xSummary.tweets.slice(0, 10).forEach((tweet) => {
+        lines.push(`  - @${tweet.author_username}: ${tweet.text.replace(/\r?\n/g, " ")} ${tweet.url}`);
+      });
+    }
+    if (externalSnapshot.xHorseAnalysis?.analysis_items.length) {
+      lines.push("");
+      lines.push("#### 馬別分析");
+      externalSnapshot.xHorseAnalysis.analysis_items.forEach((item) => {
+        lines.push(`- ${mdText(item.horse)}: + ${mdText(item.plus, "-")} / - ${mdText(item.minus, "-")} / ${mdText(item.source_title, "-")} ${mdText(item.source_url, "")}`);
+      });
+    }
+  } else {
+    lines.push("未取得");
+  }
+  lines.push("");
+
+  lines.push("### Web");
+  lines.push(externalSnapshot?.webSummary || "未取得");
+  lines.push("");
+  lines.push("---");
+  lines.push("注: この資料はアプリ内で取得済みの情報をAI分析へ渡すためのコピー用Markdownです。");
+
+  return lines.join("\n");
+}
+
 export default function RaceDetailPage() {
   const params = useParams<{ raceKey: string }>();
   const searchParams = useSearchParams();
@@ -214,7 +425,9 @@ export default function RaceDetailPage() {
   const [entry, setEntry] = useState<RaceEntryResponse | null>(null);
   const [courseStats, setCourseStats] = useState<RaceCourseStatsResponse | null>(null);
   const [betPlan, setBetPlan] = useState<BetPlanResponse | null>(null);
+  const [externalSnapshot, setExternalSnapshot] = useState<ExternalSnapshot | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>("entry");
+  const [reportOpen, setReportOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -222,6 +435,29 @@ export default function RaceDetailPage() {
   const [loadedFromCache, setLoadedFromCache] = useState(false);
 
   const status = statusText(loading || refreshing, error);
+  const horseNames = useMemo(() => entry?.horses.map((horse) => horse.horse_name).filter(Boolean) ?? [], [entry]);
+  const researchMarkdown = useMemo(
+    () => buildRaceResearchMarkdown({ race, entry, courseStats, betPlan, externalSnapshot }),
+    [race, entry, courseStats, betPlan, externalSnapshot],
+  );
+
+  const handleExternalSnapshotChange = useCallback(
+    (snapshot: ExternalSnapshot) => {
+      setExternalSnapshot(snapshot);
+      if (!race || !entry) return;
+      const savedAt = writeDetailCache(race, {
+        race,
+        entry,
+        courseStats,
+        betPlan,
+        externalSnapshot: snapshot,
+      });
+      if (savedAt) {
+        setCacheSavedAt(savedAt);
+      }
+    },
+    [race, entry, courseStats, betPlan],
+  );
 
   async function loadAll(forceRefresh = false) {
     const meta = race ?? metaFromQuery(raceKey, searchParams);
@@ -237,6 +473,7 @@ export default function RaceDetailPage() {
           setEntry(cached.entry);
           setCourseStats(cached.courseStats);
           setBetPlan(cached.betPlan);
+          setExternalSnapshot(cached.externalSnapshot ?? null);
           setCacheSavedAt(cached.savedAt);
           setLoadedFromCache(true);
           setLoading(false);
@@ -249,6 +486,7 @@ export default function RaceDetailPage() {
           setEntry(sheetCached.entry);
           setCourseStats(sheetCached.courseStats);
           setBetPlan(sheetCached.betPlan);
+          setExternalSnapshot(sheetCached.externalSnapshot ?? null);
           const savedAt = writeDetailCache(sheetCached.race, sheetCached);
           setCacheSavedAt(savedAt);
           setLoadedFromCache(true);
@@ -268,6 +506,7 @@ export default function RaceDetailPage() {
           setEntry(cached.entry);
           setCourseStats(cached.courseStats);
           setBetPlan(cached.betPlan);
+          setExternalSnapshot(cached.externalSnapshot ?? null);
           setCacheSavedAt(cached.savedAt);
           setLoadedFromCache(true);
           setLoading(false);
@@ -280,6 +519,7 @@ export default function RaceDetailPage() {
           setEntry(sheetCached.entry);
           setCourseStats(sheetCached.courseStats);
           setBetPlan(sheetCached.betPlan);
+          setExternalSnapshot(sheetCached.externalSnapshot ?? null);
           const savedAt = writeDetailCache(sheetCached.race, sheetCached);
           setCacheSavedAt(savedAt);
           setLoadedFromCache(true);
@@ -314,6 +554,7 @@ export default function RaceDetailPage() {
         entry: entryResponse,
         courseStats: courseStatsResponse,
         betPlan: betResponse,
+        externalSnapshot,
       });
       setCacheSavedAt(savedAt);
       setLoadedFromCache(false);
@@ -372,6 +613,13 @@ export default function RaceDetailPage() {
         <Link href="/" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700">
           トップへ戻る
         </Link>
+        <button
+          type="button"
+          onClick={() => setReportOpen((current) => !current)}
+          className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800"
+        >
+          AI共有用Markdown
+        </button>
       </div>
 
       <section className="mt-3 overflow-hidden rounded-3xl bg-slate-950 text-white shadow-lg">
@@ -401,6 +649,8 @@ export default function RaceDetailPage() {
           </button>
         </div>
       </section>
+
+      {reportOpen ? <ResearchMarkdownPanel markdown={researchMarkdown} /> : null}
 
       {entry?.warnings.length ? (
         <div className="mt-3 space-y-2">
@@ -435,8 +685,61 @@ export default function RaceDetailPage() {
       {activeTab === "entry" ? <EntryTab entry={entry} /> : null}
       {activeTab === "features" ? <FeaturesTab courseStats={courseStats} /> : null}
       {activeTab === "bet" ? <BetTab betPlan={betPlan} /> : null}
-      {activeTab === "external" ? <ExternalTab race={race} /> : null}
+      {activeTab === "external" ? (
+        <ExternalTab
+          race={race}
+          horseNames={horseNames}
+          externalSnapshot={externalSnapshot}
+          onExternalSnapshotChange={handleExternalSnapshotChange}
+        />
+      ) : null}
     </main>
+  );
+}
+
+function ResearchMarkdownPanel({ markdown }: { markdown: string }) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
+
+  async function handleCopy() {
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setCopyStatus("コピーしました");
+    } catch {
+      textareaRef.current?.focus();
+      textareaRef.current?.select();
+      setCopyStatus("自動コピーできませんでした。本文を選択してコピーしてください。");
+    }
+  }
+
+  return (
+    <section className="mt-3 rounded-3xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-black text-emerald-950">AI共有用Markdown</p>
+          <p className="mt-1 text-xs text-emerald-800">
+            ChatGPT/GeminiのDeep Researchへ貼り付けるための整理済み資料です。
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            void handleCopy();
+          }}
+          className="shrink-0 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white"
+        >
+          コピーする
+        </button>
+      </div>
+      {copyStatus ? <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-xs text-emerald-900">{copyStatus}</p> : null}
+      <textarea
+        ref={textareaRef}
+        readOnly
+        value={markdown}
+        rows={14}
+        className="mt-3 w-full rounded-2xl border border-emerald-200 bg-white p-3 font-mono text-xs leading-5 text-slate-800"
+      />
+    </section>
   );
 }
 
@@ -526,7 +829,7 @@ function RecentRunLine({
 }) {
   const text = run || "-";
   const match = text.match(/^(\d{2}\/\d{2}\/\d{2})\s+(\d{1,2})\s+(.+)$/);
-  const hasDetailChips = Boolean(detail?.race_time || detail?.time_index != null || detail?.margin);
+  const hasDetailChips = Boolean(detail?.venue || detail?.race_time || detail?.time_index != null || detail?.margin);
   return (
     <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-700">
       <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -543,6 +846,11 @@ function RecentRunLine({
       </div>
       {hasDetailChips ? (
         <div className="mb-1 flex flex-wrap gap-1">
+          {detail?.venue ? (
+            <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-bold text-indigo-700">
+              {detail.venue}
+            </span>
+          ) : null}
           {detail?.race_time ? (
             <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-slate-700 ring-1 ring-slate-200">
               {detail.race_time}
@@ -662,14 +970,29 @@ function BetTab({ betPlan }: { betPlan: BetPlanResponse | null }) {
   );
 }
 
-function ExternalTab({ race }: { race: RaceMeta | null }) {
+function ExternalTab({
+  race,
+  horseNames,
+  externalSnapshot,
+  onExternalSnapshotChange,
+}: {
+  race: RaceMeta | null;
+  horseNames: string[];
+  externalSnapshot: ExternalSnapshot | null;
+  onExternalSnapshotChange: (snapshot: ExternalSnapshot) => void;
+}) {
   return (
     <section className="mt-3 space-y-3">
       <p className="rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-800">
         当日モードではYouTube/X/Web検索は自動実行しません。必要な場合だけ手動で実行してください。
         検索語には「{race?.date_iso || "日付"} {race?.venue || "会場"} {race?.race_number || "R番号"} {race?.race_name || "レース名"}」を含めるのがおすすめです。
       </p>
-      <ExternalWorkbenchCard />
+      <ExternalWorkbenchCard
+        initialRaceName={race?.race_name || ""}
+        initialHorseNames={horseNames}
+        initialSnapshot={externalSnapshot}
+        onSnapshotChange={onExternalSnapshotChange}
+      />
     </section>
   );
 }

@@ -11,6 +11,7 @@ import {
   postYouTubeSummary,
 } from "@/lib/api/client";
 import type {
+  ExternalSnapshot,
   ExternalProvidersResponse,
   XAccountsResponse,
   XHorseAnalysisResponse,
@@ -38,7 +39,19 @@ function parseHorseNames(input: string): string[] {
   );
 }
 
-export function ExternalWorkbenchCard() {
+type ExternalWorkbenchCardProps = {
+  initialRaceName?: string;
+  initialHorseNames?: string[];
+  initialSnapshot?: ExternalSnapshot | null;
+  onSnapshotChange?: (snapshot: ExternalSnapshot) => void;
+};
+
+export function ExternalWorkbenchCard({
+  initialRaceName,
+  initialHorseNames = [],
+  initialSnapshot,
+  onSnapshotChange,
+}: ExternalWorkbenchCardProps) {
   const [providers, setProviders] = useState<ExternalProvidersResponse | null>(null);
   const [providersLoading, setProvidersLoading] = useState(true);
   const [providersError, setProvidersError] = useState<string | null>(null);
@@ -46,19 +59,23 @@ export function ExternalWorkbenchCard() {
   const [xAccounts, setXAccounts] = useState<XAccountsResponse | null>(null);
   const [xAccountsError, setXAccountsError] = useState<string | null>(null);
 
-  const [raceName, setRaceName] = useState("Satsuki Sho");
-  const [youtubeQuery, setYouTubeQuery] = useState("Satsuki Sho prediction");
-  const [horseNamesText, setHorseNamesText] = useState("Croix du Nord, Satono Shining, Masquerade Ball");
+  const [raceName, setRaceName] = useState(initialRaceName || "Satsuki Sho");
+  const [youtubeQuery, setYouTubeQuery] = useState(initialRaceName ? `${initialRaceName} 予想` : "Satsuki Sho prediction");
+  const [horseNamesText, setHorseNamesText] = useState(
+    initialHorseNames.length ? initialHorseNames.join(", ") : "Croix du Nord, Satono Shining, Masquerade Ball",
+  );
 
   const [maxVideos, setMaxVideos] = useState(5);
-  const [youtubeResult, setYouTubeResult] = useState<YouTubeSummaryResponse | null>(null);
-  const [youtubeHorseResult, setYouTubeHorseResult] = useState<YouTubeHorseAnalysisResponse | null>(null);
+  const [youtubeResult, setYouTubeResult] = useState<YouTubeSummaryResponse | null>(initialSnapshot?.youtubeSummary ?? null);
+  const [youtubeHorseResult, setYouTubeHorseResult] = useState<YouTubeHorseAnalysisResponse | null>(
+    initialSnapshot?.youtubeHorseAnalysis ?? null,
+  );
   const [youtubeLoading, setYouTubeLoading] = useState(false);
   const [youtubeError, setYouTubeError] = useState<string | null>(null);
 
   const [maxTweets, setMaxTweets] = useState(30);
-  const [xResult, setXResult] = useState<XSummaryResponse | null>(null);
-  const [xHorseResult, setXHorseResult] = useState<XHorseAnalysisResponse | null>(null);
+  const [xResult, setXResult] = useState<XSummaryResponse | null>(initialSnapshot?.xSummary ?? null);
+  const [xHorseResult, setXHorseResult] = useState<XHorseAnalysisResponse | null>(initialSnapshot?.xHorseAnalysis ?? null);
   const [xLoading, setXLoading] = useState(false);
   const [xError, setXError] = useState<string | null>(null);
 
@@ -68,6 +85,29 @@ export function ExternalWorkbenchCard() {
     () => statusFrom(providersLoading || youtubeLoading || xLoading, providersError || youtubeError || xError),
     [providersLoading, youtubeLoading, xLoading, providersError, youtubeError, xError],
   );
+
+  const initialHorseNamesText = initialHorseNames.join(", ");
+
+  useEffect(() => {
+    if (initialRaceName) {
+      setRaceName(initialRaceName);
+      setYouTubeQuery(`${initialRaceName} 予想`);
+    }
+    if (initialHorseNamesText) {
+      setHorseNamesText(initialHorseNamesText);
+    }
+  }, [initialRaceName, initialHorseNamesText]);
+
+  useEffect(() => {
+    onSnapshotChange?.({
+      youtubeSummary: youtubeResult,
+      youtubeHorseAnalysis: youtubeHorseResult,
+      xSummary: xResult,
+      xHorseAnalysis: xHorseResult,
+      webSummary: initialSnapshot?.webSummary ?? null,
+      updatedAt: new Date().toISOString(),
+    });
+  }, [youtubeResult, youtubeHorseResult, xResult, xHorseResult, initialSnapshot?.webSummary, onSnapshotChange]);
 
   async function refreshProviders() {
     setProvidersLoading(true);

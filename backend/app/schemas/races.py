@@ -51,6 +51,7 @@ class OddsResponse(BaseModel):
 
 class RecentRunDetail(BaseModel):
     date: str = ""
+    venue: str = ""
     finish: str = ""
     race_name: str = ""
     course: str = ""
@@ -96,6 +97,8 @@ class RaceEntryResponse(BaseModel):
     track_conditions: dict[str, str] = Field(default_factory=dict)
     race_data01: str = ""
     race_data02: str = ""
+    odds_updated_at: str = ""
+    body_updated_at: str = ""
     horses: list[EntryHorse]
     style_distribution: dict[str, int] = Field(default_factory=dict)
     style_distribution_label: str = ""

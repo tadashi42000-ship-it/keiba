@@ -1,10 +1,13 @@
 ﻿# TASK Progress Tracker
 
 ## Project Snapshot
-- Date (JST): 2026-05-02
+- Date (JST): 2026-05-05
 - Branch: `same-day-mode`
-- Current phase: 当日レースモード追加（1R〜12R 対応、平レース用情報源拡張）
+- Current phase: 当日モード実用化完了直後 / 重賞モードは legacy Streamlit で継続利用
 - Recent updates:
+  - 5/3東京現地利用向けのNext.js/PWA当日モードを整備済み。全Rシート、詳細キャッシュ、単勝オッズ同期、AI共有Markdown、近3走の走破タイム/指数/レースレベル/開催場所を確認済み
+  - PCで重賞モードを使う場合は `legacy/streamlit_app` のStreamlit版を起動する。Next.js/PWA版は現時点では当日モード中心
+  - 次回作業前に未コミット変更を確認し、必要なら `git add . && git commit -m "backup same-day mobile updates"` で退避する
   - 品質向上フェーズ完了: T-LS-06〜T-LS-10（Gemini 404/YouTube自動解析/買い目スコア統合/Web多様化/E2E）すべて Done
   - Session-QUALITY-004 で 皐月賞 E2E (`errors=[]`, `404=0`, `parse_fail=0`, `bet_generate_success=true`) 達成
   - 新プラン採択: 当日レースモード（任意の開催日・会場を指定し 1R〜12R 単位で予想）
@@ -25,6 +28,40 @@
   - Session-MOBILE-SD-014 で 5/3 東京現地運用向けに全Rシート/詳細キャッシュを調整。候補指数表示、localStorage詳細キャッシュ、オッズのみ軽量更新を確認
   - Session-MOBILE-SD-016 で5R以降の全Rシートキャッシュを確認し、詳細ページ初回もサーバー側シートキャッシュから即表示するよう変更
   - Session-MOBILE-SD-017 で当日モード詳細に近3走の走破タイム/タイム指数/レースレベル/着差を追加。5/3東京シートキャッシュを新形式へ更新
+  - Session-MOBILE-SD-018 でR詳細ページ上部にAI共有用Markdownコピー機能を追加。5/3東京5RでMarkdown生成とコピー成功をPlaywright確認
+
+## Quick Handoff
+| Item | Current state / command |
+|---|---|
+| Active branch | `same-day-mode` |
+| Must-read sections next time | `Project Snapshot`, `Quick Handoff`, latest `Session Log` |
+| Current main product | `frontend` + `backend` のNext.js/PWA当日モード |
+| Legacy product | `legacy/streamlit_app/app.py` のStreamlit重賞モード |
+| Run Streamlit graded mode | `cd C:\WORK\keiba\legacy\streamlit_app; python -m streamlit run app.py` |
+| Streamlit URL/password | `http://localhost:8501` / `7777` |
+| Run mobile PWA local/tunnel | `powershell -ExecutionPolicy Bypass -File scripts\start_mobile_pwa.ps1 -Date 2026-05-03 -Venue 東京 -SkipBuild` |
+| Stop mobile PWA/tunnel | `powershell -ExecutionPolicy Bypass -File scripts\stop_mobile_pwa.ps1` |
+| Backend validation | `cd backend; python -m pytest tests -q` |
+| Frontend validation | `cd frontend; npm run lint; npm run build` |
+| Known caveat | Cloudflare quick tunnel URL is temporary and changes after restart |
+| Known caveat | PowerShellに日本語引数を直書きすると文字化けする場合あり。URLエンコードまたはUnicode escapeを使う |
+| Known caveat | 2・3走前のタイム指数はnetkeiba側が空欄なら `指数なし` |
+| Backup rule | 作業終了時は `git status --short --branch` を確認し、必要ならコミット/プッシュして退避 |
+
+### Current Uncommitted Work To Preserve
+- `TASK.md`
+- `backend/app/schemas/races.py`
+- `backend/app/services/same_day_service.py`
+- `frontend/src/app/races/[raceKey]/page.tsx`
+- `frontend/src/app/same-day-sheet/page.tsx`
+- `frontend/src/components/mobile/external-workbench-card.tsx`
+- `frontend/src/lib/api/types.ts`
+- `frontend/src/components/mobile/same-day-sheet-client.tsx`（new file）
+
+### Next Recommended First Action
+1. `git status --short --branch` で未コミット変更を確認する。
+2. 変更を残す場合は `git add .; git commit -m "backup same-day mobile updates"; git push` で退避する。
+3. 重賞モード利用なら Streamlit、当日モード利用なら `scripts/start_mobile_pwa.ps1` を起動する。
 
 ## Milestones
 | ID | Milestone | Target state | Progress % | Status | Due | Notes |
@@ -105,6 +142,7 @@
 | M-SD-09 | Mobile Frontend/Backend | 5/3東京現地運用向けキャッシュ/オッズ更新調整 | Done | 100 | P0 | M-SD-08 | 全Rシートは候補指数表示、refreshは既存キャッシュのオッズのみ軽量更新、詳細はlocalStorageへ静的情報保存。`pytest` 42/42、`lint/build`、Playwright/tunnel確認済み。 | Codex |
 | M-SD-10 | Mobile Frontend | 5R以降の詳細ページをシートキャッシュ優先表示 | Done | 100 | P0 | M-SD-09 | localStorage未保存でも `/same-day-sheet` キャッシュから該当Rの entry/course_stats/bet_plan を即表示。5Rでオッズ/特徴をPlaywright確認。 | Codex |
 | M-SD-11 | Mobile Backend/Frontend | 近3走の走破タイム・タイム指数・レースレベル追加 | Done | 100 | P0 | M-SD-10 | `recent_run_details` を追加し、詳細ページに小チップ表示。候補指数へ小幅反映。5/3東京5R実測 + 5R〜12Rキャッシュ更新、`pytest/lint/build` PASS。 | Codex |
+| M-SD-12 | Mobile Frontend | R詳細ページのAI共有用Markdownコピー | Done | 100 | P1 | M-SD-11 | 出馬表/近3走指数/特徴/候補/買い目/外部情報をMarkdown化。5/3東京5RでPlaywrightコピー確認、`lint/build` PASS。 | Codex |
 
 ## Issue / Blocker Log
 | IssueID | Date | Issue | Impact | Temporary action | Permanent fix | Status |
@@ -886,3 +924,74 @@
   - 画面変更後は起動中の `next start` を再起動しないと旧ビルドが表示され続ける。現地用URLも再起動ごとに変わる。
 - 次回着手:
   - 明日は最新URLを開き、必要に応じて `最新オッズ・基本情報を取得` で直前オッズへ上書きする。
+
+### 2026-05-02 / Session-MOBILE-SD-018
+- 実施内容:
+  - R詳細ページ上部に `AI共有用Markdown` ボタンを追加。
+  - ボタン押下で、ChatGPT/Gemini Deep Researchへ貼り付けやすいMarkdown本文を読み取り専用テキストエリアに表示。
+  - Markdownにはレース情報、出馬表、近3走・指数、コース特徴、候補馬ランキング、買い目、外部情報（YouTube/X/Web）を出力。
+  - `ExternalWorkbenchCard` のYouTube/X取得結果を親ページへ通知し、R詳細のlocalStorageキャッシュにも保存できるようにした。
+  - Clipboard APIで `コピーする` ボタンを追加し、失敗時はテキストエリアを選択して手動コピーできる導線を用意。
+- 結果:
+  - 5/3東京5Rで、出馬表・走破タイム・指数・レースレベル・コース特徴・候補指数・買い目がMarkdownに含まれることを確認。
+  - 外部情報が未取得の場合は `未取得` と明示される。
+  - 検証時、Next dev serverではHMR WebSocket由来で詳細ページのhydration確認が不安定だったため、production build + `next start` で実画面確認を実施。
+- Verification:
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Playwright: `http://127.0.0.1:3001` のproduction startで5/3東京5R詳細を開き、`AI共有用Markdown` パネル表示、`## 近3走・指数` を含むtextarea、`コピーしました` 表示を確認。
+- 発生課題:
+  - Web情報は現時点でR詳細ページ側の取得UIが未実装のため、Markdown内では `未取得` と表示する。必要なら次フェーズでWeb取得UI/キャッシュを追加する。
+- 次回着手:
+  - 現地利用前に本番用 `next start` / Cloudflare tunnel を再起動し、最新ビルドのURLをスマホへ共有する。
+
+### 2026-05-02 / Session-MOBILE-SD-019
+- 実施内容:
+  - 5/3東京の現地スマホ利用前提で、全R一覧とR詳細の同期・更新導線を改善。
+  - 全R一覧をクライアント描画コンポーネントへ分離し、R詳細のlocalStorageキャッシュを一覧へ反映できるようにした。
+  - 全R一覧に `全R詳細をこの端末に保存` ボタンを追加し、12R分の詳細キャッシュを端末に事前保存できるようにした。
+  - 全R軽量更新で、単勝オッズに加えて馬体重/増減も再取得・マージするbackend処理を追加。
+  - APIレスポンスに `odds_updated_at` / `body_updated_at` を追加し、一覧カードへレース別更新時刻を表示できるようにした。
+  - AI共有Markdownの馬場表示を修正し、`track_conditions` が空でも `race_data01` から `馬場:良` 等を補完するようにした。
+- 結果:
+  - 5/3東京5Rで、R詳細の `最新オッズ・基本情報を取得` 後に、全R一覧へ戻ると5R候補ランキングの単勝が更新後の値へ同期されることを確認。
+  - 全R一覧の `全R詳細をこの端末に保存` で、localStorageに12R分の `keiba:same-day:race-detail:*` が保存されることを確認。
+  - AI共有Markdownで `- 馬場: 良`、走破タイム、指数、コース特徴が出力されることを確認。
+- Verification:
+  - Backend: `python -m pytest tests -q` from `backend` passed（46/46, pandas FutureWarning 1件は既存のCSVオッズ書き戻し由来）。
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Playwright: スマホ幅390pxで `/same-day-sheet?date=2026-05-03&venue=東京` が12R表示、横スクロールなし、全R保存ボタン表示を確認。
+  - Playwright: 全R保存後に `cacheKeys=12` を確認。
+  - Playwright: 5R詳細更新後、一覧5Rカードが `オープンザパンドラ 単勝 3.2` へ同期されることを確認。
+  - Playwright: AI共有Markdownの馬場行が `- 馬場: 良` になることを確認。
+- 発生課題:
+  - ローカル検証中のNext rewriteは既存8000番backendを参照していたため、8010番の新backendで追加した更新時刻フィールドはブラウザ経由では未確認。直接APIでは `odds_updated_at` が返ることを確認済み。公開前はbackend/Next/tunnelをまとめて再起動する。
+  - 馬体重は5/2 23時台時点ではnetkeiba上で未公開のため、更新処理は入ったが `馬体重 0頭` のまま。公開後に全R軽量更新で再確認する。
+- 次回着手:
+  - 最新ビルドでmobile PWA/tunnelを再起動し、スマホ用URLを再発行する。
+
+### 2026-05-03 / Session-MOBILE-SD-020
+- 実施内容:
+  - 当日モードR詳細の近3走詳細に `venue`（前走〜3走前の開催場所: 東京/中山/京都など）を追加。
+  - `db.netkeiba.com/horse/result/{horse_id}/` の結果表から `開催` 列をheader-basedで取得し、開催表記からJRA場名を正規化する処理を追加。
+  - `RecentRunDetail` APIスキーマとfrontend型へ `venue` を追加し、既存の近走表示チップに場所を控えめに表示。
+  - AI共有用Markdownの近3走詳細にも `場所 中山` のように出力されるようにした。
+  - タイム指数列の検出候補を `タイム指数` に加えて `指数` まで広げ、2・3走前も取得元に値がある場合は表示できるようにした。
+  - 旧キャッシュ判定を更新し、`venue` 未格納の当日シートは再生成対象にした。
+- 結果:
+  - 5/3東京の全12Rシートキャッシュを新形式で再生成。
+  - 1Rサンプルで `中山 / 中山 / 福島`、`1:56.2 / 指数64 D` などが近3走チップに表示されることを確認。
+  - 2・3走前のタイム指数はnetkeiba側が空欄の場合は `指数なし` のまま。取得元に値があれば同じ表示欄に出る。
+  - モバイルPWA/tunnelを最新ビルドで再起動し、5/3東京URLを再発行。
+- Verification:
+  - Backend: `python -m pytest tests -q` from `backend` passed（46/46, pandas FutureWarning 1件は既存のCSVオッズ書き戻し由来）。
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Cache: `data/same_day_sheets/2026-05-03_tokyo_same_day_sheet.json` に `recent_run_details[].venue` が入ることを直接確認。
+  - Playwright: `http://127.0.0.1:3000/same-day-sheet?date=2026-05-03&venue=東京` → 1R詳細で `中山`、`福島`、`指数64 D` が表示されることを確認。
+- 発生課題:
+  - netkeibaの馬別結果表で2・3走前のタイム指数が空欄の馬は補完できないため、表示は `指数なし` とする。
+  - PowerShellで日本語引数を直書きすると文字化けする場合があるため、キャッシュ再生成時はUnicode escape/URLエンコードを使う。
+- 次回着手:
+  - 現地利用中は新URLを開き、直前は全R一覧の `オッズ・馬体重公開後に全Rを軽量更新` で最新化する。
