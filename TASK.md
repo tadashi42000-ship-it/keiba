@@ -995,3 +995,27 @@
   - PowerShellで日本語引数を直書きすると文字化けする場合があるため、キャッシュ再生成時はUnicode escape/URLエンコードを使う。
 - 次回着手:
   - 現地利用中は新URLを開き、直前は全R一覧の `オッズ・馬体重公開後に全Rを軽量更新` で最新化する。
+
+### 2026-05-09 / Session-MOBILE-SD-021
+- 実施内容:
+  - 5/10東京競馬場の当日モード利用に向けて、東京全12Rの同日シートキャッシュを生成。
+  - `2026-05-10 / 東京` の race_id を全12R分確認し、entry / course_stats / bet_plan をキャッシュへ保存。
+  - モバイルPWA + FastAPI + Cloudflare quick tunnel を5/10東京用に起動。
+  - Playwrightで全R一覧、全R詳細端末保存、11R NHKマイル詳細を確認。
+- 結果:
+  - 5/10東京は全12R取得成功。各Rで出走馬、単勝オッズ、近走詳細、コース特徴、候補ランキングが取得済み。
+  - 取得状況: `1R 16/16/16`, `2R 16/16/16`, `3R 18/18/18`, `4R 14/14/14`, `5R 16/16/16`, `6R 11/11/11`, `7R 16/16/16`, `8R 11/11/11`, `9R 9/9/9`, `10R 12/12/12`, `11R 18/18/18`, `12R 15/15/15`（horses/odds/details）。
+  - 11R NHKマイル詳細で単勝、前走〜3走前の開催場所、走破タイム、指数、AI共有用Markdownボタンを確認。
+  - 現在の一時URL: `https://stolen-levy-cumulative-voltage.trycloudflare.com/same-day-sheet?date=2026-05-10&venue=%E6%9D%B1%E4%BA%AC`
+- Verification:
+  - Direct API/service: `get_same_day_races(2026-05-10, 東京)` returned 12 races with race_id.
+  - Direct cache generation: `build_same_day_sheet_snapshot(2026-05-10, 東京)` completed with `race_count=12` and `error=''` for all races.
+  - Playwright: `/same-day-sheet?date=2026-05-10&venue=東京` shows 12R, NHKマイル, `全R詳細をこの端末に保存`.
+  - Playwright: allR保存後、localStorageに5/10東京race_id分の詳細キャッシュが入ることを確認。
+  - Playwright: 11R詳細で `NHKマイル`、`単勝`、`指数`、開催場所チップ、`AI共有用Markdown` を確認。
+- 発生課題:
+  - 馬体重は5/9 22時台時点では未公開のため `0頭`。当日公開後に `オッズ・馬体重公開後に全Rを軽量更新` を押す。
+  - Cloudflare quick tunnel URLは一時URL。PC/プロセス停止やトンネル切断でURLが変わるため、当日朝に再発行・再共有するのが安全。
+- 次回着手:
+  - 5/10当日朝または出発前にPCをスリープしない設定にし、同URLへスマホ2台でアクセス確認。必要なら `scripts/start_mobile_pwa.ps1 -Date 2026-05-10 -Venue 東京 -SkipBuild` で再起動してURLを共有し直す。
+  - レース直前は全R一覧の `オッズ・馬体重公開後に全Rを軽量更新` を押し、馬体重/直前オッズを更新する。
