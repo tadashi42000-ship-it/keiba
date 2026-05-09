@@ -1062,3 +1062,24 @@
   - `評価` はタイム指数が取れない走の補助評価。指数ベースではなくレース格ベースのため、強弱の絶対評価ではない。
 - 次回着手:
   - 当日朝にURLを再確認し、馬体重公開後に全R軽量更新を実施する。
+
+### 2026-05-09 / Session-MOBILE-SD-024
+- 実施内容:
+  - 5/10東京当日モードを追加検証し、現地スマホでの押しやすさ・横スクロール・各タブ表示・AI共有Markdownを再確認。
+  - 全R一覧とR詳細の上部ナビ（トップへ戻る/シート読込/全R一覧へ戻る/AI共有用Markdown）が33px程度で残っていたため44pxへ拡大。
+  - 5/10東京用PWA/tunnelを再起動し、最新URLを再発行。
+- 結果:
+  - 全R一覧: 12R/NHKマイル/保存/軽量更新表示OK、横スクロールなし、主要ボタン44px以上。
+  - 11R詳細: `評価L`/`評価G2`、AI共有Markdown、特徴、買い目タブ表示OK、横スクロールなし。
+  - Console warnings/errors は0件。
+  - 現在の一時URL: `https://connections-ppm-hrs-replication.trycloudflare.com/same-day-sheet?date=2026-05-10&venue=%E6%9D%B1%E4%BA%AC`
+- Verification:
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Playwright: 390px幅で全R一覧トップ操作、11R詳細トップ操作、タブ操作、特徴/買い目/Markdown表示を確認。
+- 改善候補:
+  - P1相当は今回潰し込み済み。
+  - P2: 当日朝に馬体重公開後の軽量更新を実走し、馬体重表示/更新時刻を最終確認する。
+  - P2: 共有URLはquick tunnelの一時URLなので、出発前に再起動・再共有する運用チェックを忘れない。
+- 次回着手:
+  - 当日朝にスマホ2台で最新URLへアクセスし、`全R詳細をこの端末に保存` と `オッズ・馬体重公開後に全Rを軽量更新` を確認する。

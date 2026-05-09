@@ -228,12 +228,12 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
   return (
     <main className="mx-auto min-h-screen w-full max-w-md bg-slate-50 px-4 pb-10 pt-5">
       <div className="flex items-center justify-between gap-3">
-        <Link href="/" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700">
+        <Link href="/" className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 py-3 text-xs font-bold text-slate-700">
           トップへ戻る
         </Link>
         <Link
           href={`/same-day-sheet?date=${encodeURIComponent(date)}&venue=${encodeURIComponent(venue)}`}
-          className="rounded-xl bg-emerald-500 px-3 py-2 text-xs font-black text-slate-950"
+          className="min-h-11 rounded-xl bg-emerald-500 px-3 py-3 text-xs font-black text-slate-950"
         >
           シート読込
         </Link>

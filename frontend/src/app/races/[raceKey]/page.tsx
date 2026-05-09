@@ -643,17 +643,17 @@ export default function RaceDetailPage() {
       <div className="flex flex-wrap gap-2">
         <Link
           href={sameDaySheetHref(race, searchParams)}
-          className="rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white"
+          className="min-h-11 rounded-xl bg-slate-900 px-3 py-3 text-xs font-black text-white"
         >
           全R一覧へ戻る
         </Link>
-        <Link href="/" className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700">
+        <Link href="/" className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 py-3 text-xs font-semibold text-slate-700">
           トップへ戻る
         </Link>
         <button
           type="button"
           onClick={() => setReportOpen((current) => !current)}
-          className="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-800"
+          className="min-h-11 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-3 text-xs font-black text-emerald-800"
         >
           AI共有用Markdown
         </button>
