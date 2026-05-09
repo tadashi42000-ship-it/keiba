@@ -1,12 +1,12 @@
 {
   "meta": {
     "race_key": "2026-05-10_東京_NHKマイルカップ",
-    "last_updated": "2026-05-09T22:09:44",
+    "last_updated": "2026-05-09T22:10:46",
     "web_article_count": 18,
     "youtube_video_count": 2,
-    "x_tweet_count": 0,
-    "x_newest_id": null,
-    "training_item_count": 15,
+    "x_tweet_count": 30,
+    "x_newest_id": "2053100086830551151",
+    "training_item_count": 16,
     "training_time_row_count": 53,
     "yt_video_conclusion_count": 0,
     "bet_plan_ticket_count": 0,
@@ -911,8 +911,610 @@
     "race_data02": "2回 東京 6日目 サラ系３歳 オープン (国際) 牡・牝(指) 馬齢 18頭 本賞金:13000,5200,3300,2000,1300万円"
   },
   "doc_horse_raw": [],
-  "x_raw": [],
-  "x_tweets": [],
+  "x_raw": [
+    {
+      "馬名": "アドマイヤクワッズ",
+      "プラス情報": "複数の予想家から本命、対抗、連下、3番手として高く評価されており、最終投票でも選ばれています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/kajyu_koda/status/2053100086830551151",
+      "source_title": "𝕏 @kajyu_koda",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "エコロアルバ",
+      "プラス情報": "複数の予想家から対抗、3番手、本命として非常に高く評価されており、最終投票でも選ばれています。",
+      "マイナス情報": "粗品が本命に指名しているため、「粗品の呪い」というオカルト的な懸念が一部で指摘されています。",
+      "source_url": "https://x.com/kajyu_koda/status/2053100086830551151",
+      "source_title": "𝕏 @kajyu_koda",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "サンダーストラック",
+      "プラス情報": "穴馬として評価されています。",
+      "マイナス情報": "剛腕ルメール騎手からブリンカーを外す提案があったとのこと。これが吉と出るか凶と出るか未知数であり、判断の難しい材料です。",
+      "source_url": "https://x.com/kajyu_koda/status/2053100086830551151",
+      "source_title": "𝕏 @kajyu_koda",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "アンドゥーリル",
+      "プラス情報": "穴馬として挙げられており、最終投票でも選ばれています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/kajyu_koda/status/2053100086830551151",
+      "source_title": "𝕏 @kajyu_koda",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "アスクイキゴミ",
+      "プラス情報": "複数の予想家から本命、対抗として高く評価されており、最終投票でも選ばれています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/aoiro_tomokun/status/2053100073291272446",
+      "source_title": "𝕏 @aoiro_tomokun",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ロデオドライブ",
+      "プラス情報": "複数の予想家から単穴、対抗、本命として高く評価されており、多くの最終投票で選ばれています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/YYYBBBMMM/status/2053099914520097048",
+      "source_title": "𝕏 @YYYBBBMMM",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "バルセシート",
+      "プラス情報": "小穴、対抗として挙げられており、最終投票でも選ばれています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/YYYBBBMMM/status/2053099914520097048",
+      "source_title": "𝕏 @YYYBBBMMM",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "フクチャンショウ",
+      "プラス情報": "大穴、★評価として挙げられています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/YYYBBBMMM/status/2053099914520097048",
+      "source_title": "𝕏 @YYYBBBMMM",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ユウファラオ",
+      "プラス情報": "爆穴として挙げられています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/YYYBBBMMM/status/2053099914520097048",
+      "source_title": "𝕏 @YYYBBBMMM",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ダイヤモンドノット",
+      "プラス情報": "複数の予想家から本命、3番手、△として高く評価されています。能力、騎手、厩舎、最新の馬体重データを基にしたプロ思考モードで高評価を得ています。",
+      "マイナス情報": "パドックでの気配の最終確認が推奨されており、当日の状態が重要となります。",
+      "source_url": "https://x.com/denshoko320kawa/status/2053099783653597685",
+      "source_title": "𝕏 @denshoko320kawa",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "カヴァレリッツォ",
+      "プラス情報": "4番手以降の△評価や、本命として挙げられています。",
+      "マイナス情報": "ある予想家からは「消」の評価を受けており、評価が分かれています。",
+      "source_url": "https://x.com/denshoko320kawa/status/2053099783653597685",
+      "source_title": "𝕏 @denshoko320kawa",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ギリーズボール",
+      "プラス情報": "4番手以降の△評価として挙げられており、最終投票でも選ばれています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/denshoko320kawa/status/2053099783653597685",
+      "source_title": "𝕏 @denshoko320kawa",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "レザベーション",
+      "プラス情報": "4番手以降の△評価として挙げられています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/denshoko320kawa/status/2053099783653597685",
+      "source_title": "𝕏 @denshoko320kawa",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ジーネキング",
+      "プラス情報": "調教は抜群との評価があります。人気も上昇傾向にあり、△評価として挙げられています。",
+      "マイナス情報": "人気上昇の主な理由が、同じコントレイル産駒の他馬（コンジェスタス）の好走影響であり、自身の実力評価とは直接関係ない可能性が指摘されています。",
+      "source_url": "https://x.com/hazue_shirou/status/2053099642393596094",
+      "source_title": "𝕏 @hazue_shirou",
+      "source_type": "x_twitter"
+    },
+    {
+      "馬名": "ローベルクランツ",
+      "プラス情報": "複数の予想家から△、3番手、☆として挙げられています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://x.com/kp48BZ0AkGFQqzD/status/2053099340059844641",
+      "source_title": "𝕏 @kp48BZ0AkGFQqzD",
+      "source_type": "x_twitter"
+    }
+  ],
+  "x_tweets": [
+    {
+      "tweet_id": "2053100086830551151",
+      "text": "NHKマイルカップは本命アドマイヤクワッズ対抗エコロアルバでいこうかな\n穴はサンダーストラック\nアンドゥーリルあたりで",
+      "author_username": "kajyu_koda",
+      "author_label": "kajyu_koda",
+      "created_at": "2026-05-09T13:09:40.000Z",
+      "url": "https://x.com/kajyu_koda/status/2053100086830551151",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 0
+      }
+    },
+    {
+      "tweet_id": "2053100073291272446",
+      "text": "今週の #JFCGP 対象レースは\n波乱の決着含みの3歳マイル王決定戦！\n#NHKマイルカップ\n\n私の最終投票は\n#アスクイキゴミ\n理由はコチラ！\nhttps://t.co/p6n8RnlhGo\n\n #JRAFUNCLUB で予想をシェア！\nhttps://t.co/wiWdg7PD52",
+      "author_username": "aoiro_tomokun",
+      "author_label": "aoiro_tomokun",
+      "created_at": "2026-05-09T13:09:36.000Z",
+      "url": "https://x.com/aoiro_tomokun/status/2053100073291272446",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 2
+      }
+    },
+    {
+      "tweet_id": "2053099914520097048",
+      "text": "5/10東京競馬11R　NHKマイルカップ\n\n本命◎アスクイキゴミ\n対抗○エコロアルバ\n単穴▲ロデオドライブ\n連下△アドマイヤクワッズ\n小穴☆バルセシート\n大穴×フクチャンショウ\n爆穴＊ユウファラオ\n\n最終見解(*‘ω‘ *)\n見解は以下に続く",
+      "author_username": "YYYBBBMMM",
+      "author_label": "YYYBBBMMM",
+      "created_at": "2026-05-09T13:08:59.000Z",
+      "url": "https://x.com/YYYBBBMMM/status/2053099914520097048",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 1
+      }
+    },
+    {
+      "tweet_id": "2053099895301755020",
+      "text": "#NHKマイルカップ \n明日の東京競馬場、落雷が予想されます😆\n今回、剛腕ルメールからブリンカーを外す提案があったとか\n果たしてそれが吉と出るか、凶と出るか\n\n#サンダーストラック #cyborg https://t.co/PrkK5mPX4W https://t.co/rVPMGolC1T",
+      "author_username": "K_ScarletBeast",
+      "author_label": "K_ScarletBeast",
+      "created_at": "2026-05-09T13:08:54.000Z",
+      "url": "https://x.com/K_ScarletBeast/status/2053099895301755020",
+      "public_metrics": {
+        "retweet_count": 1,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 61
+      }
+    },
+    {
+      "tweet_id": "2053099783653597685",
+      "text": "ボンレちゃんの予想！\n◎本命　　⑦ダイヤモンドノット\n◯対抗　　⑪アドマイヤクワッズ\n▲３番手　⑩エコロアルバ\n△４番手以降\n　　　　　④カヴァレリッツォ\n　　　　　⑤ギリーズボール\n　　　　　⑮レザベーション\n#NHKマイルカップ",
+      "author_username": "denshoko320kawa",
+      "author_label": "denshoko320kawa",
+      "created_at": "2026-05-09T13:08:27.000Z",
+      "url": "https://x.com/denshoko320kawa/status/2053099783653597685",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 0
+      }
+    },
+    {
+      "tweet_id": "2053099748215984394",
+      "text": "遅くなりましたが\n\n本日のレースの予想結果です\n京都新聞杯\n　無印-◯-⭐︎　❌最悪やな\nエプソムカップ\n　◎-△-無印　⭕️単勝、馬連GET‼️\n\n出馬表と共に投稿した推奨馬券の結果\n　▲27,280円\n\n良いとこなしでした＿|￣|○\n\nその他の結果も順次投稿していきます\n明日はNHKマイルカップですね https://t.co/7cYmowzC6L",
+      "author_username": "keisuke_desu",
+      "author_label": "keisuke_desu",
+      "created_at": "2026-05-09T13:08:19.000Z",
+      "url": "https://x.com/keisuke_desu/status/2053099748215984394",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 1,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 1
+      }
+    },
+    {
+      "tweet_id": "2053099724706902437",
+      "text": "NHKマイルC 私のAI予想｜私のAI   https://t.co/LSmLi0qOXm\n#競馬 #競馬予想 #NHKマイルカップ #NHKマイルC #東京競馬場 #G1 #AI予想 #note #私のAI",
+      "author_username": "bokunoai222",
+      "author_label": "bokunoai222",
+      "created_at": "2026-05-09T13:08:13.000Z",
+      "url": "https://x.com/bokunoai222/status/2053099724706902437",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 4
+      }
+    },
+    {
+      "tweet_id": "2053099642393596094",
+      "text": "「ＮＨＫマイルカップ」のジーネキングの人気が上がってきたので、笑っている。前日締切時は１５番人気だったのに、いまみたら１３番人気になっていた。同じコントレイル産駒のコンジェスタスが「京都新聞杯」を勝った影響だろうけど、そんなので人気が上昇するとは驚きだね。まぁ、調教は抜群だけど。",
+      "author_username": "hazue_shirou",
+      "author_label": "hazue_shirou",
+      "created_at": "2026-05-09T13:07:54.000Z",
+      "url": "https://x.com/hazue_shirou/status/2053099642393596094",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 4
+      }
+    },
+    {
+      "tweet_id": "2053099633975661048",
+      "text": "今週の #JFCGP 対象レースは\n波乱の決着含みの3歳マイル王決定戦！\n#NHKマイルカップ\n\n私の最終投票は\n#ロデオドライブ\n理由はコチラ！\nhttps://t.co/xUvgCC9xuP\n\n #JRAFUNCLUB で予想をシェア！\nhttps://t.co/55A6EvRJKC",
+      "author_username": "yoshiyoshi375",
+      "author_label": "yoshiyoshi375",
+      "created_at": "2026-05-09T13:07:52.000Z",
+      "url": "https://x.com/yoshiyoshi375/status/2053099633975661048",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 3
+      }
+    },
+    {
+      "tweet_id": "2053099602388336797",
+      "text": "【雑談】NHKマイルカップの予想配信はやりません【放談】2026.05.09 / ニコ生配信中 https://t.co/5DxqDapHx4",
+      "author_username": "ramen32210168",
+      "author_label": "ramen32210168",
+      "created_at": "2026-05-09T13:07:44.000Z",
+      "url": "https://x.com/ramen32210168/status/2053099602388336797",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 7
+      }
+    },
+    {
+      "tweet_id": "2053099598869303521",
+      "text": "競馬予想TV 出演者の「NHKマイルカップ」予想印！亀谷敬正、水上学、井内利彰、高柳誠二、夏目耕四郎！予想印の成績！本命馬の単勝＆複勝 回収率！うま9いくデータの該当馬！https://t.co/tl49MziHz8",
+      "author_username": "bujin_post",
+      "author_label": "bujin_post",
+      "created_at": "2026-05-09T13:07:43.000Z",
+      "url": "https://x.com/bujin_post/status/2053099598869303521",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 3
+      }
+    },
+    {
+      "tweet_id": "2053099527004135688",
+      "text": "【雑談】NHKマイルカップの予想配信はやりません【放談】2026.05.09 https://t.co/Kuax2Hky49 @YouTubeより",
+      "author_username": "ramen32210168",
+      "author_label": "ramen32210168",
+      "created_at": "2026-05-09T13:07:26.000Z",
+      "url": "https://x.com/ramen32210168/status/2053099527004135688",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 12
+      }
+    },
+    {
+      "tweet_id": "2053099429771747837",
+      "text": "@a_kikuchii @n0s3z2k7 どん詰りなんで八戸戦ど同時刻に開催の #NHKマイルカップ　の買い目公開\n200円だけど、\n本命　10番◎　#エコロアルバ\n更に架線が線路側傾き、現場検証中、\n#vegalta https://t.co/TiDMB7vxIb",
+      "author_username": "VegattiCalcio",
+      "author_label": "VegattiCalcio",
+      "created_at": "2026-05-09T13:07:03.000Z",
+      "url": "https://x.com/VegattiCalcio/status/2053099429771747837",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 16
+      }
+    },
+    {
+      "tweet_id": "2053099342542893325",
+      "text": "NHKマイルカップの予想\n本当に難しい。馬券はほどほどにレース観戦楽しみます https://t.co/pLhsCsiuwi",
+      "author_username": "omatst_dx",
+      "author_label": "omatst_dx",
+      "created_at": "2026-05-09T13:06:42.000Z",
+      "url": "https://x.com/omatst_dx/status/2053099342542893325",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 75
+      }
+    },
+    {
+      "tweet_id": "2053099340059844641",
+      "text": "NHKマイルカップ\n◎10エコロアルバ\n●16アスクイキゴミ\n▲７ダイヤモンドノット\n△８ローベルクランツ\n△17ロデオドライブ\n△９サンデーストラック\n△12アンドゥーリル\n\n３連単２頭軸マルチ\n10・16ー７・８・９・12・17\n\n＃NHKマイルカップ\n＃競馬予想",
+      "author_username": "kp48BZ0AkGFQqzD",
+      "author_label": "kp48BZ0AkGFQqzD",
+      "created_at": "2026-05-09T13:06:42.000Z",
+      "url": "https://x.com/kp48BZ0AkGFQqzD/status/2053099340059844641",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 34
+      }
+    },
+    {
+      "tweet_id": "2053099311664423049",
+      "text": "こんばんみー　\n明日　5/10　東京11R　NHKマイルカップ\n◎4カヴァレリッツォ\n〇14バルセシート\n▲8ローベルクランツ\n△17ロデオドライブ\n△6ジーネキング \n★18フクチャンショウ\n3連複ボックスで勝負! \n#競馬予想 \n#NHKマイルカップ",
+      "author_username": "4H91HJDjdHPpWTe",
+      "author_label": "4H91HJDjdHPpWTe",
+      "created_at": "2026-05-09T13:06:35.000Z",
+      "url": "https://x.com/4H91HJDjdHPpWTe/status/2053099311664423049",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 3,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 59
+      }
+    },
+    {
+      "tweet_id": "2053099169708154946",
+      "text": "#NHKマイルカップ\n\n5/10（日）東京11レース暴れ牛の相馬眼&amp;予想｜競馬予想神🐮暴れ牛〜Official @abareushi6831 https://t.co/VoFpe5QbUv",
+      "author_username": "abareushi6831",
+      "author_label": "abareushi6831",
+      "created_at": "2026-05-09T13:06:01.000Z",
+      "url": "https://x.com/abareushi6831/status/2053099169708154946",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 187
+      }
+    },
+    {
+      "tweet_id": "2053099155883708758",
+      "text": "5/10 かかしぃの競馬予想〜東京11R〜　NHKマイルカップ｜かかしぃ @kakashi_keiba https://t.co/40Kqf4Atag",
+      "author_username": "next9nichi",
+      "author_label": "next9nichi",
+      "created_at": "2026-05-09T13:05:58.000Z",
+      "url": "https://x.com/next9nichi/status/2053099155883708758",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 38
+      }
+    },
+    {
+      "tweet_id": "2053099044806009230",
+      "text": "今週の #JFCGP 対象レースは\n波乱の決着含みの3歳マイル王決定戦！\n#NHKマイルカップ\n\n私の最終投票は\n#バルセシート\n#アンドゥーリル\n#エコロアルバ\n理由はコチラ！\nhttps://t.co/I1uJZIJmWx\n\n #JRAFUNCLUB で予想をシェア！\nhttps://t.co/8WdMNFXBsU",
+      "author_username": "gattuso696969",
+      "author_label": "gattuso696969",
+      "created_at": "2026-05-09T13:05:31.000Z",
+      "url": "https://x.com/gattuso696969/status/2053099044806009230",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 68
+      }
+    },
+    {
+      "tweet_id": "2053098954351612366",
+      "text": "一旦NHKマイルカップはこの予想で朝まで寝かしてみるか… https://t.co/mTbtLB2nuN",
+      "author_username": "tanoteyan",
+      "author_label": "tanoteyan",
+      "created_at": "2026-05-09T13:05:10.000Z",
+      "url": "https://x.com/tanoteyan/status/2053098954351612366",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 36
+      }
+    },
+    {
+      "tweet_id": "2053098898697474275",
+      "text": "◎17ロデオドライブ\n〇10エコロアルバ\n▲11アドマイヤクワッズ\n☆8ローベルクランツ\n△7ダイアモンドノット\n消4カヴァレリッツォ\n\n#NHKマイルカップ #無料予想",
+      "author_username": "Kaori_keiba",
+      "author_label": "Kaori_keiba",
+      "created_at": "2026-05-09T13:04:56.000Z",
+      "url": "https://x.com/Kaori_keiba/status/2053098898697474275",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 1
+      }
+    },
+    {
+      "tweet_id": "2053098790484324424",
+      "text": "#競馬予想 #NHKマイルC\n#NHKマイルカップ\n\n本命 ➉エコロアルバ\n対抗 ⑰ロデオドライブ\n穴　 ⑫アンドゥーリル",
+      "author_username": "m5vThKyX2j2nehB",
+      "author_label": "m5vThKyX2j2nehB",
+      "created_at": "2026-05-09T13:04:31.000Z",
+      "url": "https://x.com/m5vThKyX2j2nehB/status/2053098790484324424",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 92
+      }
+    },
+    {
+      "tweet_id": "2053098753536737342",
+      "text": "今週の #JFCGP 対象レースは\n波乱の決着含みの3歳マイル王決定戦！\n#NHKマイルカップ\n\n私の最終投票は\n#ロデオドライブ\n#アドマイヤクワッズ\n#ダイヤモンドノット\n理由はコチラ！\nhttps://t.co/bOZoH9s9VK\n\n #JRAFUNCLUB で予想をシェア！\nhttps://t.co/H8pVp3rnQx",
+      "author_username": "kazu420312",
+      "author_label": "kazu420312",
+      "created_at": "2026-05-09T13:04:22.000Z",
+      "url": "https://x.com/kazu420312/status/2053098753536737342",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 83
+      }
+    },
+    {
+      "tweet_id": "2053098654492483605",
+      "text": "今週の #JFCGP 対象レースは\n波乱の決着含みの3歳マイル王決定戦！\n#NHKマイルカップ\n\n私の最終投票は\n#ダイヤモンドノット\n理由はコチラ！\nhttps://t.co/wugwIF6FZG\n\n #JRAFUNCLUB で予想をシェア！\nhttps://t.co/tUOcRW2w5y",
+      "author_username": "mikikawa_",
+      "author_label": "mikikawa_",
+      "created_at": "2026-05-09T13:03:58.000Z",
+      "url": "https://x.com/mikikawa_/status/2053098654492483605",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 50
+      }
+    },
+    {
+      "tweet_id": "2053098513257681107",
+      "text": "人生そううまくいきません！\nなので、明日のNHKマイルカップでも予想するとします。",
+      "author_username": "garako_hitogara",
+      "author_label": "garako_hitogara",
+      "created_at": "2026-05-09T13:03:24.000Z",
+      "url": "https://x.com/garako_hitogara/status/2053098513257681107",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 53
+      }
+    },
+    {
+      "tweet_id": "2053098486107938932",
+      "text": "今週の #JFCGP 対象レースは\n波乱の決着含みの3歳マイル王決定戦！\n#NHKマイルカップ\n\n私の最終投票は\n#ギリーズボール\n理由はコチラ！\nhttps://t.co/WYy4zecub7\n\n #JRAFUNCLUB で予想をシェア！\nhttps://t.co/oQt5FTezbw",
+      "author_username": "chihiro_oyoyo",
+      "author_label": "chihiro_oyoyo",
+      "created_at": "2026-05-09T13:03:18.000Z",
+      "url": "https://x.com/chihiro_oyoyo/status/2053098486107938932",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 78
+      }
+    },
+    {
+      "tweet_id": "2053098438087332190",
+      "text": "粗品のNHKマイルカップの本命はエコロアルバ。\nエコロアルバは粗品の呪いに・・・\n#粗品\n#NHKマイルカップ\n#エコロアルバ\n#粗品の呪い",
+      "author_username": "maize81431072",
+      "author_label": "maize81431072",
+      "created_at": "2026-05-09T13:03:07.000Z",
+      "url": "https://x.com/maize81431072/status/2053098438087332190",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 88
+      }
+    },
+    {
+      "tweet_id": "2053098381472624974",
+      "text": "■ NHKマイルカップ (GI) 再投稿用\n消された真相：これがプロ思考が導き出した「正解」だ。 🕵️‍♂️🕶️\n※本予想は、能力、騎手、厩舎、最新の馬体重データを基にした『プロ思考モード』による能力値選考です。パドックでの気配を必ず最終確認した上で、参考にしてください。\n• ◎ 7 https://t.co/nmVzktTXL5",
+      "author_username": "kick73975",
+      "author_label": "kick73975",
+      "created_at": "2026-05-09T13:02:53.000Z",
+      "url": "https://x.com/kick73975/status/2053098381472624974",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 115
+      }
+    },
+    {
+      "tweet_id": "2053098376120696991",
+      "text": "NHKマイルカップ\nオカルト\n\n2019年から、超荒→大荒→本命\n超荒れ→大荒→本命\n超荒→大荒？\n\nとなると、三連単10〜30マン辺りが狙い目か？ https://t.co/CT9TxVY6xm",
+      "author_username": "b7gRfdDo1x70293",
+      "author_label": "b7gRfdDo1x70293",
+      "created_at": "2026-05-09T13:02:52.000Z",
+      "url": "https://x.com/b7gRfdDo1x70293/status/2053098376120696991",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 59
+      }
+    },
+    {
+      "tweet_id": "2053098292108767573",
+      "text": "🔥人気薄だからといって軽視するのは危険かもしれない…。\n\n今年のNHKマイルカップは、上位人気馬だけでは絶対に決まらないとみています。\n実際に過去レースを1頭ずつ細かく見返していくと、“競馬の噛み合い一つ”で\n馬券圏内まできてもおかしくない馬がかなり多い。 https://t.co/bqbsywkBAE",
+      "author_username": "gyoukou_gamble",
+      "author_label": "gyoukou_gamble",
+      "created_at": "2026-05-09T13:02:32.000Z",
+      "url": "https://x.com/gyoukou_gamble/status/2053098292108767573",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 1,
+        "quote_count": 0,
+        "bookmark_count": 0,
+        "impression_count": 118
+      }
+    }
+  ],
   "training_items": [
     {
       "馬名": "エコロアルバ",
@@ -993,6 +1595,14 @@
       "情報源": "【NHKマイルC】斎藤誠調教師「普段は辛口の助手が…」　ジーネキングはグッと首沈みパワフルな動き　 | 競馬ニュース - netkeiba",
       "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330306&rf=ksop",
       "source_type": "web"
+    },
+    {
+      "馬名": "ジーネキング",
+      "評価内容": "調教は抜群との評価があります",
+      "種別": "プラス",
+      "情報源": "𝕏 @hazue_shirou",
+      "url": "https://x.com/hazue_shirou/status/2053099642393596094",
+      "source_type": "x_twitter"
     },
     {
       "馬名": "ダイヤモンドノット",
