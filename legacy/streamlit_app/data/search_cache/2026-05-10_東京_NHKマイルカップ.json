@@ -1,20 +1,241 @@
 {
   "meta": {
     "race_key": "2026-05-10_東京_NHKマイルカップ",
-    "last_updated": "2026-05-09T10:29:46",
-    "web_article_count": 0,
+    "last_updated": "2026-05-09T10:35:18",
+    "web_article_count": 13,
     "youtube_video_count": 0,
     "x_tweet_count": 0,
     "x_newest_id": null,
-    "training_item_count": 0,
+    "training_item_count": 6,
     "training_time_row_count": 0,
     "yt_video_conclusion_count": 0,
     "bet_plan_ticket_count": 0,
     "recent_runs_horse_count": 0
   },
-  "web_raw": [],
+  "web_raw": [
+    {
+      "馬名": "リゾートアイランド",
+      "プラス情報": "特になし",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/db/race/202605100511/odds.html",
+      "source_title": "ＮＨＫマイルカップの単勝・複勝・枠連オッズ【2026年5月10日東京11R】",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ユウファラオ",
+      "プラス情報": "特になし",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/db/race/202605100511/odds.html",
+      "source_title": "ＮＨＫマイルカップの単勝・複勝・枠連オッズ【2026年5月10日東京11R】",
+      "source_type": "web"
+    },
+    {
+      "馬名": "オルネーロ",
+      "プラス情報": "特になし",
+      "マイナス情報": "特になし",
+      "source_url": "https://www.keibalab.jp/db/race/202605100511/odds.html",
+      "source_title": "ＮＨＫマイルカップの単勝・複勝・枠連オッズ【2026年5月10日東京11R】",
+      "source_type": "web"
+    },
+    {
+      "馬名": "エコロアルバ",
+      "プラス情報": "特になし",
+      "マイナス情報": "GⅠ直行でありながら、記事中でその状態について疑問符が付けられており、調整過程や馬のコンディションに不透明な要素がある点が懸念される。",
+      "source_url": "https://www.keibalab.jp/db/race/202605100511/umabashira.html",
+      "source_title": "ＮＨＫマイルカップの馬柱【2026年5月10日東京11R】",
+      "source_type": "web"
+    },
+    {
+      "馬名": "エコロアルバ",
+      "プラス情報": "記事ではGⅠ直行の事実が述べられていますが、具体的な好材料としての情報はありません。",
+      "マイナス情報": "「状態は？」という記述があり、GⅠ直行におけるコンディションの不透明さや懸念が示唆されています。",
+      "source_url": "https://www.keibalab.jp/db/race/202605100511/tokubetsu.html",
+      "source_title": "ＮＨＫマイルカップの特別登録馬情報【2026年5月10日東京11R】",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ダイヤモンドノット",
+      "プラス情報": "前走のファルコンSをレースレコードで快勝しており、近走の成績は非常に良好。追い切りでは坂路で万全の仕上がりを見せており、福永調教師からも「状態は前回よりいい」とのコメントがあり、体調は前回よりも上昇していると評価できる。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330259&rf=ksop",
+      "source_title": "【NHKマイルC・追い切り】3歳マイル王へダイヤモンドノットが坂路で万全の仕上がり　福永調教師「状態は前回よりいい」 | 競馬ニュース - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "エコロアルバ",
+      "プラス情報": "最終追い切りで美浦のWコースにて自己ベストタイをマークし、非常に良好な動きを見せました。田村調教師も「完全に仕上がった」とコメントしており、最高の状態での出走が期待されます。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.netkeiba.com/?pid=news_view&no=330270",
+      "source_title": "【NHKマイルC・追い切り】エコロアルバは美浦・Wコースで自己ベストタイをマーク 田村調教師「完全に仕上がった」",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バルセシート",
+      "プラス情報": "良血馬であり、調教では素軽いキャンターを見せており好調が伺えます。前走はチャーチルダウンズCで3着と重賞での実績があります。7枠14番という枠順に関しても、松下調教師から「極端な内外ではなくて良かった」というポジティブなコメントがあり、枠順への懸念は少ないようです。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330497",
+      "source_title": "【NHKマイルC・金曜気配】良血バルセシートは素軽いキャンター　7枠14番に松下調教師「極端な内外ではなくて良かった」 | 競馬ニュース - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "リゾートアイランド",
+      "プラス情報": "かつて「暴れ馬」であったことが示唆されているが、記事タイトルにある「たった２０分で我慢を覚えたスゴ技」を例に挙げられていることから、気性面の改善が見られ、コントロールが効くようになった可能性が示唆されます。",
+      "マイナス情報": "元々「暴れ馬」とされていたため、レース本番での精神的な側面や、環境の変化に対する反応には引き続き注意が必要となる可能性があります。",
+      "source_url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330505",
+      "source_title": "【記者メモ】引手の持ち方１つで馬の“しつけ”　暴れ馬がたった２０分で我慢を覚えたスゴ技に仰天　ＮＨＫマイルＣ出走リゾートアイランドを例に | 競馬ニュース - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ダイヤモンドノット",
+      "プラス情報": "4枠7番と中目の枠に入った。東京芝1600mの多頭数戦では、内過ぎず外過ぎないこの枠番は、スタート後のポジション取りにおいて有利に働く可能性を秘めている。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keibamatome/detail.html?no=5681",
+      "source_title": "【NHKマイルカップ2026枠順発表】全18頭 ダイヤモンドノット4枠7番・ロデオドライブ＆レーン8枠17番など最新情報【5月10日(日)15時40分】 | 競馬まとめ - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ロデオドライブ",
+      "プラス情報": "名手レーン騎手とのコンビは大きな強み。彼の巧みな手綱さばきと判断力は、厳しいG1の舞台で馬の能力を最大限に引き出すことが期待される。",
+      "マイナス情報": "8枠17番と大外枠に入ったことは懸念材料。多頭数の東京芝1600mでは、スタートから先行争いに加わるには距離ロスが大きくなる可能性があり、展開が読みづらくなるリスクを抱えている。",
+      "source_url": "https://dir.netkeiba.com/keibamatome/detail.html?no=5681",
+      "source_title": "【NHKマイルカップ2026枠順発表】全18頭 ダイヤモンドノット4枠7番・ロデオドライブ＆レーン8枠17番など最新情報【5月10日(日)15時40分】 | 競馬まとめ - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "エコロアルバ",
+      "プラス情報": "人気種牡馬モズアスコットの産駒であり、種牡馬にとってGI初制覇がかかる重要な一戦として、大きな注目を集めている。馬産地ではモズアスコット産駒全体への評価が爆騰しており、本馬もその期待を背負って出走する。",
+      "マイナス情報": "特になし",
+      "source_url": "https://news.netkeiba.com/?pid=news_view&no=330028",
+      "source_title": "馬産地で評価爆騰のモズアスコット産駒 NHKマイルCのエコロアルバでGI初制覇なるか",
+      "source_type": "web"
+    },
+    {
+      "馬名": "アスクイキゴミ",
+      "プラス情報": "チャーチルダウンズカップで1着という素晴らしい実績を持っており、近走の勢いは非常に評価できます。また、予定騎手は名手である戸崎圭太騎手であり、人馬ともに信頼性が高いと言えるでしょう。優先出走権を持っている点も、これまでの実績を裏付ける好材料です。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keibamatome/detail.html?no=5567",
+      "source_title": "【2026年3歳収得賞金ランキング】NHKマイルカップ・皐月賞・桜花賞の収得賞金一覧など最新情報【クラシック路線まとめ】 | 競馬まとめ - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "パンジャタワー",
+      "プラス情報": "9番人気という低評価ながら、第30回NHKマイルカップ(GI・芝1600m)を差し切りで優勝。中団から鋭い脚を伸ばし、ゴール前の叩き合いを制した勝負根性は高く評価できます。松山弘平騎手とのコンビで大波乱を演出しました。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keibamatome/detail.html?no=4937",
+      "source_title": "【NHKマイルカップ 2025結果情報】9番人気パンジャタワーの差し切りV 3連単は150万超の大波乱 | 競馬まとめ - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ジャンタルマンタル",
+      "プラス情報": "第29回NHKマイルカップにおいて、好スタートから好位につけ、直線で満を持して抜け出し圧勝しました。川田将雅騎手とのコンビでマイル戦は無敗を維持しており、本勝利でG1・2勝目を挙げ、充実期を迎えています。",
+      "マイナス情報": "特になし",
+      "source_url": "https://dir.netkeiba.com/keibamatome/detail.html?no=4115",
+      "source_title": "【NHKマイルカップ2024結果情報】ジャンタルマンタルが圧勝 マイル無敗でG1・2勝目 | 競馬まとめ - netkeiba",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ダイヤモンドノット",
+      "プラス情報": "記事内容から具体的な好材料は読み取れません。",
+      "マイナス情報": "記事内容から具体的な懸念点・不安材料は読み取れません。",
+      "source_url": "https://race.sp.netkeiba.com/?pid=appli_speed&race_id=202605020611&type=shutuba&mode=default",
+      "source_title": "ＮＨＫマイルＣ(G1) タイム指数 | 2026年5月10日 東京11R レース情報(JRA) - netkeiba",
+      "source_type": "web"
+    }
+  ],
   "youtube_raw": [],
-  "web_articles": [],
+  "web_articles": [
+    {
+      "title": "ＮＨＫマイルカップの単勝・複勝・枠連オッズ【2026年5月10日東京11R】",
+      "url": "https://www.keibalab.jp/db/race/202605100511/odds.html",
+      "source_name": "keibalab.jp",
+      "snippet": "馬番, 馬名, 単勝, 複勝, 人気. 1, リゾートアイランド, 97.1, 18.5-23.0, 18. 2, ユウファラオ, 96.5, 11.6-14.5, 17. 3, オルネーロ, 43.4, 6.7-8.3",
+      "source_type": "web"
+    },
+    {
+      "title": "ＮＨＫマイルカップの馬柱【2026年5月10日東京11R】",
+      "url": "https://www.keibalab.jp/db/race/202605100511/umabashira.html",
+      "source_name": "keibalab.jp",
+      "snippet": "ＮＨＫマイルカップ. 2026/05/10(日) 2回東京6日目 15:40 3歳オープン 馬齢 18頭 芝1600m. 12R · 【NHKマイルC展望編】GⅠ直行エコロアルバの状態は ？",
+      "source_type": "web"
+    },
+    {
+      "title": "ＮＨＫマイルカップの特別登録馬情報【2026年5月10日東京11R】",
+      "url": "https://www.keibalab.jp/db/race/202605100511/tokubetsu.html",
+      "source_name": "keibalab.jp",
+      "snippet": "ＮＨＫマイルカップ. 2026/05/10(日) 2回東京6日目 15:40 3歳オープン 馬齢 18頭 芝1600m. 【NHKマイルC展望編】GⅠ直行エコロアルバの状態は ？有力馬一挙６頭追い切り",
+      "source_type": "web"
+    },
+    {
+      "title": "【NHKマイルC・追い切り】3歳マイル王へダイヤモンドノットが坂路で万全の仕上がり　福永調教師「状態は前回よりいい」 | 競馬ニュース - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330259&rf=ksop",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "第31回NHKマイルC・G1(5月10日、東京競馬場・芝1600メートル)＝5月6日、栗東トレセン 前走のファルコンSをレースレコードで快勝したダイヤモンド",
+      "source_type": "web"
+    },
+    {
+      "title": "【NHKマイルC・追い切り】エコロアルバは美浦・Wコースで自己ベストタイをマーク 田村調教師「完全に仕上がった」",
+      "url": "https://news.netkeiba.com/?pid=news_view&no=330270",
+      "source_name": "news.netkeiba.com",
+      "snippet": "第31回NHKマイルC・G1(5月10日、東京・芝1600メートル)追い切り＝5月6日、美浦トレセン エコロアルバ(牡3歳、美浦・田村康仁厩舎、父モズアスコット)",
+      "source_type": "web"
+    },
+    {
+      "title": "【NHKマイルC・金曜気配】良血バルセシートは素軽いキャンター　7枠14番に松下調教師「極端な内外ではなくて良かった」 | 競馬ニュース - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330497",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "第31回NHKマイルC・G1(5月10日、東京競馬場・芝1600メートル)＝5月8日、栗東トレセン チャーチルダウンズC3着のバルセシート(牡3歳、栗東・松下武士",
+      "source_type": "web"
+    },
+    {
+      "title": "【記者メモ】引手の持ち方１つで馬の“しつけ”　暴れ馬がたった２０分で我慢を覚えたスゴ技に仰天　ＮＨＫマイルＣ出走リゾートアイランドを例に | 競馬ニュース - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330505",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "とある馬の取材で上原佑紀厩舎を訪れると、汗をかきながら馬と向き合う助手さんへ向けた馬の扱い方の講義が開かれていた。宗像助手の手を焼いていたの",
+      "source_type": "web"
+    },
+    {
+      "title": "【NHKマイルカップ2026枠順発表】全18頭 ダイヤモンドノット4枠7番・ロデオドライブ＆レーン8枠17番など最新情報【5月10日(日)15時40分】 | 競馬まとめ - netkeiba",
+      "url": "https://dir.netkeiba.com/keibamatome/detail.html?no=5681",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "当記事では、2026年NHKマイルカップ(5月10日(日)15:40発走・3歳牡牝・G1・東京競馬場・芝1600m・18頭)の枠順・最新情報を記載する。",
+      "source_type": "web"
+    },
+    {
+      "title": "馬産地で評価爆騰のモズアスコット産駒 NHKマイルCのエコロアルバでGI初制覇なるか",
+      "url": "https://news.netkeiba.com/?pid=news_view&no=330028",
+      "source_name": "news.netkeiba.com",
+      "snippet": "人気種牡馬のモズアスコットが産駒のGI初制覇なるか。NHKマイルカップ(3歳牡牝・GI・芝1600m)のエコロアルバ(牡3、美浦・田村康仁厩舎)に大きな注目が",
+      "source_type": "web"
+    },
+    {
+      "title": "【2026年3歳収得賞金ランキング】NHKマイルカップ・皐月賞・桜花賞の収得賞金一覧など最新情報【クラシック路線まとめ】 | 競馬まとめ - netkeiba",
+      "url": "https://dir.netkeiba.com/keibamatome/detail.html?no=5567",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "出走順, 出走決定賞金, 馬名, 主な成績, 予定騎手. 優先, ---, アスクイキゴミ, チャーチルダウンズカップ1着, 戸崎圭太.",
+      "source_type": "web"
+    },
+    {
+      "title": "【NHKマイルカップ 2025結果情報】9番人気パンジャタワーの差し切りV 3連単は150万超の大波乱 | 競馬まとめ - netkeiba",
+      "url": "https://dir.netkeiba.com/keibamatome/detail.html?no=4937",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "東京競馬場で行われた第30回NHKマイルカップ(3歳・牡牝・GI・芝1600m)は、中団から脚を伸ばしてゴール前の叩き合いを制した松山弘平騎手騎乗の9番人気",
+      "source_type": "web"
+    },
+    {
+      "title": "【NHKマイルカップ2024結果情報】ジャンタルマンタルが圧勝 マイル無敗でG1・2勝目 | 競馬まとめ - netkeiba",
+      "url": "https://dir.netkeiba.com/keibamatome/detail.html?no=4115",
+      "source_name": "dir.netkeiba.com",
+      "snippet": "第29回NHKマイルカップ(3歳・牡牝・GI・芝1600m)は、好スタートを決めて好位につけ、直線で満を持して抜け出した川田将雅騎手騎乗の2番人気ジャンタル",
+      "source_type": "web"
+    },
+    {
+      "title": "ＮＨＫマイルＣ(G1) タイム指数 | 2026年5月10日 東京11R レース情報(JRA) - netkeiba",
+      "url": "https://race.sp.netkeiba.com/?pid=appli_speed&race_id=202605020611&type=shutuba&mode=default",
+      "source_name": "race.sp.netkeiba.com",
+      "snippet": "チェック, 馬名, 最高, ５走平均, 距離, コ｜ ス, 近走成績, 性齢, 斤量. 3走, 2走, 前走. タイヤモントノツトダイヤモンドノット, 1105105, 109696, 1105105, 109090",
+      "source_type": "web"
+    }
+  ],
   "race_characteristics": {
     "コース特徴": "東京競馬場 芝1600m（G1）を対象に、ウマニティ「NHKマイルC G1データ分析」を主ソースとして整理。",
     "注目ポイント": "・主ソース: ウマニティ データ分析（https://umanity.jp/racedata/graderace/0017/race_data_analyze.php）\n・取得対象: 2026/05/10(日) NHKマイルカップ",
@@ -513,7 +734,56 @@
   "doc_horse_raw": [],
   "x_raw": [],
   "x_tweets": [],
-  "training_items": [],
+  "training_items": [
+    {
+      "馬名": "エコロアルバ",
+      "評価内容": "最終追い切りで美浦のWコースにて自己ベストタイをマークし",
+      "種別": "プラス",
+      "情報源": "【NHKマイルC・追い切り】エコロアルバは美浦・Wコースで自己ベストタイをマーク 田村調教師「完全に仕上がった」",
+      "url": "https://news.netkeiba.com/?pid=news_view&no=330270",
+      "source_type": "web"
+    },
+    {
+      "馬名": "エコロアルバ",
+      "評価内容": "調教師も「完全に仕上がった」とコメントしており",
+      "種別": "プラス",
+      "情報源": "【NHKマイルC・追い切り】エコロアルバは美浦・Wコースで自己ベストタイをマーク 田村調教師「完全に仕上がった」",
+      "url": "https://news.netkeiba.com/?pid=news_view&no=330270",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ダイヤモンドノット",
+      "評価内容": "追い切りでは坂路で万全の仕上がりを見せており",
+      "種別": "プラス",
+      "情報源": "【NHKマイルC・追い切り】3歳マイル王へダイヤモンドノットが坂路で万全の仕上がり　福永調教師「状態は前回よりいい」 | 競馬ニュース - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330259&rf=ksop",
+      "source_type": "web"
+    },
+    {
+      "馬名": "ダイヤモンドノット",
+      "評価内容": "調教師からも「状態は前回よりいい」とのコメントがあり",
+      "種別": "プラス",
+      "情報源": "【NHKマイルC・追い切り】3歳マイル王へダイヤモンドノットが坂路で万全の仕上がり　福永調教師「状態は前回よりいい」 | 競馬ニュース - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330259&rf=ksop",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バルセシート",
+      "評価内容": "調教では素軽いキャンターを見せており好調が伺えます",
+      "種別": "プラス",
+      "情報源": "【NHKマイルC・金曜気配】良血バルセシートは素軽いキャンター　7枠14番に松下調教師「極端な内外ではなくて良かった」 | 競馬ニュース - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330497",
+      "source_type": "web"
+    },
+    {
+      "馬名": "バルセシート",
+      "評価内容": "調教師から「極端な内外ではなくて良かった」というポジティブなコメントがあり",
+      "種別": "プラス",
+      "情報源": "【NHKマイルC・金曜気配】良血バルセシートは素軽いキャンター　7枠14番に松下調教師「極端な内外ではなくて良かった」 | 競馬ニュース - netkeiba",
+      "url": "https://dir.netkeiba.com/keiba/news/news_preview.html?no=330497",
+      "source_type": "web"
+    }
+  ],
   "training_time_rows": [],
   "yt_detail_analysis": {},
   "yt_video_conclusions": {},
