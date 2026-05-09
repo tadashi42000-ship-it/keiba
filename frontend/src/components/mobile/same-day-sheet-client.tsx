@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import type {
   BetPlanResponse,
@@ -32,6 +32,7 @@ type RaceDetailCachePayload = {
 
 const DETAIL_CACHE_PREFIX = "keiba:same-day:race-detail:";
 const DETAIL_CACHE_EVENT = "keiba:same-day-detail-cache-updated";
+const DETAIL_CACHE_TTL_DAYS = 7;
 
 const WAKU_BADGE_CLASS: Record<string, string> = {
   "1": "border-slate-400 bg-white text-slate-950",
@@ -166,9 +167,37 @@ function detailCacheSnapshot(): string {
   }
 }
 
+function cleanupOldDetailCaches(): void {
+  if (typeof window === "undefined") return;
+  const ttlMs = DETAIL_CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  try {
+    Object.keys(window.localStorage)
+      .filter((key) => key.startsWith(DETAIL_CACHE_PREFIX))
+      .forEach((key) => {
+        const raw = window.localStorage.getItem(key);
+        if (!raw) return;
+        try {
+          const payload = JSON.parse(raw) as RaceDetailCachePayload;
+          const raceDateMs = payload?.race?.date_iso ? new Date(`${payload.race.date_iso}T00:00:00+09:00`).getTime() : Number.NaN;
+          if (Number.isFinite(raceDateMs) && now - raceDateMs > ttlMs) {
+            window.localStorage.removeItem(key);
+          }
+        } catch {
+          window.localStorage.removeItem(key);
+        }
+      });
+  } catch {
+    // Keep the page usable even when localStorage is blocked.
+  }
+}
+
 export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetClientProps) {
   const [saveMessage, setSaveMessage] = useState("");
   const cacheSnapshot = useSyncExternalStore(subscribeDetailCache, detailCacheSnapshot, () => "server");
+  useEffect(() => {
+    cleanupOldDetailCaches();
+  }, []);
   const races = useMemo(() => {
     void cacheSnapshot;
     const base = sheet?.races ?? [];
@@ -246,7 +275,7 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
           </label>
           <button
             type="submit"
-            className="col-span-2 mt-1 rounded-xl bg-slate-900 px-3 py-2 text-xs font-black text-white"
+            className="col-span-2 mt-1 min-h-12 rounded-xl bg-slate-900 px-4 py-3 text-sm font-black text-white"
           >
             この条件で表示
           </button>
@@ -254,7 +283,7 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
         {error ? <p className="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-700">{error}</p> : null}
         <Link
           href={refreshHref}
-          className="mt-3 block rounded-xl border border-slate-300 bg-white px-3 py-2 text-center text-xs font-black text-slate-700"
+          className="mt-3 block min-h-12 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-black text-amber-900"
         >
           オッズ・馬体重公開後に全Rを軽量更新
         </Link>
@@ -262,7 +291,7 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
           type="button"
           onClick={handleSaveAll}
           disabled={!races.length}
-          className="mt-2 w-full rounded-xl bg-emerald-500 px-3 py-2 text-xs font-black text-slate-950 disabled:opacity-50"
+          className="mt-2 min-h-12 w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 shadow-sm shadow-emerald-200 disabled:opacity-50"
         >
           全R詳細をこの端末に保存
         </button>

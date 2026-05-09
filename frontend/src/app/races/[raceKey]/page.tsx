@@ -50,6 +50,7 @@ type RaceDetailCachePayload = {
 
 const DETAIL_CACHE_PREFIX = "keiba:same-day:race-detail:";
 const DETAIL_CACHE_EVENT = "keiba:same-day-detail-cache-updated";
+const DETAIL_CACHE_TTL_DAYS = 7;
 
 function statusText(loading: boolean, error: string | null): string {
   if (loading) return "取得中...";
@@ -172,6 +173,31 @@ function writeDetailCache(meta: RaceMeta, payload: Omit<RaceDetailCachePayload, 
     return savedAt;
   } catch {
     return null;
+  }
+}
+
+function cleanupOldDetailCaches(): void {
+  if (typeof window === "undefined") return;
+  const ttlMs = DETAIL_CACHE_TTL_DAYS * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  try {
+    Object.keys(window.localStorage)
+      .filter((key) => key.startsWith(DETAIL_CACHE_PREFIX))
+      .forEach((key) => {
+        const raw = window.localStorage.getItem(key);
+        if (!raw) return;
+        try {
+          const payload = JSON.parse(raw) as RaceDetailCachePayload;
+          const raceDateMs = payload?.race?.date_iso ? new Date(`${payload.race.date_iso}T00:00:00+09:00`).getTime() : Number.NaN;
+          if (Number.isFinite(raceDateMs) && now - raceDateMs > ttlMs) {
+            window.localStorage.removeItem(key);
+          }
+        } catch {
+          window.localStorage.removeItem(key);
+        }
+      });
+  } catch {
+    // localStorage may be unavailable in private mode; keep the detail page usable.
   }
 }
 
@@ -567,6 +593,7 @@ export default function RaceDetailPage() {
   }
 
   useEffect(() => {
+    cleanupOldDetailCaches();
     let mounted = true;
     async function init() {
       setLoading(true);
@@ -643,10 +670,20 @@ export default function RaceDetailPage() {
               void loadAll(true);
             }}
             disabled={loading || refreshing}
-            className="mt-4 w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 disabled:opacity-60"
+            className="mt-4 min-h-12 w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 shadow-sm shadow-emerald-200 disabled:opacity-60"
           >
             {refreshing ? "更新中..." : "最新オッズ・基本情報を取得"}
           </button>
+          {refreshing ? (
+            <p className="mt-2 rounded-xl bg-emerald-400/15 px-3 py-2 text-xs font-bold text-emerald-100">
+              ?????????????????????????????
+            </p>
+          ) : null}
+          {error ? (
+            <p className="mt-2 rounded-xl bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-100">
+              ???????????????????????????????????????????
+            </p>
+          ) : null}
         </div>
       </section>
 
@@ -673,7 +710,7 @@ export default function RaceDetailPage() {
             key={key}
             type="button"
             onClick={() => setActiveTab(key as TabKey)}
-            className={`rounded-xl px-2 py-2 text-xs font-bold ${
+            className={`min-h-11 rounded-xl px-2 py-3 text-xs font-bold ${
               activeTab === key ? "bg-slate-900 text-white" : "text-slate-600"
             }`}
           >
@@ -726,7 +763,7 @@ function ResearchMarkdownPanel({ markdown }: { markdown: string }) {
           onClick={() => {
             void handleCopy();
           }}
-          className="shrink-0 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white"
+          className="min-h-11 shrink-0 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-black text-white"
         >
           コピーする
         </button>

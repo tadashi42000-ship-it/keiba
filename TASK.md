@@ -1019,3 +1019,25 @@
 - 次回着手:
   - 5/10当日朝または出発前にPCをスリープしない設定にし、同URLへスマホ2台でアクセス確認。必要なら `scripts/start_mobile_pwa.ps1 -Date 2026-05-10 -Venue 東京 -SkipBuild` で再起動してURLを共有し直す。
   - レース直前は全R一覧の `オッズ・馬体重公開後に全Rを軽量更新` を押し、馬体重/直前オッズを更新する。
+
+### 2026-05-09 / Session-MOBILE-SD-022
+- 実施内容:
+  - Claude Code検証レポートのP1/P2指摘を確認し、現地スマホ利用で効く修正を実施。
+  - R詳細タブ（出馬表/特徴/買い目/外部情報）のタップ高さを44pxへ拡大。
+  - 全R一覧の `この条件で表示`、`オッズ・馬体重公開後に全Rを軽量更新`、`全R詳細をこの端末に保存` を48pxへ拡大し、保存/更新導線を強調。
+  - R詳細の `最新オッズ・基本情報を取得` を48pxへ拡大し、更新中/失敗時の補助メッセージを追加。
+  - localStorageの当日詳細キャッシュに7日TTL掃除を追加し、古い `keiba:same-day:race-detail:*` を自動削除するようにした。
+- 結果:
+  - P1-1/P1-2は修正済み。P1-3は既存のボタンロックに加えて、更新中/失敗時の案内を追加。
+  - P2-2のlocalStorage世代管理は7日TTLで対応。
+  - P2-1のAI共有Markdown自動コピーは、iOS/SafariのClipboard API制約を避けるため今回は見送り。既存の2タップコピー導線は維持。
+- Verification:
+  - Backend: `python -m pytest tests -q` passed（46/46, pandas FutureWarning 1件は既存）。
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Playwright: 390px幅で全R一覧の主要ボタンが48px、横スクロールなし（sw=cw=375）を確認。
+  - Playwright: 11R NHKマイル詳細でタブ4種が各44px、最新オッズ更新ボタンが48px、横スクロールなしを確認。
+- 発生課題:
+  - 既存ファイルの一部はPowerShell表示上 mojibake に見えるが、ブラウザ表示は正常。ファイル編集時はUTF-8前提で扱う。
+- 次回着手:
+  - 当日朝に最新URLへスマホ2台でアクセス確認し、馬体重公開後に全R軽量更新を実施する。
