@@ -66,6 +66,7 @@ export type RecentRunDetail = {
   margin: string;
   time_index: number | null;
   race_level: string;
+  race_eval?: string;
   last3f: string;
   corner: string;
   field_size: string;

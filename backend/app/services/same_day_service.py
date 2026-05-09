@@ -306,7 +306,10 @@ def _same_day_sheet_has_recent_run_details(snapshot: dict[str, Any] | None) -> b
         return all(
             isinstance(horse, dict)
             and isinstance(horse.get("recent_run_details"), list)
-            and all(isinstance(detail, dict) and "venue" in detail for detail in horse.get("recent_run_details") or [])
+            and all(
+                isinstance(detail, dict) and "venue" in detail and "race_eval" in detail
+                for detail in horse.get("recent_run_details") or []
+            )
             for horse in horses
         )
     return False
@@ -1014,17 +1017,19 @@ def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[d
         track = _cell_text(cells, idx["track"])
         course = f"{distance}/{track}" if distance and track else distance
         time_index = _to_float(_cell_text(cells, idx["time_index"]))
+        race_name = _cell_text(cells, idx["race_name"])
         details.append(
             {
                 "date": _short_date(date_text),
                 "venue": _normalize_run_venue(_cell_text(cells, idx["venue"])),
                 "finish": _cell_text(cells, idx["finish"]),
-                "race_name": _cell_text(cells, idx["race_name"]),
+                "race_name": race_name,
                 "course": course,
                 "race_time": _cell_text(cells, idx["race_time"]),
                 "margin": _cell_text(cells, idx["margin"]),
                 "time_index": time_index,
                 "race_level": _classify_race_level(time_index),
+                "race_eval": _race_eval_label(time_index, race_name),
                 "last3f": _cell_text(cells, idx["last3f"]),
                 "corner": _cell_text(cells, idx["corner"]).replace(" ", ""),
                 "field_size": _cell_text(cells, idx["field_size"]),
@@ -1085,16 +1090,18 @@ def _build_recent_run_details(
         summary = _parse_recent_run_summary(recent_runs[idx] if idx < len(recent_runs) else "")
         fetched = fetched_details[idx] if idx < len(fetched_details) and isinstance(fetched_details[idx], dict) else {}
         time_index = _to_float(fetched.get("time_index"))
+        race_name = _to_text(fetched.get("race_name")) or summary.get("race_name", "")
         detail = {
             "date": _to_text(fetched.get("date")) or summary.get("date", ""),
             "venue": _to_text(fetched.get("venue")) or summary.get("venue", ""),
             "finish": _to_text(fetched.get("finish")) or summary.get("finish", ""),
-            "race_name": _to_text(fetched.get("race_name")) or summary.get("race_name", ""),
+            "race_name": race_name,
             "course": _to_text(fetched.get("course")) or summary.get("course", ""),
             "race_time": _to_text(fetched.get("race_time")),
             "margin": _to_text(fetched.get("margin")),
             "time_index": time_index,
             "race_level": _classify_race_level(time_index),
+            "race_eval": _to_text(fetched.get("race_eval")) or _race_eval_label(time_index, race_name),
             "last3f": _to_text(fetched.get("last3f")) or (last3fs[idx] if idx < len(last3fs) else ""),
             "corner": _to_text(fetched.get("corner")) or (corners[idx] if idx < len(corners) else ""),
             "field_size": _to_text(fetched.get("field_size")) or (field_sizes[idx] if idx < len(field_sizes) else ""),
@@ -1133,6 +1140,30 @@ def _classify_race_level(time_index: float | None) -> str:
     if time_index >= 65:
         return "C"
     return "D"
+
+
+def _race_eval_label(time_index: float | None, race_name: str) -> str:
+    if time_index is not None:
+        return _classify_race_level(time_index)
+    normalized = _to_text(race_name).upper().replace("（", "(").replace("）", ")")
+    if "GIII" in normalized or "G3" in normalized:
+        return "G3"
+    if "GII" in normalized or "G2" in normalized:
+        return "G2"
+    if "GI" in normalized or "G1" in normalized:
+        return "G1"
+    if re.search(r"(^|[\\s(])L([\\s)]|$)", normalized):
+        return "L"
+    if "OP" in normalized or "オープン" in normalized:
+        return "OP"
+    for label in ("3勝", "2勝", "1勝"):
+        if label in normalized:
+            return label
+    if "新馬" in normalized:
+        return "新馬"
+    if "未勝利" in normalized:
+        return "未勝利"
+    return ""
 
 
 def _time_level_bonus(details: list[dict[str, Any]]) -> tuple[float, str]:

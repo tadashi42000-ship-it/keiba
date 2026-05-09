@@ -1041,3 +1041,24 @@
   - 既存ファイルの一部はPowerShell表示上 mojibake に見えるが、ブラウザ表示は正常。ファイル編集時はUTF-8前提で扱う。
 - 次回着手:
   - 当日朝に最新URLへスマホ2台でアクセス確認し、馬体重公開後に全R軽量更新を実施する。
+
+### 2026-05-09 / Session-MOBILE-SD-023
+- 実施内容:
+  - 近3走のレース評価が前走中心にしか見えない問題を修正。
+  - `RecentRunDetail` に `race_eval` を追加し、タイム指数がある走は `S/A/B/C/D`、タイム指数がない走はレース名から `G1/G2/G3/L/OP/3勝/2勝/1勝/新馬/未勝利` を推定するようにした。
+  - UIでは指数ありなら `指数91 A`、指数なしなら `評価L` / `評価G1` / `評価1勝` のように表示。
+  - 古いlocalStorage詳細キャッシュに `race_eval` が無い場合は無効扱いにし、新しいシートキャッシュから読み直すようにした。
+  - 5/10東京シートキャッシュを再生成。
+- 結果:
+  - 11R NHKマイル詳細で2走前・3走前にも `評価L`、`評価G1`、`評価G2`、`評価1勝`、`評価新馬` 等が表示されることを確認。
+  - GIIがGIとして誤判定される包含バグを修正し、`GIII -> GII -> GI` の順で判定するようにした。
+  - 現在の一時URL: `https://tracks-conditional-revolution-marshall.trycloudflare.com/same-day-sheet?date=2026-05-10&venue=%E6%9D%B1%E4%BA%AC`
+- Verification:
+  - Backend: `python -m pytest tests -q` passed（46/46, pandas FutureWarning 1件は既存）。
+  - Frontend: `npm run lint` passed。
+  - Frontend: `npm run build` passed。
+  - Playwright: 11R NHKマイル詳細で `評価L`、`評価G1`、`評価G2`、`評価1勝` が表示されることを確認。
+- 発生課題:
+  - `評価` はタイム指数が取れない走の補助評価。指数ベースではなくレース格ベースのため、強弱の絶対評価ではない。
+- 次回着手:
+  - 当日朝にURLを再確認し、馬体重公開後に全R軽量更新を実施する。

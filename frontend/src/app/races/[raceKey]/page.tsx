@@ -234,7 +234,11 @@ async function readDetailFromSheetCache(meta: RaceMeta, raceKey: string): Promis
 
 function entryHasRecentRunDetailShape(entry: RaceEntryResponse): boolean {
   if (!entry.horses.length) return true;
-  return entry.horses.every((horse) => Array.isArray(horse.recent_run_details));
+  return entry.horses.every(
+    (horse) =>
+      Array.isArray(horse.recent_run_details) &&
+      horse.recent_run_details.every((detail) => "race_eval" in detail),
+  );
 }
 
 function mdCell(value: unknown): string {
@@ -259,10 +263,16 @@ function trackTextFromEntry(entry: RaceEntryResponse | null): string {
 
 function formatRunDetail(detail?: RecentRunDetail): string {
   if (!detail) return "詳細未取得";
+  const evalText =
+    detail.time_index != null
+      ? `指数${detail.time_index} ${detail.race_eval || detail.race_level || ""}`.trim()
+      : detail.race_eval
+        ? `評価 ${detail.race_eval}`
+        : "";
   const parts = [
     detail.venue ? `場所 ${detail.venue}` : "",
     detail.race_time ? `走破タイム ${detail.race_time}` : "",
-    detail.time_index != null ? `指数${detail.time_index} ${detail.race_level || ""}`.trim() : "",
+    evalText,
     detail.margin ? `着差${detail.margin}` : "",
     detail.last3f ? `上り${detail.last3f}` : "",
     detail.corner ? `通過${detail.corner}` : "",
@@ -839,12 +849,17 @@ function HorseCard({ horse }: { horse: EntryHorse }) {
 function raceLevelColor(level: string): string {
   switch (level) {
     case "S":
+    case "G1":
       return "bg-purple-100 text-purple-800";
     case "A":
+    case "G2":
       return "bg-blue-100 text-blue-800";
     case "B":
+    case "G3":
       return "bg-emerald-50 text-emerald-700";
     case "C":
+    case "L":
+    case "OP":
       return "bg-yellow-50 text-yellow-700";
     case "D":
       return "bg-slate-100 text-slate-500";
@@ -866,7 +881,14 @@ function RecentRunLine({
 }) {
   const text = run || "-";
   const match = text.match(/^(\d{2}\/\d{2}\/\d{2})\s+(\d{1,2})\s+(.+)$/);
-  const hasDetailChips = Boolean(detail?.venue || detail?.race_time || detail?.time_index != null || detail?.margin);
+  const evalText =
+    detail?.time_index != null
+      ? `指数${detail.time_index} ${detail.race_eval || detail.race_level || ""}`.trim()
+      : detail?.race_eval
+        ? `評価${detail.race_eval}`
+        : "";
+  const evalLevel = detail?.race_eval || detail?.race_level || "";
+  const hasDetailChips = Boolean(detail?.venue || detail?.race_time || evalText || detail?.margin);
   return (
     <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-700">
       <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -893,9 +915,9 @@ function RecentRunLine({
               {detail.race_time}
             </span>
           ) : null}
-          {detail?.time_index != null ? (
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${raceLevelColor(detail.race_level)}`}>
-              指数{detail.time_index} {detail.race_level}
+          {evalText ? (
+            <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${raceLevelColor(evalLevel)}`}>
+              {evalText}
             </span>
           ) : null}
           {detail?.margin ? (

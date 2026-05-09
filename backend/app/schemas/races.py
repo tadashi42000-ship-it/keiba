@@ -59,6 +59,7 @@ class RecentRunDetail(BaseModel):
     margin: str = ""
     time_index: float | None = None
     race_level: str = ""
+    race_eval: str = ""
     last3f: str = ""
     corner: str = ""
     field_size: str = ""
