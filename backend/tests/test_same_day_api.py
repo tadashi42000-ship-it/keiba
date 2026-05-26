@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import date
 
@@ -9,6 +10,9 @@ from fastapi.testclient import TestClient
 from app.api.v1 import races as races_api
 from app.main import app
 from app.services import same_day_service
+from app.services import sire_aptitude
+from app.services.track_bias import compute_track_bias
+import same_day_sources
 
 
 client = TestClient(app)
@@ -281,6 +285,10 @@ def test_recent_run_details_are_added_without_replacing_legacy_fields() -> None:
     assert horses[0]["last3fs"][0] == "36.8"
     assert horses[0]["recent_run_details"][0]["race_time"] == "1:26.4"
     assert horses[0]["recent_run_details"][0]["race_level"] == "A"
+    assert "distance_m" in horses[0]["recent_run_details"][0]
+    assert "carried_weight" in horses[0]["recent_run_details"][0]
+    assert "race_time_grade" in horses[0]["recent_run_details"][0]
+    assert "last3f_grade" in horses[0]["recent_run_details"][0]
     assert horses[0]["recent_run_details"][1]["race_level"] == "C"
 
 
@@ -298,6 +306,391 @@ def test_time_level_bonus_is_small_and_absent_when_no_index() -> None:
     empty_bonus, empty_reason = same_day_service._time_level_bonus([{"time_index": None}])
     assert empty_bonus == 0
     assert empty_reason == ""
+
+
+def test_body_weight_bucket_boundaries() -> None:
+    cases = [
+        (439, "~439"),
+        (440, "440-459"),
+        (459, "440-459"),
+        (460, "460-479"),
+        (479, "460-479"),
+        (480, "480-499"),
+        (499, "480-499"),
+        (500, "500-519"),
+        (519, "500-519"),
+        (520, "520+"),
+    ]
+    for weight, expected in cases:
+        assert same_day_service._classify_body_weight_bucket(weight) == expected
+
+
+def test_parse_result_table_stats_collects_body_weight_buckets() -> None:
+    rows = []
+    weights = ["438(+2)", "445(-2)", "462(+0)", "481(+4)", "506(-6)", "522(+8)", "468(+2)", "489(-4)"]
+    finishes = [1, 2, 3, 4, 5, 6, 1, 2]
+    for idx, (weight, finish) in enumerate(zip(weights, finishes), start=1):
+        rows.append(
+            f"<tr><td>{finish}</td><td>{(idx % 8) + 1}</td><td>{idx}</td><td>3-3</td><td>{weight}</td></tr>"
+        )
+    html = (
+        "<table class='race_table_01'>"
+        "<tr><th>着順</th><th>枠番</th><th>人気</th><th>通過</th><th>馬体重</th></tr>"
+        + "".join(rows)
+        + "</table>"
+    )
+
+    parsed = same_day_sources._parse_result_table_stats(html)
+
+    assert parsed["body_total"]["460-479"] == 2
+    assert parsed["body_top3"]["460-479"] == 2
+    assert parsed["body_wins"]["~439"] == 1
+
+
+def test_parse_result_table_rows_include_bias_metadata() -> None:
+    html = (
+        "<table class='race_table_01'>"
+        "<tr><th>着順</th><th>枠番</th><th>馬番</th><th>通過</th><th>人気</th><th>上り</th><th>馬体重</th></tr>"
+        "<tr><td>1</td><td>1</td><td>2</td><td>1-1</td><td>3</td><td>34.1</td><td>468(+2)</td></tr>"
+        "</table>"
+    )
+    rows = same_day_sources._parse_result_table_rows(
+        html,
+        race_id="202605021011",
+        race_meta={
+            "date": "2026-05-24",
+            "venue": "東京",
+            "surface": "芝",
+            "distance_m": 2400,
+            "race_number": "11R",
+        },
+    )
+
+    assert rows == [
+        {
+            "race_id": "202605021011",
+            "date": "2026-05-24",
+            "venue": "東京",
+            "surface": "芝",
+            "distance_m": 2400,
+            "race_number": "11R",
+            "finish_pos": 1,
+            "waku": 1,
+            "umaban": 2,
+            "style": "逃げ",
+            "popularity": 3,
+            "last3f": "34.1",
+            "body_weight": "468(+2)",
+        }
+    ]
+
+
+def test_compute_track_bias_high_low_and_fallback() -> None:
+    today_rows = []
+    for race_no in range(1, 6):
+        race_id = f"r{race_no}"
+        for waku in range(1, 9):
+            today_rows.append(
+                {
+                    "race_id": race_id,
+                    "date": "2026-05-24",
+                    "venue": "東京",
+                    "surface": "芝",
+                    "distance_m": 1600,
+                    "race_number": f"{race_no}R",
+                    "finish_pos": 1 if waku == 1 else (2 if waku == 2 else (3 if waku == 3 else 8)),
+                    "waku": waku,
+                    "style": "先行" if waku <= 3 else "追込",
+                }
+            )
+
+    high = compute_track_bias(today_rows, [], "芝", 1600, min_samples=5, target_race_number="6R")
+    assert high["confidence"] in {"medium", "high"}
+    assert high["frame_bias"]["inner"] > high["frame_bias"]["outer"]
+    assert "内枠有利" in high["summary_label"]
+
+    low = compute_track_bias(today_rows[:8], [], "芝", 1600, min_samples=5, target_race_number="2R")
+    assert low["confidence"] == "low"
+    assert low["summary_label"] == "サンプル不足（1R）"
+
+    fallback = compute_track_bias(today_rows, [], "芝", 2400, min_samples=5, target_race_number="6R")
+    assert fallback["fallback_used"] is True
+    assert fallback["summary_label"]
+
+
+def test_track_bias_bonus_and_rank_baseline_are_independent() -> None:
+    horse = {"horse_name": "A", "umaban": "1", "waku": "1", "style": "先行", "odds": 5.0, "recent_runs": [], "recent_run_details": []}
+    bias = {
+        "frame_bias": {"inner": 0.55, "outer": 0.20},
+        "style_bias": {"逃げ": 0.1, "先行": 0.55, "差し": 0.2, "追込": 0.1},
+        "sample_size": 5,
+        "fallback_used": False,
+        "summary_label": "内枠有利 / 先行有利",
+        "confidence": "high",
+    }
+
+    bonus, reason = same_day_service._track_bias_bonus(horse, bias)
+    assert bonus > 0
+    assert "内枠有利" in reason
+
+    base = same_day_service._rank_horses([horse], track_bias=None)[0]
+    current = same_day_service._rank_horses([horse], track_bias=bias)[0]
+    assert base["bias_bonus"] == 0
+    assert current["bias_bonus"] == bonus
+    assert current["score"] > base["score"]
+    assert "バイアス" in current["reason"]
+
+
+def test_same_day_sheet_cache_requires_track_bias_layers() -> None:
+    snapshot = {
+        "track_bias_schema_version": "v1",
+        "races": [
+            {
+                "track_bias": None,
+                "entry": {
+                    "horses": [
+                        {
+                            "recent_run_details": [],
+                            "body_weight_bucket": "",
+                            "body_weight_source": "",
+                            "sire_name": "父",
+                            "sire_aptitude_summary": "◎",
+                            "broodmare_sire_name": "母父",
+                            "sire_aptitude_notes": "",
+                        }
+                    ]
+                },
+                "bet_plan": {"ranking": [{"baseline_score": 0.1, "bias_bonus": 0.0}]},
+            }
+        ],
+    }
+    assert same_day_service._same_day_sheet_has_recent_run_details(snapshot) is True
+
+    missing_race_layer = json.loads(json.dumps(snapshot))
+    del missing_race_layer["races"][0]["track_bias"]
+    assert same_day_service._same_day_sheet_has_recent_run_details(missing_race_layer) is False
+
+    missing_ranking_layer = json.loads(json.dumps(snapshot))
+    del missing_ranking_layer["races"][0]["bet_plan"]["ranking"][0]["bias_bonus"]
+    assert same_day_service._same_day_sheet_has_recent_run_details(missing_ranking_layer) is False
+
+
+def test_body_weight_bonus_is_small_and_sample_guarded() -> None:
+    course_stats = {
+        "body_weight_stats": [
+            {"label": "440-459", "starts": 8, "top3_rate": 12.5},
+            {"label": "460-479", "starts": 12, "top3_rate": 42.0},
+            {"label": "480-499", "starts": 10, "top3_rate": 30.0},
+        ]
+    }
+    plus, reason = same_day_service._body_weight_bonus(
+        {"body_weight_bucket": "460-479", "body_weight_source": "current"},
+        course_stats,
+    )
+    minus, low_reason = same_day_service._body_weight_bonus(
+        {"body_weight_bucket": "440-459", "body_weight_source": "previous"},
+        course_stats,
+    )
+    guarded, guarded_reason = same_day_service._body_weight_bonus(
+        {"body_weight_bucket": "520+", "body_weight_source": "current"},
+        {"body_weight_stats": [{"label": "520+", "starts": 3, "top3_rate": 80.0}]},
+    )
+
+    assert plus == 0.04
+    assert "馬体重460-479" in reason
+    assert minus == -0.02
+    assert "前走" in low_reason
+    assert guarded == 0
+    assert guarded_reason == ""
+
+
+def test_sire_context_reads_generic_track_condition_from_race_data() -> None:
+    context = same_day_service._sire_context_from_metadata(
+        {"race_data01": "11:30発走 / 芝1600m (左 B) / 天候:曇 / 馬場:重"},
+        venue="東京",
+        surface="芝",
+        distance="1600m",
+    )
+
+    assert context["going"] == "重"
+
+
+def test_sire_aptitude_bonus_affects_bet_ranking_reason() -> None:
+    ranked = same_day_service._rank_horses(
+        [
+            {
+                "horse_name": "血統良",
+                "umaban": "1",
+                "waku": "1",
+                "odds": 10.0,
+                "style": "",
+                "recent_runs": [],
+                "recent_run_details": [],
+                "sire_data_available": True,
+                "sire_aptitude_summary": "◎",
+                "sire_aptitude_score": 9,
+                "sire_aptitude_max_score": 9,
+                "broodmare_sire_data_available": True,
+                "broodmare_sire_aptitude_summary": "◎",
+                "broodmare_sire_aptitude_score": 9,
+                "broodmare_sire_aptitude_max_score": 9,
+            },
+            {
+                "horse_name": "血統弱",
+                "umaban": "2",
+                "waku": "2",
+                "odds": 10.0,
+                "style": "",
+                "recent_runs": [],
+                "recent_run_details": [],
+                "sire_data_available": True,
+                "sire_aptitude_summary": "×",
+                "sire_aptitude_score": 0,
+                "sire_aptitude_max_score": 9,
+                "broodmare_sire_data_available": True,
+                "broodmare_sire_aptitude_summary": "×",
+                "broodmare_sire_aptitude_score": 0,
+                "broodmare_sire_aptitude_max_score": 9,
+            },
+        ]
+    )
+
+    assert ranked[0]["horse_name"] == "血統良"
+    assert "血統◎ 9/9" in ranked[0]["reason"]
+    assert "母父◎ 9/9" in ranked[0]["reason"]
+
+
+def test_apply_body_weight_stats_keeps_small_sample_for_display_only() -> None:
+    horses = [{"horse_name": "大型馬", "body_weight": "528", "recent_run_details": []}]
+    course_stats = {"body_weight_stats": [{"label": "520+", "starts": 3, "top3_rate": 66.7}]}
+
+    same_day_service._apply_body_weight_stats_to_horses(horses, course_stats)
+    bonus, reason = same_day_service._body_weight_bonus(horses[0], course_stats)
+
+    assert horses[0]["body_weight_bucket"] == "520+"
+    assert horses[0]["body_weight_top3_rate"] == 66.7
+    assert bonus == 0
+    assert reason == ""
+
+
+def test_evaluate_sire_aptitude_excludes_going_on_firm() -> None:
+    result = sire_aptitude.evaluate_sire_aptitude("キタサンブラック", "芝", 2400, "東京", "良")
+
+    assert result["sire_data_available"] is True
+    assert result["marks"]["surface"] == "◎"
+    assert result["marks"]["distance"] == "◎"
+    assert result["marks"]["course_shape"] == "◎"
+    assert "going" not in result["marks"]
+    assert result["summary_mark"] == "◎"
+
+
+def test_evaluate_sire_aptitude_includes_going_on_soft() -> None:
+    result = sire_aptitude.evaluate_sire_aptitude("キタサンブラック", "芝", 2400, "東京", "重")
+
+    assert result["sire_data_available"] is True
+    assert result["marks"]["going"] == "○"
+    assert result["max_score"] == 12
+
+
+def test_evaluate_sire_aptitude_matches_netkeiba_name_with_english_suffix() -> None:
+    result = sire_aptitude.evaluate_sire_aptitude("ドレフォン Drefong(米)", "ダ", 1600, "東京", "良")
+
+    assert result["sire_data_available"] is True
+    assert result["marks"]["surface"] == "◎"
+
+
+def test_evaluate_sire_aptitude_matches_english_only_alias() -> None:
+    result = sire_aptitude.evaluate_sire_aptitude("Frankel", "芝", 1600, "東京", "良")
+
+    assert result["sire_data_available"] is True
+    assert result["marks"]["surface"] == "◎"
+    assert result["marks"]["distance"] == "◎"
+
+
+def test_horse_sire_persistent_cache_avoids_second_fetch(monkeypatch, tmp_path) -> None:
+    cache_path = tmp_path / "horse_sires_cache.json"
+    calls = {"count": 0}
+
+    def fake_fetch(horse_id: str, session=None):
+        calls["count"] += 1
+        return {"sire_name": "キタサンブラック", "broodmare_sire_name": "キングヘイロー"}
+
+    monkeypatch.setattr(same_day_service, "HORSE_SIRES_CACHE_PATH", cache_path)
+    monkeypatch.setattr(same_day_service, "legacy_fetch_horse_pedigree", fake_fetch)
+    monkeypatch.setattr(same_day_service, "legacy_fetch_horse_sire", lambda horse_id, session=None: "")
+    same_day_service._fetch_horse_pedigree_cached.cache_clear()
+    same_day_service._fetch_horse_sire_cached.cache_clear()
+
+    assert same_day_service.get_horse_sire("2020104567") == "キタサンブラック"
+    assert same_day_service.get_horse_sire("2020104567") == "キタサンブラック"
+    assert same_day_service.get_horse_pedigree("2020104567")["broodmare_sire_name"] == "キングヘイロー"
+    assert calls["count"] == 1
+
+
+def test_horse_pedigree_cache_keeps_legacy_sire_only_entry(monkeypatch, tmp_path) -> None:
+    cache_path = tmp_path / "horse_sires_cache.json"
+    cache_path.write_text(
+        json.dumps({"version": 1, "horses": {"2020104567": {"sire_name": "キタサンブラック"}}}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    def fake_fetch(horse_id: str, session=None):
+        return {"sire_name": "", "broodmare_sire_name": ""}
+
+    monkeypatch.setattr(same_day_service, "HORSE_SIRES_CACHE_PATH", cache_path)
+    monkeypatch.setattr(same_day_service, "legacy_fetch_horse_pedigree", fake_fetch)
+    monkeypatch.setattr(same_day_service, "legacy_fetch_horse_sire", lambda horse_id, session=None: "")
+    same_day_service._fetch_horse_pedigree_cached.cache_clear()
+    same_day_service._fetch_horse_sire_cached.cache_clear()
+
+    assert same_day_service.get_horse_pedigree("2020104567") == {
+        "sire_name": "キタサンブラック",
+        "broodmare_sire_name": "",
+    }
+
+
+def test_fetch_horse_sire_uses_pedigree_page_when_profile_has_no_blood_table(monkeypatch) -> None:
+    requested_urls: list[str] = []
+
+    def fake_request_html(url: str, timeout: int = 12, session=None) -> str:
+        requested_urls.append(url)
+        if "/horse/ped/" in url:
+            return """
+            <table class="blood_table">
+              <tr><td><a href="/horse/2015104961/">キタサンブラック</a></td></tr>
+            </table>
+            """
+        return "<html><body>profile</body></html>"
+
+    monkeypatch.setattr(same_day_sources, "_request_html", fake_request_html)
+
+    assert same_day_sources.fetch_horse_sire("2020104567") == "キタサンブラック"
+    assert requested_urls == [
+        "https://db.netkeiba.com/horse/2020104567/",
+        "https://db.netkeiba.com/horse/ped/2020104567/",
+    ]
+
+
+def test_fetch_horse_pedigree_reads_sire_and_broodmare_sire(monkeypatch) -> None:
+    def fake_request_html(url: str, timeout: int = 12, session=None) -> str:
+        return """
+        <table class="blood_table">
+          <tr><td rowspan="16"><a href="/horse/2015104961/">キタサンブラック 2012 鹿毛 [ 血統 ]</a></td></tr>
+          <tr></tr><tr></tr><tr></tr><tr></tr><tr></tr><tr></tr><tr></tr>
+          <tr></tr><tr></tr><tr></tr><tr></tr><tr></tr><tr></tr><tr></tr><tr></tr>
+          <tr>
+            <td rowspan="16"><a href="/horse/2015100000/">母馬</a></td>
+            <td rowspan="8"><a href="/horse/1998101516/">キングヘイロー 1995 鹿毛 [ 血統 ][ 産駒 ]</a></td>
+          </tr>
+        </table>
+        """
+
+    monkeypatch.setattr(same_day_sources, "_request_html", fake_request_html)
+
+    assert same_day_sources.fetch_horse_pedigree("2020104567") == {
+        "sire_name": "キタサンブラック",
+        "broodmare_sire_name": "キングヘイロー",
+    }
 
 
 def test_same_day_sheet_refresh_updates_only_odds_from_cache(monkeypatch, tmp_path) -> None:
@@ -332,6 +725,21 @@ def test_same_day_sheet_refresh_updates_only_odds_from_cache(monkeypatch, tmp_pa
                             "weight": "",
                             "body_weight": "",
                             "body_delta": "",
+                            "body_weight_bucket": "",
+                            "body_weight_source": "",
+                            "body_weight_top3_rate": None,
+                            "sire_name": "キタサンブラック",
+                            "sire_data_available": True,
+                            "sire_aptitude_marks": {"surface": "◎"},
+                            "sire_aptitude_summary": "◎",
+                            "sire_aptitude_score": 3,
+                            "sire_aptitude_max_score": 3,
+                            "sire_aptitude_notes": "東京向き",
+                            "broodmare_sire_name": "キングヘイロー",
+                            "broodmare_sire_data_available": True,
+                            "broodmare_sire_aptitude_summary": "○",
+                            "broodmare_sire_aptitude_score": 2,
+                            "broodmare_sire_aptitude_max_score": 3,
                             "jockey": "",
                             "style": "先行",
                             "odds": None,
@@ -348,6 +756,7 @@ def test_same_day_sheet_refresh_updates_only_odds_from_cache(monkeypatch, tmp_pa
                 },
                 "course_stats": None,
                 "bet_plan": {"race_id": "202605020401", "budget_yen": 3000, "provisional_only": False, "ranking": [], "tickets": [], "warnings": []},
+                "track_bias": None,
                 "error": "",
             }
         ],
@@ -355,7 +764,13 @@ def test_same_day_sheet_refresh_updates_only_odds_from_cache(monkeypatch, tmp_pa
 
     monkeypatch.setattr(same_day_service, "SAME_DAY_SHEET_DIR", tmp_path)
     same_day_service._save_same_day_sheet_cache(cached)
+    monkeypatch.setattr(same_day_service, "_collect_track_bias_result_pools", lambda **kwargs: ([], []))
     monkeypatch.setattr(same_day_service, "_fetch_win_odds_map", lambda race_id: ({"フレンチブラッサム": 3.4}, "netkeiba odds API"))
+    monkeypatch.setattr(
+        same_day_service,
+        "legacy_fetch_race_metadata",
+        lambda race_id: {"race_data01": "10:05発走 / ダ1600m / 馬場:良", "track_conditions": {"ダート": "良"}},
+    )
 
     result = same_day_service.build_same_day_sheet_snapshot(date(2026, 5, 3), "東京", refresh=True)
 
@@ -363,3 +778,97 @@ def test_same_day_sheet_refresh_updates_only_odds_from_cache(monkeypatch, tmp_pa
     assert entry["horses"][0]["odds"] == 3.4
     assert not any("単勝オッズは未公開" in warning for warning in entry["warnings"])
     assert result["races"][0]["bet_plan"]["ranking"][0]["horse_name"] == "フレンチブラッサム"
+
+
+def test_refresh_recalculates_body_weight_bucket_and_bet_reason(monkeypatch, tmp_path) -> None:
+    cached = {
+        "generated_at": "2026-05-02T18:00:00",
+        "date": "2026-05-03",
+        "venue": "東京",
+        "race_count": 1,
+        "races": [
+            {
+                "race": {
+                    "race_name": "3歳未勝利",
+                    "grade": "平場",
+                    "date_str": "2026/05/03(日)",
+                    "date_iso": "2026-05-03",
+                    "venue": "東京",
+                    "distance": "1600m",
+                    "surface": "ダ",
+                    "race_id": "202605020401",
+                    "race_key": "2026-05-03_東京_3歳未勝利_1R",
+                    "race_number": "1R",
+                },
+                "entry": {
+                    "race_id": "202605020401",
+                    "source_csv": "race.csv",
+                    "horses": [
+                        {
+                            "horse_name": "フレンチブラッサム",
+                            "waku": "4",
+                            "umaban": "7",
+                            "sex_age": "",
+                            "weight": "",
+                            "body_weight": "",
+                            "body_delta": "",
+                            "body_weight_bucket": "",
+                            "body_weight_source": "",
+                            "body_weight_top3_rate": None,
+                            "sire_name": "キタサンブラック",
+                            "sire_data_available": True,
+                            "sire_aptitude_marks": {"surface": "◎"},
+                            "sire_aptitude_summary": "◎",
+                            "sire_aptitude_score": 3,
+                            "sire_aptitude_max_score": 3,
+                            "sire_aptitude_notes": "東京向き",
+                            "broodmare_sire_name": "キングヘイロー",
+                            "broodmare_sire_data_available": True,
+                            "broodmare_sire_aptitude_summary": "○",
+                            "broodmare_sire_aptitude_score": 2,
+                            "broodmare_sire_aptitude_max_score": 3,
+                            "jockey": "",
+                            "style": "先行",
+                            "odds": 3.4,
+                            "recent_runs": [],
+                            "last3fs": [],
+                            "corners": [],
+                            "field_sizes": [],
+                            "recent_run_details": [],
+                        }
+                    ],
+                    "style_distribution": {"先行": 1},
+                    "style_distribution_label": "先行1",
+                    "warnings": [],
+                },
+                "course_stats": {
+                    "body_weight_stats": [
+                        {"label": "460-479", "starts": 10, "top3_rate": 45.0},
+                        {"label": "500-519", "starts": 10, "top3_rate": 10.0},
+                    ]
+                },
+                "bet_plan": {"race_id": "202605020401", "budget_yen": 3000, "provisional_only": False, "ranking": [], "tickets": [], "warnings": []},
+                "track_bias": None,
+                "error": "",
+            }
+        ],
+    }
+    monkeypatch.setattr(same_day_service, "SAME_DAY_SHEET_DIR", tmp_path)
+    same_day_service._save_same_day_sheet_cache(cached)
+    monkeypatch.setattr(same_day_service, "_collect_track_bias_result_pools", lambda **kwargs: ([], []))
+    monkeypatch.setattr(same_day_service, "_fetch_win_odds_map", lambda race_id: ({}, ""))
+    monkeypatch.setattr(same_day_service, "_fetch_body_weight_map", lambda race_id: ({"フレンチブラッサム": ("468", "+2")}, ""))
+    monkeypatch.setattr(
+        same_day_service,
+        "legacy_fetch_race_metadata",
+        lambda race_id: {"race_data01": "10:05発走 / ダ1600m / 馬場:良", "track_conditions": {"ダート": "良"}},
+    )
+
+    result = same_day_service.build_same_day_sheet_snapshot(date(2026, 5, 3), "東京", refresh=True)
+
+    horse = result["races"][0]["entry"]["horses"][0]
+    reason = result["races"][0]["bet_plan"]["ranking"][0]["reason"]
+    assert horse["body_weight_bucket"] == "460-479"
+    assert horse["body_weight_source"] == "current"
+    assert horse["body_weight_top3_rate"] == 45.0
+    assert "馬体重460-479複45%" in reason

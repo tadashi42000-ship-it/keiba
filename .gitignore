@@ -19,6 +19,7 @@ legacy/streamlit_app/.streamlit/secrets.toml
 
 # Data and logs
 data/*
+!data/horse_sires_cache.json
 !data/search_cache/
 !data/search_cache/**
 legacy/streamlit_app/data/*

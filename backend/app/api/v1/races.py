@@ -107,9 +107,14 @@ def api_race_odds(race_id: str) -> OddsResponse:
 
 
 @router.get("/{race_id}/entry", response_model=RaceEntryResponse)
-def api_race_entry(race_id: str) -> RaceEntryResponse:
+def api_race_entry(
+    race_id: str,
+    venue: str = Query(default=""),
+    distance: str = Query(default=""),
+    surface: str = Query(default=""),
+) -> RaceEntryResponse:
     try:
-        result = get_entry_snapshot(race_id=race_id)
+        result = get_entry_snapshot(race_id=race_id, venue=venue, distance=distance, surface=surface)
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     return RaceEntryResponse(**result)

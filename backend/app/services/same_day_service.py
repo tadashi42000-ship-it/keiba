@@ -8,7 +8,7 @@ import sys
 import zlib
 from functools import lru_cache
 from collections import Counter
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -28,12 +28,23 @@ from get_keiba_info import (  # type: ignore  # noqa: E402
 from race_catalog import fetch_races_by_date as legacy_fetch_races_by_date  # type: ignore  # noqa: E402
 from race_catalog import group_races_by_venue as legacy_group_races_by_venue  # type: ignore  # noqa: E402
 from same_day_sources import build_requests_session, fetch_course_stats  # type: ignore  # noqa: E402
+from same_day_sources import fetch_horse_pedigree as legacy_fetch_horse_pedigree  # type: ignore  # noqa: E402
+from same_day_sources import fetch_race_result_rows as legacy_fetch_race_result_rows  # type: ignore  # noqa: E402
+from same_day_sources import fetch_horse_sire as legacy_fetch_horse_sire  # type: ignore  # noqa: E402
 
 from app.services.race_service import BACKEND_DATA_DIR
+from app.services.race_time_rating import evaluate_last3f, evaluate_race_time
+from app.services.sire_aptitude import evaluate_sire_aptitude
+from app.services.track_bias import compute_track_bias
 
 SAME_DAY_COURSE_STATS_SCHEMA_VERSION = "same_day_course_stats_v3"
 STYLE_ORDER = ("逃げ", "先行", "差し", "追込", "自在")
 SAME_DAY_SHEET_DIR = ROOT_DIR / "data" / "same_day_sheets"
+HORSE_SIRES_CACHE_PATH = ROOT_DIR / "data" / "horse_sires_cache.json"
+TRACK_BIAS_RESULTS_CACHE_PATH = ROOT_DIR / "data" / "track_bias_results_cache.json"
+TRACK_BIAS_SCHEMA_VERSION = "v1"
+TRACK_BIAS_RESULT_TTL_SECONDS = 10 * 60
+BODY_WEIGHT_BUCKETS = ("~439", "440-459", "460-479", "480-499", "500-519", "520+")
 
 
 def _to_text(value: object) -> str:
@@ -59,6 +70,17 @@ def _to_float(value: object) -> float | None:
     except ValueError:
         return None
     return parsed if math.isfinite(parsed) else None
+
+
+def _to_int(value: object) -> int | None:
+    text = _to_text(value).replace(",", "")
+    match = re.search(r"(\d{3})", text)
+    if not match:
+        return None
+    try:
+        return int(match.group(1))
+    except ValueError:
+        return None
 
 
 def _normalize_key(value: object) -> str:
@@ -174,37 +196,57 @@ def build_same_day_sheet_snapshot(
         return refreshed
 
     races_response = get_same_day_races(target_date=target_date, venue=venue)
+    today_results, yesterday_results = _collect_track_bias_result_pools(
+        target_date=target_date,
+        venue=venue,
+        races=races_response.get("races", []),
+        refresh=refresh,
+    )
     snapshots: list[dict[str, Any]] = []
     for race in races_response.get("races", []):
         race_id = race.get("race_id")
         if not race_id:
-            snapshots.append({"race": race, "error": "race_id???"})
+            snapshots.append({"race": race, "track_bias": None, "error": "race_id???"})
             continue
         try:
-            entry = get_entry_snapshot(str(race_id))
+            entry = get_entry_snapshot(
+                str(race_id),
+                venue=str(race.get("venue") or venue),
+                distance=str(race.get("distance") or ""),
+                surface=str(race.get("surface") or ""),
+            )
             course_stats = get_course_stats_snapshot(
                 race_id=str(race_id),
                 venue=str(race.get("venue") or venue),
                 distance=str(race.get("distance") or ""),
                 surface=str(race.get("surface") or ""),
             )
-            bet_plan = _build_bet_plan_from_entry(entry, budget_yen=budget_yen)
+            _apply_body_weight_stats_to_horses(entry.get("horses", []), course_stats)
+            track_bias = _compute_track_bias_for_race(race, today_results, yesterday_results)
+            bet_plan = _build_bet_plan_from_entry(
+                entry,
+                budget_yen=budget_yen,
+                course_stats=course_stats,
+                track_bias=track_bias,
+            )
             snapshots.append(
                 {
                     "race": race,
                     "entry": entry,
                     "course_stats": course_stats,
                     "bet_plan": bet_plan,
+                    "track_bias": track_bias,
                     "error": "",
                 }
             )
         except Exception as exc:
-            snapshots.append({"race": race, "error": str(exc)})
+            snapshots.append({"race": race, "track_bias": None, "error": str(exc)})
     snapshot = {
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "date": target_date.isoformat(),
         "venue": venue,
         "race_count": len(races_response.get("races", [])),
+        "track_bias_schema_version": TRACK_BIAS_SCHEMA_VERSION,
         "races": snapshots,
     }
     _save_same_day_sheet_cache(snapshot)
@@ -214,6 +256,20 @@ def build_same_day_sheet_snapshot(
 def _refresh_same_day_sheet_odds(snapshot: dict[str, Any], budget_yen: int = 3000) -> dict[str, Any]:
     """Refresh volatile win odds/body weight while keeping expensive static race data cached."""
     updated_snapshot = dict(snapshot)
+    try:
+        target_date = date.fromisoformat(_to_text(snapshot.get("date")))
+    except ValueError:
+        target_date = date.today()
+    venue = _to_text(snapshot.get("venue"))
+    snapshot_races = [
+        item.get("race") for item in snapshot.get("races", []) if isinstance(item, dict) and isinstance(item.get("race"), dict)
+    ]
+    today_results, yesterday_results = _collect_track_bias_result_pools(
+        target_date=target_date,
+        venue=venue,
+        races=snapshot_races,
+        refresh=True,
+    )
     races: list[dict[str, Any]] = []
     for item in snapshot.get("races", []):
         if not isinstance(item, dict):
@@ -249,11 +305,84 @@ def _refresh_same_day_sheet_odds(snapshot: dict[str, Any], budget_yen: int = 300
                     warnings.append(odds_note)
                 entry["warnings"] = warnings
             if body_map or odds_map:
-                updated_item["bet_plan"] = _build_bet_plan_from_entry(entry, budget_yen=budget_yen)
+                course_stats = updated_item.get("course_stats") if isinstance(updated_item.get("course_stats"), dict) else None
+                _apply_body_weight_stats_to_horses(horses, course_stats)
+            metadata = _fetch_race_metadata_for_refresh(race_id)
+            if metadata:
+                _merge_metadata_into_entry(entry, metadata)
+            race_context = _sire_context_from_metadata(
+                {
+                    "race_data01": entry.get("race_data01", ""),
+                    "race_data02": entry.get("race_data02", ""),
+                    "track_conditions": entry.get("track_conditions") if isinstance(entry.get("track_conditions"), dict) else {},
+                },
+                venue=_to_text(race.get("venue")),
+                distance=_to_text(race.get("distance")),
+                surface=_to_text(race.get("surface")),
+            )
+            _recalculate_sire_aptitudes(horses, race_context)
+            course_stats = updated_item.get("course_stats") if isinstance(updated_item.get("course_stats"), dict) else None
+            track_bias = _compute_track_bias_for_race(race, today_results, yesterday_results)
+            updated_item["track_bias"] = track_bias
+            updated_item["bet_plan"] = _build_bet_plan_from_entry(
+                entry,
+                budget_yen=budget_yen,
+                course_stats=course_stats,
+                track_bias=track_bias,
+            )
+        elif "track_bias" not in updated_item:
+            updated_item["track_bias"] = None
         races.append(updated_item)
     updated_snapshot["races"] = races
+    updated_snapshot["track_bias_schema_version"] = TRACK_BIAS_SCHEMA_VERSION
     updated_snapshot["generated_at"] = datetime.now().isoformat(timespec="seconds")
     return updated_snapshot
+
+
+def _fetch_race_metadata_for_refresh(race_id: str) -> dict[str, Any]:
+    try:
+        metadata = legacy_fetch_race_metadata(race_id) or {}
+    except Exception:
+        return {}
+    return metadata if isinstance(metadata, dict) else {}
+
+
+def _merge_metadata_into_entry(entry: dict[str, Any], metadata: dict[str, Any]) -> None:
+    for key in ("start_time", "weather", "race_data01", "race_data02"):
+        value = _to_text(metadata.get(key))
+        if value:
+            entry[key] = value
+    track_conditions = metadata.get("track_conditions")
+    if isinstance(track_conditions, dict) and track_conditions:
+        entry["track_conditions"] = track_conditions
+
+
+def _recalculate_sire_aptitudes(horses: list[dict[str, Any]], context: dict[str, Any]) -> None:
+    for horse in horses:
+        sire_eval = evaluate_sire_aptitude(
+            sire_name=_to_text(horse.get("sire_name")),
+            surface=_to_text(context.get("surface")),
+            distance_m=int(context.get("distance_m") or 0),
+            venue=_to_text(context.get("venue")),
+            going=_to_text(context.get("going")),
+        )
+        horse["sire_data_available"] = bool(sire_eval.get("sire_data_available"))
+        horse["sire_aptitude_marks"] = sire_eval.get("marks") if isinstance(sire_eval.get("marks"), dict) else {}
+        horse["sire_aptitude_summary"] = _to_text(sire_eval.get("summary_mark"))
+        horse["sire_aptitude_score"] = int(sire_eval.get("score") or 0)
+        horse["sire_aptitude_max_score"] = int(sire_eval.get("max_score") or 0)
+        horse["sire_aptitude_notes"] = _to_text(sire_eval.get("notes"))
+        broodmare_eval = evaluate_sire_aptitude(
+            sire_name=_to_text(horse.get("broodmare_sire_name")),
+            surface=_to_text(context.get("surface")),
+            distance_m=int(context.get("distance_m") or 0),
+            venue=_to_text(context.get("venue")),
+            going=_to_text(context.get("going")),
+        )
+        horse["broodmare_sire_data_available"] = bool(broodmare_eval.get("sire_data_available"))
+        horse["broodmare_sire_aptitude_summary"] = _to_text(broodmare_eval.get("summary_mark"))
+        horse["broodmare_sire_aptitude_score"] = int(broodmare_eval.get("score") or 0)
+        horse["broodmare_sire_aptitude_max_score"] = int(broodmare_eval.get("max_score") or 0)
 
 
 def _same_day_sheet_cache_paths(target_date: date, venue: str) -> list[Path]:
@@ -291,9 +420,24 @@ def _load_same_day_sheet_cache(target_date: date, venue: str) -> dict[str, Any] 
 def _same_day_sheet_has_recent_run_details(snapshot: dict[str, Any] | None) -> bool:
     if not isinstance(snapshot, dict):
         return False
+    if snapshot.get("track_bias_schema_version") != TRACK_BIAS_SCHEMA_VERSION:
+        return False
     races = snapshot.get("races")
     if not isinstance(races, list):
         return False
+    for item in races:
+        if not isinstance(item, dict):
+            continue
+        if "track_bias" not in item:
+            return False
+        bet_plan = item.get("bet_plan") if isinstance(item.get("bet_plan"), dict) else {}
+        ranking = bet_plan.get("ranking") if isinstance(bet_plan, dict) else []
+        if isinstance(ranking, list):
+            for ranking_item in ranking:
+                if not isinstance(ranking_item, dict):
+                    continue
+                if "baseline_score" not in ranking_item or "bias_bonus" not in ranking_item:
+                    return False
     for item in races:
         if not isinstance(item, dict):
             continue
@@ -306,8 +450,16 @@ def _same_day_sheet_has_recent_run_details(snapshot: dict[str, Any] | None) -> b
         return all(
             isinstance(horse, dict)
             and isinstance(horse.get("recent_run_details"), list)
+            and "body_weight_bucket" in horse
+            and "body_weight_source" in horse
+            and "sire_name" in horse
+            and "sire_aptitude_summary" in horse
+            and "broodmare_sire_name" in horse
+            and "sire_aptitude_notes" in horse
             and all(
-                isinstance(detail, dict) and "venue" in detail and "race_eval" in detail
+                isinstance(detail, dict) and "venue" in detail and "race_eval" in detail and "body_weight" in detail and "jockey" in detail
+                and "distance_m" in detail and "carried_weight" in detail
+                and "race_time_grade" in detail and "last3f_grade" in detail
                 for detail in horse.get("recent_run_details") or []
             )
             for horse in horses
@@ -324,12 +476,169 @@ def _save_same_day_sheet_cache(snapshot: dict[str, Any]) -> None:
     if not venue:
         return
     SAME_DAY_SHEET_DIR.mkdir(parents=True, exist_ok=True)
+    snapshot["track_bias_schema_version"] = TRACK_BIAS_SCHEMA_VERSION
     text = json.dumps(snapshot, ensure_ascii=False, indent=2)
     for path in _same_day_sheet_cache_paths(target_date, venue):
         path.write_text(text, encoding="utf-8")
 
 
-def get_entry_snapshot(race_id: str) -> dict[str, Any]:
+def _load_results_cache() -> dict[str, Any]:
+    if not TRACK_BIAS_RESULTS_CACHE_PATH.exists():
+        return {"version": 1, "races": {}}
+    try:
+        payload = json.loads(TRACK_BIAS_RESULTS_CACHE_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {"version": 1, "races": {}}
+    if not isinstance(payload, dict):
+        return {"version": 1, "races": {}}
+    races = payload.get("races")
+    if not isinstance(races, dict):
+        payload["races"] = {}
+    payload["version"] = 1
+    return payload
+
+
+def _save_results_cache(payload: dict[str, Any]) -> None:
+    TRACK_BIAS_RESULTS_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    payload["version"] = 1
+    if not isinstance(payload.get("races"), dict):
+        payload["races"] = {}
+    TRACK_BIAS_RESULTS_CACHE_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _cache_entry_is_fresh(entry: dict[str, Any], race_meta: dict[str, Any], *, refresh: bool) -> bool:
+    if entry.get("has_result"):
+        return True
+    if refresh:
+        return False
+    try:
+        race_date = date.fromisoformat(_to_text(race_meta.get("date")))
+    except ValueError:
+        race_date = date.today()
+    if race_date < date.today():
+        return True
+    fetched_at_text = _to_text(entry.get("fetched_at"))
+    try:
+        fetched_at = datetime.fromisoformat(fetched_at_text)
+    except ValueError:
+        return False
+    return (datetime.now() - fetched_at).total_seconds() < TRACK_BIAS_RESULT_TTL_SECONDS
+
+
+def get_race_result_rows(
+    race_id: str,
+    race_meta: dict[str, Any],
+    *,
+    refresh: bool = False,
+) -> list[dict[str, Any]]:
+    race_id_text = _to_text(race_id)
+    if not race_id_text:
+        return []
+    cache = _load_results_cache()
+    races = cache.setdefault("races", {})
+    entry = races.get(race_id_text)
+    if isinstance(entry, dict) and _cache_entry_is_fresh(entry, race_meta, refresh=refresh):
+        rows = entry.get("rows")
+        return rows if isinstance(rows, list) else []
+
+    session = build_requests_session()
+    rows = legacy_fetch_race_result_rows(race_id_text, session=session, race_meta=race_meta)
+    has_result = bool(rows)
+    races[race_id_text] = {
+        "rows": rows,
+        "race_meta": race_meta,
+        "has_result": has_result,
+        "fetched_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    _save_results_cache(cache)
+    return rows
+
+
+def _load_horse_sires_cache() -> dict[str, Any]:
+    if not HORSE_SIRES_CACHE_PATH.exists():
+        return {"version": 1, "horses": {}}
+    try:
+        payload = json.loads(HORSE_SIRES_CACHE_PATH.read_text(encoding="utf-8"))
+    except Exception:
+        return {"version": 1, "horses": {}}
+    if not isinstance(payload, dict):
+        return {"version": 1, "horses": {}}
+    if not isinstance(payload.get("horses"), dict):
+        payload["horses"] = {}
+    payload["version"] = int(payload.get("version") or 1)
+    return payload
+
+
+def _save_horse_sires_cache(payload: dict[str, Any]) -> None:
+    HORSE_SIRES_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    safe_payload = {
+        "version": int(payload.get("version") or 1),
+        "horses": payload.get("horses") if isinstance(payload.get("horses"), dict) else {},
+    }
+    HORSE_SIRES_CACHE_PATH.write_text(json.dumps(safe_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def get_horse_sire(horse_id: str, *, refresh: bool = False) -> str:
+    return _to_text(get_horse_pedigree(horse_id, refresh=refresh).get("sire_name"))
+
+
+def get_horse_pedigree(horse_id: str, *, refresh: bool = False) -> dict[str, str]:
+    hid = _to_text(horse_id)
+    if not hid:
+        return {}
+    cache = _load_horse_sires_cache()
+    horses = cache.setdefault("horses", {})
+    cached = horses.get(hid) if isinstance(horses, dict) else None
+    if not refresh and isinstance(cached, dict):
+        sire_name = _to_text(cached.get("sire_name"))
+        broodmare_sire_name = _to_text(cached.get("broodmare_sire_name"))
+        if sire_name and broodmare_sire_name:
+            return {"sire_name": sire_name, "broodmare_sire_name": broodmare_sire_name}
+
+    fetched = _fetch_horse_pedigree_cached(hid) if not refresh else _fetch_horse_pedigree_uncached(hid)
+    sire_name = _to_text(fetched.get("sire_name"))
+    broodmare_sire_name = _to_text(fetched.get("broodmare_sire_name"))
+    if not sire_name and isinstance(cached, dict):
+        sire_name = _to_text(cached.get("sire_name"))
+    if sire_name:
+        horses[hid] = {
+            "sire_name": sire_name,
+            "broodmare_sire_name": broodmare_sire_name,
+            "fetched_at": date.today().isoformat(),
+        }
+        _save_horse_sires_cache(cache)
+    return {"sire_name": sire_name, "broodmare_sire_name": broodmare_sire_name}
+
+
+@lru_cache(maxsize=2048)
+def _fetch_horse_pedigree_cached(horse_id: str) -> dict[str, str]:
+    return _fetch_horse_pedigree_uncached(horse_id)
+
+
+def _fetch_horse_pedigree_uncached(horse_id: str) -> dict[str, str]:
+    try:
+        session = build_requests_session()
+        payload = legacy_fetch_horse_pedigree(horse_id, session=session)
+        if isinstance(payload, dict) and _to_text(payload.get("sire_name")):
+            return {
+                "sire_name": _to_text(payload.get("sire_name")),
+                "broodmare_sire_name": _to_text(payload.get("broodmare_sire_name")),
+            }
+        return {"sire_name": _to_text(legacy_fetch_horse_sire(horse_id, session=session)), "broodmare_sire_name": ""}
+    except Exception:
+        return {"sire_name": "", "broodmare_sire_name": ""}
+
+
+@lru_cache(maxsize=2048)
+def _fetch_horse_sire_cached(horse_id: str) -> str:
+    return _to_text(_fetch_horse_pedigree_cached(horse_id).get("sire_name"))
+
+
+def _fetch_horse_sire_uncached(horse_id: str) -> str:
+    return _to_text(_fetch_horse_pedigree_uncached(horse_id).get("sire_name"))
+
+
+def get_entry_snapshot(race_id: str, venue: str = "", distance: str = "", surface: str = "") -> dict[str, Any]:
     csv_path = BACKEND_DATA_DIR / f"race_{race_id}.csv"
     legacy_fetch_race_csv(race_id, str(csv_path))
     df = pd.read_csv(csv_path, encoding="utf-8-sig")
@@ -341,7 +650,9 @@ def get_entry_snapshot(race_id: str) -> dict[str, Any]:
         if isinstance(payload, dict) and _to_text(payload.get("horse_id"))
     }
     run_details_map = _fetch_run_details_for_race(horse_id_map) if horse_id_map else {}
-    horses = _build_entry_horses(df, recent_runs, run_details_map)
+    sire_map = _fetch_sires_for_race(horse_id_map) if horse_id_map else {}
+    context = _sire_context_from_metadata(metadata, venue=venue, distance=distance, surface=surface)
+    horses = _build_entry_horses(df, recent_runs, run_details_map, sire_map, context)
     odds_map, odds_note = _fetch_win_odds_map(race_id)
     if odds_map:
         _merge_odds_into_horses(horses, odds_map)
@@ -383,6 +694,7 @@ def get_course_stats_snapshot(*, race_id: str, venue: str, distance: str, surfac
     frame_stats = [row for row in raw.get("frame_stats", []) if isinstance(row, dict)]
     style_stats = [row for row in raw.get("style_stats", []) if isinstance(row, dict)]
     popularity_stats = [row for row in raw.get("popularity_stats", []) if isinstance(row, dict)]
+    body_weight_stats = [row for row in raw.get("body_weight_stats", []) if isinstance(row, dict)]
     style_top = sorted(style_stats, key=lambda row: float(row.get("top3_rate") or 0), reverse=True)[:2]
     pace_tendency = _to_text(raw.get("pace_tendency"))
     favored_styles = [str(row.get("label")) for row in style_top if row.get("label")]
@@ -399,6 +711,7 @@ def get_course_stats_snapshot(*, race_id: str, venue: str, distance: str, surfac
         "frame_stats": frame_stats,
         "style_stats": style_stats,
         "popularity_stats": popularity_stats,
+        "body_weight_stats": body_weight_stats,
         "pace_tendency": pace_tendency,
         "frame_markdown": build_frame_rate_markdown(frame_stats),
         "summary": {
@@ -436,10 +749,25 @@ def build_bet_plan_snapshot(race_id: str, budget_yen: int = 3000) -> dict[str, A
     return _build_bet_plan_from_entry(entry, budget_yen=budget_yen)
 
 
-def _build_bet_plan_from_entry(entry: dict[str, Any], budget_yen: int = 3000) -> dict[str, Any]:
+def _build_bet_plan_from_entry(
+    entry: dict[str, Any],
+    budget_yen: int = 3000,
+    course_stats: dict[str, Any] | None = None,
+    track_bias: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     race_id = _to_text(entry.get("race_id"))
     horses = entry["horses"]
-    ranked = _rank_horses(horses)
+    if course_stats:
+        _apply_body_weight_stats_to_horses(horses, course_stats)
+    baseline_ranked = _rank_horses(horses, course_stats=course_stats, track_bias=None)
+    baseline_by_horse = {
+        (_to_text(item.get("umaban")), _to_text(item.get("horse_name"))): item.get("score")
+        for item in baseline_ranked
+    }
+    ranked = _rank_horses(horses, course_stats=course_stats, track_bias=track_bias)
+    for item in ranked:
+        key = (_to_text(item.get("umaban")), _to_text(item.get("horse_name")))
+        item["baseline_score"] = baseline_by_horse.get(key)
     has_numbers = any(_to_text(horse.get("umaban")) for horse in horses)
     warnings = list(entry.get("warnings") or [])
     if not has_numbers:
@@ -489,6 +817,78 @@ def _race_to_dict(race: Any) -> dict[str, Any]:
         "race_key": _to_text(getattr(race, "race_key", "")),
         "race_number": _to_text(getattr(race, "race_number", "")),
     }
+
+
+def _distance_m_from_text(value: object) -> int:
+    match = re.search(r"(\d{3,4})", _to_text(value))
+    return int(match.group(1)) if match else 0
+
+
+def _race_number_value(value: object) -> int:
+    match = re.search(r"(\d{1,2})", _to_text(value))
+    return int(match.group(1)) if match else 0
+
+
+def _race_meta_from_race(race: dict[str, Any], fallback_date: date, fallback_venue: str) -> dict[str, Any]:
+    return {
+        "date": _to_text(race.get("date_iso")) or fallback_date.isoformat(),
+        "venue": _to_text(race.get("venue")) or fallback_venue,
+        "surface": _to_text(race.get("surface")),
+        "distance_m": _distance_m_from_text(race.get("distance")),
+        "race_number": _to_text(race.get("race_number")),
+    }
+
+
+def _collect_track_bias_result_pools(
+    *,
+    target_date: date,
+    venue: str,
+    races: list[dict[str, Any]],
+    refresh: bool = False,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    today_results: list[dict[str, Any]] = []
+    for race in races:
+        if not isinstance(race, dict):
+            continue
+        race_id = _to_text(race.get("race_id"))
+        if not race_id:
+            continue
+        race_meta = _race_meta_from_race(race, target_date, venue)
+        today_results.extend(get_race_result_rows(race_id, race_meta, refresh=refresh))
+
+    yesterday_results: list[dict[str, Any]] = []
+    previous_date = target_date - timedelta(days=1)
+    try:
+        previous_races = [_race_to_dict(race) for race in legacy_fetch_races_by_date(previous_date)]
+    except Exception:
+        previous_races = []
+    for race in previous_races:
+        if _to_text(race.get("venue")) != venue:
+            continue
+        race_id = _to_text(race.get("race_id"))
+        if not race_id:
+            continue
+        race_meta = _race_meta_from_race(race, previous_date, venue)
+        yesterday_results.extend(get_race_result_rows(race_id, race_meta, refresh=False))
+    return today_results, yesterday_results
+
+
+def _compute_track_bias_for_race(
+    race: dict[str, Any],
+    today_results: list[dict[str, Any]],
+    yesterday_results: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    surface = _to_text(race.get("surface"))
+    distance_m = _distance_m_from_text(race.get("distance"))
+    if not surface or not distance_m:
+        return None
+    return compute_track_bias(
+        today_results=today_results,
+        yesterday_results=yesterday_results,
+        surface=surface,
+        distance_m=distance_m,
+        target_race_number=_to_text(race.get("race_number")),
+    )
 
 
 def _fetch_win_odds_map(race_id: str, allow_jra_fallback: bool = False) -> tuple[dict[str, float], str]:
@@ -784,6 +1184,67 @@ def _now_time_label() -> str:
     return datetime.now().strftime("%H:%M")
 
 
+def _classify_body_weight_bucket(weight: object) -> str:
+    value = _to_int(weight)
+    if value is None:
+        return ""
+    if value < 440:
+        return "~439"
+    if value < 460:
+        return "440-459"
+    if value < 480:
+        return "460-479"
+    if value < 500:
+        return "480-499"
+    if value < 520:
+        return "500-519"
+    return "520+"
+
+
+def _body_weight_stats_by_label(course_stats: dict[str, Any] | None, min_starts: int = 1) -> dict[str, dict[str, Any]]:
+    if not isinstance(course_stats, dict):
+        return {}
+    rows = course_stats.get("body_weight_stats")
+    if not isinstance(rows, list):
+        return {}
+    result: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        label = _to_text(row.get("label"))
+        starts = int(row.get("starts") or 0)
+        if label and starts >= min_starts:
+            result[label] = row
+    return result
+
+
+def _set_body_weight_context(horse: dict[str, Any]) -> None:
+    current_bucket = _classify_body_weight_bucket(horse.get("body_weight"))
+    if current_bucket:
+        horse["body_weight_bucket"] = current_bucket
+        horse["body_weight_source"] = "current"
+        return
+
+    details = horse.get("recent_run_details") if isinstance(horse.get("recent_run_details"), list) else []
+    previous_weight = details[0].get("body_weight") if details and isinstance(details[0], dict) else None
+    previous_bucket = _classify_body_weight_bucket(previous_weight)
+    if previous_bucket:
+        horse["body_weight_bucket"] = previous_bucket
+        horse["body_weight_source"] = "previous"
+    else:
+        horse["body_weight_bucket"] = ""
+        horse["body_weight_source"] = ""
+
+
+def _apply_body_weight_stats_to_horses(horses: list[dict[str, Any]], course_stats: dict[str, Any] | None) -> None:
+    stats_by_label = _body_weight_stats_by_label(course_stats, min_starts=1)
+    for horse in horses:
+        _set_body_weight_context(horse)
+        bucket = _to_text(horse.get("body_weight_bucket"))
+        stat = stats_by_label.get(bucket)
+        horse["body_weight_top3_rate"] = _to_float(stat.get("top3_rate")) if stat else None
+
+
 def _fetch_body_weight_map(race_id: str) -> tuple[dict[str, tuple[str, str]], str]:
     if not race_id:
         return {}, ""
@@ -847,6 +1308,7 @@ def _merge_body_weight_into_horses(
         if body is None:
             continue
         horse["body_weight"], horse["body_delta"] = body
+        _set_body_weight_context(horse)
 
 
 def _write_odds_to_csv(csv_path: Path, odds_map: dict[str, float]) -> None:
@@ -882,6 +1344,8 @@ def _build_entry_horses(
     df: pd.DataFrame,
     recent_runs: dict[str, dict],
     run_details_map: dict[str, list[dict[str, Any]]] | None = None,
+    sire_map: dict[str, dict[str, str]] | None = None,
+    sire_context: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     cols = {
         "waku": _first_column(df, ["枠番", "枠", "譫逡ｪ", "waku"]),
@@ -902,6 +1366,12 @@ def _build_entry_horses(
         for name, payload in (run_details_map or {}).items()
         if isinstance(payload, list)
     }
+    pedigrees_by_horse = {
+        _horse_token(name): payload
+        for name, payload in (sire_map or {}).items()
+        if isinstance(payload, dict)
+    }
+    context = sire_context or {}
     horses: list[dict[str, Any]] = []
     for _, row in df.iterrows():
         horse_name = _to_text(row.get(cols["horse_name"]))
@@ -924,7 +1394,24 @@ def _build_entry_horses(
             field_sizes,
             details_by_horse.get(_horse_token(horse_name), []),
         )
-        horses.append({
+        pedigree = pedigrees_by_horse.get(_horse_token(horse_name), {})
+        sire_name = _to_text(pedigree.get("sire_name"))
+        broodmare_sire_name = _to_text(pedigree.get("broodmare_sire_name"))
+        sire_eval = evaluate_sire_aptitude(
+            sire_name=sire_name,
+            surface=_to_text(context.get("surface")),
+            distance_m=int(context.get("distance_m") or 0),
+            venue=_to_text(context.get("venue")),
+            going=_to_text(context.get("going")),
+        )
+        broodmare_eval = evaluate_sire_aptitude(
+            sire_name=broodmare_sire_name,
+            surface=_to_text(context.get("surface")),
+            distance_m=int(context.get("distance_m") or 0),
+            venue=_to_text(context.get("venue")),
+            going=_to_text(context.get("going")),
+        )
+        horse = {
             "horse_name": horse_name,
             "waku": _to_text(row.get(cols["waku"])) if cols["waku"] else "",
             "umaban": _to_text(row.get(cols["umaban"])) if cols["umaban"] else "",
@@ -940,7 +1427,24 @@ def _build_entry_horses(
             "corners": corners,
             "field_sizes": field_sizes,
             "recent_run_details": recent_run_details,
-        })
+            "body_weight_bucket": "",
+            "body_weight_source": "",
+            "body_weight_top3_rate": None,
+            "sire_name": sire_name,
+            "sire_data_available": bool(sire_eval.get("sire_data_available")),
+            "sire_aptitude_marks": sire_eval.get("marks") if isinstance(sire_eval.get("marks"), dict) else {},
+            "sire_aptitude_summary": _to_text(sire_eval.get("summary_mark")),
+            "sire_aptitude_score": int(sire_eval.get("score") or 0),
+            "sire_aptitude_max_score": int(sire_eval.get("max_score") or 0),
+            "sire_aptitude_notes": _to_text(sire_eval.get("notes")),
+            "broodmare_sire_name": broodmare_sire_name,
+            "broodmare_sire_data_available": bool(broodmare_eval.get("sire_data_available")),
+            "broodmare_sire_aptitude_summary": _to_text(broodmare_eval.get("summary_mark")),
+            "broodmare_sire_aptitude_score": int(broodmare_eval.get("score") or 0),
+            "broodmare_sire_aptitude_max_score": int(broodmare_eval.get("max_score") or 0),
+        }
+        _set_body_weight_context(horse)
+        horses.append(horse)
     return horses
 
 
@@ -969,6 +1473,65 @@ def _fetch_run_details_for_race(
     return details
 
 
+def _fetch_sires_for_race(horse_id_map: dict[str, str]) -> dict[str, dict[str, str]]:
+    pedigrees: dict[str, dict[str, str]] = {}
+    for horse_name, horse_id in horse_id_map.items():
+        pedigree = get_horse_pedigree(_to_text(horse_id), refresh=False)
+        if _to_text(pedigree.get("sire_name")):
+            pedigrees[horse_name] = pedigree
+    return pedigrees
+
+
+def _sire_context_from_metadata(
+    metadata: dict[str, Any],
+    *,
+    venue: str = "",
+    distance: str = "",
+    surface: str = "",
+) -> dict[str, Any]:
+    race_data = " ".join(
+        _to_text(metadata.get(key))
+        for key in ("race_data01", "race_data02")
+        if _to_text(metadata.get(key))
+    )
+    surface_text = _to_text(surface)
+    if not surface_text:
+        if "芝" in race_data:
+            surface_text = "芝"
+        elif "ダート" in race_data or "ダ" in race_data:
+            surface_text = "ダ"
+
+    distance_text = _to_text(distance)
+    distance_match = re.search(r"(\d{3,4})", distance_text or race_data)
+    distance_m = int(distance_match.group(1)) if distance_match else 0
+
+    going = ""
+    track_conditions = metadata.get("track_conditions")
+    if isinstance(track_conditions, dict):
+        candidates = [surface_text]
+        if surface_text == "ダ":
+            candidates.extend(["ダート", "ダ"])
+        for key in candidates:
+            going = _to_text(track_conditions.get(key))
+            if going:
+                break
+    if not going:
+        condition_match = re.search(r"(?:芝|ダート|ダ|障害|障)\s*[:：]\s*(良|稍重|重|不良)", race_data)
+        if condition_match:
+            going = condition_match.group(1)
+    if not going:
+        generic_condition = re.search(r"馬場\s*[:：]\s*(良|稍重|重|不良)", race_data)
+        if generic_condition:
+            going = generic_condition.group(1)
+
+    return {
+        "venue": _to_text(venue),
+        "surface": surface_text,
+        "distance_m": distance_m,
+        "going": going or "良",
+    }
+
+
 @lru_cache(maxsize=512)
 def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[dict[str, Any], ...]:
     if not horse_id:
@@ -991,18 +1554,21 @@ def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[d
     header_row = table.select_one("tr")
     headers = [_to_text(cell.get_text(" ", strip=True)) for cell in header_row.find_all(["th", "td"])] if header_row else []
     idx = {
+        "jockey": _header_index(headers, ["\u9a0e\u624b"]),
         "date": _header_index(headers, ["日付"]),
         "venue": _header_index_any(headers, [(["開催"], None), (["場所"], None), (["競馬場"], None)]),
         "finish": _header_index(headers, ["着順"]),
         "race_name": _header_index(headers, ["レース名"]),
         "distance": _header_index(headers, ["距離"]),
         "track": _header_index(headers, ["馬場"]),
+        "carried_weight": _header_index(headers, ["斤量"]),
         "race_time": _header_index(headers, ["タイム"], exclude=["指数"]),
         "margin": _header_index(headers, ["着差"]),
         "time_index": _header_index_any(headers, [(["タイム指数"], None), (["指数"], ["PCI", "ペース"])]),
         "corner": _header_index(headers, ["通過"]),
         "last3f": _header_index(headers, ["上り", "上がり"]),
         "field_size": _header_index(headers, ["頭数"]),
+        "body_weight": _header_index(headers, ["馬体重"]),
     }
 
     details: list[dict[str, Any]] = []
@@ -1016,6 +1582,7 @@ def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[d
         distance = _cell_text(cells, idx["distance"])
         track = _cell_text(cells, idx["track"])
         course = f"{distance}/{track}" if distance and track else distance
+        course_parts = _parse_run_course_parts(distance, track)
         time_index = _to_float(_cell_text(cells, idx["time_index"]))
         race_name = _cell_text(cells, idx["race_name"])
         details.append(
@@ -1024,12 +1591,18 @@ def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[d
                 "venue": _normalize_run_venue(_cell_text(cells, idx["venue"])),
                 "finish": _cell_text(cells, idx["finish"]),
                 "race_name": race_name,
+                "jockey": _cell_text(cells, idx["jockey"]),
                 "course": course,
+                "distance_m": course_parts.get("distance_m"),
+                "surface": course_parts.get("surface", ""),
+                "going": course_parts.get("going", ""),
+                "carried_weight": _to_float(_cell_text(cells, idx["carried_weight"])),
                 "race_time": _cell_text(cells, idx["race_time"]),
                 "margin": _cell_text(cells, idx["margin"]),
                 "time_index": time_index,
                 "race_level": _classify_race_level(time_index),
                 "race_eval": _race_eval_label(time_index, race_name),
+                "body_weight": _to_int(_cell_text(cells, idx["body_weight"])),
                 "last3f": _cell_text(cells, idx["last3f"]),
                 "corner": _cell_text(cells, idx["corner"]).replace(" ", ""),
                 "field_size": _cell_text(cells, idx["field_size"]),
@@ -1038,6 +1611,49 @@ def _fetch_horse_run_details_cached(horse_id: str, n_recent: int = 3) -> tuple[d
         if len(details) >= n_recent:
             break
     return tuple(details)
+
+
+def _parse_run_course_parts(distance_text: str, going_text: str = "") -> dict[str, Any]:
+    raw_distance = _to_text(distance_text)
+    raw_going = _to_text(going_text)
+    combined = f"{raw_distance}/{raw_going}" if raw_going else raw_distance
+    surface = ""
+    if "芝" in combined:
+        surface = "芝"
+    elif "ダート" in combined or "ダ" in combined:
+        surface = "ダ"
+    distance_match = re.search(r"(\d{3,4})", combined)
+    going = raw_going
+    if not going and "/" in combined:
+        going = combined.rsplit("/", 1)[-1].strip()
+    return {
+        "distance_m": int(distance_match.group(1)) if distance_match else None,
+        "surface": surface,
+        "going": going,
+    }
+
+
+def _with_recent_run_ratings(detail: dict[str, Any]) -> dict[str, Any]:
+    race_time_eval = evaluate_race_time(
+        raw_race_time=_to_text(detail.get("race_time")),
+        venue=_to_text(detail.get("venue")),
+        surface=_to_text(detail.get("surface")),
+        distance_m=detail.get("distance_m") if isinstance(detail.get("distance_m"), int) else None,
+        going=_to_text(detail.get("going")),
+        carried_weight=_to_float(detail.get("carried_weight")),
+    )
+    last3f_eval = evaluate_last3f(
+        last3f=_to_text(detail.get("last3f")),
+        venue=_to_text(detail.get("venue")),
+        surface=_to_text(detail.get("surface")),
+        distance_m=detail.get("distance_m") if isinstance(detail.get("distance_m"), int) else None,
+        specification=None,
+    )
+    detail["race_time_grade"] = _to_text(race_time_eval.get("grade"))
+    detail["race_time_grade_detail"] = race_time_eval
+    detail["last3f_grade"] = _to_text(last3f_eval.get("grade"))
+    detail["last3f_grade_detail"] = last3f_eval
+    return detail
 
 
 def _header_index_any(headers: list[str], rules: list[tuple[list[str], list[str] | None]]) -> int | None:
@@ -1091,22 +1707,33 @@ def _build_recent_run_details(
         fetched = fetched_details[idx] if idx < len(fetched_details) and isinstance(fetched_details[idx], dict) else {}
         time_index = _to_float(fetched.get("time_index"))
         race_name = _to_text(fetched.get("race_name")) or summary.get("race_name", "")
+        course_text = _to_text(fetched.get("course")) or summary.get("course", "")
+        course_parts = _parse_run_course_parts(course_text, _to_text(fetched.get("going")))
+        distance_m = fetched.get("distance_m") if isinstance(fetched.get("distance_m"), int) else course_parts.get("distance_m")
+        surface = _to_text(fetched.get("surface")) or _to_text(course_parts.get("surface"))
+        going = _to_text(fetched.get("going")) or _to_text(course_parts.get("going"))
         detail = {
             "date": _to_text(fetched.get("date")) or summary.get("date", ""),
             "venue": _to_text(fetched.get("venue")) or summary.get("venue", ""),
             "finish": _to_text(fetched.get("finish")) or summary.get("finish", ""),
             "race_name": race_name,
-            "course": _to_text(fetched.get("course")) or summary.get("course", ""),
+            "jockey": _to_text(fetched.get("jockey")),
+            "course": course_text,
+            "distance_m": distance_m,
+            "surface": surface,
+            "going": going,
+            "carried_weight": _to_float(fetched.get("carried_weight")),
             "race_time": _to_text(fetched.get("race_time")),
             "margin": _to_text(fetched.get("margin")),
             "time_index": time_index,
             "race_level": _classify_race_level(time_index),
             "race_eval": _to_text(fetched.get("race_eval")) or _race_eval_label(time_index, race_name),
+            "body_weight": _to_int(fetched.get("body_weight")),
             "last3f": _to_text(fetched.get("last3f")) or (last3fs[idx] if idx < len(last3fs) else ""),
             "corner": _to_text(fetched.get("corner")) or (corners[idx] if idx < len(corners) else ""),
             "field_size": _to_text(fetched.get("field_size")) or (field_sizes[idx] if idx < len(field_sizes) else ""),
         }
-        details.append(detail)
+        details.append(_with_recent_run_ratings(detail))
     return details
 
 
@@ -1191,7 +1818,136 @@ def _style_distribution(horses: list[dict[str, Any]]) -> dict[str, int]:
     return {style: int(counts.get(style, 0)) for style in STYLE_ORDER if counts.get(style, 0)}
 
 
-def _rank_horses(horses: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _body_weight_bonus(horse: dict[str, Any], course_stats: dict[str, Any] | None) -> tuple[float, str]:
+    bucket = _to_text(horse.get("body_weight_bucket"))
+    if not bucket:
+        return 0.0, ""
+    stats_by_label = _body_weight_stats_by_label(course_stats, min_starts=6)
+    if len(stats_by_label) < 2:
+        return 0.0, ""
+    stat = stats_by_label.get(bucket)
+    if not stat:
+        return 0.0, ""
+    starts = int(stat.get("starts") or 0)
+    if starts < 6:
+        return 0.0, ""
+    ranked_stats = sorted(
+        stats_by_label.values(),
+        key=lambda row: _to_float(row.get("top3_rate")) or 0.0,
+        reverse=True,
+    )
+    top3_rate = _to_float(stat.get("top3_rate")) or 0.0
+    labels = [_to_text(row.get("label")) for row in ranked_stats]
+    rank = labels.index(bucket) if bucket in labels else -1
+    if rank < 0:
+        return 0.0, ""
+    source_note = "前走" if _to_text(horse.get("body_weight_source")) == "previous" else ""
+    if rank <= 1:
+        return 0.04, f"馬体重{bucket}複{top3_rate:.0f}%↑{source_note}"
+    if rank >= max(len(ranked_stats) - 2, 0):
+        return -0.02, f"馬体重{bucket}複{top3_rate:.0f}%↓{source_note}"
+    return 0.0, ""
+
+
+def _sire_aptitude_bonus(horse: dict[str, Any]) -> tuple[float, str]:
+    if not horse.get("sire_data_available"):
+        return 0.0, ""
+    score = int(horse.get("sire_aptitude_score") or 0)
+    max_score = int(horse.get("sire_aptitude_max_score") or 0)
+    if max_score <= 0:
+        return 0.0, ""
+    ratio = score / max_score
+    summary = _to_text(horse.get("sire_aptitude_summary"))
+    if ratio >= 0.85:
+        bonus = 0.08
+    elif ratio >= 0.70:
+        bonus = 0.05
+    elif ratio >= 0.50:
+        bonus = 0.02
+    elif ratio <= 0.25:
+        bonus = -0.03
+    else:
+        bonus = 0.0
+    if summary == "◎":
+        bonus += 0.02
+    elif summary == "×":
+        bonus -= 0.01
+    if not bonus:
+        return 0.0, ""
+    return bonus, f"血統{summary or '-'} {score}/{max_score}"
+
+
+def _broodmare_sire_aptitude_bonus(horse: dict[str, Any]) -> tuple[float, str]:
+    if not horse.get("broodmare_sire_data_available"):
+        return 0.0, ""
+    score = int(horse.get("broodmare_sire_aptitude_score") or 0)
+    max_score = int(horse.get("broodmare_sire_aptitude_max_score") or 0)
+    if max_score <= 0:
+        return 0.0, ""
+    ratio = score / max_score
+    summary = _to_text(horse.get("broodmare_sire_aptitude_summary"))
+    if ratio >= 0.85:
+        bonus = 0.025
+    elif ratio >= 0.70:
+        bonus = 0.015
+    elif ratio <= 0.25:
+        bonus = -0.015
+    else:
+        bonus = 0.0
+    if not bonus:
+        return 0.0, ""
+    return bonus, f"母父{summary or '-'} {score}/{max_score}"
+
+
+def _track_bias_bonus(horse: dict[str, Any], track_bias: dict[str, Any] | None) -> tuple[float, str]:
+    if not track_bias or track_bias.get("confidence") == "low":
+        return 0.0, ""
+    try:
+        waku = int(re.sub(r"[^\d]", "", _to_text(horse.get("waku") or "0")) or "0")
+    except ValueError:
+        waku = 0
+    style = _to_text(horse.get("style"))
+    bonus = 0.0
+    reasons: list[str] = []
+    frame_bias = track_bias.get("frame_bias") if isinstance(track_bias.get("frame_bias"), dict) else {}
+    if 1 <= waku <= 8:
+        side = "inner" if waku <= 4 else "outer"
+        opposite = "outer" if side == "inner" else "inner"
+        gap = float(frame_bias.get(side) or 0.0) - float(frame_bias.get(opposite) or 0.0)
+        side_label = "内" if side == "inner" else "外"
+        if gap >= 0.15:
+            bonus += 0.04
+            reasons.append(f"{side_label}枠有利")
+        elif gap >= 0.08:
+            bonus += 0.02
+        elif gap <= -0.15:
+            bonus -= 0.03
+            reasons.append(f"{side_label}枠不利")
+
+    style_bias = track_bias.get("style_bias") if isinstance(track_bias.get("style_bias"), dict) else {}
+    if style and style in style_bias:
+        rates = [float(value or 0.0) for value in style_bias.values()]
+        rate = float(style_bias.get(style) or 0.0)
+        best_rate = max(rates) if rates else 0.0
+        if rate >= 0.5 and rate == best_rate:
+            bonus += 0.03
+            reasons.append(f"脚質{style}有利")
+        elif rate >= 0.4:
+            bonus += 0.015
+        elif rate <= 0.15:
+            bonus -= 0.02
+            reasons.append(f"脚質{style}不利")
+    if not bonus:
+        return 0.0, ""
+    label = "/".join(reasons) if reasons else f"{bonus:+.2f}"
+    return bonus, f"バイアス{label}{bonus:+.2f}" if reasons else f"バイアス{label}"
+
+
+def _rank_horses(
+    horses: list[dict[str, Any]],
+    course_stats: dict[str, Any] | None = None,
+    track_bias: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     ranked: list[dict[str, Any]] = []
     for horse in horses:
         odds = horse.get("odds")
@@ -1200,7 +1956,14 @@ def _rank_horses(horses: list[dict[str, Any]]) -> list[dict[str, Any]]:
         style_bonus = {"逃げ": 0.08, "先行": 0.10, "差し": 0.07, "自在": 0.05, "追込": 0.02}.get(_to_text(horse.get("style")), 0.0)
         recent_bonus = _recent_finish_bonus(horse.get("recent_runs") or [])
         time_bonus, time_reason = _time_level_bonus(horse.get("recent_run_details") or [])
-        score = round(odds_score + style_bonus + recent_bonus + time_bonus, 4)
+        body_bonus, body_reason = _body_weight_bonus(horse, course_stats)
+        sire_bonus, sire_reason = _sire_aptitude_bonus(horse)
+        broodmare_bonus, broodmare_reason = _broodmare_sire_aptitude_bonus(horse)
+        bias_bonus, bias_reason = _track_bias_bonus(horse, track_bias)
+        score = round(
+            odds_score + style_bonus + recent_bonus + time_bonus + body_bonus + sire_bonus + broodmare_bonus + bias_bonus,
+            4,
+        )
         ranked.append({
             "horse_name": horse.get("horse_name"),
             "umaban": horse.get("umaban"),
@@ -1208,7 +1971,17 @@ def _rank_horses(horses: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "odds": horse.get("odds"),
             "style": horse.get("style"),
             "score": score,
-            "reason": _rank_reason(horse, recent_bonus, time_reason),
+            "baseline_score": None,
+            "bias_bonus": round(bias_bonus, 4),
+            "reason": _rank_reason(
+                horse,
+                recent_bonus,
+                time_reason,
+                body_reason,
+                sire_reason,
+                broodmare_reason,
+                bias_reason,
+            ),
         })
     ranked.sort(key=lambda item: item["score"], reverse=True)
     return ranked
@@ -1229,7 +2002,15 @@ def _recent_finish_bonus(recent_runs: list[str]) -> float:
     return bonus
 
 
-def _rank_reason(horse: dict[str, Any], recent_bonus: float, time_reason: str = "") -> str:
+def _rank_reason(
+    horse: dict[str, Any],
+    recent_bonus: float,
+    time_reason: str = "",
+    body_reason: str = "",
+    sire_reason: str = "",
+    broodmare_reason: str = "",
+    bias_reason: str = "",
+) -> str:
     parts = []
     if horse.get("odds") is not None:
         parts.append(f"単勝{float(horse['odds']):.1f}")
@@ -1239,6 +2020,14 @@ def _rank_reason(horse: dict[str, Any], recent_bonus: float, time_reason: str = 
         parts.append("近走評価あり")
     if time_reason:
         parts.append(time_reason)
+    if body_reason:
+        parts.append(body_reason)
+    if sire_reason:
+        parts.append(sire_reason)
+    if broodmare_reason:
+        parts.append(broodmare_reason)
+    if bias_reason:
+        parts.append(bias_reason)
     return " / ".join(parts) or "出馬表情報ベース"
 
 

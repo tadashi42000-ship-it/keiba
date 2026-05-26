@@ -54,13 +54,23 @@ class RecentRunDetail(BaseModel):
     venue: str = ""
     finish: str = ""
     race_name: str = ""
+    jockey: str = ""
     course: str = ""
+    distance_m: int | None = None
+    surface: str = ""
+    going: str = ""
+    carried_weight: float | None = None
     race_time: str = ""
     margin: str = ""
     time_index: float | None = None
     race_level: str = ""
     race_eval: str = ""
+    body_weight: int | None = None
     last3f: str = ""
+    race_time_grade: str = ""
+    race_time_grade_detail: dict[str, Any] = Field(default_factory=dict)
+    last3f_grade: str = ""
+    last3f_grade_detail: dict[str, Any] = Field(default_factory=dict)
     corner: str = ""
     field_size: str = ""
 
@@ -80,6 +90,9 @@ class EntryHorse(BaseModel):
     weight: str = ""
     body_weight: str = ""
     body_delta: str = ""
+    body_weight_bucket: str = ""
+    body_weight_source: str = ""
+    body_weight_top3_rate: float | None = None
     jockey: str = ""
     style: str = ""
     odds: float | None = None
@@ -88,6 +101,18 @@ class EntryHorse(BaseModel):
     corners: list[str] = Field(default_factory=list)
     field_sizes: list[str] = Field(default_factory=list)
     recent_run_details: list[RecentRunDetail] = Field(default_factory=list)
+    sire_name: str = ""
+    sire_data_available: bool = False
+    sire_aptitude_marks: dict[str, str] = Field(default_factory=dict)
+    sire_aptitude_summary: str = ""
+    sire_aptitude_score: int = 0
+    sire_aptitude_max_score: int = 0
+    sire_aptitude_notes: str = ""
+    broodmare_sire_name: str = ""
+    broodmare_sire_data_available: bool = False
+    broodmare_sire_aptitude_summary: str = ""
+    broodmare_sire_aptitude_score: int = 0
+    broodmare_sire_aptitude_max_score: int = 0
 
 
 class RaceEntryResponse(BaseModel):
@@ -121,6 +146,7 @@ class RaceCourseStatsResponse(BaseModel):
     frame_stats: list[dict[str, Any]] = Field(default_factory=list)
     style_stats: list[dict[str, Any]] = Field(default_factory=list)
     popularity_stats: list[dict[str, Any]] = Field(default_factory=list)
+    body_weight_stats: list[dict[str, Any]] = Field(default_factory=list)
     pace_tendency: str = ""
     frame_markdown: str = ""
     summary: CourseStatsSummary = Field(default_factory=CourseStatsSummary)
@@ -137,6 +163,8 @@ class BetRankingItem(BaseModel):
     odds: float | None = None
     style: str = ""
     score: float
+    baseline_score: float | None = None
+    bias_bonus: float = 0.0
     reason: str = ""
 
 
@@ -157,11 +185,21 @@ class BetPlanResponse(BaseModel):
     warnings: list[str] = Field(default_factory=list)
 
 
+class TrackBias(BaseModel):
+    frame_bias: dict[str, float] = Field(default_factory=dict)
+    style_bias: dict[str, float] = Field(default_factory=dict)
+    sample_size: int = 0
+    fallback_used: bool = False
+    summary_label: str = ""
+    confidence: str = "low"
+
+
 class SameDaySheetRace(BaseModel):
     race: UpcomingRace
     entry: RaceEntryResponse | None = None
     course_stats: RaceCourseStatsResponse | None = None
     bet_plan: BetPlanResponse | None = None
+    track_bias: TrackBias | None = None
     error: str = ""
 
 
@@ -170,6 +208,7 @@ class SameDaySheetResponse(BaseModel):
     date: str
     venue: str
     race_count: int
+    track_bias_schema_version: str = "v1"
     races: list[SameDaySheetRace]
 
 

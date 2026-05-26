@@ -5,6 +5,16 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 
 import { ExternalWorkbenchCard } from "@/components/mobile/external-workbench-card";
+import { BetSimulator } from "@/components/race/bet-simulator";
+import { RaceCountdown } from "@/components/race/race-countdown";
+import {
+  HORSE_MARKS,
+  MARK_ORDER,
+  type HorseMark,
+  stableHorseMarkKey,
+  useHorseMarks,
+} from "@/hooks/use-horse-marks";
+import { useRaceResearchNotes } from "@/hooks/use-race-research-notes";
 import {
   getRaceCourseStats,
   getRaceEntry,
@@ -21,10 +31,11 @@ import type {
   RaceEntryResponse,
   RecentRunDetail,
   SameDaySheetRace,
+  TrackBias,
   UpcomingRace,
 } from "@/lib/api/types";
 
-type TabKey = "entry" | "features" | "bet" | "external";
+type TabKey = "entry" | "features" | "research" | "bet" | "vote" | "external";
 
 type RaceMeta = {
   race_key: string;
@@ -45,10 +56,11 @@ type RaceDetailCachePayload = {
   entry: RaceEntryResponse | null;
   courseStats: RaceCourseStatsResponse | null;
   betPlan: BetPlanResponse | null;
+  trackBias?: TrackBias | null;
   externalSnapshot?: ExternalSnapshot | null;
 };
 
-const DETAIL_CACHE_PREFIX = "keiba:same-day:race-detail:";
+const DETAIL_CACHE_PREFIX = "keiba:same-day:race-detail:v3:";
 const DETAIL_CACHE_EVENT = "keiba:same-day-detail-cache-updated";
 const DETAIL_CACHE_TTL_DAYS = 7;
 
@@ -66,6 +78,13 @@ function formatOdds(value: number | null): string {
 function formatCandidateIndex(value: number): string {
   if (!Number.isFinite(value)) return "-";
   return `${Math.round(value * 100)}`;
+}
+
+function formatBodyWeightBucket(value?: string | null): string {
+  if (!value) return "";
+  if (value === "~439") return "~439kg";
+  if (value === "520+") return "520+kg";
+  return `${value}kg`;
 }
 
 const WAKU_BADGE_CLASS: Record<string, string> = {
@@ -88,6 +107,20 @@ const WAKU_BORDER_CLASS: Record<string, string> = {
   "6": "border-l-emerald-600",
   "7": "border-l-orange-500",
   "8": "border-l-pink-400",
+};
+
+const SIRE_AXIS_LABEL: Record<string, string> = {
+  surface: "芝ダ",
+  distance: "距離",
+  course_shape: "コース",
+  going: "道悪",
+};
+
+const SIRE_MARK_RANK: Record<string, number> = {
+  "◎": 4,
+  "○": 3,
+  "△": 2,
+  "×": 1,
 };
 
 function wakuNumber(value: string): string {
@@ -208,6 +241,7 @@ function detailPayloadFromSheetItem(item: SameDaySheetRace): Omit<RaceDetailCach
     entry: item.entry,
     courseStats: item.course_stats,
     betPlan: item.bet_plan,
+    trackBias: item.track_bias ?? null,
     externalSnapshot: null,
   };
 }
@@ -236,8 +270,23 @@ function entryHasRecentRunDetailShape(entry: RaceEntryResponse): boolean {
   if (!entry.horses.length) return true;
   return entry.horses.every(
     (horse) =>
+      "body_weight_bucket" in horse &&
+      "body_weight_source" in horse &&
+      "sire_name" in horse &&
+      "sire_aptitude_summary" in horse &&
+      "broodmare_sire_name" in horse &&
+      "sire_aptitude_notes" in horse &&
       Array.isArray(horse.recent_run_details) &&
-      horse.recent_run_details.every((detail) => "race_eval" in detail),
+      horse.recent_run_details.every(
+        (detail) =>
+          "race_eval" in detail &&
+          "body_weight" in detail &&
+          "jockey" in detail &&
+          "distance_m" in detail &&
+          "carried_weight" in detail &&
+          "race_time_grade" in detail &&
+          "last3f_grade" in detail,
+      ),
   );
 }
 
@@ -251,10 +300,31 @@ function mdText(value: unknown, fallback = "未取得"): string {
   return text || fallback;
 }
 
+function stripPedigreeDisplayName(value: unknown): string {
+  let text = value == null ? "" : String(value).replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  const mixedName = text.match(/^([^A-Za-z]+?)\s+[A-Za-z].*$/);
+  if (mixedName?.[1]) return mixedName[1].trim();
+  text = text.replace(/\s*\([^)]*\)\s*$/, "").trim();
+  return text;
+}
+
+function sireMarksText(marks?: Record<string, string>): string {
+  const pairs = Object.entries(marks ?? {});
+  if (!pairs.length) return "-";
+  return pairs.map(([axis, mark]) => `${SIRE_AXIS_LABEL[axis] ?? axis}${mark}`).join(" / ");
+}
+
+function aptitudeScoreText(summary?: string, score?: number, maxScore?: number): string {
+  if (!summary) return "-";
+  return `${summary} ${score ?? 0}/${maxScore ?? 0}`;
+}
+
 function trackTextFromEntry(entry: RaceEntryResponse | null): string {
-  const direct = Object.entries(entry?.track_conditions ?? {})
-    .map(([key, value]) => `${key}:${value}`)
-    .join(" / ");
+  const conditions = Object.entries(entry?.track_conditions ?? {}).filter(([, value]) => String(value || "").trim());
+  const direct = conditions.length === 1
+    ? String(conditions[0][1]).trim()
+    : conditions.map(([key, value]) => `${key}:${value}`).join(" / ");
   if (direct) return direct;
   const raceData = entry?.race_data01 ?? "";
   const match = raceData.match(/馬場\s*[:：]\s*([^\s/]+)/);
@@ -267,10 +337,11 @@ function formatRunDetail(detail?: RecentRunDetail): string {
     detail.time_index != null
       ? `指数${detail.time_index} ${detail.race_eval || detail.race_level || ""}`.trim()
       : detail.race_eval
-        ? `評価 ${detail.race_eval}`
+        ? `クラス ${detail.race_eval}`
         : "";
   const parts = [
     detail.venue ? `場所 ${detail.venue}` : "",
+    detail.jockey || "",
     detail.race_time ? `走破タイム ${detail.race_time}` : "",
     evalText,
     detail.margin ? `着差${detail.margin}` : "",
@@ -287,15 +358,18 @@ function buildRaceResearchMarkdown({
   courseStats,
   betPlan,
   externalSnapshot,
+  horseMarks,
 }: {
   race: RaceMeta | null;
   entry: RaceEntryResponse | null;
   courseStats: RaceCourseStatsResponse | null;
   betPlan: BetPlanResponse | null;
   externalSnapshot: ExternalSnapshot | null;
+  horseMarks: Record<string, HorseMark>;
 }): string {
   const lines: string[] = [];
   const title = `${race?.race_number ? `${race.race_number} ` : ""}${race?.race_name || "レース詳細"}`;
+  const hasMarks = entry?.horses.some((horse) => horseMarks[stableHorseMarkKey(horse.umaban, horse.horse_name)]) ?? false;
 
   lines.push("# AI共有用レース分析資料");
   lines.push("");
@@ -312,11 +386,26 @@ function buildRaceResearchMarkdown({
 
   lines.push("## 出馬表");
   if (entry?.horses.length) {
-    lines.push("| 枠 | 馬番 | 馬名 | 騎手 | 単勝 | 脚質 | 斤量 | 馬体重 |");
-    lines.push("|---|---:|---|---|---:|---|---:|---|");
+    lines.push(hasMarks ? "| 印 | 枠 | 馬番 | 馬名 | 騎手 | 単勝 | 脚質 | 斤量 | 馬体重 |" : "| 枠 | 馬番 | 馬名 | 騎手 | 単勝 | 脚質 | 斤量 | 馬体重 |");
+    lines.push(hasMarks ? "|---|---|---:|---|---|---:|---|---:|---|" : "|---|---:|---|---|---:|---|---:|---|");
+    entry.horses.forEach((horse) => {
+      const mark = horseMarks[stableHorseMarkKey(horse.umaban, horse.horse_name)] || "";
+      const bodyText = `${horse.body_weight || "-"}${horse.body_delta ? ` (${horse.body_delta})` : ""}${horse.body_weight_bucket ? ` / ${formatBodyWeightBucket(horse.body_weight_bucket)}` : ""}`;
+      const base = `${mdCell(horse.waku)} | ${mdCell(horse.umaban)} | ${mdCell(horse.horse_name)} | ${mdCell(horse.jockey)} | ${mdCell(formatOdds(horse.odds))} | ${mdCell(horse.style)} | ${mdCell(horse.weight)} | ${mdCell(bodyText)}`;
+      lines.push(hasMarks ? `| ${mdCell(mark)} | ${base} |` : `| ${base} |`);
+    });
+  } else {
+    lines.push("未取得");
+  }
+  lines.push("");
+
+  lines.push("## 血統適性");
+  if (entry?.horses.length) {
+    lines.push("| 馬番 | 馬名 | 父 | 母父 | 総合 | 父軸別 | 母父評価 | notes |");
+    lines.push("|---:|---|---|---|---|---|---|---|");
     entry.horses.forEach((horse) => {
       lines.push(
-        `| ${mdCell(horse.waku)} | ${mdCell(horse.umaban)} | ${mdCell(horse.horse_name)} | ${mdCell(horse.jockey)} | ${mdCell(formatOdds(horse.odds))} | ${mdCell(horse.style)} | ${mdCell(horse.weight)} | ${mdCell(`${horse.body_weight || "-"}${horse.body_delta ? ` (${horse.body_delta})` : ""}`)} |`,
+        `| ${mdCell(horse.umaban)} | ${mdCell(horse.horse_name)} | ${mdCell(stripPedigreeDisplayName(horse.sire_name))} | ${mdCell(stripPedigreeDisplayName(horse.broodmare_sire_name))} | ${mdCell(aptitudeScoreText(horse.sire_aptitude_summary, horse.sire_aptitude_score, horse.sire_aptitude_max_score))} | ${mdCell(sireMarksText(horse.sire_aptitude_marks))} | ${mdCell(aptitudeScoreText(horse.broodmare_sire_aptitude_summary, horse.broodmare_sire_aptitude_score, horse.broodmare_sire_aptitude_max_score))} | ${mdCell(horse.sire_aptitude_notes)} |`,
       );
     });
   } else {
@@ -453,6 +542,48 @@ function buildRaceResearchMarkdown({
   return lines.join("\n");
 }
 
+function buildDeepResearchPrompt(race: RaceMeta | null, entry: RaceEntryResponse | null): string {
+  const title = `${race?.race_number ? `${race.race_number} ` : ""}${race?.race_name || "レース"}`;
+  const lines: string[] = [
+    "以下の競馬レースについて、Deep Researchで事前予想レポートを作成してください。",
+    "",
+    "## レース情報",
+    `- レース: ${title}`,
+    `- 日付: ${race?.date_str || race?.date_iso || "-"}`,
+    `- 会場: ${race?.venue || "-"}`,
+    `- 条件: ${(race?.surface || "") + (race?.distance || "") || "-"}`,
+    `- グレード: ${race?.grade || "-"}`,
+    `- 発走: ${entry?.start_time || "-"}`,
+    `- 天気: ${entry?.weather || "-"}`,
+    `- 馬場: ${trackTextFromEntry(entry) || "-"}`,
+    "",
+    "## 出走馬と血統適性",
+  ];
+
+  if (entry?.horses.length) {
+    lines.push("| 馬番 | 馬名 | 父 | 母父 | 父適性 | 母父適性 | 脚質 | オッズ |");
+    lines.push("|---:|---|---|---|---|---|---|---:|");
+    entry.horses.forEach((horse) => {
+      lines.push(
+        `| ${mdCell(horse.umaban)} | ${mdCell(horse.horse_name)} | ${mdCell(stripPedigreeDisplayName(horse.sire_name))} | ${mdCell(stripPedigreeDisplayName(horse.broodmare_sire_name))} | ${mdCell(aptitudeScoreText(horse.sire_aptitude_summary, horse.sire_aptitude_score, horse.sire_aptitude_max_score))} | ${mdCell(aptitudeScoreText(horse.broodmare_sire_aptitude_summary, horse.broodmare_sire_aptitude_score, horse.broodmare_sire_aptitude_max_score))} | ${mdCell(horse.style)} | ${mdCell(formatOdds(horse.odds))} |`,
+      );
+    });
+  } else {
+    lines.push("出走馬情報は未取得です。");
+  }
+
+  lines.push("");
+  lines.push("## 調査してほしい観点");
+  lines.push("- 各馬の近走内容、調子、距離・コース適性");
+  lines.push("- 想定ペースと展開、脚質面の有利不利");
+  lines.push("- 血統面で距離・馬場・東京コースに向く馬/不安な馬");
+  lines.push("- 本命候補、相手候補、穴馬候補、消し候補");
+  lines.push("- 最後に候補馬ランキングを根拠付きで作成");
+  lines.push("");
+  lines.push("出典や確認した情報の要点も、可能な範囲で併記してください。");
+  return lines.join("\n");
+}
+
 export default function RaceDetailPage() {
   const params = useParams<{ raceKey: string }>();
   const searchParams = useSearchParams();
@@ -461,6 +592,7 @@ export default function RaceDetailPage() {
   const [entry, setEntry] = useState<RaceEntryResponse | null>(null);
   const [courseStats, setCourseStats] = useState<RaceCourseStatsResponse | null>(null);
   const [betPlan, setBetPlan] = useState<BetPlanResponse | null>(null);
+  const [trackBias, setTrackBias] = useState<TrackBias | null>(null);
   const [externalSnapshot, setExternalSnapshot] = useState<ExternalSnapshot | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>("entry");
   const [reportOpen, setReportOpen] = useState(false);
@@ -471,10 +603,12 @@ export default function RaceDetailPage() {
   const [loadedFromCache, setLoadedFromCache] = useState(false);
 
   const status = statusText(loading || refreshing, error);
+  const raceIdForMarks = race?.race_id || raceKey;
+  const { marks: horseMarks, setMark: setHorseMark } = useHorseMarks(raceIdForMarks);
   const horseNames = useMemo(() => entry?.horses.map((horse) => horse.horse_name).filter(Boolean) ?? [], [entry]);
   const researchMarkdown = useMemo(
-    () => buildRaceResearchMarkdown({ race, entry, courseStats, betPlan, externalSnapshot }),
-    [race, entry, courseStats, betPlan, externalSnapshot],
+    () => buildRaceResearchMarkdown({ race, entry, courseStats, betPlan, externalSnapshot, horseMarks }),
+    [race, entry, courseStats, betPlan, externalSnapshot, horseMarks],
   );
 
   const handleExternalSnapshotChange = useCallback(
@@ -486,13 +620,14 @@ export default function RaceDetailPage() {
         entry,
         courseStats,
         betPlan,
+        trackBias,
         externalSnapshot: snapshot,
       });
       if (savedAt) {
         setCacheSavedAt(savedAt);
       }
     },
-    [race, entry, courseStats, betPlan],
+    [race, entry, courseStats, betPlan, trackBias],
   );
 
   async function loadAll(forceRefresh = false) {
@@ -509,6 +644,7 @@ export default function RaceDetailPage() {
           setEntry(cached.entry);
           setCourseStats(cached.courseStats);
           setBetPlan(cached.betPlan);
+          setTrackBias(cached.trackBias ?? null);
           setExternalSnapshot(cached.externalSnapshot ?? null);
           setCacheSavedAt(cached.savedAt);
           setLoadedFromCache(true);
@@ -522,6 +658,7 @@ export default function RaceDetailPage() {
           setEntry(sheetCached.entry);
           setCourseStats(sheetCached.courseStats);
           setBetPlan(sheetCached.betPlan);
+          setTrackBias(sheetCached.trackBias ?? null);
           setExternalSnapshot(sheetCached.externalSnapshot ?? null);
           const savedAt = writeDetailCache(sheetCached.race, sheetCached);
           setCacheSavedAt(savedAt);
@@ -542,6 +679,7 @@ export default function RaceDetailPage() {
           setEntry(cached.entry);
           setCourseStats(cached.courseStats);
           setBetPlan(cached.betPlan);
+          setTrackBias(cached.trackBias ?? null);
           setExternalSnapshot(cached.externalSnapshot ?? null);
           setCacheSavedAt(cached.savedAt);
           setLoadedFromCache(true);
@@ -555,6 +693,7 @@ export default function RaceDetailPage() {
           setEntry(sheetCached.entry);
           setCourseStats(sheetCached.courseStats);
           setBetPlan(sheetCached.betPlan);
+          setTrackBias(sheetCached.trackBias ?? null);
           setExternalSnapshot(sheetCached.externalSnapshot ?? null);
           const savedAt = writeDetailCache(sheetCached.race, sheetCached);
           setCacheSavedAt(savedAt);
@@ -569,7 +708,11 @@ export default function RaceDetailPage() {
       }
       setRace(resolvedMeta);
 
-      const entryResponse = await getRaceEntry(resolvedMeta.race_id);
+      const entryResponse = await getRaceEntry(resolvedMeta.race_id, {
+        venue: resolvedMeta.venue,
+        distance: resolvedMeta.distance,
+        surface: resolvedMeta.surface,
+      });
       setEntry(entryResponse);
 
       let courseStatsResponse: RaceCourseStatsResponse | null = null;
@@ -585,11 +728,13 @@ export default function RaceDetailPage() {
 
       const betResponse = await postRaceBetPlan(resolvedMeta.race_id);
       setBetPlan(betResponse);
+      setTrackBias(null);
       const savedAt = writeDetailCache(resolvedMeta, {
         race: resolvedMeta,
         entry: entryResponse,
         courseStats: courseStatsResponse,
         betPlan: betResponse,
+        trackBias: null,
         externalSnapshot,
       });
       setCacheSavedAt(savedAt);
@@ -667,7 +812,7 @@ export default function RaceDetailPage() {
             {race?.date_str || race?.date_iso || "-"} / {race?.venue || "-"} / {race?.surface || ""}
             {race?.distance || ""}
           </p>
-          {entry?.start_time ? <p className="mt-1 text-sm font-bold text-emerald-200">発走 {entry.start_time}</p> : null}
+          {entry?.start_time ? <RaceCountdown startTime={entry.start_time} dateIso={race?.date_iso || ""} /> : null}
           {status ? <p className={`mt-3 rounded-xl px-3 py-2 text-xs ${error ? "bg-rose-500/20 text-rose-100" : "bg-white/10 text-slate-100"}`}>{status}</p> : null}
           {cacheSavedAt ? (
             <p className="mt-3 rounded-xl bg-white/10 px-3 py-2 text-xs text-slate-100">
@@ -686,12 +831,12 @@ export default function RaceDetailPage() {
           </button>
           {refreshing ? (
             <p className="mt-2 rounded-xl bg-emerald-400/15 px-3 py-2 text-xs font-bold text-emerald-100">
-              ?????????????????????????????
+              最新情報を取得中です。完了までこの画面のままお待ちください。
             </p>
           ) : null}
           {error ? (
             <p className="mt-2 rounded-xl bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-100">
-              ???????????????????????????????????????????
+              通信に失敗した場合でも保存済みデータは表示できます。少し待って再実行してください。
             </p>
           ) : null}
         </div>
@@ -709,29 +854,36 @@ export default function RaceDetailPage() {
         </div>
       ) : null}
 
-      <div className="sticky top-0 z-10 mt-4 grid grid-cols-4 gap-1 rounded-2xl bg-white p-1 shadow-sm ring-1 ring-slate-200">
+      <div className="sticky top-0 z-10 mt-4 grid grid-cols-6 gap-1 rounded-2xl bg-white p-1 shadow-sm ring-1 ring-slate-200">
         {[
           ["entry", "出馬表"],
           ["features", "特徴"],
           ["bet", "買い目"],
+          ["vote", "投票"],
           ["external", "外部情報"],
-        ].map(([key, label]) => (
+          ["research", "事前"],
+        ].sort(([a], [b]) => {
+          const order: Record<string, number> = { entry: 0, features: 1, research: 2, bet: 3, vote: 4, external: 5 };
+          return (order[a] ?? 99) - (order[b] ?? 99);
+        }).map(([key, label]) => (
           <button
             key={key}
             type="button"
             onClick={() => setActiveTab(key as TabKey)}
-            className={`min-h-11 rounded-xl px-2 py-3 text-xs font-bold ${
+            className={`min-h-11 rounded-xl px-1 py-3 text-[10px] font-bold sm:text-xs ${
               activeTab === key ? "bg-slate-900 text-white" : "text-slate-600"
             }`}
           >
-            {label}
+            {key === "external" ? "外部" : label}
           </button>
         ))}
       </div>
 
-      {activeTab === "entry" ? <EntryTab entry={entry} /> : null}
-      {activeTab === "features" ? <FeaturesTab courseStats={courseStats} /> : null}
+      {activeTab === "entry" ? <EntryTab entry={entry} courseStats={courseStats} trackBias={trackBias} horseMarks={horseMarks} onMarkChange={setHorseMark} /> : null}
+      {activeTab === "features" ? <FeaturesTab courseStats={courseStats} entry={entry} race={race} /> : null}
+      {activeTab === "research" ? <ResearchNotesTab raceId={raceIdForMarks} race={race} entry={entry} /> : null}
       {activeTab === "bet" ? <BetTab betPlan={betPlan} /> : null}
+      {activeTab === "vote" ? <BetSimulator key={raceIdForMarks} raceId={raceIdForMarks} entry={entry} /> : null}
       {activeTab === "external" ? (
         <ExternalTab
           race={race}
@@ -759,6 +911,32 @@ function ResearchMarkdownPanel({ markdown }: { markdown: string }) {
     }
   }
 
+  function handleAiOpen(url: string, label: string) {
+    let copyPromise: Promise<void> | null = null;
+    try {
+      copyPromise = navigator.clipboard.writeText(markdown);
+    } catch {
+      copyPromise = null;
+    }
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) {
+      setCopyStatus("新しいタブを開けませんでした。ブラウザのポップアップ設定を確認してください。");
+    }
+    if (!copyPromise) {
+      textareaRef.current?.focus();
+      textareaRef.current?.select();
+      setCopyStatus("自動コピー失敗。下のテキストを手動コピーしてください。");
+      return;
+    }
+    void copyPromise
+      .then(() => setCopyStatus(`${label}を開きました。Markdownもコピー済みです。`))
+      .catch(() => {
+        textareaRef.current?.focus();
+        textareaRef.current?.select();
+        setCopyStatus("自動コピー失敗。下のテキストを手動コピーしてください。");
+      });
+  }
+
   return (
     <section className="mt-3 rounded-3xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
@@ -779,6 +957,22 @@ function ResearchMarkdownPanel({ markdown }: { markdown: string }) {
         </button>
       </div>
       {copyStatus ? <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-xs text-emerald-900">{copyStatus}</p> : null}
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        {[
+          ["Claudeで質問", "https://claude.ai/new"],
+          ["Geminiで質問", "https://gemini.google.com/app"],
+          ["ChatGPTで質問", "https://chat.openai.com/"],
+        ].map(([label, url]) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => handleAiOpen(url, label)}
+            className="min-h-11 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white"
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <textarea
         ref={textareaRef}
         readOnly
@@ -790,25 +984,254 @@ function ResearchMarkdownPanel({ markdown }: { markdown: string }) {
   );
 }
 
-function EntryTab({ entry }: { entry: RaceEntryResponse | null }) {
+function ResearchNotesTab({ raceId, race, entry }: { raceId: string; race: RaceMeta | null; entry: RaceEntryResponse | null }) {
+  const prompt = useMemo(() => buildDeepResearchPrompt(race, entry), [race, entry]);
+  const promptRef = useRef<HTMLTextAreaElement | null>(null);
+  const notesRef = useRef<HTMLTextAreaElement | null>(null);
+  const { notes, savedAt, setNotes, clearNotes } = useRaceResearchNotes(raceId);
+  const [draft, setDraft] = useState(notes);
+  const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDraft(notes);
+  }, [notes]);
+
+  function savedAtText(): string {
+    if (!savedAt) return "未保存";
+    return new Intl.DateTimeFormat("ja-JP", {
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(savedAt));
+  }
+
+  function focusPromptForManualCopy(message: string) {
+    promptRef.current?.focus();
+    promptRef.current?.select();
+    setStatus(message);
+  }
+
+  function openAi(url: string, label: string) {
+    let copyPromise: Promise<void> | null = null;
+    try {
+      copyPromise = navigator.clipboard.writeText(prompt);
+    } catch {
+      copyPromise = null;
+    }
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) {
+      focusPromptForManualCopy("新しいタブを開けませんでした。ポップアップを許可して、下のプロンプトをコピーしてください。");
+      return;
+    }
+    if (!copyPromise) {
+      focusPromptForManualCopy("自動コピーに失敗しました。下のプロンプトを手動でコピーしてください。");
+      return;
+    }
+    void copyPromise
+      .then(() => setStatus(`${label}を開きました。プロンプトもコピー済みです。Deep Researchモードは移動先で選択してください。`))
+      .catch(() => focusPromptForManualCopy("自動コピーに失敗しました。下のプロンプトを手動でコピーしてください。"));
+  }
+
+  function saveDraft() {
+    setNotes(draft, "manual");
+    setStatus("事前研究レポートを保存しました。");
+  }
+
+  function clearDraft() {
+    clearNotes();
+    setDraft("");
+    notesRef.current?.focus();
+    setStatus("事前研究レポートをクリアしました。");
+  }
+
+  return (
+    <section className="mt-4 space-y-4">
+      <div className="rounded-3xl border border-indigo-100 bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-black text-slate-950">Deep Research プロンプト</p>
+            <p className="mt-1 text-xs text-slate-500">出走馬と血統情報を含めて、事前予想用の調査依頼を作ります。</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => openAi("https://gemini.google.com/app", "Gemini")}
+              className="min-h-11 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-black text-white"
+            >
+              Gemini
+            </button>
+            <button
+              type="button"
+              onClick={() => openAi("https://chat.openai.com/", "ChatGPT")}
+              className="min-h-11 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white"
+            >
+              ChatGPT
+            </button>
+          </div>
+        </div>
+        {status ? <p className="mt-3 rounded-xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800">{status}</p> : null}
+        <textarea
+          ref={promptRef}
+          readOnly
+          value={prompt}
+          rows={8}
+          className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs leading-5 text-slate-700"
+        />
+      </div>
+
+      <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-black text-slate-950">事前研究レポート</p>
+            <p className="mt-1 text-xs text-slate-500">最終保存: {savedAtText()}</p>
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={saveDraft} className="min-h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white">
+              保存
+            </button>
+            <button type="button" onClick={clearDraft} className="min-h-11 rounded-xl bg-slate-100 px-4 py-2 text-xs font-black text-slate-700">
+              クリア
+            </button>
+          </div>
+        </div>
+        <textarea
+          ref={notesRef}
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          rows={20}
+          className="mt-3 w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-800"
+          placeholder="Deep Research のレポートをここに貼り付け"
+        />
+      </div>
+
+      {notes ? (
+        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <p className="text-sm font-black text-slate-950">プレビュー</p>
+          <pre className="mt-3 max-h-[520px] overflow-auto whitespace-pre-wrap rounded-2xl bg-slate-50 p-3 text-xs leading-5 text-slate-700">
+            {notes}
+          </pre>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+type EntrySortKey = "mark" | "umaban" | "odds";
+
+function bodyWeightTop3Rate(horse: EntryHorse, courseStats: RaceCourseStatsResponse | null): number | null {
+  if (typeof horse.body_weight_top3_rate === "number") return horse.body_weight_top3_rate;
+  const bucket = horse.body_weight_bucket;
+  if (!bucket) return null;
+  const row = courseStats?.body_weight_stats?.find((item) => String(item.label ?? "") === bucket);
+  const value = row?.top3_rate;
+  return typeof value === "number" ? value : null;
+}
+
+function EntryTab({
+  entry,
+  courseStats,
+  trackBias,
+  horseMarks,
+  onMarkChange,
+}: {
+  entry: RaceEntryResponse | null;
+  courseStats: RaceCourseStatsResponse | null;
+  trackBias: TrackBias | null;
+  horseMarks: Record<string, HorseMark>;
+  onMarkChange: (horseKey: string, mark: HorseMark | null) => void;
+}) {
+  const [sortKey, setSortKey] = useState<EntrySortKey>("umaban");
+  const [hideErased, setHideErased] = useState(false);
   if (!entry) {
     return <EmptyCard message="出馬表を取得中です。" />;
   }
+  const horses = [...entry.horses]
+    .filter((horse) => {
+      const mark = horseMarks[stableHorseMarkKey(horse.umaban, horse.horse_name)] || "";
+      return !(hideErased && mark === "消");
+    })
+    .sort((a, b) => {
+      if (sortKey === "mark") {
+        const markA = horseMarks[stableHorseMarkKey(a.umaban, a.horse_name)] || "";
+        const markB = horseMarks[stableHorseMarkKey(b.umaban, b.horse_name)] || "";
+        const markDiff = MARK_ORDER[markA] - MARK_ORDER[markB];
+        if (markDiff !== 0) return markDiff;
+      }
+      if (sortKey === "odds") {
+        const oddsA = typeof a.odds === "number" ? a.odds : Number.POSITIVE_INFINITY;
+        const oddsB = typeof b.odds === "number" ? b.odds : Number.POSITIVE_INFINITY;
+        const oddsDiff = oddsA - oddsB;
+        if (oddsDiff !== 0) return oddsDiff;
+      }
+      return (Number.parseInt(a.umaban || "999", 10) || 999) - (Number.parseInt(b.umaban || "999", 10) || 999);
+    });
   return (
     <section className="mt-3 space-y-3">
       <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <p className="text-xs font-semibold text-slate-500">脚質分布</p>
         <p className="mt-1 text-lg font-black text-slate-900">{entry.style_distribution_label || "-"}</p>
+        {trackBias?.summary_label ? (
+          <div className="mt-2 rounded-2xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800">
+            <span className="font-black">バイアス:</span> {trackBias.summary_label}
+            <span className="ml-2 text-[10px] opacity-70">
+              ({trackBias.sample_size}R{trackBias.fallback_used ? " / 同会場他コース" : ""})
+            </span>
+          </div>
+        ) : null}
         <p className="mt-1 text-xs text-slate-500">{entry.race_data01}</p>
       </div>
-      {entry.horses.map((horse) => (
-        <HorseCard key={`${horse.umaban || horse.horse_name}-${horse.horse_name}`} horse={horse} />
+      <div className="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="text-xs font-bold text-slate-600">
+            並び替え
+            <select
+              value={sortKey}
+              onChange={(event) => setSortKey(event.target.value as EntrySortKey)}
+              className="ml-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-800"
+            >
+              <option value="umaban">馬番順</option>
+              <option value="mark">印順</option>
+              <option value="odds">単勝順</option>
+            </select>
+          </label>
+          <label className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700">
+            <input
+              type="checkbox"
+              checked={hideErased}
+              onChange={(event) => setHideErased(event.target.checked)}
+              className="h-4 w-4"
+            />
+            消した馬を非表示
+          </label>
+        </div>
+      </div>
+      {horses.map((horse) => (
+        <HorseCard
+          key={`${horse.umaban || horse.horse_name}-${horse.horse_name}`}
+          horse={horse}
+          mark={horseMarks[stableHorseMarkKey(horse.umaban, horse.horse_name)] || ""}
+          top3Rate={bodyWeightTop3Rate(horse, courseStats)}
+          onMarkChange={onMarkChange}
+        />
       ))}
     </section>
   );
 }
 
-function HorseCard({ horse }: { horse: EntryHorse }) {
+function HorseCard({
+  horse,
+  mark,
+  top3Rate,
+  onMarkChange,
+}: {
+  horse: EntryHorse;
+  mark: HorseMark | "";
+  top3Rate: number | null;
+  onMarkChange: (horseKey: string, mark: HorseMark | null) => void;
+}) {
+  const horseKey = stableHorseMarkKey(horse.umaban, horse.horse_name);
+  const hasRecentRuns = horse.recent_runs.some((run) => run.trim().length > 0);
   return (
     <article className={`rounded-3xl border border-l-8 border-slate-200 bg-white p-4 shadow-sm ${wakuBorderClass(horse.waku)}`}>
       <div className="flex items-start justify-between gap-3">
@@ -825,47 +1248,86 @@ function HorseCard({ horse }: { horse: EntryHorse }) {
             {horse.body_delta ? ` (${horse.body_delta})` : ""}
           </p>
         </div>
-        <div className="text-right">
+        <div className="shrink-0 text-right">
+          <div className="mb-2 flex justify-end">
+            {mark ? (
+              <span className={`inline-flex h-9 min-w-9 items-center justify-center rounded-full px-2 text-sm font-black ${mark === "消" ? "bg-slate-200 text-slate-500" : "bg-rose-100 text-rose-700"}`}>
+                {mark}
+              </span>
+            ) : (
+              <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-slate-100 px-2 text-xs font-bold text-slate-400">
+                無印
+              </span>
+            )}
+          </div>
           <p className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">{horse.style || "-"}</p>
           <p className="mt-2 text-lg font-black text-slate-900">{formatOdds(horse.odds)}</p>
           <p className="text-[10px] text-slate-500">単勝</p>
         </div>
       </div>
-      <div className="mt-3 space-y-2">
-        {horse.recent_runs.map((run, idx) => (
-          <RecentRunLine
-            key={`${horse.horse_name}-run-${idx}`}
-            label={idx === 0 ? "前走" : `${idx + 1}走前`}
-            run={run}
-            last3f={horse.last3fs[idx]}
-            detail={horse.recent_run_details?.[idx]}
-          />
+      <div className="mt-3 flex flex-wrap gap-2">
+        {HORSE_MARKS.map((candidate) => (
+          <button
+            key={candidate}
+            type="button"
+            onClick={() => onMarkChange(horseKey, candidate)}
+            className={`h-9 min-w-9 rounded-xl px-2 text-sm font-black ${
+              mark === candidate ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"
+            }`}
+          >
+            {candidate}
+          </button>
         ))}
+        <button
+          type="button"
+          onClick={() => onMarkChange(horseKey, null)}
+          className="h-9 min-w-9 rounded-xl bg-white px-2 text-xs font-black text-slate-500 ring-1 ring-slate-200"
+        >
+          ×
+        </button>
+      </div>
+      {horse.body_weight_bucket ? (
+        <p className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-600">
+          <span className="rounded-full bg-slate-100 px-2 py-1">
+            馬体重帯 {formatBodyWeightBucket(horse.body_weight_bucket)}
+            {horse.body_weight_source === "previous" ? "（前走）" : ""}
+          </span>
+          {typeof top3Rate === "number" ? (
+            <span className="rounded-full bg-emerald-50 px-2 py-1 text-emerald-700">同条件 複勝率{top3Rate.toFixed(0)}%</span>
+          ) : null}
+        </p>
+      ) : null}
+      <div className="mt-3 space-y-2">
+        {hasRecentRuns ? (
+          horse.recent_runs.map((run, idx) => (
+            <RecentRunLine
+              key={`${horse.horse_name}-run-${idx}`}
+              label={idx === 0 ? "前走" : `${idx + 1}走前`}
+              run={run}
+              last3f={horse.last3fs[idx]}
+              detail={horse.recent_run_details?.[idx]}
+            />
+          ))
+        ) : (
+          <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">
+            初出走または競走成績なし
+          </div>
+        )}
       </div>
     </article>
   );
 }
 
-function raceLevelColor(level: string): string {
-  switch (level) {
-    case "S":
-    case "G1":
-      return "bg-purple-100 text-purple-800";
-    case "A":
-    case "G2":
-      return "bg-blue-100 text-blue-800";
-    case "B":
-    case "G3":
-      return "bg-emerald-50 text-emerald-700";
-    case "C":
-    case "L":
-    case "OP":
-      return "bg-yellow-50 text-yellow-700";
-    case "D":
-      return "bg-slate-100 text-slate-500";
-    default:
-      return "bg-slate-100 text-slate-400";
-  }
+const RATING_CHIP_COLOR: Record<string, string> = {
+  S: "bg-rose-100 text-rose-800",
+  A: "bg-orange-100 text-orange-800",
+  B: "bg-emerald-100 text-emerald-800",
+  C: "bg-slate-200 text-slate-700",
+  D: "bg-slate-100 text-slate-500",
+};
+
+function ratingChipColor(grade: string | undefined): string {
+  return RATING_CHIP_COLOR[grade || ""] || "bg-slate-100 text-slate-400";
 }
 
 function RecentRunLine({
@@ -881,14 +1343,9 @@ function RecentRunLine({
 }) {
   const text = run || "-";
   const match = text.match(/^(\d{2}\/\d{2}\/\d{2})\s+(\d{1,2})\s+(.+)$/);
-  const evalText =
-    detail?.time_index != null
-      ? `指数${detail.time_index} ${detail.race_eval || detail.race_level || ""}`.trim()
-      : detail?.race_eval
-        ? `評価${detail.race_eval}`
-        : "";
-  const evalLevel = detail?.race_eval || detail?.race_level || "";
-  const hasDetailChips = Boolean(detail?.venue || detail?.race_time || evalText || detail?.margin);
+  const raceTimeGrade = detail?.race_time_grade || "-";
+  const last3fGrade = detail?.last3f_grade || "-";
+  const hasDetailChips = Boolean(detail);
   return (
     <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-700">
       <div className="mb-1 flex flex-wrap items-center gap-2">
@@ -902,6 +1359,11 @@ function RecentRunLine({
           </>
         ) : null}
         {last3f ? <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-bold text-emerald-700">上り {last3f}</span> : null}
+        {detail ? (
+          <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${ratingChipColor(last3fGrade)}`}>
+            上{last3fGrade}
+          </span>
+        ) : null}
       </div>
       {hasDetailChips ? (
         <div className="mb-1 flex flex-wrap gap-1">
@@ -910,14 +1372,19 @@ function RecentRunLine({
               {detail.venue}
             </span>
           ) : null}
+          {detail?.jockey ? (
+            <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-700">
+              {detail.jockey}
+            </span>
+          ) : null}
           {detail?.race_time ? (
             <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-slate-700 ring-1 ring-slate-200">
               {detail.race_time}
             </span>
           ) : null}
-          {evalText ? (
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${raceLevelColor(evalLevel)}`}>
-              {evalText}
+          {detail ? (
+            <span className={`rounded-full px-2 py-0.5 text-[11px] font-black ${ratingChipColor(raceTimeGrade)}`}>
+              走{raceTimeGrade}
             </span>
           ) : null}
           {detail?.margin ? (
@@ -932,21 +1399,103 @@ function RecentRunLine({
   );
 }
 
-function FeaturesTab({ courseStats }: { courseStats: RaceCourseStatsResponse | null }) {
+function FeaturesTab({
+  courseStats,
+  entry,
+  race,
+}: {
+  courseStats: RaceCourseStatsResponse | null;
+  entry: RaceEntryResponse | null;
+  race: RaceMeta | null;
+}) {
   if (!courseStats) {
     return <EmptyCard message="レース特徴を取得中です。" />;
   }
+  const rankedHorses = [...(entry?.horses ?? [])]
+    .filter((horse) => horse.sire_data_available && horse.sire_aptitude_summary)
+    .sort((a, b) => {
+      const aRatio = (a.sire_aptitude_score ?? 0) / Math.max(1, a.sire_aptitude_max_score ?? 0);
+      const bRatio = (b.sire_aptitude_score ?? 0) / Math.max(1, b.sire_aptitude_max_score ?? 0);
+      if (bRatio !== aRatio) return bRatio - aRatio;
+      const aBroodmareRatio = (a.broodmare_sire_aptitude_score ?? 0) / Math.max(1, a.broodmare_sire_aptitude_max_score ?? 0);
+      const bBroodmareRatio = (b.broodmare_sire_aptitude_score ?? 0) / Math.max(1, b.broodmare_sire_aptitude_max_score ?? 0);
+      if (bBroodmareRatio !== aBroodmareRatio) return bBroodmareRatio - aBroodmareRatio;
+      return (SIRE_MARK_RANK[b.sire_aptitude_summary ?? ""] ?? 0) - (SIRE_MARK_RANK[a.sire_aptitude_summary ?? ""] ?? 0);
+    });
+  const unregisteredSires = Array.from(
+    new Set(
+      (entry?.horses ?? [])
+        .flatMap((horse) => [
+          horse.sire_name && !horse.sire_data_available ? stripPedigreeDisplayName(horse.sire_name) : "",
+          horse.broodmare_sire_name && !horse.broodmare_sire_data_available ? stripPedigreeDisplayName(horse.broodmare_sire_name) : "",
+        ])
+        .filter(Boolean),
+    ),
+  );
+  const conditionLabel = `${race?.surface || ""}${race?.distance || ""} / ${race?.venue || "-"} / ${trackTextFromEntry(entry) || "馬場未取得"}`;
+
   return (
     <section className="mt-3 space-y-3">
       <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <p className="text-xs font-semibold text-slate-500">コース特徴</p>
         <p className="mt-1 text-sm font-semibold text-slate-900">{courseStats.summary.course}</p>
         <p className="mt-2 rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          {courseStats.summary.winning_type || "脚質データ不足"}
+          {courseStats.summary.winning_type || "傾向データ不足"}
         </p>
         <p className="mt-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">
           {courseStats.summary.pace_note}
         </p>
+      </div>
+      <div className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+        <p className="text-sm font-black text-slate-950">血統適性ランキング</p>
+        <p className="mt-1 text-xs leading-5 text-slate-500">
+          本レース条件（{conditionLabel}）で関連する適性軸のみ評価しています。経験則ベースの参考情報です。
+        </p>
+        {rankedHorses.length ? (
+          <div className="mt-3 space-y-2">
+            {rankedHorses.map((horse) => (
+              <div key={`${horse.umaban}-${horse.horse_name}-sire`} className="rounded-2xl bg-slate-50 px-3 py-2">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="min-w-0 text-sm text-slate-800">
+                    <span className="mr-1 text-lg font-black text-slate-950">{horse.sire_aptitude_summary}</span>
+                    <span className="font-bold">{horse.umaban || "-"} {horse.horse_name}</span>
+                    <span className="block text-xs text-slate-500">
+                      父: {stripPedigreeDisplayName(horse.sire_name) || "-"}
+                      {horse.broodmare_sire_name ? ` / 母父: ${stripPedigreeDisplayName(horse.broodmare_sire_name) || "-"}` : ""}
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-xs font-bold text-slate-500">
+                    {horse.sire_aptitude_score ?? 0}/{horse.sire_aptitude_max_score ?? 0}
+                  </span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1 text-xs">
+                  {Object.entries(horse.sire_aptitude_marks ?? {}).map(([axis, mark]) => (
+                    <span key={axis} className="rounded-full bg-white px-2 py-0.5 font-bold text-slate-700 ring-1 ring-slate-200">
+                      {SIRE_AXIS_LABEL[axis] ?? axis}{mark}
+                    </span>
+                  ))}
+                  {horse.broodmare_sire_aptitude_summary ? (
+                    <span className="rounded-full bg-white px-2 py-0.5 font-bold text-slate-700 ring-1 ring-slate-200">
+                      母父{horse.broodmare_sire_aptitude_summary}
+                    </span>
+                  ) : null}
+                </div>
+                {horse.sire_aptitude_notes ? (
+                  <p className="mt-2 text-xs leading-5 text-slate-500">{horse.sire_aptitude_notes}</p>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-3 rounded-2xl bg-slate-50 px-3 py-2 text-xs text-slate-500">
+            血統DBに登録済みの種牡馬がまだ見つかっていません。事前キャッシュ生成後に表示されます。
+          </p>
+        )}
+        {unregisteredSires.length > 0 ? (
+          <p className="mt-3 text-xs leading-5 text-amber-700">
+            血統データ未登録（事前追加推奨）: {unregisteredSires.join("、")}
+          </p>
+        ) : null}
       </div>
       <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <p className="text-sm font-black text-slate-900">枠別成績割合</p>
@@ -961,6 +1510,26 @@ function FeaturesTab({ courseStats }: { courseStats: RaceCourseStatsResponse | n
             </div>
           ))}
         </div>
+      </div>
+      <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+        <p className="text-sm font-black text-slate-900">馬体重別成績割合</p>
+        {courseStats.body_weight_stats?.length ? (
+          <div className="mt-3 space-y-2">
+            {courseStats.body_weight_stats.map((row) => (
+              <div key={String(row.label)} className="grid grid-cols-5 gap-1 rounded-xl bg-slate-50 px-2 py-2 text-center text-[11px] text-slate-700">
+                <span className="font-black text-slate-900">{formatBodyWeightBucket(String(row.label ?? "")) || "-"}</span>
+                <span>1着 {String(row.win_rate ?? "0")}%</span>
+                <span>複勝 {String(row.top3_rate ?? "0")}%</span>
+                <span>外 {String(row.outside_top3_rate ?? "0")}%</span>
+                <span>{String(row.starts ?? "0")}頭</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-500">
+            馬体重別成績はサンプル不足または未取得です。
+          </p>
+        )}
       </div>
       {courseStats.source_url ? (
         <a

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
+import { stableHorseMarkKey, useHorseMarksMulti, type HorseMark } from "@/hooks/use-horse-marks";
 import type {
   BetPlanResponse,
   BetRankingItem,
@@ -204,6 +205,8 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
     if (typeof window === "undefined" || cacheSnapshot === "server") return base;
     return base.map(mergeDetailCache);
   }, [sheet, cacheSnapshot]);
+  const raceIds = useMemo(() => races.map((item) => item.race.race_id || item.race.race_key), [races]);
+  const marksByRace = useHorseMarksMulti(raceIds);
 
   const totalWarnings = useMemo(
     () =>
@@ -300,14 +303,18 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
 
       <div className="mt-4 space-y-3">
         {races.map((item) => (
-          <RaceSheetCard key={item.race.race_key} item={item} />
+          <RaceSheetCard
+            key={item.race.race_key}
+            item={item}
+            horseMarks={marksByRace[item.race.race_id || item.race.race_key] || {}}
+          />
         ))}
       </div>
     </main>
   );
 }
 
-function RaceSheetCard({ item }: { item: SameDaySheetRace }) {
+function RaceSheetCard({ item, horseMarks }: { item: SameDaySheetRace; horseMarks: Record<string, HorseMark> }) {
   const entry = item.entry;
   const betPlan = item.bet_plan;
   const ranking = betPlan?.ranking.slice(0, 4) ?? [];
@@ -357,9 +364,23 @@ function RaceSheetCard({ item }: { item: SameDaySheetRace }) {
         </div>
       ) : null}
 
+      {item.track_bias?.summary_label ? (
+        <div className="mt-3 rounded-2xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800">
+          <span className="font-black">バイアス:</span> {item.track_bias.summary_label}
+          <span className="ml-2 text-[10px] opacity-70">
+            ({item.track_bias.sample_size}R{item.track_bias.fallback_used ? " / 同会場他コース" : ""})
+          </span>
+        </div>
+      ) : null}
+
       <div className="mt-4 space-y-2">
         {ranking.map((rankingItem, idx) => (
-          <RankingRow key={`${rankingItem.horse_name}-${idx}`} item={rankingItem} index={idx + 1} />
+          <RankingRow
+            key={`${rankingItem.horse_name}-${idx}`}
+            item={rankingItem}
+            index={idx + 1}
+            mark={horseMarks[stableHorseMarkKey(rankingItem.umaban, rankingItem.horse_name)] || ""}
+          />
         ))}
       </div>
 
@@ -373,7 +394,7 @@ function RaceSheetCard({ item }: { item: SameDaySheetRace }) {
   );
 }
 
-function RankingRow({ item, index }: { item: BetRankingItem; index: number }) {
+function RankingRow({ item, index, mark }: { item: BetRankingItem; index: number; mark: HorseMark | "" }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2">
       <div className="min-w-0">
@@ -381,6 +402,11 @@ function RankingRow({ item, index }: { item: BetRankingItem; index: number }) {
           <span>
             {index}. {item.horse_name}
           </span>
+          {mark ? (
+            <span className={`inline-flex min-w-7 items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-black ${mark === "消" ? "bg-slate-200 text-slate-500" : "bg-rose-100 text-rose-700"}`}>
+              {mark}
+            </span>
+          ) : null}
           {item.waku ? (
             <span className={`inline-flex min-w-7 items-center justify-center rounded-full border px-2 py-0.5 text-[11px] font-black ${wakuBadgeClass(item.waku)}`}>
               {item.waku}枠
@@ -393,6 +419,12 @@ function RankingRow({ item, index }: { item: BetRankingItem; index: number }) {
       </div>
       <div className="shrink-0 text-right">
         <p className="text-sm font-black text-emerald-700">{formatCandidateIndex(item.score)}</p>
+        {item.bias_bonus ? (
+          <p className={`text-[10px] font-black ${item.bias_bonus > 0 ? "text-emerald-700" : "text-rose-700"}`}>
+            {item.bias_bonus > 0 ? "+" : ""}
+            {(item.bias_bonus * 100).toFixed(0)}
+          </p>
+        ) : null}
         <p className="text-[10px] font-bold text-slate-400">候補指数</p>
       </div>
     </div>

@@ -37,6 +37,7 @@ _JRA_VENUE_CODE_MAP = {
 _JRA_VENUES = tuple(_JRA_VENUE_CODE_MAP.keys())
 _STYLE_ORDER = ("逃げ", "先行", "差し", "追込")
 _POPULARITY_BUCKETS = ("1番人気", "2-3番人気", "4-6番人気", "7番人気以下")
+_BODY_WEIGHT_BUCKETS = ("~439", "440-459", "460-479", "480-499", "500-519", "520+")
 
 
 def build_requests_session() -> requests.Session:
@@ -213,6 +214,108 @@ def fetch_race_horse_ids(
     return results
 
 
+def fetch_horse_sire(
+    horse_id: str,
+    *,
+    session: requests.Session | None = None,
+) -> str | None:
+    """Fetch sire name from the netkeiba horse profile page.
+
+    The race result page (/horse/result/{id}/) does not include the pedigree
+    table, so this function intentionally reads /horse/{id}/.
+    """
+    hid = str(horse_id or "").strip()
+    if not re.fullmatch(r"\d+", hid):
+        return None
+
+    blood_table = None
+    for url in (
+        f"https://db.netkeiba.com/horse/{hid}/",
+        f"https://db.netkeiba.com/horse/ped/{hid}/",
+    ):
+        try:
+            html = _request_html(url, timeout=12, session=session)
+        except requests.exceptions.RequestException:
+            continue
+        if not html:
+            continue
+        soup = BeautifulSoup(html, "html.parser")
+        blood_table = soup.select_one("table.blood_table")
+        if blood_table:
+            break
+    if not blood_table:
+        return None
+
+    candidates = [
+        "tr:nth-of-type(1) td:nth-of-type(1) a[href*='/horse/']",
+        "tr:first-child td:first-child a[href*='/horse/']",
+        "a[href*='/horse/']",
+    ]
+    for selector in candidates:
+        anchor = blood_table.select_one(selector)
+        if not anchor:
+            continue
+        sire_name = _clean_pedigree_name(anchor.get_text(" ", strip=True))
+        if sire_name:
+            return sire_name
+    return None
+
+
+def fetch_horse_pedigree(
+    horse_id: str,
+    *,
+    session: requests.Session | None = None,
+) -> dict[str, str]:
+    """Fetch sire and broodmare sire names from the netkeiba pedigree table."""
+    hid = str(horse_id or "").strip()
+    if not re.fullmatch(r"\d+", hid):
+        return {}
+
+    blood_table = None
+    for url in (
+        f"https://db.netkeiba.com/horse/{hid}/",
+        f"https://db.netkeiba.com/horse/ped/{hid}/",
+    ):
+        try:
+            html = _request_html(url, timeout=12, session=session)
+        except requests.exceptions.RequestException:
+            continue
+        if not html:
+            continue
+        soup = BeautifulSoup(html, "html.parser")
+        blood_table = soup.select_one("table.blood_table")
+        if blood_table:
+            break
+    if not blood_table:
+        return {}
+
+    rows = blood_table.select("tr")
+    sire_name = _pedigree_cell_name(rows, 0, 0)
+    broodmare_sire_name = _pedigree_cell_name(rows, 16, 1)
+    return {
+        "sire_name": sire_name,
+        "broodmare_sire_name": broodmare_sire_name,
+    }
+
+
+def _pedigree_cell_name(rows: list, row_index: int, cell_index: int) -> str:
+    if row_index >= len(rows):
+        return ""
+    cells = rows[row_index].select("td")
+    if cell_index >= len(cells):
+        return ""
+    anchor = cells[cell_index].select_one("a[href*='/horse/']")
+    source = anchor.get_text(" ", strip=True) if anchor else cells[cell_index].get_text(" ", strip=True)
+    return _clean_pedigree_name(source)
+
+
+def _clean_pedigree_name(value: str) -> str:
+    text = re.sub(r"\s+", " ", str(value or "")).strip()
+    text = re.sub(r"\s*\[[^\]]+\]\s*", " ", text)
+    text = re.sub(r"\s+\d{4}\b.*$", "", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def fetch_horse_profile(
     horse_id: str,
     *,
@@ -283,6 +386,7 @@ def fetch_horse_profile(
     idx_distance = _find_idx("距離")
     idx_corner = _find_idx("通過")
     idx_last3f = _find_idx("上り")
+    idx_body_weight = _find_idx("馬体重")
 
     # Header decode failure fallback (fixed columns in db_h_race_results)
     if idx_date < 0:
@@ -301,6 +405,8 @@ def fetch_horse_profile(
         idx_corner = 25
     if idx_last3f < 0:
         idx_last3f = 27
+    if idx_body_weight < 0:
+        idx_body_weight = 23 if len(headers) > 23 else -1
 
     race_rows: list[dict[str, Any]] = []
     surface_stats: dict[str, dict[str, int]] = defaultdict(lambda: {"starts": 0, "wins": 0, "top3": 0})
@@ -366,6 +472,7 @@ def fetch_horse_profile(
                 "venue": venue,
                 "corner": _extract_corner_order(texts[idx_corner] if 0 <= idx_corner < len(texts) else ""),
                 "last3f": texts[idx_last3f] if 0 <= idx_last3f < len(texts) else "",
+                "body_weight": _extract_body_weight_kg(texts[idx_body_weight] if 0 <= idx_body_weight < len(texts) else ""),
             }
         )
 
@@ -594,6 +701,122 @@ def _popularity_bucket(popularity: int | None) -> str:
     return "7番人気以下"
 
 
+def _body_weight_bucket(weight: int | None) -> str:
+    if weight is None:
+        return ""
+    if weight < 440:
+        return "~439"
+    if weight < 460:
+        return "440-459"
+    if weight < 480:
+        return "460-479"
+    if weight < 500:
+        return "480-499"
+    if weight < 520:
+        return "500-519"
+    return "520+"
+
+
+def _extract_body_weight_kg(text: str) -> int | None:
+    match = re.search(r"(\d{3})", str(text or ""))
+    if not match:
+        return None
+    try:
+        return int(match.group(1))
+    except ValueError:
+        return None
+
+
+def fetch_race_result_rows(
+    race_id: str,
+    *,
+    session: requests.Session | None = None,
+    race_meta: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    result_url = f"https://db.netkeiba.com/race/{race_id}/"
+    try:
+        html = _request_html(result_url, timeout=14, session=session)
+    except requests.exceptions.RequestException:
+        return []
+    if not html:
+        return []
+    return _parse_result_table_rows(html, race_id=str(race_id), race_meta=race_meta or {})
+
+
+def _parse_result_table_rows(result_html: str, *, race_id: str, race_meta: dict[str, Any]) -> list[dict[str, Any]]:
+    soup = BeautifulSoup(result_html, "html.parser")
+    table = soup.select_one("table.race_table_01")
+    if not table:
+        return []
+
+    rows = table.select("tr")
+    if len(rows) <= 1:
+        return []
+
+    headers = [re.sub(r"\s+", "", th.get_text(" ", strip=True)) for th in rows[0].select("th")]
+
+    def _find_idx(*keywords: str) -> int:
+        for idx, header in enumerate(headers):
+            if any(keyword in header for keyword in keywords):
+                return idx
+        return -1
+
+    idx_finish = _find_idx("着順")
+    idx_frame = _find_idx("枠番")
+    idx_umaban = _find_idx("馬番")
+    idx_popularity = _find_idx("人気")
+    idx_passing = _find_idx("通過")
+    idx_last3f = _find_idx("上り", "上がり")
+    idx_body_weight = _find_idx("馬体重")
+
+    if idx_finish < 0:
+        idx_finish = 0
+    if idx_frame < 0:
+        idx_frame = 1
+    if idx_umaban < 0:
+        idx_umaban = 2
+    if idx_passing < 0:
+        idx_passing = 14 if len(headers) > 14 else -1
+    if idx_last3f < 0:
+        idx_last3f = 15 if len(headers) > 15 else -1
+    if idx_popularity < 0:
+        idx_popularity = 17 if len(headers) > 17 else -1
+    if idx_body_weight < 0:
+        idx_body_weight = 14 if len(headers) > 14 else -1
+    if min(idx_finish, idx_frame, idx_umaban, idx_popularity, idx_passing) < 0:
+        return []
+
+    parsed_rows: list[dict[str, Any]] = []
+    for row in rows[1:]:
+        cells = row.select("td")
+        if not cells:
+            continue
+        texts = [re.sub(r"\s+", " ", td.get_text(" ", strip=True)).strip() for td in cells]
+        if max(idx_finish, idx_frame, idx_umaban, idx_popularity, idx_passing) >= len(texts):
+            continue
+        finish = _safe_int(texts[idx_finish])
+        if finish is None:
+            continue
+        parsed_rows.append(
+            {
+                "race_id": str(race_id),
+                "date": str(race_meta.get("date") or ""),
+                "venue": str(race_meta.get("venue") or ""),
+                "surface": str(race_meta.get("surface") or ""),
+                "distance_m": int(race_meta.get("distance_m") or 0),
+                "race_number": str(race_meta.get("race_number") or ""),
+                "finish_pos": finish,
+                "waku": _safe_int(texts[idx_frame]),
+                "umaban": _safe_int(texts[idx_umaban]),
+                "style": _classify_style_from_passing(texts[idx_passing]),
+                "popularity": _safe_int(texts[idx_popularity]),
+                "last3f": texts[idx_last3f] if 0 <= idx_last3f < len(texts) else "",
+                "body_weight": texts[idx_body_weight] if 0 <= idx_body_weight < len(texts) else "",
+            }
+        )
+    return parsed_rows
+
+
 def _parse_result_table_stats(result_html: str) -> dict[str, Any]:
     soup = BeautifulSoup(result_html, "html.parser")
     table = soup.select_one("table.race_table_01")
@@ -616,6 +839,7 @@ def _parse_result_table_stats(result_html: str) -> dict[str, Any]:
     idx_frame = _find_idx("枠番")
     idx_popularity = _find_idx("人気")
     idx_passing = _find_idx("通過")
+    idx_body_weight = _find_idx("馬体重")
 
     # Header decode fallback (netkeiba race result table)
     if idx_finish < 0:
@@ -626,6 +850,8 @@ def _parse_result_table_stats(result_html: str) -> dict[str, Any]:
         idx_passing = 14 if len(headers) > 14 else -1
     if idx_popularity < 0:
         idx_popularity = 17 if len(headers) > 17 else -1
+    if idx_body_weight < 0:
+        idx_body_weight = 14 if len(headers) > 14 else -1
     if min(idx_finish, idx_frame, idx_popularity, idx_passing) < 0:
         return {}
 
@@ -636,6 +862,9 @@ def _parse_result_table_stats(result_html: str) -> dict[str, Any]:
     style_top3: Counter[str] = Counter()
     pop_total: Counter[str] = Counter()
     pop_top3: Counter[str] = Counter()
+    body_total: Counter[str] = Counter()
+    body_wins: Counter[str] = Counter()
+    body_top3: Counter[str] = Counter()
     winner_style: Counter[str] = Counter()
     rows_parsed = 0
 
@@ -662,6 +891,10 @@ def _parse_result_table_stats(result_html: str) -> dict[str, Any]:
             style_total[style] += 1
         if pop_bucket:
             pop_total[pop_bucket] += 1
+        if 0 <= idx_body_weight < len(texts):
+            body_bucket = _body_weight_bucket(_extract_body_weight_kg(texts[idx_body_weight]))
+            if body_bucket:
+                body_total[body_bucket] += 1
 
         if finish <= 3:
             if frame:
@@ -670,11 +903,19 @@ def _parse_result_table_stats(result_html: str) -> dict[str, Any]:
                 style_top3[style] += 1
             if pop_bucket:
                 pop_top3[pop_bucket] += 1
+            if 0 <= idx_body_weight < len(texts):
+                body_bucket = _body_weight_bucket(_extract_body_weight_kg(texts[idx_body_weight]))
+                if body_bucket:
+                    body_top3[body_bucket] += 1
 
         if finish == 1 and style:
             winner_style[style] += 1
         if finish == 1 and frame:
             frame_wins[frame] += 1
+        if finish == 1 and 0 <= idx_body_weight < len(texts):
+            body_bucket = _body_weight_bucket(_extract_body_weight_kg(texts[idx_body_weight]))
+            if body_bucket:
+                body_wins[body_bucket] += 1
 
     if rows_parsed < 8:
         return {}
@@ -687,6 +928,9 @@ def _parse_result_table_stats(result_html: str) -> dict[str, Any]:
         "style_top3": style_top3,
         "pop_total": pop_total,
         "pop_top3": pop_top3,
+        "body_total": body_total,
+        "body_wins": body_wins,
+        "body_top3": body_top3,
         "winner_style": winner_style,
     }
 
@@ -735,6 +979,9 @@ def fetch_course_stats(
     style_top3: Counter[str] = Counter()
     pop_total: Counter[str] = Counter()
     pop_top3: Counter[str] = Counter()
+    body_total: Counter[str] = Counter()
+    body_wins: Counter[str] = Counter()
+    body_top3: Counter[str] = Counter()
     winner_style: Counter[str] = Counter()
     used_race_ids: list[str] = []
 
@@ -759,6 +1006,9 @@ def fetch_course_stats(
         style_top3.update(parsed["style_top3"])
         pop_total.update(parsed["pop_total"])
         pop_top3.update(parsed["pop_top3"])
+        body_total.update(parsed.get("body_total", Counter()))
+        body_wins.update(parsed.get("body_wins", Counter()))
+        body_top3.update(parsed.get("body_top3", Counter()))
         winner_style.update(parsed["winner_style"])
         used_race_ids.append(race_id)
         time.sleep(0.15)
@@ -804,6 +1054,25 @@ def fetch_course_stats(
         top = int(pop_top3.get(bucket, 0))
         popularity_rows.append({"label": bucket, "starts": total, "top3": top, "top3_rate": _rate(top, total)})
 
+    body_rows = []
+    for bucket in _BODY_WEIGHT_BUCKETS:
+        total = int(body_total.get(bucket, 0))
+        if total <= 0:
+            continue
+        top = int(body_top3.get(bucket, 0))
+        wins = int(body_wins.get(bucket, 0))
+        other = max(total - top, 0)
+        body_rows.append({
+            "label": bucket,
+            "starts": total,
+            "wins": wins,
+            "top3": top,
+            "outside_top3": other,
+            "win_rate": _rate(wins, total),
+            "top3_rate": _rate(top, total),
+            "outside_top3_rate": _rate(other, total),
+        })
+
     winner_front = int(winner_style.get("逃げ", 0) + winner_style.get("先行", 0))
     winner_close = int(winner_style.get("差し", 0) + winner_style.get("追込", 0))
     if winner_front >= winner_close * 1.2:
@@ -825,6 +1094,7 @@ def fetch_course_stats(
         "frame_stats": frame_rows,
         "style_stats": style_rows,
         "popularity_stats": popularity_rows,
+        "body_weight_stats": body_rows,
         "winner_style_counts": {k: int(v) for k, v in winner_style.items()},
         "pace_tendency": pace_tendency,
     }

@@ -196,6 +196,13 @@ def fetch_race_metadata(race_id: str) -> dict[str, Any]:
     for surface, condition in re.findall(r"(芝|ダート|ダ|障害|障)\s*[:：]\s*([^\s/]+)", normalized):
         key = "ダート" if surface == "ダ" else ("障害" if surface == "障" else surface)
         track_conditions[key] = condition
+    if not track_conditions:
+        generic_condition = re.search(r"馬場\s*[:：]\s*([^\s/]+)", normalized)
+        if generic_condition:
+            if "芝" in normalized:
+                track_conditions["芝"] = generic_condition.group(1)
+            elif "ダート" in normalized or "ダ" in normalized:
+                track_conditions["ダート"] = generic_condition.group(1)
 
     return {
         "start_time": start_time,

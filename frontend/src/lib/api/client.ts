@@ -129,8 +129,16 @@ export function getSameDaySheet(
   return fetchJson<SameDaySheetResponse>(`/api/v1/races/same-day-sheet?${params.toString()}`);
 }
 
-export function getRaceEntry(raceId: string): Promise<RaceEntryResponse> {
-  return fetchJson<RaceEntryResponse>(`/api/v1/races/${raceId}/entry`);
+export function getRaceEntry(
+  raceId: string,
+  context?: { venue?: string; distance?: string; surface?: string },
+): Promise<RaceEntryResponse> {
+  const params = new URLSearchParams();
+  if (context?.venue) params.set("venue", context.venue);
+  if (context?.distance) params.set("distance", context.distance);
+  if (context?.surface) params.set("surface", context.surface);
+  const suffix = params.toString() ? `?${params.toString()}` : "";
+  return fetchJson<RaceEntryResponse>(`/api/v1/races/${raceId}/entry${suffix}`);
 }
 
 export function getRaceCourseStats(

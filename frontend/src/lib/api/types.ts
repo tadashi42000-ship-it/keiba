@@ -61,13 +61,23 @@ export type RecentRunDetail = {
   venue?: string;
   finish: string;
   race_name: string;
+  jockey?: string;
   course: string;
+  distance_m?: number | null;
+  surface?: string;
+  going?: string;
+  carried_weight?: number | null;
   race_time: string;
   margin: string;
   time_index: number | null;
   race_level: string;
   race_eval?: string;
+  body_weight?: number | null;
   last3f: string;
+  race_time_grade?: string;
+  race_time_grade_detail?: Record<string, unknown>;
+  last3f_grade?: string;
+  last3f_grade_detail?: Record<string, unknown>;
   corner: string;
   field_size: string;
 };
@@ -87,6 +97,9 @@ export type EntryHorse = {
   weight: string;
   body_weight: string;
   body_delta: string;
+  body_weight_bucket?: string;
+  body_weight_source?: "current" | "previous" | "";
+  body_weight_top3_rate?: number | null;
   jockey: string;
   style: string;
   odds: number | null;
@@ -95,6 +108,18 @@ export type EntryHorse = {
   corners: string[];
   field_sizes: string[];
   recent_run_details?: RecentRunDetail[];
+  sire_name?: string;
+  sire_data_available?: boolean;
+  sire_aptitude_marks?: Record<string, string>;
+  sire_aptitude_summary?: string;
+  sire_aptitude_score?: number;
+  sire_aptitude_max_score?: number;
+  sire_aptitude_notes?: string;
+  broodmare_sire_name?: string;
+  broodmare_sire_data_available?: boolean;
+  broodmare_sire_aptitude_summary?: string;
+  broodmare_sire_aptitude_score?: number;
+  broodmare_sire_aptitude_max_score?: number;
 };
 
 export type RaceEntryResponse = {
@@ -128,6 +153,7 @@ export type RaceCourseStatsResponse = {
   frame_stats: Array<Record<string, unknown>>;
   style_stats: Array<Record<string, unknown>>;
   popularity_stats: Array<Record<string, unknown>>;
+  body_weight_stats?: Array<Record<string, unknown>>;
   pace_tendency: string;
   frame_markdown: string;
   summary: CourseStatsSummary;
@@ -140,6 +166,8 @@ export type BetRankingItem = {
   odds: number | null;
   style: string;
   score: number;
+  baseline_score?: number | null;
+  bias_bonus?: number;
   reason: string;
 };
 
@@ -160,11 +188,21 @@ export type BetPlanResponse = {
   warnings: string[];
 };
 
+export type TrackBias = {
+  frame_bias: Record<string, number>;
+  style_bias: Record<string, number>;
+  sample_size: number;
+  fallback_used: boolean;
+  summary_label: string;
+  confidence: "high" | "medium" | "low";
+};
+
 export type SameDaySheetRace = {
   race: UpcomingRace;
   entry: RaceEntryResponse | null;
   course_stats: RaceCourseStatsResponse | null;
   bet_plan: BetPlanResponse | null;
+  track_bias?: TrackBias | null;
   error: string;
 };
 
@@ -173,6 +211,7 @@ export type SameDaySheetResponse = {
   date: string;
   venue: string;
   race_count: number;
+  track_bias_schema_version?: string;
   races: SameDaySheetRace[];
 };
 

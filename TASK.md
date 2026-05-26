@@ -6,6 +6,7 @@
 - Current phase: 当日モード実用化完了直後 / 重賞モードは legacy Streamlit で継続利用
 - Recent updates:
   - 5/3東京現地利用向けのNext.js/PWA当日モードを整備済み。全Rシート、詳細キャッシュ、単勝オッズ同期、AI共有Markdown、近3走の走破タイム/指数/レースレベル/開催場所を確認済み
+  - 近3走の走破/上がり評価フィールド追加後は既存 `same_day_sheet` キャッシュが自動無効化される。初回再生成は重いため、現地利用前の前日夜または当日朝に手動 refresh 推奨
   - PCで重賞モードを使う場合は `legacy/streamlit_app` のStreamlit版を起動する。Next.js/PWA版は現時点では当日モード中心
   - 次回作業前に未コミット変更を確認し、必要なら `git add . && git commit -m "backup same-day mobile updates"` で退避する
   - 品質向上フェーズ完了: T-LS-06〜T-LS-10（Gemini 404/YouTube自動解析/買い目スコア統合/Web多様化/E2E）すべて Done
@@ -1083,3 +1084,126 @@
   - P2: 共有URLはquick tunnelの一時URLなので、出発前に再起動・再共有する運用チェックを忘れない。
 - 次回着手:
   - 当日朝にスマホ2台で最新URLへアクセスし、`全R詳細をこの端末に保存` と `オッズ・馬体重公開後に全Rを軽量更新` を確認する。
+
+### 2026-05-20 / Session-MOBILE-SD-025
+- 実施内容:
+  - `summary-3-dazzling-waterfall.md` の計画を検証し、実装上の不安点を同ファイル末尾に追記。
+  - 当日モードに馬体重バケット（~439 / 440-459 / 460-479 / 480-499 / 500-519 / 520+）を追加。
+  - netkeiba結果表から馬体重別成績を集計し、`course_stats.body_weight_stats` としてAPI/特徴タブに表示。
+  - 当日馬体重が空の場合、`db.netkeiba.com/horse/result/{horse_id}/` の前走馬体重をフォールバックに使う経路を追加。
+  - 候補馬ランキングに馬体重バケットの小幅補正を追加し、reasonへ `馬体重480-499複27%↑` のような文言を反映。
+  - R詳細に端末ローカルの印メモ（◎/〇/△/消/×）を追加。印順ソートと「消した馬を非表示」トグルを追加。
+  - AI共有用Markdownに、印が1頭以上ある場合のみ `印` 列を追加。
+  - 全RシートのRankingRowにも印バッジを反映するため、localStorage印メモのmulti-read hookを追加。
+- 結果:
+  - NHKマイル詳細ページで馬体重帯と同条件複勝率が表示されることを確認。
+  - `◎` を付けると localStorage `keiba:same-day:horse-marks:{race_id}` に保存され、AI共有Markdownに `| 印 |` と `| ◎ |` が出ることを確認。
+  - 390px幅で特徴タブの馬体重別成績表示に横スクロールが出ないことを確認。
+- Verification:
+  - Backend: `cd backend; python -m pytest tests -q` passed（50/50、既存のpandas FutureWarning 1件）。
+  - Frontend: `cd frontend; npm run lint` passed。
+  - Frontend: `cd frontend; npm run build` passed。
+  - Playwright: `http://127.0.0.1:3000/races/...NHKマイル_11R` で `馬体重帯` / `同条件 複勝率` / 印localStorage / Markdown印列を確認。
+- 発生課題:
+  - キャッシュ形状判定を更新したため、旧形式の全Rシートキャッシュは初回に再生成対象になる。5/24運用前は全Rシートを事前生成しておくこと。
+  - Playwright初回に `/same-day-sheet` が旧キャッシュ再生成でタイムアウト/一時500を返したが、backend直接APIは200、再生成後のNext APIも200を確認。
+  - 印メモは端末ローカル仕様。2人で同じURLを開いても印は同期されない。
+- 次回着手:
+  - Claude Codeで5/24東京5R以降をスマホ幅Playwright検証し、馬体重別成績・印保存・印順ソート・消フィルタ・Markdown印列・全R一覧バッジ反映を重点確認する。
+
+### 2026-05-20 / Session-MOBILE-SD-026
+- 実施内容:
+  - 馬体重別成績で500kg以上のbucketが見えにくい問題を修正。
+  - `500-519` / `520+` は従来通り保持しつつ、UI表示を `500-519kg` / `520kg以上` に変更。
+  - 馬体重別成績は `starts > 0` なら表示し、サンプル不足でも500kg以上の行が消えないように変更。
+  - スコア反映は従来どおり `starts >= 6` の安全条件を維持し、少サンプルは表示のみとした。
+- 結果:
+  - 520kg以上の馬も `馬体重帯 520kg以上` として表示される。
+  - 特徴タブの馬体重別成績にも500kg以上bucketがサンプル1件以上あれば表示される。
+- Verification:
+  - Backend: `cd backend; python -m pytest tests -q` passed（51/51）。
+  - Frontend: `cd frontend; npm run lint` passed。
+  - Frontend: `cd frontend; npm run build` passed。
+- 次回着手:
+  - Claude Code検証では、500kg台/520kg以上の出走馬がいるレースで特徴タブとHorseCard表示を確認する。
+
+### 2026-05-20 / Session-MOBILE-SD-027
+- 実施内容:
+  - 馬体重bucket表示を定義どおり `~439kg` / `500-519kg` / `520+kg` に戻した。
+  - 500kg以上bucketを表示対象に残す修正は維持。
+- Verification:
+  - Frontend: `cd frontend; npm run lint` passed。
+
+### 2026-05-22 / Session-MOBILE-SD-028
+- 実施内容:
+  - 5/24東京現地利用向けに当日モードの3機能を追加。
+  - Feature 1: R詳細ヘッダーに発走時刻カウントダウンを追加。`dateIso + startTime + +09:00` 固定でJST計算し、残り時間に応じて emerald/amber/orange/rose/slate 表示。
+  - Feature 3: AI共有用Markdownパネルに `Claudeで質問` / `Geminiで質問` / `ChatGPTで質問` を追加。クリック時にMarkdownコピーを開始し、同一ユーザー操作内でAIサービスを新規タブ表示。
+  - Feature 2: 払戻シミュレータ段階1を追加。`投票` タブを追加し、印メモの◎〇△を初期選択、消は除外。単勝は取得済み単勝オッズで計算、複勝以降は想定オッズ入力による概算。
+  - `frontend/src/lib/bet-calculator.ts` に組合せ/順列/点数/払戻概算の純粋関数を追加。
+- 結果:
+  - Feature 1/3は5/24本番投入対象として実装完了。
+  - Feature 2は段階1のみ実装。馬連/3連複/3連単などの実オッズ取得（段階2）は今回スコープ外のまま。
+- Verification:
+  - Frontend: `cd frontend; npm run lint` passed。
+  - Frontend: `cd frontend; npm run build` passed。
+  - Backend: `cd backend; python -m pytest tests -q` passed（51/51、既存pandas FutureWarning 1件）。
+- 発生課題:
+  - Playwrightで5/24全Rシートへ直接アクセスしたところ、初回キャッシュ生成に入り60秒ナビゲーション上限に到達。機能不具合ではなく、5/24全Rキャッシュ未生成時の既存コストと判断。
+  - Claude Code検証前に5/24東京の全Rシートを事前生成してから、R詳細画面でカウントダウン/AIボタン/投票タブを検証すること。
+- Claude Code検証ポイント:
+  - R詳細ヘッダーで `発走 HH:MM` と `残り X分/秒` または `発走済み` が出ること。
+  - 残り時間の色が >10分 emerald、5-10分 amber、1-5分 orange、60秒以内 rose pulse、発走後 slate になること。
+  - AI共有用Markdownパネルで3つのAIボタンが表示され、クリック後に新規タブが開き、コピー成功/失敗メッセージが出ること。
+  - 390px幅でタブ5個（出馬表/特徴/買い目/投票/外部情報）が横スクロールなく押せること。
+  - 投票タブで◎〇△が初期選択され、消の馬が候補に出ないこと。
+  - 単勝は実オッズ、複勝以降は「想定オッズ」「概算」明記で計算されること。
+- 次回着手:
+  - 5/24当日は事前に `scripts/start_mobile_pwa.ps1 -Date 2026-05-24 -Venue 東京` で起動し、全Rキャッシュ生成後にスマホURLを共有する。
+
+### 2026-05-22 / Session-MOBILE-SD-029
+- 実施内容:
+  - 5/24東京競馬場の当日モード用に全12Rシートキャッシュを事前生成。
+  - `build_same_day_sheet_snapshot(date(2026, 5, 24), "東京")` を直接実行し、PWAが読むJSONキャッシュを保存。
+  - PWA/APIのHTTP応答を確認。
+- 結果:
+  - `data/same_day_sheets/2026-05-24_tokyo_same_day_sheet.json` と `2026-05-24_東京_same_day_sheet.json` を生成。
+  - 全12R取得成功。全Rで出馬表・近走詳細・コース特徴・馬体重別成績・候補ランキングあり。
+  - 11Rオークスのみ単勝オッズ18頭分を取得済み。その他Rの単勝オッズは現時点未取得。
+  - 馬体重は現時点未公開のため全R 0頭。これは当日軽量更新で取得する運用。
+- Verification:
+  - Local PWA: `http://127.0.0.1:3000/same-day-sheet?date=2026-05-24&venue=東京` returned 200。
+  - Backend API: `/api/v1/races/same-day-sheet?date=2026-05-24&venue=東京&budget_yen=3000` returned 200。
+  - Cache direct check: `race_count=12`, `1R-12R`, `body_weight_stats` 各R 6行、11Rオークス単勝18頭。
+- 発生課題:
+  - Playwright MCPのブラウザコンテキストが閉じた状態で復帰できず、画面操作検証は未実施。Claude Code側で新規Playwrightセッションから検証する。
+- 次回着手:
+  - 当日はPC起動後に `scripts/start_mobile_pwa.ps1 -Date 2026-05-24 -Venue 東京 -SkipBuild` を実行し、スマホURLを共有。
+  - 馬体重/直前オッズ公開後に全R一覧の `オッズ・馬体重公開後に全Rを軽量更新` を押す。
+
+### 2026-05-23 / Session-MOBILE-SD-030
+- 実施内容:
+  - 当日モードの特徴タブに「血統適性ランキング」を追加。
+  - `legacy/streamlit_app/same_day_sources.py` に `fetch_horse_sire()` を追加し、父名は `db.netkeiba.com/horse/{horse_id}/` の血統テーブルから取得するようにした。
+  - `data/horse_sires_cache.json` を永続キャッシュとして追加し、`get_horse_sire(refresh=False)` ではキャッシュがあればnetkeibaへ再アクセスしない構成にした。
+  - `backend/app/services/sire_aptitude.py` と `backend/app/data/sire_aptitude.json` を追加し、芝/ダート・距離・コース形態・道悪の関連軸だけで ◎/○/△/× 評価する純粋関数を実装。
+  - `same_day_sheet` の有効判定に `sire_name` / `sire_aptitude_summary` を追加し、旧キャッシュは自動再生成対象にした。
+  - `/api/v1/races/{race_id}/entry` は任意の `venue/distance/surface` クエリを受け取り、R詳細直接表示でも血統評価軸が欠けにくいようにした。
+  - `scripts/generate_sire_aptitude.py` を追加し、Geminiで血統DBを小分けバッチ生成/1頭追加できる運用導線を用意。
+- 結果:
+  - 事前スナップショット生成時に父名と血統評価が `entry.horses[]` に保存され、当日refreshでは父名再取得を走らせない構成になった。
+  - 特徴タブではコース特徴サマリー直下に血統適性ランキングを表示し、未登録種牡馬は脚注表示・ランキング除外。
+- Verification:
+  - Backend: `cd backend; python -m pytest tests -q` passed（54/54、既存pandas FutureWarning 1件）。
+  - Frontend: `cd frontend; npm run lint` passed。
+  - Frontend: `cd frontend; npm run build` passed。
+- 発生課題:
+  - `backend/app/data/sire_aptitude.json` は初期seedであり、主要種牡馬の手動レビューは未実施。
+  - 既存の5/24東京 `same_day_sheet` は血統フィールド追加により再生成対象。5/24運用前に全Rキャッシュを再生成すること。
+- Claude Code検証ポイント:
+  - 5/24東京の全Rシート再生成後、特徴タブに「血統適性ランキング」が表示されること。
+  - 良馬場では「道悪」チップが出ず、稍重/重/不良では「道悪」チップが出ること。
+  - 未登録種牡馬が脚注に表示され、ランキングから除外されること。
+  - 390px幅で血統ランキングの父名・軸チップが横スクロールしないこと。
+- 次回着手:
+  - Claude CodeでPlaywright検証後、必要なら `python scripts/generate_sire_aptitude.py --add "種牡馬名"` で未登録種牡馬を追加し、バックエンド再起動後に5/24東京キャッシュを再生成する。
