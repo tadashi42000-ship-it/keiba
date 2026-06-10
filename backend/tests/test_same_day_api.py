@@ -196,6 +196,78 @@ def test_same_day_sheet_endpoint(monkeypatch) -> None:
     assert data["races"][0]["bet_plan"]["provisional_only"] is False
 
 
+def test_same_day_sheet_volatile_refresh_endpoint(monkeypatch) -> None:
+    race = {
+        "race_name": "3????",
+        "grade": "??",
+        "date_str": "2026/04/26(?)",
+        "date_iso": "2026-04-26",
+        "venue": "??",
+        "distance": "2400m",
+        "surface": "?",
+        "race_id": "202605020204",
+        "race_key": "2026-04-26_??_3????_4R",
+        "race_number": "4R",
+    }
+    captured = {}
+
+    def fake_refresh(target_date, venue, budget_yen=3000, race_id=None, race_number=None):
+        captured.update(
+            {
+                "target_date": target_date.isoformat(),
+                "venue": venue,
+                "budget_yen": budget_yen,
+                "race_id": race_id,
+                "race_number": race_number,
+            }
+        )
+        return {
+            "generated_at": "2026-04-26T01:31:00",
+            "date": target_date.isoformat(),
+            "venue": venue,
+            "race_count": 1,
+            "races": [
+                {
+                    "race": race,
+                    "entry": {
+                        "race_id": "202605020204",
+                        "source_csv": "race.csv",
+                        "odds_updated_at": "14:01",
+                        "horses": [{"horse_name": "A", "umaban": "1", "odds": 3.2}],
+                        "style_distribution": {},
+                        "style_distribution_label": "",
+                        "warnings": [],
+                    },
+                    "course_stats": None,
+                    "bet_plan": {
+                        "race_id": "202605020204",
+                        "budget_yen": budget_yen,
+                        "provisional_only": False,
+                        "ranking": [],
+                        "tickets": [],
+                        "warnings": [],
+                    },
+                    "track_bias": None,
+                    "error": "",
+                }
+            ],
+        }
+
+    monkeypatch.setattr(races_api, "refresh_same_day_sheet_volatile", fake_refresh)
+
+    response = client.post(
+        "/api/v1/races/same-day-sheet/refresh-volatile",
+        params={"date": "2026-04-26", "venue": "??", "race_id": "202605020204", "race_number": "4R"},
+        json={},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["generated_at"] == "2026-04-26T01:31:00"
+    assert data["races"][0]["entry"]["odds_updated_at"] == "14:01"
+    assert captured["race_id"] == "202605020204"
+    assert captured["race_number"] == "4R"
+
+
 def test_extract_netkeiba_api_odds_maps_horse_names() -> None:
     payload = {
         "status": "OK",

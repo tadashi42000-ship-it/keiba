@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 
+from app.clients import ExternalApiError
 from app.schemas.races import (
     BetPlanRequest,
     BetPlanResponse,
@@ -12,12 +13,18 @@ from app.schemas.races import (
     RaceCharacteristicsResponse,
     RaceCourseStatsResponse,
     RaceEntryResponse,
+    ResearchNotesBackup,
+    ResearchNotesBackupResponse,
+    ResearchParsed,
+    ResearchParseRequest,
     SameDayRacesResponse,
     SameDaySheetResponse,
     ResolveRaceIdResponse,
     UpcomingRace,
     UpcomingRacesResponse,
 )
+from app.services.research_notes_store import load_research_notes_backup, save_research_notes_backup
+from app.services import research_parser
 from app.services.race_service import (
     fetch_odds_for_race,
     fetch_race_csv_file,
@@ -33,6 +40,7 @@ from app.services.same_day_service import (
     get_course_stats_snapshot,
     get_entry_snapshot,
     get_same_day_races,
+    refresh_same_day_sheet_volatile,
 )
 
 from datetime import date as Date
@@ -75,6 +83,24 @@ def api_same_day_sheet(
         venue=venue,
         budget_yen=budget_yen,
         refresh=refresh,
+    )
+    return SameDaySheetResponse(**result)
+
+
+@router.post("/same-day-sheet/refresh-volatile", response_model=SameDaySheetResponse)
+def api_same_day_sheet_refresh_volatile(
+    target_date: Date = Query(..., alias="date"),
+    venue: str = Query(...),
+    budget_yen: int = Query(default=3000, ge=100, le=100000),
+    race_id: str | None = Query(default=None),
+    race_number: str | None = Query(default=None),
+) -> SameDaySheetResponse:
+    result = refresh_same_day_sheet_volatile(
+        target_date=target_date,
+        venue=venue,
+        budget_yen=budget_yen,
+        race_id=race_id,
+        race_number=race_number,
     )
     return SameDaySheetResponse(**result)
 
@@ -140,6 +166,32 @@ def api_race_course_stats(
 def api_race_bet_plan(race_id: str, payload: BetPlanRequest) -> BetPlanResponse:
     result = build_bet_plan_snapshot(race_id=race_id, budget_yen=payload.budget_yen)
     return BetPlanResponse(**result)
+
+
+@router.post("/{race_id}/research/parse", response_model=ResearchParsed)
+def api_parse_research_report(race_id: str, payload: ResearchParseRequest) -> ResearchParsed:
+    if not payload.raw_text or len(payload.raw_text.strip()) < 10:
+        raise HTTPException(status_code=422, detail="raw_text が短すぎます")
+    try:
+        return research_parser.parse_research_report(payload.raw_text, payload.entry_horses)
+    except ExternalApiError as exc:
+        status_code = 503 if exc.code == "not_configured" else 502
+        raise HTTPException(status_code=status_code, detail=f"{exc.provider}:{exc.code}: {exc}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/{race_id}/research/notes", response_model=ResearchNotesBackupResponse)
+def api_get_research_notes_backup(race_id: str) -> ResearchNotesBackupResponse:
+    return load_research_notes_backup(race_id)
+
+
+@router.put("/{race_id}/research/notes", response_model=ResearchNotesBackupResponse)
+def api_put_research_notes_backup(race_id: str, payload: ResearchNotesBackup) -> ResearchNotesBackupResponse:
+    try:
+        return save_research_notes_backup(race_id, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get("/characteristics", response_model=RaceCharacteristicsResponse)

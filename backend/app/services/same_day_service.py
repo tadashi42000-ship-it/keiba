@@ -339,6 +339,98 @@ def _refresh_same_day_sheet_odds(snapshot: dict[str, Any], budget_yen: int = 300
     return updated_snapshot
 
 
+def refresh_same_day_sheet_volatile(
+    target_date: date,
+    venue: str,
+    budget_yen: int = 3000,
+    race_id: str | None = None,
+    race_number: str | None = None,
+) -> dict[str, Any]:
+    """Refresh only volatile fields in the existing same-day sheet cache.
+
+    This path is intentionally narrower than ``refresh=true``. It avoids result-pool
+    collection, metadata refresh, sire re-evaluation, and static data rebuilds so a
+    home PC can update cache frequently while field phones keep reading cache fast.
+    """
+    cached = _load_same_day_sheet_cache(target_date, venue)
+    if not cached or not _same_day_sheet_has_recent_run_details(cached):
+        cached = build_same_day_sheet_snapshot(target_date=target_date, venue=venue, budget_yen=budget_yen, refresh=False)
+
+    updated_snapshot = dict(cached)
+    races: list[dict[str, Any]] = []
+    updated_count = 0
+    requested_race_id = _to_text(race_id)
+    requested_race_number = _to_text(race_number)
+
+    for item in cached.get("races", []):
+        if not isinstance(item, dict):
+            continue
+        updated_item = dict(item)
+        race = updated_item.get("race") if isinstance(updated_item.get("race"), dict) else {}
+        current_race_id = _to_text(race.get("race_id"))
+        current_race_number = _to_text(race.get("race_number"))
+        should_update = (
+            (not requested_race_id and not requested_race_number)
+            or (requested_race_id and current_race_id == requested_race_id)
+            or (requested_race_number and current_race_number == requested_race_number)
+        )
+        if not should_update:
+            races.append(updated_item)
+            continue
+
+        entry = updated_item.get("entry") if isinstance(updated_item.get("entry"), dict) else None
+        if current_race_id and entry:
+            horses = entry.get("horses") if isinstance(entry.get("horses"), list) else []
+            changed = False
+
+            body_map, body_note = _fetch_body_weight_map(current_race_id)
+            if body_map and horses:
+                _merge_body_weight_into_horses(horses, body_map, overwrite=True)
+                entry["body_updated_at"] = _now_time_label()
+                changed = True
+            elif body_note:
+                warnings = list(entry.get("warnings") or [])
+                if body_note not in warnings:
+                    warnings.append(body_note)
+                entry["warnings"] = warnings
+
+            odds_map, odds_note = _fetch_win_odds_map(current_race_id)
+            if odds_map:
+                _merge_odds_into_horses(horses, odds_map, overwrite=True)
+                entry["odds_updated_at"] = _now_time_label()
+                entry["warnings"] = [
+                    warning
+                    for warning in entry.get("warnings", [])
+                    if "蜊伜享繧ｪ繝・ぜ" not in _to_text(warning) and "odds" not in _to_text(warning).lower()
+                ]
+                changed = True
+            elif odds_note:
+                warnings = list(entry.get("warnings") or [])
+                if odds_note not in warnings:
+                    warnings.append(odds_note)
+                entry["warnings"] = warnings
+
+            if changed:
+                course_stats = updated_item.get("course_stats") if isinstance(updated_item.get("course_stats"), dict) else None
+                _apply_body_weight_stats_to_horses(horses, course_stats)
+                track_bias = updated_item.get("track_bias") if isinstance(updated_item.get("track_bias"), dict) else None
+                updated_item["bet_plan"] = _build_bet_plan_from_entry(
+                    entry,
+                    budget_yen=budget_yen,
+                    course_stats=course_stats,
+                    track_bias=track_bias,
+                )
+                updated_count += 1
+        races.append(updated_item)
+
+    updated_snapshot["races"] = races
+    updated_snapshot["track_bias_schema_version"] = TRACK_BIAS_SCHEMA_VERSION
+    updated_snapshot["generated_at"] = datetime.now().isoformat(timespec="seconds")
+    updated_snapshot["volatile_updated_count"] = updated_count
+    _save_same_day_sheet_cache(updated_snapshot)
+    return updated_snapshot
+
+
 def _fetch_race_metadata_for_refresh(race_id: str) -> dict[str, Any]:
     try:
         metadata = legacy_fetch_race_metadata(race_id) or {}

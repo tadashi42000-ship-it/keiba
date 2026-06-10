@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated_at": "2026-05-24",
+  "updated_at": "2026-05-30",
   "sires": {
     "キタサンブラック": {
       "surfaces": {
@@ -4012,6 +4012,1959 @@
         "soft": "○"
       },
       "notes": "芝のスプリント〜マイルでのスピードと先行力。"
+    },
+    "American Pharoah (米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "米国三冠馬。ダートの広いコースでの持続力とスピードに優れる。"
+    },
+    "Beau Liam": {
+      "surfaces": {
+        "turf": "×",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "米国ダート短距離〜マイルのスピード特化型。"
+    },
+    "Gun Runner (米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "米国ダート中距離の圧倒的なスピードと先行力。"
+    },
+    "Kingman (英)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "欧州最強マイラーの一頭。極上の瞬発力とスピード。"
+    },
+    "Le Havre": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "仏ダービー馬。欧州のタフな芝中長距離向き。"
+    },
+    "Nathaniel (愛)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "エネイブルの父。タフな馬場や道悪に強い欧州芝中長距離血統。"
+    },
+    "Omaha Beach (米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ウォーフロント系ながらダート短距離〜マイルで活躍するスピード型。"
+    },
+    "Practical Joke (米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "イントゥミスチーフ系。ダート短距離の豊かなスピード。"
+    },
+    "Saxon Warrior (安平町)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "○"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "ディープインパクト直子。欧州マイル〜中距離の王道適性。"
+    },
+    "アニマルキングダム Animal Kingdom(米)": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "○"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "芝・ダートを問わず中距離で長くいい脚を使う。"
+    },
+    "アポロケンタッキー": {
+      "surfaces": {
+        "turf": "×",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "◎"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "超大型馬でダート中長距離の圧倒的パワーとタフネス。"
+    },
+    "エポカドーロ": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "○"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "◎"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "オルフェーヴル産駒。先行力と機動力に優れ、皐月賞など小回りに強い。"
+    },
+    "ガルボ": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "マンハッタンカフェ産駒ながら芝短距離〜マイルの重賞で息長く活躍。"
+    },
+    "コントレイル": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "△"
+      },
+      "notes": "無敗の三冠馬。ディープ系最高峰の飛びの大きさと瞬発力。"
+    },
+    "ゴールドアクター": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "◎"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "グラスワンダー系。中山など小回りの芝長距離での機動力とスタミナ。"
+    },
+    "シャンハイボビー Shanghai Bobby(米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "米国ダート短距離の仕上がりの早さとスピード。"
+    },
+    "ストロングリターン": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "シンボリクリスエス系。東京マイルなど大箱での持続力勝負。"
+    },
+    "ディーマジェスティ": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "ディープ産駒。ブライアンズタイムの血を引き、力強さと末脚を兼備。"
+    },
+    "トビーズコーナー Toby's Corner(米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ダート中距離のパワー型。地方や時計のかかる馬場に向く。"
+    },
+    "パレスマリス": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "カーリン系だが日本の芝マイル〜中距離への適性が非常に高い。"
+    },
+    "フィレンツェファイア": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "米国ダート短距離のスピード特化。"
+    },
+    "マクフィ Makfi(英)": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "欧州マイラーだが、日本ではダートのマイル前後での活躍が目立つ。"
+    },
+    "ミスターメロディ": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "芝・ダート兼用の短距離スピード。左回りのスプリント戦に実績。"
+    },
+    "ミッキーロケット": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "キンカメ系。タフな馬場や時計のかかる芝中長距離で底力を発揮。"
+    },
+    "リオンリオン": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "ルーラーシップ産駒。青葉賞を逃げ切った豊富なスタミナと持続力。"
+    },
+    "レッドファルクス": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "芝ダート兼用のスプリンター。強烈な末脚が武器。"
+    },
+    "ワールドエース": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "△"
+      },
+      "notes": "ディープ産駒。大箱の芝マイル〜中距離で鋭い瞬発力。"
+    },
+    "ワールドプレミア": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "×",
+        "intermediate": "○",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "ディープ産駒のステイヤー。長距離でのスタミナと折り合いの良さ。"
+    },
+    "Action This Day": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "クリスエス系。米国ダートのマイル前後での持続力。"
+    },
+    "Alamosa": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "NZ血統。芝マイルのスピード。"
+    },
+    "Bellamy Road": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ダート中距離の圧倒的スピードと持続力。"
+    },
+    "Candy Ride": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "◎"
+      },
+      "notes": "アルゼンチン出身のダート中距離スピード血統。芝適性も秘める。"
+    },
+    "Champs Elysees": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "デインヒル系だが欧州中長距離のスタミナとタフさを持つ。"
+    },
+    "Elusive Quality": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "◎"
+      },
+      "notes": "ゴーンウェスト系。ダート及び芝の短距離〜マイルのスピード。"
+    },
+    "Equal Stripes": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "○"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "南米血統。芝ダート問わず中距離でのタフネスと機動力。"
+    },
+    "Frosted (米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "タピット系。ダートマイルを中心とした前向きなスピード。"
+    },
+    "Galileo (愛)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "欧州最強種牡馬。底なしのスタミナとタフな馬場でのパワー。"
+    },
+    "Giant's Causeway (米)": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "アイアンホース。芝ダート兼用のパワーと圧倒的な勝負根性。"
+    },
+    "Going Commando": {
+      "surfaces": {
+        "turf": "×",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "米国産。ダートのマイル前後でのパワー。"
+    },
+    "Haynesfield": {
+      "surfaces": {
+        "turf": "×",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ダートマイル〜中距離での持続力。"
+    },
+    "Henrythenavigator (米)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "キングマンボ系。芝マイルのスピードと良馬場適性。"
+    },
+    "Holy Roman Emperor": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "デインヒル系。芝短距離〜マイルの機動力と早熟スピード。"
+    },
+    "Include": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ダート中距離で長くいい脚を使う血統。"
+    },
+    "Mizzen Mast": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "カロ系。芝マイル〜中距離のスピードとダートへの対応力。"
+    },
+    "Motivator": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "トレヴの父。欧州芝中長距離の極めてタフなスタミナ。"
+    },
+    "Platini (独)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ドイツ血統。重い芝や長距離戦での圧倒的な底力。"
+    },
+    "Pure Prize": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ストームキャット系。ダートマイルのパワー。"
+    },
+    "Ready's Image": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "△",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "モアザンレディ系。ダート短距離のスピード。"
+    },
+    "Red Ransom": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "ロベルト系。芝マイル〜中距離で仕上がりの早さとスピードを伝える。"
+    },
+    "Sadler's Wells (米)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "欧州の歴史的大種牡馬。芝中長距離の重厚なスタミナと道悪適性。"
+    },
+    "Seeking the Gold": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ミスプロ系。ダートのマイル〜中距離で卓越したスピードと勝負根性。"
+    },
+    "Singspiel (愛)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "芝中長距離のスタミナと底力。日本の軽い芝にも適応。"
+    },
+    "Smoke Glacken": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "米国ダート短距離のスピード特化。"
+    },
+    "Street Cry (愛)": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ダート中距離の王道血統。ゼニヤッタやウィンクスの父であり芝適性も高い。"
+    },
+    "Stroll": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "芝マイル〜中距離のスピード血統。"
+    },
+    "Tobougg (愛)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "○"
+      },
+      "notes": "芝中距離の機動力。"
+    },
+    "Unbridled's Song (米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "◎"
+      },
+      "notes": "ダートマイル〜中距離のスピードと雄大なストライド。芝でも活躍馬多数。"
+    },
+    "War Front": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "芝ダートを問わず短距離〜マイルでのスピードと仕上がりの早さ。"
+    },
+    "Zensational": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "△",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "アンブライドルズソング系。ダートスプリントの快速。"
+    },
+    "アドマイヤベガ": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "○"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "△"
+      },
+      "notes": "サンデー系。ダービー馬らしい芝中距離でのキレと瞬発力。"
+    },
+    "アポロキングダム": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ダート短距離〜マイルのスピードと先行力。"
+    },
+    "アルデバラン? Aldebaran(米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ミスプロ系。ダート短距離〜マイルのスピード型。"
+    },
+    "アルデバランII Aldebaran(米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ミスプロ系。ダート短距離〜マイルのスピード型。"
+    },
+    "イーグルカフェ": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "芝ダートのG1を制した万能マイラー。"
+    },
+    "ウォーエンブレム War Emblem(米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "気性の難しさとダート中距離の非凡なスピード・逃げ脚。"
+    },
+    "エアジハード": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "サクラユタカオー系。芝マイルの卓越したスピード。"
+    },
+    "カーネギー Carnegie(愛)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "凱旋門賞馬。欧州の重厚なスタミナとタフネス。"
+    },
+    "キングヘイロー": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "芝短距離〜マイルのスピード。母父として底力を伝える。"
+    },
+    "クリプティックラスカル Cryptic Rascal(米)": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "○"
+      },
+      "notes": "短距離〜マイルのスピード。"
+    },
+    "グランデラ Grandera(愛)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "芝中距離の機動力。"
+    },
+    "コンデュイット Conduit(愛)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "×",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "欧州芝中長距離の豊富なスタミナ。"
+    },
+    "ゴールドアリュール": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "サンデー系ダート王。ダートのマイル〜中距離で強靭なパワーを発揮。"
+    },
+    "サクラバクシンオー": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "日本が誇るスプリント王。芝短距離のスピード特化。"
+    },
+    "サムライハート": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "○",
+        "mile": "◎",
+        "intermediate": "△",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "○"
+      },
+      "notes": "サンデー系。未出走ながら血統背景から短距離〜マイルのスピードを伝える。"
+    },
+    "サンデーサイレンス Sunday Silence(米)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "△"
+      },
+      "notes": "日本競馬を変えた大種牡馬。芝の瞬発力と底力、闘争心を伝える。"
+    },
+    "シンボリクリスエス": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "雄大なストライドで芝中長距離の持続力とパワーを発揮。エピファネイア等の母父として優秀。"
+    },
+    "ジャイアントレッカー Giant Wrecker(米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ダート短距離〜マイルのスピード。"
+    },
+    "スウェプトオーヴァーボード Swept Overboard(米)": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "◎"
+      },
+      "notes": "ダート短距離のスピード。レッドファルクスなど芝の活躍馬も出す。"
+    },
+    "スズカマンボ": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "サンデー系。芝中長距離のスタミナと、ダートもこなすタフネス。"
+    },
+    "スタチューオブリバティ Statue of Liberty(米)": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "ストームキャット系。芝・ダート問わず短距離のスピード。"
+    },
+    "ストラヴィンスキー": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "ヌレイエフ系。芝短距離のスピードとパワー。"
+    },
+    "タイムパラドックス": {
+      "surfaces": {
+        "turf": "×",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "○"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "◎"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ブライアンズタイム系。地方ダートや中距離のタフネス。"
+    },
+    "ディープスカイ": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "アグネスタキオン産駒。ダートのマイル〜中距離で活躍馬を多く出す。"
+    },
+    "ファスリエフ Fasliyev(米)": {
+      "surfaces": {
+        "turf": "○",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "◎"
+      },
+      "notes": "ヌレイエフ系。仕上がりが早く短距離のスピードに優れる。"
+    },
+    "マイネルラヴ": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "○"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "○",
+        "intermediate": "×",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "シーキングザゴールド系。芝・ダートの短距離スピード。"
+    },
+    "マツリダゴッホ": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "△"
+      },
+      "course_shape": {
+        "spacious": "△",
+        "tight": "◎"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "サンデー系。中山など小回りの芝中距離で抜群の機動力を誇る。"
+    },
+    "マヤノトップガン": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "ブライアンズタイム系。芝の中長距離で変幻自在の脚質とスタミナ。"
+    },
+    "マーベラスサンデー": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "○"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "サンデー系。芝中距離での勝負根性と安定感。"
+    },
+    "メジロマックイーン": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "○",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "長距離の絶対王者。オルフェーヴル等の母父としてスタミナを伝える。"
+    },
+    "リンカーン": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "×"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "△",
+        "intermediate": "◎",
+        "long": "◎"
+      },
+      "course_shape": {
+        "spacious": "◎",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "サンデー系。芝中長距離での持続力。"
+    },
+    "ローエングリン": {
+      "surfaces": {
+        "turf": "◎",
+        "dirt": "△"
+      },
+      "distances": {
+        "sprint": "△",
+        "mile": "◎",
+        "intermediate": "◎",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "◎"
+      },
+      "going": {
+        "firm": "◎",
+        "soft": "○"
+      },
+      "notes": "シングスピール系。芝マイル〜中距離の機動力と先行力。"
+    },
+    "ワイルドラッシュ Wild Rush(米)": {
+      "surfaces": {
+        "turf": "△",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "◎",
+        "mile": "◎",
+        "intermediate": "○",
+        "long": "×"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "○"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "ダート短距離〜マイルのスピードとパワー。"
+    },
+    "ヴァーミリアン": {
+      "surfaces": {
+        "turf": "×",
+        "dirt": "◎"
+      },
+      "distances": {
+        "sprint": "×",
+        "mile": "○",
+        "intermediate": "◎",
+        "long": "○"
+      },
+      "course_shape": {
+        "spacious": "○",
+        "tight": "◎"
+      },
+      "going": {
+        "firm": "○",
+        "soft": "◎"
+      },
+      "notes": "エルコンドルパサー系。地方ダートや中距離での持続力とパワー。"
     }
   }
 }

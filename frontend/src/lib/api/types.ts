@@ -188,6 +188,69 @@ export type BetPlanResponse = {
   warnings: string[];
 };
 
+export type ResearchEntryHorse = {
+  umaban: string;
+  horse_name: string;
+};
+
+export type ResearchParsedMark = {
+  umaban: string;
+  horse_name: string;
+  mark: "◎" | "〇" | "○" | "▲" | "△" | "☆" | "注" | "消";
+  comment: string;
+  assumed_odds?: number | null;
+  assumed_ev?: number | null;
+};
+
+export type ResearchParsedHorseNote = {
+  umaban: string;
+  horse_name: string;
+  label: string;
+  text: string;
+};
+
+export type ResearchParsedTicket = {
+  bet_type: string;
+  horses: string[];
+  formation?: string[][] | null;
+  amount_yen: number;
+  reason: string;
+};
+
+export type ResearchParsedScratch = {
+  umaban: string;
+  horse_name: string;
+  reason: string;
+};
+
+export type ResearchParsed = {
+  marks: ResearchParsedMark[];
+  horse_notes: ResearchParsedHorseNote[];
+  pace_label: string;
+  course_note: string;
+  assumed_pace_label?: string;
+  assumed_frame_bias?: string;
+  assumed_style_bias?: string;
+  tickets: ResearchParsedTicket[];
+  scratched: ResearchParsedScratch[];
+  max_payout_scenario: string;
+};
+
+export type ResearchNotesBackup = {
+  savedAt: number;
+  notes: string;
+  source?: "gemini" | "chatgpt" | "manual";
+  parsed?: ResearchParsed | null;
+  parsed_at?: number | null;
+  parse_error?: string | null;
+};
+
+export type ResearchNotesBackupResponse = ResearchNotesBackup & {
+  race_id: string;
+  exists: boolean;
+  backed_up_at: string;
+};
+
 export type TrackBias = {
   frame_bias: Record<string, number>;
   style_bias: Record<string, number>;

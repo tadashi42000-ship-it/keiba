@@ -27,7 +27,13 @@ class GeminiTextClient:
     def model_name(self) -> str:
         return self._model
 
-    def generate_text(self, *, prompt: str, system_prompt: str | None = None) -> str:
+    def generate_text(
+        self,
+        *,
+        prompt: str,
+        system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
+    ) -> str:
         if not self.is_configured:
             raise ExternalApiError(
                 "gemini",
@@ -44,7 +50,8 @@ class GeminiTextClient:
             "contents": [{"parts": [{"text": content_text}]}],
             "generationConfig": {
                 "temperature": 0.2,
-                "maxOutputTokens": 1024,
+                "maxOutputTokens": max_output_tokens or 1024,
+                "thinkingConfig": {"thinkingBudget": 0},
             },
         }
         if system_prompt and system_prompt.strip():

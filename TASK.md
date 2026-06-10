@@ -1207,3 +1207,31 @@
   - 390px幅で血統ランキングの父名・軸チップが横スクロールしないこと。
 - 次回着手:
   - Claude CodeでPlaywright検証後、必要なら `python scripts/generate_sire_aptitude.py --add "種牡馬名"` で未登録種牡馬を追加し、バックエンド再起動後に5/24東京キャッシュを再生成する。
+
+### 2026-06-10 / Session-MOBILE-SD-031
+- 実施内容:
+  - 当日モード「リアルタイム性向上 Phase 1」を実装。
+  - `same-day-sheet` キャッシュを読む自動反映、5分前/1分前の `navigator.vibrate` 通知、画面上部トースト基盤を追加。
+  - オッズ履歴を `localStorage` 最大10件/6時間TTLで保存し、トレンド矢印・SVGスパークライン・急変バナー/トーストを詳細ページに追加。
+  - Deep Research parsed schema に `assumed_odds` / `assumed_ev` / `assumed_pace_label` / `assumed_frame_bias` / `assumed_style_bias` を後方互換つきで追加し、当日値とのドリフト警告をUIへ表示。
+  - 事前研究ノートのサーバーバックアップ復元を追加し、復元中は買い目タブに確認中インジケータを表示。
+  - 家PC起動しっぱなし・現地スマホ確認を想定し、重い全R再生成ではなく `POST /api/v1/races/same-day-sheet/refresh-volatile` でオッズ/馬体重だけを軽量更新する経路を追加。
+  - `scripts/run_same_day_updater.py` を追加し、6/14東京向けにPC側で直前レースだけを定期軽量更新できる運用導線を用意。
+- 結果:
+  - 詳細ページの自動反映はキャッシュ読込ベースになり、スマホ側は重い外部取得を待たずに最新キャッシュを反映する構成になった。
+  - 手動更新ボタンと全R一覧の軽量更新は volatile refresh 経路を使うようになり、`refresh=true` の全量再構築依存を減らした。
+  - Claude検証で指摘された `realtime: post` デバッグ表示は本番UIから非表示化し、発走済みレースではオッズ履歴をpushしないよう調整。
+  - 6/14東京キャッシュは `same_day_2026-06-14_tokyo_latest.json` と同日シートキャッシュを取得済み。ただし6/10時点ではオッズ/馬体重未公開。
+- Verification:
+  - Backend: `$env:PYTHONPATH='.'; pytest tests/test_same_day_api.py tests/test_research_parser.py` passed（40/40、pandas FutureWarning 1件は既存）。
+  - Frontend: `cd frontend; npm run lint` passed。
+  - Frontend: `cd frontend; npm run build` passed。
+  - Volatile updater: `python scripts\run_same_day_updater.py --date 2026-06-14 --venue tokyo --lookahead-min 10000 --once` で `9R 芦ノ湖特別` の軽量更新が約1.34秒で完了（未公開のため odds/body は0）。
+  - Playwright MCP: 6/14東京の全R一覧・9R詳細を375px幅で確認し、`realtime:` 表示なし、横スクロールなし（`scrollWidth == clientWidth`）。
+- 発生課題:
+  - 6/14のオッズ/馬体重は現時点では未公開。公開後に `run_same_day_updater.py --loop` または全R一覧の軽量更新で取得する。
+  - 結果速報トースト、バイアス変化通知、AI再評価API、SameDaySheetRaceの結果系スキーマ拡張はPhase 2へ持ち越し。
+  - 複数タブ/複数端末で同時に軽量更新するとサーバーへ重複リクエストが飛ぶ。将来はBroadcastChannelやPC側単一updater運用でさらに抑制する。
+- 次回着手:
+  - 6/14当日はPCで `python scripts\run_same_day_updater.py --date 2026-06-14 --venue tokyo --loop` を起動し、スマホ側はキャッシュ読込を中心に使う。
+  - Claude Code側で `tmp/verify_phase1_realtime.py` / `tmp/verify_samedaymode_full.py` 相当のCLI Playwright検証を再実行し、直前オッズ公開後の急変表示を確認する。

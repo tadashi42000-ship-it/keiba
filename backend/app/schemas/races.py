@@ -1,6 +1,6 @@
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class UpcomingRace(BaseModel):
@@ -183,6 +183,130 @@ class BetPlanResponse(BaseModel):
     ranking: list[BetRankingItem]
     tickets: list[BetTicket]
     warnings: list[str] = Field(default_factory=list)
+
+
+class ResearchEntryHorse(BaseModel):
+    umaban: str = ""
+    horse_name: str = ""
+
+
+class ResearchParsedMark(BaseModel):
+    umaban: str
+    horse_name: str = ""
+    mark: Literal["◎", "〇", "○", "▲", "△", "☆", "注", "消"]
+    comment: str = ""
+    assumed_odds: float | None = None
+    assumed_ev: float | None = None
+
+    @field_validator("umaban", "horse_name", "comment", mode="before")
+    @classmethod
+    def _none_to_text(cls, value: Any) -> str:
+        return "" if value is None else str(value)
+
+    @field_validator("assumed_odds", "assumed_ev", mode="before")
+    @classmethod
+    def _empty_to_none(cls, value: Any) -> float | None:
+        if value is None or value == "":
+            return None
+        return value
+
+
+class ResearchParsedHorseNote(BaseModel):
+    umaban: str
+    horse_name: str = ""
+    label: str = ""
+    text: str
+
+    @field_validator("umaban", "horse_name", "label", "text", mode="before")
+    @classmethod
+    def _none_to_text(cls, value: Any) -> str:
+        return "" if value is None else str(value)
+
+
+class ResearchParsedTicket(BaseModel):
+    bet_type: str
+    horses: list[str] = Field(default_factory=list)
+    formation: list[list[str]] | None = None
+    amount_yen: int = 0
+    reason: str = ""
+
+    @field_validator("bet_type", "reason", mode="before")
+    @classmethod
+    def _none_to_text(cls, value: Any) -> str:
+        return "" if value is None else str(value)
+
+    @field_validator("horses", mode="before")
+    @classmethod
+    def _normalize_horses(cls, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return [str(item) for item in value if item is not None and str(item).strip()]
+        return [str(value)] if str(value).strip() else []
+
+    @field_validator("formation", mode="before")
+    @classmethod
+    def _normalize_formation(cls, value: Any) -> list[list[str]] | None:
+        if value is None or isinstance(value, str):
+            return None
+        return value
+
+
+class ResearchParsedScratch(BaseModel):
+    umaban: str
+    horse_name: str = ""
+    reason: str
+
+    @field_validator("umaban", "horse_name", "reason", mode="before")
+    @classmethod
+    def _none_to_text(cls, value: Any) -> str:
+        return "" if value is None else str(value)
+
+
+class ResearchParsed(BaseModel):
+    marks: list[ResearchParsedMark] = Field(default_factory=list)
+    horse_notes: list[ResearchParsedHorseNote] = Field(default_factory=list)
+    pace_label: str = ""
+    course_note: str = ""
+    assumed_pace_label: str = ""
+    assumed_frame_bias: str = ""
+    assumed_style_bias: str = ""
+    tickets: list[ResearchParsedTicket] = Field(default_factory=list)
+    scratched: list[ResearchParsedScratch] = Field(default_factory=list)
+    max_payout_scenario: str = ""
+
+    @field_validator(
+        "pace_label",
+        "course_note",
+        "assumed_pace_label",
+        "assumed_frame_bias",
+        "assumed_style_bias",
+        "max_payout_scenario",
+        mode="before",
+    )
+    @classmethod
+    def _none_to_text(cls, value: Any) -> str:
+        return "" if value is None else str(value)
+
+
+class ResearchParseRequest(BaseModel):
+    raw_text: str
+    entry_horses: list[ResearchEntryHorse] = Field(default_factory=list)
+
+
+class ResearchNotesBackup(BaseModel):
+    savedAt: int = 0
+    notes: str = ""
+    source: str | None = "manual"
+    parsed: ResearchParsed | None = None
+    parsed_at: int | None = None
+    parse_error: str | None = None
+
+
+class ResearchNotesBackupResponse(ResearchNotesBackup):
+    race_id: str
+    exists: bool = False
+    backed_up_at: str = ""
 
 
 class TrackBias(BaseModel):

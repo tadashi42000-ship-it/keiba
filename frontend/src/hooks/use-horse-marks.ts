@@ -106,7 +106,24 @@ export function useHorseMarks(raceId: string) {
     [raceId],
   );
 
-  return { marks, setMark };
+  const setMarksBulk = useCallback(
+    (patch: Record<string, HorseMark | null>) => {
+      if (!raceId) return;
+      const next = { ...readMarks(raceId) };
+      Object.entries(patch).forEach(([horseKey, mark]) => {
+        if (!horseKey) return;
+        if (!mark) {
+          delete next[horseKey];
+        } else {
+          next[horseKey] = mark;
+        }
+      });
+      writeMarks(raceId, next);
+    },
+    [raceId],
+  );
+
+  return { marks, setMark, setMarksBulk };
 }
 
 export function useHorseMarksMulti(raceIds: string[]) {

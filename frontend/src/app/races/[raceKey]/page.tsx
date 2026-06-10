@@ -5,8 +5,11 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 
 import { ExternalWorkbenchCard } from "@/components/mobile/external-workbench-card";
+import { useToast } from "@/components/notifications/toast-stack";
 import { BetSimulator } from "@/components/race/bet-simulator";
+import { OddsSparkline } from "@/components/race/odds-sparkline";
 import { RaceCountdown } from "@/components/race/race-countdown";
+import { useOddsHistory, type OddsTrend } from "@/hooks/use-odds-history";
 import {
   HORSE_MARKS,
   MARK_ORDER,
@@ -14,26 +17,45 @@ import {
   stableHorseMarkKey,
   useHorseMarks,
 } from "@/hooks/use-horse-marks";
+import {
+  emptyPaddockNote,
+  paddockNoteBonus,
+  type HorsePaddockNote,
+  type PaddockGrade,
+  type PaddockNotes,
+  usePaddockNotes,
+} from "@/hooks/use-paddock-notes";
+import { useRaceAutoRefresh } from "@/hooks/use-race-auto-refresh";
 import { useRaceResearchNotes } from "@/hooks/use-race-research-notes";
 import {
   getRaceCourseStats,
   getRaceEntry,
+  getSameDayRaces,
   getSameDaySheet,
   getUpcomingRaces,
+  parseResearchReport,
   postRaceBetPlan,
   resolveRaceId,
+  refreshSameDaySheetVolatile,
 } from "@/lib/api/client";
 import type {
+  BetRankingItem,
   BetPlanResponse,
   EntryHorse,
   ExternalSnapshot,
   RaceCourseStatsResponse,
   RaceEntryResponse,
   RecentRunDetail,
+  ResearchParsed,
+  ResearchParsedHorseNote,
+  ResearchParsedMark,
+  ResearchParsedScratch,
+  ResearchParsedTicket,
   SameDaySheetRace,
   TrackBias,
   UpcomingRace,
 } from "@/lib/api/types";
+import { detectResearchDrift, type OddsDrift, type ResearchDrift } from "@/lib/research-drift";
 
 type TabKey = "entry" | "features" | "research" | "bet" | "vote" | "external";
 
@@ -176,6 +198,20 @@ function sameDaySheetHref(meta: RaceMeta | null, searchParams: URLSearchParams):
   return `/same-day-sheet${query ? `?${query}` : ""}`;
 }
 
+function raceDetailHref(race: UpcomingRace): string {
+  const params = new URLSearchParams();
+  if (race.race_id) params.set("race_id", race.race_id);
+  if (race.date_iso) params.set("date", race.date_iso);
+  if (race.venue) params.set("venue", race.venue);
+  if (race.race_name) params.set("race_name", race.race_name);
+  if (race.race_number) params.set("race_number", race.race_number);
+  if (race.distance) params.set("distance", race.distance);
+  if (race.surface) params.set("surface", race.surface);
+  if (race.grade) params.set("grade", race.grade);
+  const query = params.toString();
+  return `/races/${encodeURIComponent(race.race_key)}${query ? `?${query}` : ""}`;
+}
+
 function detailCacheKey(meta: RaceMeta, raceKey: string): string {
   return `${DETAIL_CACHE_PREFIX}${meta.race_id || raceKey}`;
 }
@@ -264,6 +300,48 @@ async function readDetailFromSheetCache(meta: RaceMeta, raceKey: string): Promis
   } catch {
     return null;
   }
+}
+
+function findRaceItemInSheet(races: SameDaySheetRace[], meta: RaceMeta, raceKey: string): SameDaySheetRace | null {
+  return (
+    races.find((candidate) => {
+      const candidateRace = candidate.race;
+      return (
+        (meta.race_id && candidateRace.race_id === meta.race_id) ||
+        candidateRace.race_key === raceKey ||
+        candidateRace.race_key === meta.race_key
+      );
+    }) ?? null
+  );
+}
+
+function oddsByUmaban(entry: RaceEntryResponse | null): Record<string, number> {
+  if (!entry) return {};
+  return Object.fromEntries(
+    entry.horses
+      .map((horse) => [normalizeResearchUmaban(horse.umaban), horse.odds] as const)
+      .filter(([umaban, odds]) => umaban && typeof odds === "number" && Number.isFinite(odds)),
+  ) as Record<string, number>;
+}
+
+function startAtMs(dateIso: string, startTime: string): number | null {
+  const time = String(startTime || "").match(/(\d{1,2}):(\d{2})/);
+  if (!dateIso || !time) return null;
+  const value = new Date(`${dateIso}T${time[1].padStart(2, "0")}:${time[2]}:00+09:00`).getTime();
+  return Number.isFinite(value) ? value : null;
+}
+
+function shouldTrackOddsHistory(race: RaceMeta | null, entry: RaceEntryResponse | null): boolean {
+  if (!race || !entry) return false;
+  const startMs = startAtMs(race.date_iso, entry.start_time);
+  return startMs == null || Date.now() < startMs;
+}
+
+function autoRefreshLabel(phase: string): string {
+  if (phase === "30min") return "自動反映: 60秒間隔";
+  if (phase === "5min") return "自動反映: 30秒間隔";
+  if (phase === "1min") return "自動反映: 15秒間隔";
+  return "";
 }
 
 function entryHasRecentRunDetailShape(entry: RaceEntryResponse): boolean {
@@ -542,48 +620,6 @@ function buildRaceResearchMarkdown({
   return lines.join("\n");
 }
 
-function buildDeepResearchPrompt(race: RaceMeta | null, entry: RaceEntryResponse | null): string {
-  const title = `${race?.race_number ? `${race.race_number} ` : ""}${race?.race_name || "レース"}`;
-  const lines: string[] = [
-    "以下の競馬レースについて、Deep Researchで事前予想レポートを作成してください。",
-    "",
-    "## レース情報",
-    `- レース: ${title}`,
-    `- 日付: ${race?.date_str || race?.date_iso || "-"}`,
-    `- 会場: ${race?.venue || "-"}`,
-    `- 条件: ${(race?.surface || "") + (race?.distance || "") || "-"}`,
-    `- グレード: ${race?.grade || "-"}`,
-    `- 発走: ${entry?.start_time || "-"}`,
-    `- 天気: ${entry?.weather || "-"}`,
-    `- 馬場: ${trackTextFromEntry(entry) || "-"}`,
-    "",
-    "## 出走馬と血統適性",
-  ];
-
-  if (entry?.horses.length) {
-    lines.push("| 馬番 | 馬名 | 父 | 母父 | 父適性 | 母父適性 | 脚質 | オッズ |");
-    lines.push("|---:|---|---|---|---|---|---|---:|");
-    entry.horses.forEach((horse) => {
-      lines.push(
-        `| ${mdCell(horse.umaban)} | ${mdCell(horse.horse_name)} | ${mdCell(stripPedigreeDisplayName(horse.sire_name))} | ${mdCell(stripPedigreeDisplayName(horse.broodmare_sire_name))} | ${mdCell(aptitudeScoreText(horse.sire_aptitude_summary, horse.sire_aptitude_score, horse.sire_aptitude_max_score))} | ${mdCell(aptitudeScoreText(horse.broodmare_sire_aptitude_summary, horse.broodmare_sire_aptitude_score, horse.broodmare_sire_aptitude_max_score))} | ${mdCell(horse.style)} | ${mdCell(formatOdds(horse.odds))} |`,
-      );
-    });
-  } else {
-    lines.push("出走馬情報は未取得です。");
-  }
-
-  lines.push("");
-  lines.push("## 調査してほしい観点");
-  lines.push("- 各馬の近走内容、調子、距離・コース適性");
-  lines.push("- 想定ペースと展開、脚質面の有利不利");
-  lines.push("- 血統面で距離・馬場・東京コースに向く馬/不安な馬");
-  lines.push("- 本命候補、相手候補、穴馬候補、消し候補");
-  lines.push("- 最後に候補馬ランキングを根拠付きで作成");
-  lines.push("");
-  lines.push("出典や確認した情報の要点も、可能な範囲で併記してください。");
-  return lines.join("\n");
-}
-
 export default function RaceDetailPage() {
   const params = useParams<{ raceKey: string }>();
   const searchParams = useSearchParams();
@@ -601,14 +637,28 @@ export default function RaceDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [cacheSavedAt, setCacheSavedAt] = useState<string | null>(null);
   const [loadedFromCache, setLoadedFromCache] = useState(false);
+  const [prevRace, setPrevRace] = useState<UpcomingRace | null>(null);
+  const [nextRace, setNextRace] = useState<UpcomingRace | null>(null);
 
   const status = statusText(loading || refreshing, error);
-  const raceIdForMarks = race?.race_id || raceKey;
-  const { marks: horseMarks, setMark: setHorseMark } = useHorseMarks(raceIdForMarks);
+  const raceIdForMarks = searchParams.get("race_id") || race?.race_id || raceKey;
+  const { toast } = useToast();
+  const { marks: horseMarks, setMark: setHorseMark, setMarksBulk: setHorseMarksBulk } = useHorseMarks(raceIdForMarks);
+  const { notes: paddockNotes, setNote: setPaddockNote, clearNote: clearPaddockNote } = usePaddockNotes(raceIdForMarks);
+  const researchNotes = useRaceResearchNotes(raceIdForMarks);
+  const {
+    pushSnapshot: pushOddsSnapshot,
+    getTrend: getOddsTrend,
+    getSparkline: getOddsSparkline,
+  } = useOddsHistory(raceIdForMarks);
   const horseNames = useMemo(() => entry?.horses.map((horse) => horse.horse_name).filter(Boolean) ?? [], [entry]);
   const researchMarkdown = useMemo(
     () => buildRaceResearchMarkdown({ race, entry, courseStats, betPlan, externalSnapshot, horseMarks }),
     [race, entry, courseStats, betPlan, externalSnapshot, horseMarks],
+  );
+  const researchDrift = useMemo(
+    () => detectResearchDrift(researchNotes.parsed, entry, trackBias),
+    [researchNotes.parsed, entry, trackBias],
   );
 
   const handleExternalSnapshotChange = useCallback(
@@ -630,8 +680,137 @@ export default function RaceDetailPage() {
     [race, entry, courseStats, betPlan, trackBias],
   );
 
-  async function loadAll(forceRefresh = false) {
-    const meta = race ?? metaFromQuery(raceKey, searchParams);
+  useEffect(() => {
+    if (shouldTrackOddsHistory(race, entry)) {
+      pushOddsSnapshot(oddsByUmaban(entry));
+    }
+  }, [entry, pushOddsSnapshot, race]);
+
+  const applySameDaySheet = useCallback((sheet: { races: SameDaySheetRace[] }) => {
+    if (!race) return false;
+    const item = findRaceItemInSheet(sheet.races, race, raceKey);
+    if (!item || !item.entry) return;
+    const nextRace = metaFromUpcoming(item.race);
+    const nextCourseStats = item.course_stats ?? courseStats;
+    const nextBetPlan = item.bet_plan ?? betPlan;
+    const nextTrackBias = item.track_bias ?? null;
+    if (shouldTrackOddsHistory(nextRace, item.entry)) {
+      pushOddsSnapshot(oddsByUmaban(item.entry));
+    }
+    setRace(nextRace);
+    setEntry(item.entry);
+    setCourseStats(nextCourseStats);
+    setBetPlan(nextBetPlan);
+    setTrackBias(nextTrackBias);
+    setLoadedFromCache(false);
+    const savedAt = writeDetailCache(nextRace, {
+      race: nextRace,
+      entry: item.entry,
+      courseStats: nextCourseStats,
+      betPlan: nextBetPlan,
+      trackBias: nextTrackBias,
+      externalSnapshot,
+    });
+    if (savedAt) setCacheSavedAt(savedAt);
+    return true;
+  }, [betPlan, courseStats, externalSnapshot, pushOddsSnapshot, race, raceKey]);
+
+  const loadFromSameDayCache = useCallback(async () => {
+    if (!race?.date_iso || !race.venue) return;
+    const sheet = await getSameDaySheet(race.date_iso, race.venue, 3000, false);
+    applySameDaySheet(sheet);
+  }, [applySameDaySheet, race]);
+
+  const refreshVolatileForCurrentRace = useCallback(async () => {
+    if (!race?.date_iso || !race.venue) return;
+    setRefreshing(true);
+    setError(null);
+    try {
+      const sheet = await refreshSameDaySheetVolatile({
+        date: race.date_iso,
+        venue: race.venue,
+        raceId: race.race_id,
+        raceNumber: race.race_number,
+        budgetYen: 3000,
+      });
+      const applied = applySameDaySheet(sheet);
+      if (applied) {
+        toast({
+          kind: "odds",
+          title: "最新キャッシュを反映",
+          body: `${race.race_number || ""} ${race.race_name}`.trim(),
+        });
+      }
+    } catch (refreshError) {
+      setError(refreshError instanceof Error ? refreshError.message : "軽量更新に失敗しました");
+    } finally {
+      setRefreshing(false);
+    }
+  }, [applySameDaySheet, race, toast]);
+
+  const autoRefresh = useRaceAutoRefresh({
+    raceId: raceIdForMarks,
+    startTime: entry?.start_time || "",
+    dateIso: race?.date_iso || "",
+    enabled: Boolean(race?.date_iso && race?.venue && entry?.start_time && !loading),
+    onRefresh: loadFromSameDayCache,
+    onDeadline: (phase) => {
+      toast({
+        kind: "deadline",
+        title: phase === "5min" ? "発走5分前" : "発走1分前",
+        body: race ? `${race.race_number || ""} ${race.race_name}`.trim() : undefined,
+      });
+    },
+  });
+  const notifiedCriticalOddsRef = useRef<Set<string>>(new Set());
+  const notifiedDriftRef = useRef<string>("");
+  const criticalOddsChanges = useMemo(
+    () =>
+      (entry?.horses ?? [])
+        .map((horse) => {
+          const trend = getOddsTrend(horse.umaban);
+          return {
+            umaban: normalizeResearchUmaban(horse.umaban) || horse.umaban || "",
+            horseName: horse.horse_name,
+            trend,
+          };
+        })
+        .filter((item) => item.umaban && item.trend.direction !== "flat" && item.trend.severity === "critical"),
+    [entry, getOddsTrend],
+  );
+
+  useEffect(() => {
+    notifiedCriticalOddsRef.current = new Set();
+    notifiedDriftRef.current = "";
+  }, [raceIdForMarks]);
+
+  useEffect(() => {
+    criticalOddsChanges.forEach((change) => {
+      const key = `${change.umaban}:${change.trend.prev ?? ""}:${change.trend.current ?? ""}`;
+      if (notifiedCriticalOddsRef.current.has(key)) return;
+      notifiedCriticalOddsRef.current.add(key);
+      toast({
+        kind: "odds",
+        title: "オッズ急変",
+        body: `${change.umaban}番 ${change.horseName} ${change.trend.prev?.toFixed(1) ?? "-"} -> ${change.trend.current?.toFixed(1) ?? "-"}`,
+      });
+    });
+  }, [criticalOddsChanges, toast]);
+
+  useEffect(() => {
+    if (!researchDrift.has_warning) return;
+    const key = `${raceIdForMarks}:${researchDrift.has_critical ? "critical" : "warn"}:${researchDrift.odds_drifts.length}:${researchDrift.bias_drift?.conflict ? "bias" : ""}`;
+    if (notifiedDriftRef.current === key) return;
+    notifiedDriftRef.current = key;
+    toast({
+      kind: "drift",
+      title: "Deep Research 前提ズレ",
+      body: researchDrift.has_critical ? "当日オッズが想定から大きく動いています" : "想定値と当日値にズレがあります",
+    });
+  }, [raceIdForMarks, researchDrift, toast]);
+
+  async function loadAll(forceRefresh = false, baseMeta?: RaceMeta) {
+    const meta = baseMeta ?? race ?? metaFromQuery(raceKey, searchParams);
     if (forceRefresh) setRefreshing(true);
     else setLoading(true);
     setError(null);
@@ -753,29 +932,76 @@ export default function RaceDetailPage() {
     async function init() {
       setLoading(true);
       setError(null);
+      setEntry(null);
+      setCourseStats(null);
+      setBetPlan(null);
+      setTrackBias(null);
+      setExternalSnapshot(null);
+      setCacheSavedAt(null);
+      setLoadedFromCache(false);
       const queryMeta = metaFromQuery(raceKey, searchParams);
       if (queryMeta.race_id && queryMeta.venue) {
         if (mounted) setRace(queryMeta);
-        return;
+        return queryMeta;
       }
       try {
         const upcoming = await getUpcomingRaces(2, 120, 30);
         const found = upcoming.races.find((item) => item.race_key === raceKey);
+        const nextMeta = found ? metaFromUpcoming(found) : queryMeta;
         if (mounted) {
-          setRace(found ? metaFromUpcoming(found) : queryMeta);
+          setRace(nextMeta);
         }
+        return nextMeta;
       } catch {
         if (mounted) setRace(queryMeta);
+        return queryMeta;
       }
     }
-    void init().then(() => {
-      if (mounted) void loadAll(false);
+    void init().then((initialMeta) => {
+      if (mounted) void loadAll(false, initialMeta);
     });
     return () => {
       mounted = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raceKey]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadSiblingRaces() {
+      if (!race?.date_iso || !race.venue) {
+        setPrevRace(null);
+        setNextRace(null);
+        return;
+      }
+      try {
+        const response = await getSameDayRaces(race.date_iso, race.venue);
+        const races = [...response.races].sort((a, b) => {
+          const aNo = Number.parseInt(String(a.race_number || "").replace(/\D/g, ""), 10) || 0;
+          const bNo = Number.parseInt(String(b.race_number || "").replace(/\D/g, ""), 10) || 0;
+          return aNo - bNo;
+        });
+        const index = races.findIndex((item) => {
+          return (
+            (race.race_id && item.race_id === race.race_id) ||
+            item.race_key === race.race_key ||
+            (item.race_number && item.race_number === race.race_number)
+          );
+        });
+        if (!mounted) return;
+        setPrevRace(index > 0 ? races[index - 1] : null);
+        setNextRace(index >= 0 && index < races.length - 1 ? races[index + 1] : null);
+      } catch {
+        if (!mounted) return;
+        setPrevRace(null);
+        setNextRace(null);
+      }
+    }
+    void loadSiblingRaces();
+    return () => {
+      mounted = false;
+    };
+  }, [race]);
 
   const heroTitle = useMemo(() => {
     if (!race) return "レース詳細";
@@ -804,6 +1030,31 @@ export default function RaceDetailPage() {
         </button>
       </div>
 
+      {(prevRace || nextRace) ? (
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {prevRace ? (
+            <Link
+              href={raceDetailHref(prevRace)}
+              className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 py-3 text-center text-xs font-black text-slate-700"
+            >
+              ← 前のR {prevRace.race_number || ""}
+            </Link>
+          ) : (
+            <span className="min-h-11 rounded-xl bg-slate-100 px-3 py-3 text-center text-xs font-bold text-slate-400">前のRなし</span>
+          )}
+          {nextRace ? (
+            <Link
+              href={raceDetailHref(nextRace)}
+              className="min-h-11 rounded-xl bg-emerald-600 px-3 py-3 text-center text-xs font-black text-white"
+            >
+              次のR {nextRace.race_number || ""} →
+            </Link>
+          ) : (
+            <span className="min-h-11 rounded-xl bg-slate-100 px-3 py-3 text-center text-xs font-bold text-slate-400">次のRなし</span>
+          )}
+        </div>
+      ) : null}
+
       <section className="mt-3 overflow-hidden rounded-3xl bg-slate-950 text-white shadow-lg">
         <div className="bg-[radial-gradient(circle_at_20%_20%,rgba(16,185,129,.45),transparent_30%),linear-gradient(135deg,#0f172a,#1e293b)] p-5">
           <p className="text-xs font-bold text-emerald-200">当日レースモード</p>
@@ -813,6 +1064,12 @@ export default function RaceDetailPage() {
             {race?.distance || ""}
           </p>
           {entry?.start_time ? <RaceCountdown startTime={entry.start_time} dateIso={race?.date_iso || ""} /> : null}
+          {autoRefreshLabel(autoRefresh.phase) ? (
+            <p className="mt-2 rounded-xl bg-white/10 px-3 py-2 text-[11px] font-bold text-slate-100">
+              {autoRefreshLabel(autoRefresh.phase)}
+              {autoRefresh.lastFetchedAt ? ` / ${new Date(autoRefresh.lastFetchedAt).toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" })}` : ""}
+            </p>
+          ) : null}
           {status ? <p className={`mt-3 rounded-xl px-3 py-2 text-xs ${error ? "bg-rose-500/20 text-rose-100" : "bg-white/10 text-slate-100"}`}>{status}</p> : null}
           {cacheSavedAt ? (
             <p className="mt-3 rounded-xl bg-white/10 px-3 py-2 text-xs text-slate-100">
@@ -822,7 +1079,7 @@ export default function RaceDetailPage() {
           <button
             type="button"
             onClick={() => {
-              void loadAll(true);
+              void refreshVolatileForCurrentRace();
             }}
             disabled={loading || refreshing}
             className="mt-4 min-h-12 w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 shadow-sm shadow-emerald-200 disabled:opacity-60"
@@ -843,6 +1100,15 @@ export default function RaceDetailPage() {
       </section>
 
       {reportOpen ? <ResearchMarkdownPanel markdown={researchMarkdown} /> : null}
+
+      {criticalOddsChanges.length ? (
+        <div className="mt-3 rounded-2xl bg-rose-50 px-3 py-2 text-xs font-bold text-rose-900 ring-1 ring-rose-100">
+          急変:{" "}
+          {criticalOddsChanges
+            .map((change) => `${change.umaban}番 ${change.trend.prev?.toFixed(1) ?? "-"} -> ${change.trend.current?.toFixed(1) ?? "-"}`)
+            .join(" / ")}
+        </div>
+      ) : null}
 
       {entry?.warnings.length ? (
         <div className="mt-3 space-y-2">
@@ -879,10 +1145,43 @@ export default function RaceDetailPage() {
         ))}
       </div>
 
-      {activeTab === "entry" ? <EntryTab entry={entry} courseStats={courseStats} trackBias={trackBias} horseMarks={horseMarks} onMarkChange={setHorseMark} /> : null}
+      {activeTab === "entry" ? (
+        <EntryTab
+          entry={entry}
+          courseStats={courseStats}
+          trackBias={trackBias}
+          horseMarks={horseMarks}
+          onMarkChange={setHorseMark}
+          paddockNotes={paddockNotes}
+          onPaddockNoteChange={setPaddockNote}
+          onPaddockNoteClear={clearPaddockNote}
+          researchParsed={researchNotes.parsed}
+          researchDrift={researchDrift}
+          getOddsTrend={getOddsTrend}
+          getOddsSparkline={getOddsSparkline}
+        />
+      ) : null}
       {activeTab === "features" ? <FeaturesTab courseStats={courseStats} entry={entry} race={race} /> : null}
-      {activeTab === "research" ? <ResearchNotesTab raceId={raceIdForMarks} race={race} entry={entry} /> : null}
-      {activeTab === "bet" ? <BetTab betPlan={betPlan} /> : null}
+      {activeTab === "research" ? (
+        <ResearchNotesTab
+          raceId={raceIdForMarks}
+          entry={entry}
+          horseMarks={horseMarks}
+          researchNotes={researchNotes}
+          onMarksBulkChange={setHorseMarksBulk}
+          onOpenBetTab={() => setActiveTab("bet")}
+        />
+      ) : null}
+      {activeTab === "bet" ? (
+        <BetTab
+          betPlan={betPlan}
+          entry={entry}
+          paddockNotes={paddockNotes}
+          researchParsed={researchNotes.parsed}
+          researchDrift={researchDrift}
+          isRestoringResearch={researchNotes.isRestoringBackup}
+        />
+      ) : null}
       {activeTab === "vote" ? <BetSimulator key={raceIdForMarks} raceId={raceIdForMarks} entry={entry} /> : null}
       {activeTab === "external" ? (
         <ExternalTab
@@ -939,8 +1238,8 @@ function ResearchMarkdownPanel({ markdown }: { markdown: string }) {
 
   return (
     <section className="mt-3 rounded-3xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div>
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-black text-emerald-950">AI共有用Markdown</p>
           <p className="mt-1 text-xs text-emerald-800">
             ChatGPT/GeminiのDeep Researchへ貼り付けるための整理済み資料です。
@@ -984,13 +1283,119 @@ function ResearchMarkdownPanel({ markdown }: { markdown: string }) {
   );
 }
 
-function ResearchNotesTab({ raceId, race, entry }: { raceId: string; race: RaceMeta | null; entry: RaceEntryResponse | null }) {
-  const prompt = useMemo(() => buildDeepResearchPrompt(race, entry), [race, entry]);
-  const promptRef = useRef<HTMLTextAreaElement | null>(null);
+type RaceResearchNotesStore = ReturnType<typeof useRaceResearchNotes>;
+
+const RESEARCH_MARK_NORMALIZE: Record<string, HorseMark> = {
+  "◎": "◎",
+  "〇": "〇",
+  "○": "〇",
+  "▲": "〇",
+  "△": "△",
+  "☆": "△",
+  "注": "△",
+  "消": "消",
+};
+
+function normalizeResearchUmaban(value?: string | null): string {
+  const normalized = String(value || "")
+    .trim()
+    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
+    .replace(/[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱]/g, (char) => {
+      const map: Record<string, string> = {
+        "①": "1",
+        "②": "2",
+        "③": "3",
+        "④": "4",
+        "⑤": "5",
+        "⑥": "6",
+        "⑦": "7",
+        "⑧": "8",
+        "⑨": "9",
+        "⑩": "10",
+        "⑪": "11",
+        "⑫": "12",
+        "⑬": "13",
+        "⑭": "14",
+        "⑮": "15",
+        "⑯": "16",
+        "⑰": "17",
+        "⑱": "18",
+      };
+      return map[char] || char;
+    });
+  const match = normalized.match(/\d+/);
+  if (!match) return "";
+  const parsed = Number.parseInt(match[0], 10);
+  return Number.isFinite(parsed) && parsed > 0 ? String(parsed) : "";
+}
+
+function formatParsedTicket(ticket: ResearchParsedTicket): string {
+  if (ticket.formation?.length) {
+    return ticket.formation.map((row) => row.join("-")).join(" / ");
+  }
+  return ticket.horses.join(ticket.bet_type.includes("ボックス") ? "・" : "-");
+}
+
+type ResearchAiMark = {
+  umaban: string;
+  horse_name: string;
+  mark: ResearchParsedMark["mark"] | "消";
+  comment: string;
+};
+
+function researchAiMarkClass(mark: string): string {
+  if (mark === "◎") return "bg-rose-100 text-rose-800";
+  if (mark === "〇" || mark === "○" || mark === "▲") return "bg-orange-100 text-orange-800";
+  if (mark === "△" || mark === "☆" || mark === "注") return "bg-emerald-100 text-emerald-800";
+  if (mark === "消") return "bg-slate-200 text-slate-600";
+  return "bg-amber-100 text-amber-800";
+}
+
+function buildResearchRawPreviewSections(text: string): Array<{ title: string; body: string }> {
+  const normalized = text
+    .replace(/\r\n/g, "\n")
+    .replace(/\s+(展開予測|買い目|買わない理由がある馬|最大回収シナリオ)\s+/g, "\n$1\n")
+    .trim();
+  if (!normalized) return [];
+  const headings = ["展開予測", "買い目", "買わない理由がある馬", "最大回収シナリオ"];
+  const sections: Array<{ title: string; body: string }> = [];
+  let currentTitle = "概要";
+  let currentBody: string[] = [];
+  normalized.split("\n").forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    if (headings.includes(trimmed)) {
+      if (currentBody.length) sections.push({ title: currentTitle, body: currentBody.join("\n").trim() });
+      currentTitle = trimmed;
+      currentBody = [];
+      return;
+    }
+    currentBody.push(trimmed);
+  });
+  if (currentBody.length) sections.push({ title: currentTitle, body: currentBody.join("\n").trim() });
+  return sections;
+}
+
+function ResearchNotesTab({
+  raceId,
+  entry,
+  horseMarks,
+  researchNotes,
+  onMarksBulkChange,
+  onOpenBetTab,
+}: {
+  raceId: string;
+  entry: RaceEntryResponse | null;
+  horseMarks: Record<string, HorseMark>;
+  researchNotes: RaceResearchNotesStore;
+  onMarksBulkChange: (patch: Record<string, HorseMark | null>) => void;
+  onOpenBetTab: () => void;
+}) {
   const notesRef = useRef<HTMLTextAreaElement | null>(null);
-  const { notes, savedAt, setNotes, clearNotes } = useRaceResearchNotes(raceId);
+  const { notes, savedAt, parsed, parsedAt, parseError, setNotes, clearNotes, setParsed, setParseError } = researchNotes;
   const [draft, setDraft] = useState(notes);
   const [status, setStatus] = useState<string | null>(null);
+  const [parsing, setParsing] = useState(false);
 
   useEffect(() => {
     setDraft(notes);
@@ -1006,36 +1411,46 @@ function ResearchNotesTab({ raceId, race, entry }: { raceId: string; race: RaceM
     }).format(new Date(savedAt));
   }
 
-  function focusPromptForManualCopy(message: string) {
-    promptRef.current?.focus();
-    promptRef.current?.select();
-    setStatus(message);
+  function parsedAtText(): string {
+    if (!parsedAt) return "";
+    return new Intl.DateTimeFormat("ja-JP", {
+      month: "numeric",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(parsedAt));
   }
 
-  function openAi(url: string, label: string) {
-    let copyPromise: Promise<void> | null = null;
+  async function saveAndParseDraft() {
+    const text = draft.trimEnd();
+    setNotes(text, "manual");
+    setParsed(null);
+    setParseError(null);
+    setStatus(null);
+    if (text.trim().length < 10) {
+      setParseError("raw_text が短すぎます");
+      setStatus("レポート本文をもう少し入力してください。");
+      return;
+    }
+    setParsing(true);
     try {
-      copyPromise = navigator.clipboard.writeText(prompt);
-    } catch {
-      copyPromise = null;
+      const parsedResult = await parseResearchReport(
+        raceId,
+        text,
+        (entry?.horses ?? []).map((horse) => ({ umaban: horse.umaban || "", horse_name: horse.horse_name || "" })),
+      );
+      setParsed(parsedResult);
+      setParseError(null);
+      const appliedCount = applyParsedMarks(parsedResult);
+      setStatus(`事前研究レポートを保存し、構造化しました。${appliedCount > 0 ? `印メモに${appliedCount}件反映済みです。` : "印メモの差分はありません。"}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "構造化に失敗しました";
+      setParsed(null);
+      setParseError(message);
+      setStatus("レポートは保存しましたが、構造化に失敗しました。");
+    } finally {
+      setParsing(false);
     }
-    const opened = window.open(url, "_blank", "noopener,noreferrer");
-    if (!opened) {
-      focusPromptForManualCopy("新しいタブを開けませんでした。ポップアップを許可して、下のプロンプトをコピーしてください。");
-      return;
-    }
-    if (!copyPromise) {
-      focusPromptForManualCopy("自動コピーに失敗しました。下のプロンプトを手動でコピーしてください。");
-      return;
-    }
-    void copyPromise
-      .then(() => setStatus(`${label}を開きました。プロンプトもコピー済みです。Deep Researchモードは移動先で選択してください。`))
-      .catch(() => focusPromptForManualCopy("自動コピーに失敗しました。下のプロンプトを手動でコピーしてください。"));
-  }
-
-  function saveDraft() {
-    setNotes(draft, "manual");
-    setStatus("事前研究レポートを保存しました。");
   }
 
   function clearDraft() {
@@ -1045,40 +1460,144 @@ function ResearchNotesTab({ raceId, race, entry }: { raceId: string; race: RaceM
     setStatus("事前研究レポートをクリアしました。");
   }
 
+  function applyParsedMarks(parsedInput: ResearchParsed): number {
+    if (!entry) return 0;
+    const horseByUmaban = new Map<string, EntryHorse>();
+    entry.horses.forEach((horse) => {
+      const umaban = normalizeResearchUmaban(horse.umaban);
+      if (umaban) horseByUmaban.set(umaban, horse);
+    });
+    const desired = new Map<string, { mark: HorseMark; horseName: string }>();
+    parsedInput.marks.forEach((mark) => {
+      const umaban = normalizeResearchUmaban(mark.umaban);
+      const normalizedMark = RESEARCH_MARK_NORMALIZE[mark.mark];
+      if (umaban && normalizedMark) {
+        desired.set(umaban, { mark: normalizedMark, horseName: mark.horse_name || horseByUmaban.get(umaban)?.horse_name || "" });
+      }
+    });
+    parsedInput.scratched.forEach((scratch) => {
+      const umaban = normalizeResearchUmaban(scratch.umaban);
+      if (umaban) {
+        desired.set(umaban, { mark: "消", horseName: scratch.horse_name || horseByUmaban.get(umaban)?.horse_name || "" });
+      }
+    });
+
+    const patch: Record<string, HorseMark> = {};
+    desired.forEach(({ mark, horseName }, umaban) => {
+      const horse = horseByUmaban.get(umaban);
+      const key = stableHorseMarkKey(umaban, horse?.horse_name || horseName);
+      const current = horseMarks[key] || "";
+      if (current === mark) return;
+      patch[key] = mark;
+    });
+
+    const changeCount = Object.keys(patch).length;
+    if (changeCount === 0) return 0;
+    onMarksBulkChange(patch);
+    return changeCount;
+  }
+
   return (
     <section className="mt-4 space-y-4">
-      <div className="rounded-3xl border border-indigo-100 bg-white p-4 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-black text-slate-950">Deep Research プロンプト</p>
-            <p className="mt-1 text-xs text-slate-500">出走馬と血統情報を含めて、事前予想用の調査依頼を作ります。</p>
-          </div>
-          <div className="flex gap-2">
+      {parsed ? (
+        <div className="rounded-3xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-black text-amber-950">AI構造化結果</p>
+              <p className="mt-1 text-xs text-amber-800">
+                印 {parsed.marks.length}件 / 買い目 {parsed.tickets.length}件 / 消し馬 {parsed.scratched.length}件
+                {parsedAt ? ` / ${parsedAtText()}` : ""}
+              </p>
+            </div>
             <button
               type="button"
-              onClick={() => openAi("https://gemini.google.com/app", "Gemini")}
-              className="min-h-11 rounded-xl bg-indigo-600 px-3 py-2 text-xs font-black text-white"
-            >
-              Gemini
-            </button>
-            <button
-              type="button"
-              onClick={() => openAi("https://chat.openai.com/", "ChatGPT")}
+              onClick={onOpenBetTab}
               className="min-h-11 rounded-xl bg-slate-950 px-3 py-2 text-xs font-black text-white"
             >
-              ChatGPT
+              買い目を見る
             </button>
           </div>
+
+          {parsed.pace_label || parsed.course_note ? (
+            <div className="mt-3 grid grid-cols-1 gap-2">
+              {parsed.pace_label ? (
+                <div className="rounded-2xl bg-white/85 px-3 py-2 text-xs leading-5 text-amber-950">
+                  <span className="font-black">展開</span>
+                  <span className="ml-2">{parsed.pace_label}</span>
+                </div>
+              ) : null}
+              {parsed.course_note ? (
+                <div className="rounded-2xl bg-white/85 px-3 py-2 text-xs leading-5 text-amber-950">
+                  <span className="font-black">コース</span>
+                  <span className="ml-2">{parsed.course_note}</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {parsed.marks.length ? (
+            <div className="mt-4 overflow-hidden rounded-2xl bg-white/90 ring-1 ring-amber-100">
+              <div className="grid grid-cols-[3rem_3rem_1fr] bg-amber-100/70 px-3 py-2 text-[11px] font-black text-amber-950">
+                <span>馬番</span>
+                <span>印</span>
+                <span>コメント</span>
+              </div>
+              {parsed.marks.map((mark, index) => (
+                <div
+                  key={`${mark.umaban}-${mark.mark}-${index}`}
+                  className="grid grid-cols-[3rem_3rem_1fr] items-start gap-0 border-t border-amber-100 px-3 py-2 text-xs text-amber-950"
+                >
+                  <span className="font-black">{normalizeResearchUmaban(mark.umaban) || mark.umaban}</span>
+                  <span className="font-black">{mark.mark}</span>
+                  <span className="min-w-0 leading-5">
+                    {mark.horse_name ? <span className="font-black">{mark.horse_name}</span> : null}
+                    {mark.comment ? <span className="ml-1 text-amber-800">{mark.comment}</span> : null}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {parsed.tickets.length ? (
+            <div className="mt-4 space-y-2">
+              <p className="text-xs font-black text-amber-950">AI推奨買い目</p>
+              {parsed.tickets.map((ticket, index) => (
+                <div key={`${ticket.bet_type}-${index}`} className="rounded-2xl bg-white/90 px-3 py-2 text-xs text-amber-950 ring-1 ring-amber-100">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-black text-white">{ticket.bet_type}</span>
+                    <span className="font-black">{formatParsedTicket(ticket) || "-"}</span>
+                    {ticket.amount_yen ? <span className="font-bold text-amber-700">{ticket.amount_yen.toLocaleString()}円</span> : null}
+                  </div>
+                  {ticket.reason ? <p className="mt-1 leading-5 text-amber-800">{ticket.reason}</p> : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {parsed.scratched.length ? (
+            <div className="mt-4 rounded-2xl bg-white/80 px-3 py-2 text-xs text-amber-950 ring-1 ring-amber-100">
+              <p className="font-black">消し馬</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {parsed.scratched.map((item, index) => (
+                  <span key={`${item.umaban}-${index}`} className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-700">
+                    {normalizeResearchUmaban(item.umaban) || item.umaban}番{item.horse_name ? ` ${item.horse_name}` : ""}
+                    {item.reason ? `: ${item.reason}` : ""}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {parsed.max_payout_scenario ? (
+            <p className="mt-4 rounded-2xl bg-white/85 px-3 py-2 text-xs leading-5 text-amber-900">
+              <span className="font-black">最大回収シナリオ</span>
+              <span className="ml-2">{parsed.max_payout_scenario}</span>
+            </p>
+          ) : null}
         </div>
-        {status ? <p className="mt-3 rounded-xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800">{status}</p> : null}
-        <textarea
-          ref={promptRef}
-          readOnly
-          value={prompt}
-          rows={8}
-          className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs leading-5 text-slate-700"
-        />
-      </div>
+      ) : null}
+
+      {notes ? <ResearchRawPreview notes={notes} /> : null}
 
       <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1087,8 +1606,15 @@ function ResearchNotesTab({ raceId, race, entry }: { raceId: string; race: RaceM
             <p className="mt-1 text-xs text-slate-500">最終保存: {savedAtText()}</p>
           </div>
           <div className="flex gap-2">
-            <button type="button" onClick={saveDraft} className="min-h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white">
-              保存
+            <button
+              type="button"
+              onClick={() => {
+                void saveAndParseDraft();
+              }}
+              disabled={parsing}
+              className="min-h-11 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white disabled:opacity-60"
+            >
+              {parsing ? "構造化中..." : "保存して構造化"}
             </button>
             <button type="button" onClick={clearDraft} className="min-h-11 rounded-xl bg-slate-100 px-4 py-2 text-xs font-black text-slate-700">
               クリア
@@ -1103,21 +1629,49 @@ function ResearchNotesTab({ raceId, race, entry }: { raceId: string; race: RaceM
           className="mt-3 w-full rounded-2xl border border-slate-200 bg-white p-3 text-sm leading-6 text-slate-800"
           placeholder="Deep Research のレポートをここに貼り付け"
         />
+        {status ? <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{status}</p> : null}
+        {parseError ? (
+          <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+            構造化エラー: {parseError}
+          </p>
+        ) : null}
       </div>
 
-      {notes ? (
-        <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm font-black text-slate-950">プレビュー</p>
-          <pre className="mt-3 max-h-[520px] overflow-auto whitespace-pre-wrap rounded-2xl bg-slate-50 p-3 text-xs leading-5 text-slate-700">
-            {notes}
-          </pre>
-        </div>
-      ) : null}
     </section>
   );
 }
 
+function ResearchRawPreview({ notes }: { notes: string }) {
+  const sections = buildResearchRawPreviewSections(notes);
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+      <p className="text-sm font-black text-slate-950">レポート本文プレビュー</p>
+      <div className="mt-3 space-y-2">
+        {sections.map((section) => (
+          <details key={section.title} open={section.title !== "概要"} className="rounded-2xl bg-slate-50 px-3 py-2 ring-1 ring-slate-100">
+            <summary className="cursor-pointer text-xs font-black text-slate-800">{section.title}</summary>
+            <p className="mt-2 whitespace-pre-wrap text-xs leading-5 text-slate-700">{section.body}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 type EntrySortKey = "mark" | "umaban" | "odds";
+
+function oddsTrendClass(trend: OddsTrend): string {
+  if (trend.severity === "critical") return "font-black text-rose-700";
+  if (trend.severity === "warn") return "font-bold text-orange-600";
+  return "text-slate-400";
+}
+
+function driftIcon(drift?: OddsDrift): string {
+  if (!drift) return "";
+  if (drift.severity === "critical") return "⚠";
+  if (drift.severity === "warn") return "△";
+  return "";
+}
 
 function bodyWeightTop3Rate(horse: EntryHorse, courseStats: RaceCourseStatsResponse | null): number | null {
   if (typeof horse.body_weight_top3_rate === "number") return horse.body_weight_top3_rate;
@@ -1134,12 +1688,26 @@ function EntryTab({
   trackBias,
   horseMarks,
   onMarkChange,
+  paddockNotes,
+  onPaddockNoteChange,
+  onPaddockNoteClear,
+  researchParsed,
+  researchDrift,
+  getOddsTrend,
+  getOddsSparkline,
 }: {
   entry: RaceEntryResponse | null;
   courseStats: RaceCourseStatsResponse | null;
   trackBias: TrackBias | null;
   horseMarks: Record<string, HorseMark>;
   onMarkChange: (horseKey: string, mark: HorseMark | null) => void;
+  paddockNotes: PaddockNotes;
+  onPaddockNoteChange: (horseKey: string, patch: Partial<Omit<HorsePaddockNote, "updatedAt">>) => void;
+  onPaddockNoteClear: (horseKey: string) => void;
+  researchParsed: ResearchParsed | null;
+  researchDrift: ResearchDrift;
+  getOddsTrend: (umaban: string) => OddsTrend;
+  getOddsSparkline: (umaban: string) => number[];
 }) {
   const [sortKey, setSortKey] = useState<EntrySortKey>("umaban");
   const [hideErased, setHideErased] = useState(false);
@@ -1166,6 +1734,36 @@ function EntryTab({
       }
       return (Number.parseInt(a.umaban || "999", 10) || 999) - (Number.parseInt(b.umaban || "999", 10) || 999);
     });
+  const aiAnalysisByUmaban = new Map<string, ResearchParsedHorseNote>();
+  (researchParsed?.horse_notes ?? []).forEach((note) => {
+    const umaban = normalizeResearchUmaban(note.umaban);
+    if (umaban && note.text) aiAnalysisByUmaban.set(umaban, note);
+  });
+  const aiMarkByUmaban = new Map<string, ResearchAiMark>();
+  (researchParsed?.marks ?? []).forEach((mark) => {
+    const umaban = normalizeResearchUmaban(mark.umaban);
+    if (!umaban) return;
+    aiMarkByUmaban.set(umaban, {
+      umaban,
+      horse_name: mark.horse_name,
+      mark: mark.mark,
+      comment: mark.comment,
+    });
+  });
+  (researchParsed?.scratched ?? []).forEach((scratch: ResearchParsedScratch) => {
+    const umaban = normalizeResearchUmaban(scratch.umaban);
+    if (!umaban) return;
+    aiMarkByUmaban.set(umaban, {
+      umaban,
+      horse_name: scratch.horse_name,
+      mark: "消",
+      comment: scratch.reason,
+    });
+  });
+  const driftByUmaban = new Map<string, OddsDrift>();
+  researchDrift.odds_drifts.forEach((drift) => {
+    driftByUmaban.set(normalizeResearchUmaban(drift.umaban), drift);
+  });
   return (
     <section className="mt-3 space-y-3">
       <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -1213,6 +1811,14 @@ function EntryTab({
           mark={horseMarks[stableHorseMarkKey(horse.umaban, horse.horse_name)] || ""}
           top3Rate={bodyWeightTop3Rate(horse, courseStats)}
           onMarkChange={onMarkChange}
+          paddockNote={paddockNotes[stableHorseMarkKey(horse.umaban, horse.horse_name)]}
+          onPaddockNoteChange={onPaddockNoteChange}
+          onPaddockNoteClear={onPaddockNoteClear}
+          aiAnalysis={aiAnalysisByUmaban.get(normalizeResearchUmaban(horse.umaban))}
+          aiMark={aiMarkByUmaban.get(normalizeResearchUmaban(horse.umaban))}
+          oddsTrend={getOddsTrend(horse.umaban)}
+          oddsSparkline={getOddsSparkline(horse.umaban)}
+          oddsDrift={driftByUmaban.get(normalizeResearchUmaban(horse.umaban))}
         />
       ))}
     </section>
@@ -1224,26 +1830,43 @@ function HorseCard({
   mark,
   top3Rate,
   onMarkChange,
+  paddockNote,
+  onPaddockNoteChange,
+  onPaddockNoteClear,
+  aiAnalysis,
+  aiMark,
+  oddsTrend,
+  oddsSparkline,
+  oddsDrift,
 }: {
   horse: EntryHorse;
   mark: HorseMark | "";
   top3Rate: number | null;
   onMarkChange: (horseKey: string, mark: HorseMark | null) => void;
+  paddockNote?: HorsePaddockNote;
+  onPaddockNoteChange: (horseKey: string, patch: Partial<Omit<HorsePaddockNote, "updatedAt">>) => void;
+  onPaddockNoteClear: (horseKey: string) => void;
+  aiAnalysis?: ResearchParsedHorseNote;
+  aiMark?: ResearchAiMark;
+  oddsTrend: OddsTrend;
+  oddsSparkline: number[];
+  oddsDrift?: OddsDrift;
 }) {
   const horseKey = stableHorseMarkKey(horse.umaban, horse.horse_name);
   const hasRecentRuns = horse.recent_runs.some((run) => run.trim().length > 0);
+  const currentPaddockNote = paddockNote ?? emptyPaddockNote();
   return (
     <article className={`rounded-3xl border border-l-8 border-slate-200 bg-white p-4 shadow-sm ${wakuBorderClass(horse.waku)}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
             <span className={`inline-flex min-w-8 items-center justify-center rounded-full border px-2 py-1 font-black ${wakuBadgeClass(horse.waku)}`}>
               {horse.waku || "-"}枠
             </span>
             <span>{horse.umaban || "-"}番 / {horse.jockey || "-"}</span>
           </p>
-          <h2 className="mt-1 text-lg font-black text-slate-950">{horse.horse_name}</h2>
-          <p className="mt-1 text-xs text-slate-500">
+          <h2 className="mt-1 break-words text-lg font-black text-slate-950">{horse.horse_name}</h2>
+          <p className="mt-1 break-words text-xs text-slate-500">
             {horse.sex_age || "-"} / 斤量 {horse.weight || "-"} / 馬体重 {horse.body_weight || "-"}
             {horse.body_delta ? ` (${horse.body_delta})` : ""}
           </p>
@@ -1261,7 +1884,18 @@ function HorseCard({
             )}
           </div>
           <p className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">{horse.style || "-"}</p>
-          <p className="mt-2 text-lg font-black text-slate-900">{formatOdds(horse.odds)}</p>
+          <p className="mt-2 text-lg font-black tabular-nums text-slate-900">
+            {formatOdds(horse.odds)}
+            {oddsTrend.direction !== "flat" ? (
+              <span className={`ml-1 text-xs ${oddsTrendClass(oddsTrend)}`}>
+                {oddsTrend.direction === "up" ? "↑" : "↓"}
+                {oddsTrend.prev != null ? `${oddsTrend.prev.toFixed(1)}->` : ""}
+              </span>
+            ) : null}
+          </p>
+          <div className="mt-1 flex justify-end text-slate-400">
+            <OddsSparkline values={oddsSparkline} />
+          </div>
           <p className="text-[10px] text-slate-500">単勝</p>
         </div>
       </div>
@@ -1286,6 +1920,27 @@ function HorseCard({
           ×
         </button>
       </div>
+      {aiMark || aiAnalysis ? (
+        <div className="mt-3 rounded-2xl bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-amber-200">
+          <div className="flex flex-wrap items-center gap-2">
+            {aiMark ? (
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${researchAiMarkClass(aiMark.mark)}`}>
+                AI{aiMark.mark}{driftIcon(oddsDrift)}
+              </span>
+            ) : (
+              <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[10px] font-black text-white">AI</span>
+            )}
+            <span className="font-black">{aiAnalysis?.label || "AI分析"}</span>
+          </div>
+          {aiMark?.comment ? <p className="mt-2 whitespace-pre-wrap leading-5">{aiMark.comment}</p> : null}
+          {aiAnalysis?.text ? <p className="mt-1 whitespace-pre-wrap leading-5 text-amber-800">{aiAnalysis.text}</p> : null}
+        </div>
+      ) : null}
+      <PaddockMemoControls
+        note={currentPaddockNote}
+        onChange={(patch) => onPaddockNoteChange(horseKey, patch)}
+        onClear={() => onPaddockNoteClear(horseKey)}
+      />
       {horse.body_weight_bucket ? (
         <p className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-600">
           <span className="rounded-full bg-slate-100 px-2 py-1">
@@ -1315,6 +1970,99 @@ function HorseCard({
         )}
       </div>
     </article>
+  );
+}
+
+const PADDOCK_GRADE_OPTIONS: Array<{ value: PaddockGrade; label: string; className: string }> = [
+  { value: "good", label: "◎", className: "bg-rose-100 text-rose-800" },
+  { value: "ok", label: "○", className: "bg-emerald-100 text-emerald-800" },
+  { value: "watch", label: "△", className: "bg-amber-100 text-amber-800" },
+  { value: "bad", label: "×", className: "bg-slate-200 text-slate-600" },
+];
+
+function gradeButtonClass(active: boolean, colorClass: string): string {
+  return active
+    ? `${colorClass} ring-2 ring-slate-900/10`
+    : "bg-white text-slate-500 ring-1 ring-slate-200";
+}
+
+function PaddockGradePicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: PaddockGrade;
+  onChange: (value: PaddockGrade) => void;
+}) {
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+      <span className="mr-1 text-[11px] font-black text-slate-600">{label}</span>
+      {PADDOCK_GRADE_OPTIONS.map((option) => (
+        <button
+          key={`${label}-${option.value}`}
+          type="button"
+          onClick={() => onChange(value === option.value ? "" : option.value)}
+          className={`h-8 min-w-8 rounded-xl px-2 text-xs font-black ${gradeButtonClass(value === option.value, option.className)}`}
+          aria-pressed={value === option.value}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function PaddockMemoControls({
+  note,
+  onChange,
+  onClear,
+}: {
+  note: HorsePaddockNote;
+  onChange: (patch: Partial<Omit<HorsePaddockNote, "updatedAt">>) => void;
+  onClear: () => void;
+}) {
+  const bonus = paddockNoteBonus(note);
+  const currentGrade = note.paddock || note.returnHorse;
+  const hasValue = Boolean(currentGrade || note.memo.trim());
+  return (
+    <div className="mt-3 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-100">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs font-black text-slate-700">パドック/返し馬</p>
+        {bonus.bonus ? (
+          <span className={`rounded-full px-2 py-1 text-[11px] font-black ${bonus.bonus > 0 ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"}`}>
+            現地{bonus.bonus > 0 ? "+" : ""}
+            {Math.round(bonus.bonus * 100)}
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
+        <PaddockGradePicker
+          label="総合印"
+          value={currentGrade}
+          onChange={(paddock) => onChange({ paddock, returnHorse: "" })}
+        />
+      </div>
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+        <input
+          type="text"
+          value={note.memo}
+          onChange={(event) => onChange({ memo: event.target.value })}
+          className="min-h-10 min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800"
+          placeholder="気配メモ"
+          maxLength={160}
+        />
+        {hasValue ? (
+          <button
+            type="button"
+            onClick={onClear}
+            className="min-h-10 rounded-xl bg-white px-3 text-xs font-black text-slate-500 ring-1 ring-slate-200"
+          >
+            クリア
+          </button>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
@@ -1545,10 +2293,62 @@ function FeaturesTab({
   );
 }
 
-function BetTab({ betPlan }: { betPlan: BetPlanResponse | null }) {
+type PaddockAdjustedRankingItem = BetRankingItem & {
+  adjusted_score: number;
+  paddock_bonus: number;
+  paddock_reason: string;
+};
+
+function adjustRankingWithPaddockNotes(
+  ranking: BetRankingItem[],
+  entry: RaceEntryResponse | null,
+  paddockNotes: PaddockNotes,
+): PaddockAdjustedRankingItem[] {
+  const horseKeyByRankingKey = new Map<string, string>();
+  (entry?.horses ?? []).forEach((horse) => {
+    const horseKey = stableHorseMarkKey(horse.umaban, horse.horse_name);
+    horseKeyByRankingKey.set(`${horse.umaban || ""}::${horse.horse_name || ""}`, horseKey);
+    horseKeyByRankingKey.set(`::${horse.horse_name || ""}`, horseKey);
+  });
+  return ranking
+    .map((item) => {
+      const horseKey =
+        horseKeyByRankingKey.get(`${item.umaban || ""}::${item.horse_name || ""}`) ??
+        horseKeyByRankingKey.get(`::${item.horse_name || ""}`) ??
+        stableHorseMarkKey(item.umaban, item.horse_name);
+      const noteBonus = paddockNoteBonus(paddockNotes[horseKey]);
+      return {
+        ...item,
+        paddock_bonus: noteBonus.bonus,
+        paddock_reason: noteBonus.reason,
+        adjusted_score: Number((item.score + noteBonus.bonus).toFixed(3)),
+      };
+    })
+    .sort((a, b) => {
+      if (b.adjusted_score !== a.adjusted_score) return b.adjusted_score - a.adjusted_score;
+      return b.score - a.score;
+    });
+}
+
+function BetTab({
+  betPlan,
+  entry,
+  paddockNotes,
+  researchParsed,
+  researchDrift,
+  isRestoringResearch,
+}: {
+  betPlan: BetPlanResponse | null;
+  entry: RaceEntryResponse | null;
+  paddockNotes: PaddockNotes;
+  researchParsed: ResearchParsed | null;
+  researchDrift: ResearchDrift;
+  isRestoringResearch: boolean;
+}) {
   if (!betPlan) {
     return <EmptyCard message="買い目候補を取得中です。" />;
   }
+  const adjustedRanking = adjustRankingWithPaddockNotes(betPlan.ranking, entry, paddockNotes);
   return (
     <section className="mt-3 space-y-3">
       {betPlan.provisional_only ? (
@@ -1564,7 +2364,7 @@ function BetTab({ betPlan }: { betPlan: BetPlanResponse | null }) {
       <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
         <p className="text-sm font-black text-slate-900">候補馬ランキング</p>
         <div className="mt-3 space-y-2">
-          {betPlan.ranking.slice(0, 8).map((item, idx) => (
+          {adjustedRanking.slice(0, 8).map((item, idx) => (
             <div key={`${item.horse_name}-${idx}`} className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
               <div>
                 <p className="text-sm font-black text-slate-900">
@@ -1572,16 +2372,30 @@ function BetTab({ betPlan }: { betPlan: BetPlanResponse | null }) {
                 </p>
                 <p className="text-xs text-slate-500">
                   {item.umaban || "-"}番 / {item.style || "-"} / {item.reason}
+                  {item.paddock_reason ? ` / 現地${item.paddock_reason}` : ""}
                 </p>
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-sm font-black text-emerald-700">{formatCandidateIndex(item.score)}</p>
+                {item.paddock_bonus ? (
+                  <p className={`text-[10px] font-black ${item.paddock_bonus > 0 ? "text-emerald-700" : "text-rose-700"}`}>
+                    現地{item.paddock_bonus > 0 ? "+" : ""}
+                    {Math.round(item.paddock_bonus * 100)}
+                  </p>
+                ) : null}
+                <p className="text-sm font-black text-emerald-700">{formatCandidateIndex(item.adjusted_score)}</p>
                 <p className="text-[10px] font-bold text-slate-400">候補指数</p>
               </div>
             </div>
           ))}
         </div>
       </div>
+      <ResearchDriftSummary drift={researchDrift} />
+      {researchParsed ? <ResearchAiEvaluation parsed={researchParsed} /> : null}
+      {!researchParsed && isRestoringResearch ? (
+        <div className="rounded-2xl bg-amber-50 p-4 text-xs font-bold text-amber-900 shadow-sm ring-1 ring-amber-100">
+          Deep Research のサーバーバックアップを確認中...
+        </div>
+      ) : null}
       {!betPlan.provisional_only && betPlan.tickets.length > 0 ? (
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
           <p className="text-sm font-black text-slate-900">正式買い目</p>
@@ -1595,6 +2409,69 @@ function BetTab({ betPlan }: { betPlan: BetPlanResponse | null }) {
         </div>
       ) : null}
     </section>
+  );
+}
+
+function ResearchDriftSummary({ drift }: { drift: ResearchDrift }) {
+  if (!drift.has_warning) return null;
+  return (
+    <div className="rounded-2xl bg-amber-100 p-4 text-xs text-amber-950 shadow-sm ring-1 ring-amber-300">
+      <p className="text-sm font-black">⚠ Deep Research 前提のズレ検知</p>
+      {drift.odds_drifts
+        .filter((item) => item.severity === "warn" || item.severity === "critical")
+        .map((item) => (
+          <p key={`${item.umaban}-${item.assumed_odds}-${item.current_odds}`} className="mt-2 leading-5">
+            {item.umaban}番 想定 {item.assumed_odds.toFixed(1)} -&gt; 当日 {item.current_odds.toFixed(1)} ({item.ratio > 0 ? "+" : ""}
+            {(item.ratio * 100).toFixed(0)}%
+            {item.recalc_ev != null ? `, EV ${item.assumed_ev?.toFixed(2) ?? "-"}->${item.recalc_ev.toFixed(2)}` : ""})
+          </p>
+        ))}
+      {drift.bias_drift?.conflict ? (
+        <p className="mt-2 leading-5">
+          想定「{drift.bias_drift.assumed}」 vs 当日「{drift.bias_drift.current || "-"}」
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function ResearchAiEvaluation({ parsed }: { parsed: ResearchParsed }) {
+  const hasContent =
+    parsed.pace_label ||
+    parsed.course_note ||
+    parsed.tickets.length > 0 ||
+    parsed.scratched.length > 0 ||
+    parsed.max_payout_scenario;
+  if (!hasContent) return null;
+  return (
+    <div className="rounded-2xl bg-amber-50 p-4 shadow-sm ring-1 ring-amber-200">
+      <p className="text-sm font-black text-amber-950">AI 評価（Deep Research）</p>
+      {parsed.pace_label ? <p className="mt-2 text-xs leading-5 text-amber-900">展開: {parsed.pace_label}</p> : null}
+      {parsed.course_note ? <p className="mt-1 text-xs leading-5 text-amber-900">コース: {parsed.course_note}</p> : null}
+      {parsed.tickets.length ? (
+        <div className="mt-3 space-y-2">
+          <p className="text-xs font-black text-amber-900">AI推奨買い目</p>
+          {parsed.tickets.map((ticket, index) => (
+            <div key={`${ticket.bet_type}-${index}`} className="rounded-xl bg-white/80 px-3 py-2 text-xs text-amber-950">
+              <span className="font-black">{ticket.bet_type}</span> {formatParsedTicket(ticket)}
+              {ticket.amount_yen ? ` / ${ticket.amount_yen}円` : ""}
+              {ticket.reason ? <p className="mt-1 text-[11px] leading-4 text-amber-800">{ticket.reason}</p> : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {parsed.scratched.length ? (
+        <div className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs text-amber-950">
+          <span className="font-black">消し馬:</span>{" "}
+          {parsed.scratched.map((item) => `${item.umaban}番${item.horse_name ? ` ${item.horse_name}` : ""}`).join(" / ")}
+        </div>
+      ) : null}
+      {parsed.max_payout_scenario ? (
+        <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-xs leading-5 text-amber-900">
+          最大回収シナリオ: {parsed.max_payout_scenario}
+        </p>
+      ) : null}
+    </div>
   );
 }
 

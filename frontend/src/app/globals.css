@@ -8,6 +8,7 @@
 html,
 body {
   min-height: 100%;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 20% 10%, #dbeafe 0%, transparent 35%),
     radial-gradient(circle at 80% 0%, #e9d5ff 0%, transparent 30%),

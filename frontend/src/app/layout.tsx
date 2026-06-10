@@ -1,6 +1,8 @@
 ﻿import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
 
+import { ToastProvider } from "@/components/notifications/toast-stack";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -34,7 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="ja">
       <body className={`${inter.variable} ${notoSansJp.variable} antialiased`}>
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

@@ -69,7 +69,13 @@ class TextAnalysisClient(Protocol):
     @property
     def is_configured(self) -> bool: ...
 
-    def generate_text(self, *, prompt: str, system_prompt: str | None = None) -> str: ...
+    def generate_text(
+        self,
+        *,
+        prompt: str,
+        system_prompt: str | None = None,
+        max_output_tokens: int | None = None,
+    ) -> str: ...
 
 
 class YouTubeClient(Protocol):

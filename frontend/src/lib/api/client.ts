@@ -9,6 +9,10 @@
   RaceCharacteristicsResponse,
   RaceCourseStatsResponse,
   RaceEntryResponse,
+  ResearchEntryHorse,
+  ResearchNotesBackup,
+  ResearchNotesBackupResponse,
+  ResearchParsed,
   ResolveRaceIdResponse,
   SameDayRacesResponse,
   SameDaySheetResponse,
@@ -46,6 +50,21 @@ async function fetchJson<T>(path: string): Promise<T> {
 async function postJson<T>(path: string, body: object): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response);
+  }
+
+  return (await response.json()) as T;
+}
+
+async function putJson<T>(path: string, body: object): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",
     body: JSON.stringify(body),
@@ -129,6 +148,25 @@ export function getSameDaySheet(
   return fetchJson<SameDaySheetResponse>(`/api/v1/races/same-day-sheet?${params.toString()}`);
 }
 
+export function refreshSameDaySheetVolatile({
+  date,
+  venue,
+  raceId,
+  raceNumber,
+  budgetYen = 3000,
+}: {
+  date: string;
+  venue: string;
+  raceId?: string | null;
+  raceNumber?: string | null;
+  budgetYen?: number;
+}): Promise<SameDaySheetResponse> {
+  const params = new URLSearchParams({ date, venue, budget_yen: String(budgetYen) });
+  if (raceId) params.set("race_id", raceId);
+  if (raceNumber) params.set("race_number", raceNumber);
+  return postJson<SameDaySheetResponse>(`/api/v1/races/same-day-sheet/refresh-volatile?${params.toString()}`, {});
+}
+
 export function getRaceEntry(
   raceId: string,
   context?: { venue?: string; distance?: string; surface?: string },
@@ -153,6 +191,25 @@ export function getRaceCourseStats(
 
 export function postRaceBetPlan(raceId: string, budgetYen = 3000): Promise<BetPlanResponse> {
   return postJson<BetPlanResponse>(`/api/v1/races/${raceId}/bet-plan`, { budget_yen: budgetYen });
+}
+
+export function parseResearchReport(
+  raceId: string,
+  rawText: string,
+  entryHorses: ResearchEntryHorse[],
+): Promise<ResearchParsed> {
+  return postJson<ResearchParsed>(`/api/v1/races/${raceId}/research/parse`, {
+    raw_text: rawText,
+    entry_horses: entryHorses,
+  });
+}
+
+export function getResearchNotesBackup(raceId: string): Promise<ResearchNotesBackupResponse> {
+  return fetchJson<ResearchNotesBackupResponse>(`/api/v1/races/${raceId}/research/notes`);
+}
+
+export function putResearchNotesBackup(raceId: string, payload: ResearchNotesBackup): Promise<ResearchNotesBackupResponse> {
+  return putJson<ResearchNotesBackupResponse>(`/api/v1/races/${raceId}/research/notes`, payload);
 }
 
 export function getRaceCharacteristics(raceKey: string): Promise<RaceCharacteristicsResponse> {

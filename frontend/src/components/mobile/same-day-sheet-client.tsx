@@ -195,6 +195,7 @@ function cleanupOldDetailCaches(): void {
 
 export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetClientProps) {
   const [saveMessage, setSaveMessage] = useState("");
+  const [refreshingVolatile, setRefreshingVolatile] = useState(false);
   const cacheSnapshot = useSyncExternalStore(subscribeDetailCache, detailCacheSnapshot, () => "server");
   useEffect(() => {
     cleanupOldDetailCaches();
@@ -217,14 +218,30 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
       }, 0),
     [races],
   );
-  const refreshHref = `/same-day-sheet?date=${encodeURIComponent(date)}&venue=${encodeURIComponent(venue)}&refresh=true`;
-
   function handleSaveAll() {
     try {
       const count = saveAllDetails(races);
       setSaveMessage(`${count}R分をこの端末に保存しました`);
     } catch {
       setSaveMessage("端末保存に失敗しました。ブラウザの空き容量を確認してください。");
+    }
+  }
+
+  async function handleVolatileRefreshAll() {
+    setRefreshingVolatile(true);
+    setSaveMessage("");
+    try {
+      const params = new URLSearchParams({ date, venue, budget_yen: "3000" });
+      const response = await fetch(`/api/v1/races/same-day-sheet/refresh-volatile?${params.toString()}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      window.location.href = `/same-day-sheet?date=${encodeURIComponent(date)}&venue=${encodeURIComponent(venue)}`;
+    } catch (refreshError) {
+      setSaveMessage(refreshError instanceof Error ? `軽量更新に失敗しました: ${refreshError.message}` : "軽量更新に失敗しました");
+      setRefreshingVolatile(false);
     }
   }
 
@@ -284,12 +301,16 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
           </button>
         </form>
         {error ? <p className="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-xs text-rose-700">{error}</p> : null}
-        <Link
-          href={refreshHref}
-          className="mt-3 block min-h-12 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-black text-amber-900"
+        <button
+          type="button"
+          onClick={() => {
+            void handleVolatileRefreshAll();
+          }}
+          disabled={refreshingVolatile}
+          className="mt-3 block min-h-12 w-full rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-center text-sm font-black text-amber-900 disabled:opacity-60"
         >
           オッズ・馬体重公開後に全Rを軽量更新
-        </Link>
+        </button>
         <button
           type="button"
           onClick={handleSaveAll}
