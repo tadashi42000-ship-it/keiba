@@ -12,6 +12,7 @@ import type {
   RaceEntryResponse,
   SameDaySheetRace,
   SameDaySheetResponse,
+  TrackBias,
   UpcomingRace,
 } from "@/lib/api/types";
 
@@ -24,14 +25,17 @@ type SameDaySheetClientProps = {
 
 type RaceDetailCachePayload = {
   savedAt: string;
+  savedAtIso?: string;
+  serverGeneratedAt?: string;
   race: UpcomingRace;
   entry: RaceEntryResponse | null;
   courseStats: RaceCourseStatsResponse | null;
   betPlan: BetPlanResponse | null;
+  trackBias?: TrackBias | null;
   externalSnapshot?: ExternalSnapshot | null;
 };
 
-const DETAIL_CACHE_PREFIX = "keiba:same-day:race-detail:";
+const DETAIL_CACHE_PREFIX = "keiba:same-day:race-detail:v3:";
 const DETAIL_CACHE_EVENT = "keiba:same-day-detail-cache-updated";
 const DETAIL_CACHE_TTL_DAYS = 7;
 
@@ -54,6 +58,43 @@ function formatOdds(value: number | null): string {
 function formatCandidateIndex(value: number): string {
   if (!Number.isFinite(value)) return "-";
   return `${Math.round(value * 100)}`;
+}
+
+function formatOptionalIndex(value?: number | null): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return formatCandidateIndex(value);
+}
+
+function shoshoFlagLabels(flags?: { label: string }[]): string {
+  return flags?.map((flag) => flag.label).filter(Boolean).join("・") || "";
+}
+
+function raceShapeText(shape?: Record<string, unknown>): string {
+  const parts: string[] = [];
+  const pace = shape?.pace_pattern;
+  const hatsuran = shape?.hatsuran_do;
+  if (typeof pace === "string" && pace) parts.push(`展開 ${pace}`);
+  if (typeof hatsuran === "number" && Number.isFinite(hatsuran)) parts.push(`波乱${Math.round(hatsuran * 100)}%`);
+  return parts.join(" / ");
+}
+
+function oddsRecalcText(entry: RaceEntryResponse | null): string {
+  const updatedAt = entry?.odds_updated_at || entry?.body_updated_at;
+  return updatedAt ? `買い目は最新オッズで再計算 ${updatedAt}` : "買い目はキャッシュ済みオッズで計算";
+}
+
+function biasConfidenceLabel(confidence?: string): string {
+  if (confidence === "high") return "高";
+  if (confidence === "medium") return "中";
+  if (confidence === "provisional") return "暫定";
+  return "サンプル不足";
+}
+
+function biasConfidenceClass(confidence?: string): string {
+  if (confidence === "high") return "bg-emerald-100 text-emerald-800";
+  if (confidence === "medium") return "bg-sky-100 text-sky-800";
+  if (confidence === "provisional") return "bg-amber-100 text-amber-800";
+  return "bg-slate-100 text-slate-600";
 }
 
 function wakuNumber(value: string): string {
@@ -90,15 +131,24 @@ function raceDetailHref(item: SameDaySheetRace): string {
   return `/races/${encodeURIComponent(race.race_key)}?${params.toString()}`;
 }
 
-function detailCacheFromItem(item: SameDaySheetRace, savedAt: string): RaceDetailCachePayload {
+function detailCacheFromItem(item: SameDaySheetRace, savedAt: string, savedAtIso: string, serverGeneratedAt?: string): RaceDetailCachePayload {
   return {
     savedAt,
+    savedAtIso,
+    serverGeneratedAt,
     race: item.race,
     entry: item.entry,
     courseStats: item.course_stats,
     betPlan: item.bet_plan,
+    trackBias: item.track_bias ?? null,
     externalSnapshot: null,
   };
+}
+
+function freshnessMs(value?: string): number {
+  if (!value) return 0;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function readDetailCache(item: SameDaySheetRace): RaceDetailCachePayload | null {
@@ -113,14 +163,21 @@ function readDetailCache(item: SameDaySheetRace): RaceDetailCachePayload | null 
   }
 }
 
-function mergeDetailCache(item: SameDaySheetRace): SameDaySheetRace {
+function mergeDetailCache(item: SameDaySheetRace, serverGeneratedAt?: string): SameDaySheetRace {
   const cached = readDetailCache(item);
   if (!cached) return item;
+  if (serverGeneratedAt && !cached.serverGeneratedAt) {
+    return item;
+  }
+  if (freshnessMs(serverGeneratedAt) > freshnessMs(cached.serverGeneratedAt || cached.savedAtIso)) {
+    return item;
+  }
   return {
     ...item,
     entry: cached.entry,
     course_stats: cached.courseStats,
     bet_plan: cached.betPlan,
+    track_bias: cached.trackBias ?? item.track_bias,
   };
 }
 
@@ -130,13 +187,15 @@ function latestRaceUpdatedAt(item: SameDaySheetRace): string {
   return entry.odds_updated_at || entry.body_updated_at || "";
 }
 
-function saveAllDetails(races: SameDaySheetRace[]): number {
-  const savedAt = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+function saveAllDetails(races: SameDaySheetRace[], serverGeneratedAt?: string): number {
+  const now = new Date();
+  const savedAt = now.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  const savedAtIso = now.toISOString();
   let count = 0;
   for (const item of races) {
     if (!item.entry) continue;
     const existing = readDetailCache(item);
-    const payload = detailCacheFromItem(item, savedAt);
+    const payload = detailCacheFromItem(item, savedAt, savedAtIso, serverGeneratedAt);
     payload.externalSnapshot = existing?.externalSnapshot ?? null;
     window.localStorage.setItem(detailCacheKey(item.race), JSON.stringify(payload));
     count += 1;
@@ -204,7 +263,7 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
     void cacheSnapshot;
     const base = sheet?.races ?? [];
     if (typeof window === "undefined" || cacheSnapshot === "server") return base;
-    return base.map(mergeDetailCache);
+    return base.map((item) => mergeDetailCache(item, sheet?.generated_at));
   }, [sheet, cacheSnapshot]);
   const raceIds = useMemo(() => races.map((item) => item.race.race_id || item.race.race_key), [races]);
   const marksByRace = useHorseMarksMulti(raceIds);
@@ -220,7 +279,7 @@ export function SameDaySheetClient({ date, venue, sheet, error }: SameDaySheetCl
   );
   function handleSaveAll() {
     try {
-      const count = saveAllDetails(races);
+      const count = saveAllDetails(races, sheet?.generated_at);
       setSaveMessage(`${count}R分をこの端末に保存しました`);
     } catch {
       setSaveMessage("端末保存に失敗しました。ブラウザの空き容量を確認してください。");
@@ -342,6 +401,10 @@ function RaceSheetCard({ item, horseMarks }: { item: SameDaySheetRace; horseMark
   const oddsCount = entry?.horses.filter((horse) => horse.odds !== null).length ?? 0;
   const bodyCount = entry?.horses.filter((horse) => horse.body_weight).length ?? 0;
   const updatedAt = latestRaceUpdatedAt(item);
+  const shapeText = raceShapeText(betPlan?.recommendations?.race_shape);
+  const abilityTicket = betPlan?.tickets?.[0] ?? null;
+  const valueTicket = betPlan?.recommendations?.tickets?.[0] ?? null;
+  const abilityFallback = abilityTicket ? null : ranking[0] ?? null;
 
   return (
     <article className="rounded-3xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
@@ -387,6 +450,9 @@ function RaceSheetCard({ item, horseMarks }: { item: SameDaySheetRace; horseMark
 
       {item.track_bias?.summary_label ? (
         <div className="mt-3 rounded-2xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800">
+          <span className={`mr-2 rounded-full px-2 py-0.5 text-[10px] font-black ${biasConfidenceClass(item.track_bias.confidence)}`}>
+            {biasConfidenceLabel(item.track_bias.confidence)}
+          </span>
           <span className="font-black">バイアス:</span> {item.track_bias.summary_label}
           <span className="ml-2 text-[10px] opacity-70">
             ({item.track_bias.sample_size}R{item.track_bias.fallback_used ? " / 同会場他コース" : ""})
@@ -405,6 +471,38 @@ function RaceSheetCard({ item, horseMarks }: { item: SameDaySheetRace; horseMark
         ))}
       </div>
 
+      {betPlan ? (
+        <div className="mt-3 space-y-1 rounded-2xl bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+          <p className="font-black text-emerald-800">{oddsRecalcText(entry)}</p>
+          <p className="line-clamp-1">
+            <span className="font-black">能力上位:</span>{" "}
+            {abilityTicket ? (
+              <>
+                {abilityTicket.type} <span className="text-emerald-700">{abilityTicket.selection}</span>
+              </>
+            ) : abilityFallback ? (
+              <>
+                {abilityFallback.umaban || "-"}番 {abilityFallback.horse_name}
+              </>
+            ) : (
+              "詳細で確認"
+            )}
+          </p>
+          <p className="line-clamp-1">
+            <span className="font-black">妙味推奨:</span>{" "}
+            {valueTicket ? (
+              <>
+                {valueTicket.type} {valueTicket.point_note || ""}
+                <span className="ml-1 text-emerald-700">{valueTicket.selection}</span>
+              </>
+            ) : (
+              betPlan.recommendations?.note || "詳細で確認"
+            )}
+          </p>
+          {shapeText ? <p className="line-clamp-1 text-[10px] font-bold text-emerald-700">{shapeText}</p> : null}
+        </div>
+      ) : null}
+
       <Link
         href={raceDetailHref(item)}
         className="mt-4 block rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-black text-white"
@@ -420,6 +518,7 @@ function RankingRow({ item, index, mark }: { item: BetRankingItem; index: number
     <div className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-3 py-2">
       <div className="min-w-0">
         <p className="flex flex-wrap items-center gap-2 text-sm font-black text-slate-950">
+          {item.is_value_top5 ? <span className="text-amber-500">★</span> : null}
           <span>
             {index}. {item.horse_name}
           </span>
@@ -433,13 +532,25 @@ function RankingRow({ item, index, mark }: { item: BetRankingItem; index: number
               {item.waku}枠
             </span>
           ) : null}
+          {item.danger_flags?.length ? (
+            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-700">⚠</span>
+          ) : null}
+          {item.value_flags?.length ? (
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-800">🎯</span>
+          ) : null}
         </p>
         <p className="mt-1 text-xs text-slate-500">
           {item.umaban || "-"}番 / {item.style || "-"} / 単勝 {formatOdds(item.odds)}
         </p>
+        {(item.danger_flags?.length || item.value_flags?.length) ? (
+          <p className="mt-1 line-clamp-1 text-[10px] font-semibold text-slate-500">
+            {[shoshoFlagLabels(item.value_flags), shoshoFlagLabels(item.danger_flags)].filter(Boolean).join(" / ")}
+          </p>
+        ) : null}
       </div>
       <div className="shrink-0 text-right">
         <p className="text-sm font-black text-emerald-700">{formatCandidateIndex(item.score)}</p>
+        <p className="text-[10px] font-black text-amber-700">妙 {formatOptionalIndex(item.value_score)}</p>
         {item.bias_bonus ? (
           <p className={`text-[10px] font-black ${item.bias_bonus > 0 ? "text-emerald-700" : "text-rose-700"}`}>
             {item.bias_bonus > 0 ? "+" : ""}

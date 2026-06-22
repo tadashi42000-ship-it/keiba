@@ -179,4 +179,8 @@ def _course_shape_key(venue: str) -> str:
 
 def _going_bucket(going: str) -> str:
     text = re.sub(r"\s+", "", str(going or ""))
-    return "firm" if not text or "良" in text else "soft"
+    if not text:
+        return "firm"
+    if any(token in text for token in ("不良", "不", "稍重", "稍", "やや重", "重")):
+        return "soft"
+    return "firm" if "良" in text else "soft"

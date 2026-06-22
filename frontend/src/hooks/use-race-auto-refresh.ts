@@ -15,6 +15,20 @@ type Props = {
 };
 
 const VIBRATE_PREFIX = "keiba:same-day:vibrate-fired:";
+const LEADER_PREFIX = "keiba:same-day:auto-refresh-leader:";
+const CHANNEL_PREFIX = "keiba-same-day-auto-refresh:";
+
+type LeaderLease = {
+  tabId: string;
+  expiresAt: number;
+};
+
+type RefreshMessage = {
+  type: "refreshed";
+  raceId: string;
+  tabId: string;
+  at: number;
+};
 
 function startAtMs(dateIso: string, startTime: string): number | null {
   const time = String(startTime || "").match(/(\d{1,2}):(\d{2})/);
@@ -55,13 +69,45 @@ function fireDeadlineOnce(raceId: string, phase: DeadlinePhase, onDeadline?: (ph
   onDeadline?.(phase);
 }
 
+function leaderKey(raceId: string): string {
+  return `${LEADER_PREFIX}${raceId}`;
+}
+
+function readLeaderLease(raceId: string): LeaderLease | null {
+  if (typeof window === "undefined" || !raceId) return null;
+  try {
+    const raw = window.localStorage.getItem(leaderKey(raceId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<LeaderLease>;
+    if (!parsed.tabId || typeof parsed.expiresAt !== "number") return null;
+    return { tabId: parsed.tabId, expiresAt: parsed.expiresAt };
+  } catch {
+    return null;
+  }
+}
+
+function writeLeaderLease(raceId: string, lease: LeaderLease): void {
+  if (typeof window === "undefined" || !raceId) return;
+  window.localStorage.setItem(leaderKey(raceId), JSON.stringify(lease));
+}
+
+function createTabId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export function useRaceAutoRefresh({ raceId, startTime, dateIso, enabled = true, onRefresh, onDeadline }: Props) {
   const [phase, setPhase] = useState<PollingPhase>("off");
   const [lastFetchedAt, setLastFetchedAt] = useState<number | null>(null);
+  const [isPollingLeader, setIsPollingLeader] = useState(false);
   const onRefreshRef = useRef(onRefresh);
   const onDeadlineRef = useRef(onDeadline);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const channelRef = useRef<BroadcastChannel | null>(null);
   const inFlightRef = useRef(false);
+  const tabIdRef = useRef<string>("");
   const startMs = useMemo(() => startAtMs(dateIso, startTime), [dateIso, startTime]);
 
   useEffect(() => {
@@ -72,17 +118,70 @@ export function useRaceAutoRefresh({ raceId, startTime, dateIso, enabled = true,
     onDeadlineRef.current = onDeadline;
   }, [onDeadline]);
 
+  const acquireLeadership = useCallback(
+    (leaseMs: number) => {
+      if (typeof window === "undefined" || !raceId) return true;
+      if (!("BroadcastChannel" in window)) {
+        setIsPollingLeader(true);
+        return true;
+      }
+      const tabId = tabIdRef.current;
+      const now = Date.now();
+      const current = readLeaderLease(raceId);
+      if (!current || current.expiresAt <= now || current.tabId === tabId) {
+        writeLeaderLease(raceId, { tabId, expiresAt: now + leaseMs });
+        setIsPollingLeader(true);
+        return true;
+      }
+      setIsPollingLeader(false);
+      return false;
+    },
+    [raceId],
+  );
+
   const runRefresh = useCallback(async () => {
     if (!enabled || !raceId || inFlightRef.current) return;
     inFlightRef.current = true;
     try {
       await onRefreshRef.current();
-      setLastFetchedAt(Date.now());
-      console.debug("[same-day-auto-refresh] fetched", { raceId, phase });
+      const fetchedAt = Date.now();
+      setLastFetchedAt(fetchedAt);
+      channelRef.current?.postMessage({
+        type: "refreshed",
+        raceId,
+        tabId: tabIdRef.current,
+        at: fetchedAt,
+      } satisfies RefreshMessage);
+      console.debug("[same-day-auto-refresh] fetched", { raceId, phase, leader: isPollingLeader });
     } finally {
       inFlightRef.current = false;
     }
-  }, [enabled, phase, raceId]);
+  }, [enabled, isPollingLeader, phase, raceId]);
+
+  useEffect(() => {
+    tabIdRef.current = createTabId();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !raceId || !("BroadcastChannel" in window)) return;
+    const channel = new BroadcastChannel(`${CHANNEL_PREFIX}${raceId}`);
+    channelRef.current = channel;
+    channel.onmessage = (event: MessageEvent<RefreshMessage>) => {
+      const message = event.data;
+      if (!message || message.type !== "refreshed" || message.raceId !== raceId || message.tabId === tabIdRef.current) return;
+      if (document.visibilityState === "hidden" || inFlightRef.current) return;
+      inFlightRef.current = true;
+      void Promise.resolve(onRefreshRef.current())
+        .then(() => setLastFetchedAt(message.at))
+        .finally(() => {
+          inFlightRef.current = false;
+        });
+    };
+    return () => {
+      channel.close();
+      if (channelRef.current === channel) channelRef.current = null;
+    };
+  }, [raceId]);
 
   useEffect(() => {
     if (!enabled || !raceId || !startMs) {
@@ -121,11 +220,13 @@ export function useRaceAutoRefresh({ raceId, startTime, dateIso, enabled = true,
       clearPolling();
       const intervalMs = intervalForPhase(phase);
       if (!enabled || !raceId || !intervalMs || document.visibilityState === "hidden") return;
-      // same-day-sheet refresh is intentionally reused for Phase 1. It is heavier than
-      // a single-race endpoint; future work can elect one tab via BroadcastChannel.
-      if (immediate) void runRefresh();
+      const leaseMs = Math.max(intervalMs * 2, 20 * 1000);
+      const refreshIfLeader = () => {
+        if (acquireLeadership(leaseMs)) void runRefresh();
+      };
+      if (immediate) refreshIfLeader();
       intervalRef.current = setInterval(() => {
-        void runRefresh();
+        refreshIfLeader();
       }, intervalMs);
     };
     const handleVisibility = () => {
@@ -141,7 +242,7 @@ export function useRaceAutoRefresh({ raceId, startTime, dateIso, enabled = true,
       document.removeEventListener("visibilitychange", handleVisibility);
       clearPolling();
     };
-  }, [enabled, phase, raceId, runRefresh]);
+  }, [acquireLeadership, enabled, phase, raceId, runRefresh]);
 
-  return { phase, lastFetchedAt };
+  return { phase, lastFetchedAt, isPollingLeader };
 }

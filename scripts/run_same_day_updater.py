@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 import sys
 import time
 import urllib.error
@@ -38,6 +39,13 @@ def main() -> int:
     parser.add_argument("--budget-yen", type=int, default=3000)
     parser.add_argument("--lookahead-min", type=int, default=30, help="Refresh races starting within this window")
     parser.add_argument("--post-start-min", type=int, default=1, help="Keep refreshing briefly after start")
+    parser.add_argument(
+        "--full-refresh-every-min",
+        type=int,
+        default=30,
+        help="Also rebuild the full same-day sheet on this interval to refresh track bias/result pools. 0 disables. Default: 30.",
+    )
+    parser.add_argument("--status-file", default="", help="Optional JSON heartbeat/status output path")
     parser.add_argument("--once", action="store_true", help="Run one cycle and exit")
     parser.add_argument("--loop", action="store_true", help="Keep running until Ctrl+C")
     args = parser.parse_args()
@@ -46,13 +54,44 @@ def main() -> int:
     if not args.once and not args.loop:
         args.once = True
 
+    last_full_refresh_at = 0.0
     while True:
         try:
-            sleep_seconds = run_cycle(args)
+            now_mono = time.monotonic()
+            do_full_refresh = bool(
+                args.full_refresh_every_min > 0
+                and (
+                    last_full_refresh_at <= 0.0
+                    or now_mono - last_full_refresh_at >= args.full_refresh_every_min * 60
+                )
+            )
+            sleep_seconds = run_cycle(args, full_refresh=do_full_refresh)
+            if do_full_refresh:
+                last_full_refresh_at = now_mono
         except KeyboardInterrupt:
+            write_status(
+                args.status_file,
+                {
+                    "status": "stopped",
+                    "date": args.date,
+                    "venue": args.venue,
+                    "updated_at": now_iso(),
+                },
+            )
             print("stopped")
             return 0
         except Exception as exc:
+            write_status(
+                args.status_file,
+                {
+                    "status": "warn",
+                    "date": args.date,
+                    "venue": args.venue,
+                    "updated_at": now_iso(),
+                    "error": f"{type(exc).__name__}: {exc}",
+                    "next_sleep_sec": 60,
+                },
+            )
             print(f"[WARN] cycle failed: {type(exc).__name__}: {exc}", flush=True)
             sleep_seconds = 60
 
@@ -61,16 +100,40 @@ def main() -> int:
         time.sleep(max(5, sleep_seconds))
 
 
-def run_cycle(args: argparse.Namespace) -> int:
+def run_cycle(args: argparse.Namespace, *, full_refresh: bool = False) -> int:
     sheet = get_json(
         args.base_url,
         "/api/v1/races/same-day-sheet",
-        {"date": args.date, "venue": args.venue, "budget_yen": str(args.budget_yen)},
+        {
+            "date": args.date,
+            "venue": args.venue,
+            "budget_yen": str(args.budget_yen),
+            **({"refresh": "true"} if full_refresh else {}),
+        },
+        timeout_sec=360 if full_refresh else 30,
     )
+    if full_refresh:
+        print(
+            f"[OK] full refresh for track bias/result pools generated_at={sheet.get('generated_at', '-')}",
+            flush=True,
+        )
     target = choose_target_race(sheet, args.date, args.lookahead_min, args.post_start_min)
     generated_at = sheet.get("generated_at", "-")
     if not target:
         print(f"[INFO] {args.date} {args.venue}: no race in refresh window / cache generated_at={generated_at}", flush=True)
+        write_status(
+            args.status_file,
+            {
+                "status": "idle",
+                "date": args.date,
+                "venue": args.venue,
+                "updated_at": now_iso(),
+                "generated_at": generated_at,
+                "message": "no race in refresh window",
+                "full_refresh": full_refresh,
+                "next_sleep_sec": 60,
+            },
+        )
         return 60
 
     race = target["race"]
@@ -110,6 +173,25 @@ def run_cycle(args: argparse.Namespace) -> int:
             f"[INFO] previous cache odds={entry.get('odds_updated_at') or '-'} body={entry.get('body_updated_at') or '-'}",
             flush=True,
         )
+    write_status(
+        args.status_file,
+        {
+            "status": "ok",
+            "date": args.date,
+            "venue": args.venue,
+            "updated_at": now_iso(),
+            "generated_at": refreshed.get("generated_at", "-"),
+            "full_refresh": full_refresh,
+            "race_id": race_id,
+            "race_number": race_number,
+            "race_name": race_name,
+            "remaining_sec": int(remaining),
+            "odds_count": odds_count,
+            "body_count": body_count,
+            "elapsed_sec": round(elapsed, 2),
+            "next_sleep_sec": phase_sleep,
+        },
+    )
     return phase_sleep
 
 
@@ -169,9 +251,9 @@ def find_race(sheet: dict[str, Any], race_id: str, race_number: str) -> dict[str
     return None
 
 
-def get_json(base_url: str, path: str, params: dict[str, str]) -> dict[str, Any]:
+def get_json(base_url: str, path: str, params: dict[str, str], *, timeout_sec: int = 30) -> dict[str, Any]:
     url = build_url(base_url, path, params)
-    with urllib.request.urlopen(url, timeout=30) as response:
+    with urllib.request.urlopen(url, timeout=timeout_sec) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
@@ -189,6 +271,20 @@ def post_json(base_url: str, path: str, params: dict[str, str]) -> dict[str, Any
 def build_url(base_url: str, path: str, params: dict[str, str]) -> str:
     query = urllib.parse.urlencode(params)
     return f"{base_url.rstrip('/')}{path}?{query}"
+
+
+def now_iso() -> str:
+    return datetime.now(JST).isoformat(timespec="seconds")
+
+
+def write_status(path: str, payload: dict[str, Any]) -> None:
+    if not path:
+        return
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temp = target.with_suffix(f"{target.suffix}.tmp")
+    temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    temp.replace(target)
 
 
 if __name__ == "__main__":

@@ -1,215 +1,2610 @@
 {
   "version": 1,
   "horses": {
-    "2021105352": {
-      "sire_name": "スワーヴリチャード",
-      "broodmare_sire_name": "キングカメハメハ",
-      "fetched_at": "2026-06-10"
-    },
-    "2021105066": {
-      "sire_name": "ジャスタウェイ",
-      "broodmare_sire_name": "Efisio",
-      "fetched_at": "2026-06-10"
-    },
-    "2021105662": {
-      "sire_name": "モーリス",
-      "broodmare_sire_name": "キングカメハメハ",
-      "fetched_at": "2026-06-10"
-    },
-    "2020102625": {
-      "sire_name": "ルーラーシップ",
-      "broodmare_sire_name": "ディープインパクト",
-      "fetched_at": "2026-06-10"
-    },
-    "2021105548": {
-      "sire_name": "エピファネイア",
+    "2024106650": {
+      "sire_name": "マインドユアビスケッツ Mind Your Biscuits(米)",
       "broodmare_sire_name": "ダイワメジャー",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-19"
     },
-    "2022104697": {
-      "sire_name": "マクフィ Makfi(英)",
+    "2024108272": {
+      "sire_name": "Violence",
+      "broodmare_sire_name": "Scat Daddy (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024104937": {
+      "sire_name": "フォーウィールドライブ Four Wheel Drive(米)",
       "broodmare_sire_name": "ディープインパクト",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-19"
     },
-    "2016104668": {
-      "sire_name": "ジャスタウェイ",
-      "broodmare_sire_name": "サクラバクシンオー",
-      "fetched_at": "2026-06-10"
+    "2024106790": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-19"
     },
-    "2022103146": {
+    "2024106284": {
+      "sire_name": "ルヴァンスレーヴ",
+      "broodmare_sire_name": "ワイルドラッシュ Wild Rush(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024101709": {
+      "sire_name": "ディスクリートキャット Discreet Cat(米)",
+      "broodmare_sire_name": "ダンカーク Dunkirk(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024102381": {
+      "sire_name": "クリソベリル",
+      "broodmare_sire_name": "フリオーソ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024105548": {
+      "sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "broodmare_sire_name": "クロフネ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024101646": {
+      "sire_name": "ウインブライト",
+      "broodmare_sire_name": "ロージズインメイ Roses in May(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024108240": {
+      "sire_name": "Yaupon (米)",
+      "broodmare_sire_name": "シャンハイボビー Shanghai Bobby(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104668": {
+      "sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "broodmare_sire_name": "ダンカーク Dunkirk(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105452": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105601": {
+      "sire_name": "レインボーライン",
+      "broodmare_sire_name": "オウケンブルースリ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102689": {
+      "sire_name": "フィエールマン",
+      "broodmare_sire_name": "アグネスデジタル",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104508": {
+      "sire_name": "ゴールドアクター",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106163": {
+      "sire_name": "アポロケンタッキー",
+      "broodmare_sire_name": "アポロキングダム",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105295": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Manhattan Rain",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106704": {
+      "sire_name": "レッドファルクス",
+      "broodmare_sire_name": "ショウナンカンプ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104526": {
+      "sire_name": "アジアエクスプレス",
+      "broodmare_sire_name": "オルフェーヴル",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105006": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Tapit (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103956": {
+      "sire_name": "アジアエクスプレス",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102396": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "Congrats (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102236": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "Exchange Rate",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100543": {
+      "sire_name": "パイロ Pyro(米)",
+      "broodmare_sire_name": "コマンズ Commands(豪)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105652": {
+      "sire_name": "ミスチヴィアスアレックス Mischevious Alex(米)",
+      "broodmare_sire_name": "オルフェーヴル",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106834": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "ディクタット Diktat(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103133": {
+      "sire_name": "ダノンプレミアム",
+      "broodmare_sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106686": {
+      "sire_name": "サンダースノー Thunder Snow(愛)",
+      "broodmare_sire_name": "エスポワールシチー",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105114": {
+      "sire_name": "フォーウィールドライブ Four Wheel Drive(米)",
+      "broodmare_sire_name": "フェノーメノ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101656": {
+      "sire_name": "エスポワールシチー",
+      "broodmare_sire_name": "ディープスカイ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102868": {
+      "sire_name": "ゴールドドリーム",
+      "broodmare_sire_name": "サウスヴィグラス",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100531": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "フジキセキ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101489": {
+      "sire_name": "スマートファルコン",
+      "broodmare_sire_name": "キングズベスト King's Best(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101246": {
+      "sire_name": "インカンテーション",
+      "broodmare_sire_name": "カジノドライヴ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105355": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "パイロ Pyro(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104870": {
+      "sire_name": "ロジャーバローズ",
+      "broodmare_sire_name": "スペシャルウィーク",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104606": {
+      "sire_name": "ダノンバラード",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023109122": {
+      "sire_name": "ヴァンセンヌ",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100647": {
+      "sire_name": "モズアスコット",
+      "broodmare_sire_name": "マジェスティックウォリアー Majestic Warrior(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103997": {
+      "sire_name": "ミスチヴィアスアレックス Mischevious Alex(米)",
+      "broodmare_sire_name": "ブラックタイド",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102866": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "ルーラーシップ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102978": {
+      "sire_name": "ロジャーバローズ",
+      "broodmare_sire_name": "ヤマニンセラフィム",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105876": {
+      "sire_name": "ウインブライト",
+      "broodmare_sire_name": "ロージズインメイ Roses in May(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100812": {
+      "sire_name": "クラウンレガーロ",
+      "broodmare_sire_name": "エピファネイア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107319": {
+      "sire_name": "アドマイヤマーズ",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106419": {
+      "sire_name": "ウインブライト",
+      "broodmare_sire_name": "Blame",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106913": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "Frankel",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106770": {
+      "sire_name": "ジュンツバサ",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105043": {
+      "sire_name": "シルバーステート",
+      "broodmare_sire_name": "Unbridled's Song (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103447": {
+      "sire_name": "サトノダイヤモンド",
+      "broodmare_sire_name": "Iffraaj",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105374": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Roderic O'Connor",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100127": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "キングズベスト King's Best(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105572": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106417": {
+      "sire_name": "ウインブライト",
+      "broodmare_sire_name": "コンデュイット Conduit(愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103078": {
+      "sire_name": "シルバーステート",
+      "broodmare_sire_name": "Kitten's Joy (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100894": {
+      "sire_name": "ヘンリーバローズ",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102843": {
+      "sire_name": "ミッキーアイル",
+      "broodmare_sire_name": "アドマイヤムーン",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100727": {
+      "sire_name": "デクラレーションオブウォー",
+      "broodmare_sire_name": "マヤノトップガン",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106144": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "オルフェーヴル",
+      "fetched_at": "2026-06-19"
+    },
+    "2024107186": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024100050": {
+      "sire_name": "ステルヴィオ",
+      "broodmare_sire_name": "モーリス",
+      "fetched_at": "2026-06-19"
+    },
+    "2024104606": {
+      "sire_name": "ハービンジャー Harbinger(英)",
+      "broodmare_sire_name": "ドリームジャーニー",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106263": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "Sunday Break",
+      "fetched_at": "2026-06-19"
+    },
+    "2024107146": {
+      "sire_name": "インディチャンプ",
+      "broodmare_sire_name": "Exceed And Excel",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106878": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106712": {
+      "sire_name": "ジャンダルム",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024104298": {
+      "sire_name": "サトノクラウン",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-19"
+    },
+    "2024105183": {
+      "sire_name": "シスキン Siskin(米)",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024100660": {
+      "sire_name": "Too Darn Hot (英)",
+      "broodmare_sire_name": "Raven's Pass",
+      "fetched_at": "2026-06-19"
+    },
+    "2024105762": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106309": {
+      "sire_name": "アドマイヤマーズ",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106890": {
+      "sire_name": "ニューイヤーズデイ",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106044": {
+      "sire_name": "マインドユアビスケッツ Mind Your Biscuits(米)",
+      "broodmare_sire_name": "スウェプトオーヴァーボード Swept Overboard(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024101227": {
+      "sire_name": "カリフォルニアクローム California Chrome(米)",
+      "broodmare_sire_name": "ドリームジャーニー",
+      "fetched_at": "2026-06-19"
+    },
+    "2024105388": {
+      "sire_name": "サリオス",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-19"
+    },
+    "2024100732": {
+      "sire_name": "コントレイル",
+      "broodmare_sire_name": "スウェプトオーヴァーボード Swept Overboard(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106066": {
+      "sire_name": "サリオス",
+      "broodmare_sire_name": "ロゴタイプ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106587": {
+      "sire_name": "アドマイヤマーズ",
+      "broodmare_sire_name": "モーリス",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106687": {
+      "sire_name": "インディチャンプ",
+      "broodmare_sire_name": "Galileo (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102016": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "トビーズコーナー Toby's Corner(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106944": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Azamour (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100861": {
+      "sire_name": "タワーオブロンドン",
+      "broodmare_sire_name": "ファルブラヴ Falbrav(愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100377": {
+      "sire_name": "ダノンプレミアム",
+      "broodmare_sire_name": "Elusive Quality",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105655": {
+      "sire_name": "ルヴァンスレーヴ",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103252": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105139": {
+      "sire_name": "リオンディーズ",
+      "broodmare_sire_name": "アドマイヤムーン",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105308": {
+      "sire_name": "ミッキーアイル",
+      "broodmare_sire_name": "Congrats (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106255": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "アグネスタキオン",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104811": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "メイショウサムソン",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101117": {
+      "sire_name": "サンダースノー Thunder Snow(愛)",
+      "broodmare_sire_name": "オルフェーヴル",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101407": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "Danehill Dancer (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103450": {
+      "sire_name": "ルーラーシップ",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107260": {
+      "sire_name": "ミッキーアイル",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103932": {
+      "sire_name": "サトノクラウン",
+      "broodmare_sire_name": "バンブーエール",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103451": {
+      "sire_name": "ベンバトル Benbatl(英)",
+      "broodmare_sire_name": "ローエングリン",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100285": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "ブライアンズタイム Brian's Time(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105243": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "シニスターミニスター Sinister Minister(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105814": {
+      "sire_name": "ロードカナロア",
+      "broodmare_sire_name": "ジャングルポケット",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102401": {
+      "sire_name": "ダノンレジェンド",
+      "broodmare_sire_name": "ファスリエフ Fasliyev(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104209": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "ヨハネスブルグ Johannesburg(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107100": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106275": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "カジノドライヴ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100513": {
+      "sire_name": "ダノンレジェンド",
+      "broodmare_sire_name": "サマーバード Summer Bird(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105150": {
+      "sire_name": "ディーマジェスティ",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104128": {
+      "sire_name": "ヘンリーバローズ",
+      "broodmare_sire_name": "スターリングローズ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105240": {
+      "sire_name": "マインドユアビスケッツ Mind Your Biscuits(米)",
+      "broodmare_sire_name": "ノヴェリスト Novellist(愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102122": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106389": {
+      "sire_name": "ルーラーシップ",
+      "broodmare_sire_name": "ノヴェリスト Novellist(愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100044": {
+      "sire_name": "ミスチヴィアスアレックス Mischevious Alex(米)",
+      "broodmare_sire_name": "キングズベスト King's Best(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103256": {
+      "sire_name": "ノヴェリスト Novellist(愛)",
+      "broodmare_sire_name": "ブラックタイド",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106053": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021102708": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103558": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2021106199": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "アイルハヴアナザー I'll Have Another(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022106344": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "Sea The Stars Sea the Stars(愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105255": {
+      "sire_name": "ポエティックフレア Poetic Flare(愛)",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105642": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Sea The Stars Sea the Stars(愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106426": {
+      "sire_name": "ダノンバラード",
+      "broodmare_sire_name": "New Approach",
+      "fetched_at": "2026-06-19"
+    },
+    "2022106800": {
+      "sire_name": "キタサンブラック",
+      "broodmare_sire_name": "スウェプトオーヴァーボード Swept Overboard(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102730": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Northern Afleet",
+      "fetched_at": "2026-06-19"
+    },
+    "2021106118": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "テレグノシス",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105191": {
+      "sire_name": "リオンディーズ",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105014": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "Australia (英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107121": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "ルーラーシップ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105324": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Adelaide",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107179": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "Congrats (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105578": {
+      "sire_name": "ワールドプレミア",
+      "broodmare_sire_name": "クロフネ",
+      "fetched_at": "2026-06-19"
+    },
+    "2019103827": {
+      "sire_name": "フェノーメノ",
+      "broodmare_sire_name": "オウケンブルースリ",
+      "fetched_at": "2026-06-19"
+    },
+    "2021101701": {
+      "sire_name": "ルーラーシップ",
+      "broodmare_sire_name": "ステイゴールド",
+      "fetched_at": "2026-06-19"
+    },
+    "2017106722": {
+      "sire_name": "ダノンシャンティ",
+      "broodmare_sire_name": "サクラローレル",
+      "fetched_at": "2026-06-19"
+    },
+    "2018105086": {
+      "sire_name": "ディープインパクト",
+      "broodmare_sire_name": "Rossini",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107389": {
+      "sire_name": "キタサンブラック",
+      "broodmare_sire_name": "Cape Cross",
+      "fetched_at": "2026-06-19"
+    },
+    "2019104531": {
+      "sire_name": "オルフェーヴル",
+      "broodmare_sire_name": "Candy Ride",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104799": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021104840": {
+      "sire_name": "オルフェーヴル",
+      "broodmare_sire_name": "ティンバーカントリー Timber Country(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105577": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "ステイゴールド",
+      "fetched_at": "2026-06-19"
+    },
+    "2022106709": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104960": {
+      "sire_name": "ダノンプレミアム",
+      "broodmare_sire_name": "グラスワンダー",
+      "fetched_at": "2026-06-19"
+    },
+    "2022110006": {
+      "sire_name": "カラヴァッジオ",
+      "broodmare_sire_name": "Sir Prancealot",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102920": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "Medaglia d'Oro",
+      "fetched_at": "2026-06-19"
+    },
+    "2022101906": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106925": {
+      "sire_name": "リオンディーズ",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105367": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2021104200": {
+      "sire_name": "ロジャーバローズ",
+      "broodmare_sire_name": "Frankel",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102153": {
+      "sire_name": "タワーオブロンドン",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102395": {
+      "sire_name": "ラブリーデイ",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102421": {
+      "sire_name": "グレーターロンドン",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105047": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "Kingmambo (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104316": {
       "sire_name": "ビッグアーサー",
       "broodmare_sire_name": "ディープインパクト",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-19"
     },
-    "2020101813": {
-      "sire_name": "ファインニードル",
-      "broodmare_sire_name": "アルカセット Alkaased(米)",
-      "fetched_at": "2026-06-10"
+    "2022110066": {
+      "sire_name": "American Pharoah (米)",
+      "broodmare_sire_name": "ヴィクトワールピサ",
+      "fetched_at": "2026-06-19"
     },
-    "2018105454": {
-      "sire_name": "ディープインパクト",
-      "broodmare_sire_name": "Closing Argument",
-      "fetched_at": "2026-06-10"
+    "2021105077": {
+      "sire_name": "ハーツクライ",
+      "broodmare_sire_name": "Seattle Fitz",
+      "fetched_at": "2026-06-19"
     },
-    "2021104830": {
-      "sire_name": "リアルインパクト",
-      "broodmare_sire_name": "Songandaprayer",
-      "fetched_at": "2026-06-10"
+    "2021105264": {
+      "sire_name": "マインドユアビスケッツ Mind Your Biscuits(米)",
+      "broodmare_sire_name": "サンデーサイレンス Sunday Silence(米)",
+      "fetched_at": "2026-06-19"
     },
-    "2022105071": {
-      "sire_name": "キズナ",
-      "broodmare_sire_name": "Pulpit",
-      "fetched_at": "2026-06-10"
+    "2020103387": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
     },
-    "2020106015": {
-      "sire_name": "マジェスティックウォリアー Majestic Warrior(米)",
+    "2021103987": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "フォーティナイナーズサン Fourty Niners Son(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2019105308": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "トワイニング Twining(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022106553": {
+      "sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "broodmare_sire_name": "スペシャルウィーク",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102874": {
+      "sire_name": "ゴールドドリーム",
+      "broodmare_sire_name": "スキャターザゴールド Scatter the Gold(加)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105979": {
+      "sire_name": "アジアエクスプレス",
+      "broodmare_sire_name": "メジロライアン",
+      "fetched_at": "2026-06-19"
+    },
+    "2019102665": {
+      "sire_name": "トーセンジョーダン",
+      "broodmare_sire_name": "ダンスインザダーク",
+      "fetched_at": "2026-06-19"
+    },
+    "2019101198": {
+      "sire_name": "キタサンブラック",
+      "broodmare_sire_name": "オペラハウス Opera House(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105112": {
+      "sire_name": "ジャスタウェイ",
+      "broodmare_sire_name": "Shackleford",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105496": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "ワークフォース Workforce(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022103941": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "ストロングリターン",
+      "fetched_at": "2026-06-19"
+    },
+    "2021103717": {
+      "sire_name": "ロードカナロア",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-19"
+    },
+    "2020101579": {
+      "sire_name": "ルーラーシップ",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-19"
+    },
+    "2018102576": {
+      "sire_name": "キングカメハメハ",
       "broodmare_sire_name": "ディープインパクト",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-19"
     },
-    "2022106768": {
-      "sire_name": "ダノンバラード",
-      "broodmare_sire_name": "マツリダゴッホ",
-      "fetched_at": "2026-06-10"
+    "2021101363": {
+      "sire_name": "ユアーズトゥルーリ",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-19"
     },
-    "2021100019": {
-      "sire_name": "シルバーステート",
-      "broodmare_sire_name": "メイショウボーラー",
-      "fetched_at": "2026-06-10"
+    "2023101661": {
+      "sire_name": "カレンブラックヒル",
+      "broodmare_sire_name": "ファルブラヴ Falbrav(愛)",
+      "fetched_at": "2026-06-19"
     },
-    "2020101784": {
-      "sire_name": "アメリカンペイトリオット",
-      "broodmare_sire_name": "アドマイヤムーン",
-      "fetched_at": "2026-06-10"
+    "2023103962": {
+      "sire_name": "コパノリッキー",
+      "broodmare_sire_name": "ジャスタウェイ",
+      "fetched_at": "2026-06-19"
     },
-    "2020103517": {
-      "sire_name": "レッドファルクス",
-      "broodmare_sire_name": "Grand Slam",
-      "fetched_at": "2026-06-10"
+    "2021103720": {
+      "sire_name": "ダノンレジェンド",
+      "broodmare_sire_name": "Medaglia d'Oro",
+      "fetched_at": "2026-06-19"
     },
-    "2021102424": {
+    "2021105329": {
+      "sire_name": "ネオユニヴァース",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022106785": {
+      "sire_name": "マインドユアビスケッツ Mind Your Biscuits(米)",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-19"
+    },
+    "2020106974": {
+      "sire_name": "グレーターロンドン",
+      "broodmare_sire_name": "アグネスデジタル",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100433": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "スズカマンボ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105095": {
+      "sire_name": "Not This Time",
+      "broodmare_sire_name": "Brilliant Speed",
+      "fetched_at": "2026-06-19"
+    },
+    "2022100182": {
       "sire_name": "リオンディーズ",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104151": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104103": {
+      "sire_name": "エスポワールシチー",
+      "broodmare_sire_name": "Distorted Humor (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023110094": {
+      "sire_name": "Bolt d'Oro",
+      "broodmare_sire_name": "Sky Mesa",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100729": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-19"
+    },
+    "2021110040": {
+      "sire_name": "Masar (愛)",
+      "broodmare_sire_name": "Shamardal (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104311": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-19"
+    },
+    "2019104675": {
+      "sire_name": "ディーマジェスティ",
+      "broodmare_sire_name": "Unbridled's Song (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105805": {
+      "sire_name": "オルフェーヴル",
+      "broodmare_sire_name": "Tapizar",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105370": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "ステイゴールド",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104673": {
+      "sire_name": "ゴールドドリーム",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-19"
+    },
+    "2021103555": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "トーセンダンス",
+      "fetched_at": "2026-06-19"
+    },
+    "2020104354": {
+      "sire_name": "サトノアラジン",
+      "broodmare_sire_name": "New Approach",
+      "fetched_at": "2026-06-19"
+    },
+    "2020100233": {
+      "sire_name": "ハーツクライ",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2020106953": {
+      "sire_name": "シニスターミニスター Sinister Minister(米)",
+      "broodmare_sire_name": "テイエムオペラオー",
+      "fetched_at": "2026-06-19"
+    },
+    "2017106490": {
+      "sire_name": "リアルインパクト",
+      "broodmare_sire_name": "ミシル Misil(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2020100604": {
+      "sire_name": "ダンカーク Dunkirk(米)",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2020105914": {
+      "sire_name": "リアルインパクト",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105007": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Kitten's Joy (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102387": {
+      "sire_name": "トーセンラー",
+      "broodmare_sire_name": "マヤノトップガン",
+      "fetched_at": "2026-06-19"
+    },
+    "2020106534": {
+      "sire_name": "ミッキーアイル",
+      "broodmare_sire_name": "メイショウボーラー",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107364": {
+      "sire_name": "アドマイヤマーズ",
+      "broodmare_sire_name": "Oasis Dream (英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106251": {
+      "sire_name": "ロードカナロア",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106575": {
+      "sire_name": "タワーオブロンドン",
+      "broodmare_sire_name": "キャプテンスティーヴ Captain Steve(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106374": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-19"
+    },
+    "2023110093": {
+      "sire_name": "Not This Time",
+      "broodmare_sire_name": "Saintly Look",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101359": {
+      "sire_name": "マインドユアビスケッツ Mind Your Biscuits(米)",
+      "broodmare_sire_name": "オンファイア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104975": {
+      "sire_name": "ダノンプレミアム",
+      "broodmare_sire_name": "プリサイスエンド Precise End(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106346": {
+      "sire_name": "ファインニードル",
+      "broodmare_sire_name": "Galileo (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101135": {
+      "sire_name": "パイロ Pyro(米)",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106627": {
+      "sire_name": "アジアエクスプレス",
+      "broodmare_sire_name": "スペシャルウィーク",
+      "fetched_at": "2026-06-19"
+    },
+    "2023110045": {
+      "sire_name": "Mendelssohn",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107200": {
+      "sire_name": "ミスターメロディ",
+      "broodmare_sire_name": "アドマイヤベガ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102444": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "サウスヴィグラス",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106976": {
+      "sire_name": "クリソベリル",
+      "broodmare_sire_name": "ワイルドラッシュ Wild Rush(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101131": {
+      "sire_name": "ディスクリートキャット Discreet Cat(米)",
       "broodmare_sire_name": "パイロ Pyro(米)",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-19"
+    },
+    "2023110017": {
+      "sire_name": "Lucky Vega",
+      "broodmare_sire_name": "Galileo (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100332": {
+      "sire_name": "カリフォルニアクローム California Chrome(米)",
+      "broodmare_sire_name": "ダンスインザダーク",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105870": {
+      "sire_name": "ゴールドドリーム",
+      "broodmare_sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106368": {
+      "sire_name": "デクラレーションオブウォー",
+      "broodmare_sire_name": "スクリーンヒーロー",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107222": {
+      "sire_name": "アドマイヤマーズ",
+      "broodmare_sire_name": "Dushyantor",
+      "fetched_at": "2026-06-19"
+    },
+    "2023109080": {
+      "sire_name": "オルフェーヴル",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102967": {
+      "sire_name": "クリソベリル",
+      "broodmare_sire_name": "ルーラーシップ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106452": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "Giacomo",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106733": {
+      "sire_name": "オルフェーヴル",
+      "broodmare_sire_name": "ルーラーシップ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100271": {
+      "sire_name": "マジェスティックウォリアー Majestic Warrior(米)",
+      "broodmare_sire_name": "カリスタグローリ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105319": {
+      "sire_name": "クリソベリル",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103799": {
+      "sire_name": "ルヴァンスレーヴ",
+      "broodmare_sire_name": "Kitten's Joy (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106436": {
+      "sire_name": "ベンバトル Benbatl(英)",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104854": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101841": {
+      "sire_name": "キセキ",
+      "broodmare_sire_name": "フォーティナイナーズサン Fourty Niners Son(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103506": {
+      "sire_name": "ジャスタウェイ",
+      "broodmare_sire_name": "Alhaarth",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105831": {
+      "sire_name": "ジャスタウェイ",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106894": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Vespone",
+      "fetched_at": "2026-06-19"
+    },
+    "2024102434": {
+      "sire_name": "サリオス",
+      "broodmare_sire_name": "トーセンラー",
+      "fetched_at": "2026-06-19"
+    },
+    "2024101005": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "Dalakhani",
+      "fetched_at": "2026-06-19"
+    },
+    "2024104825": {
+      "sire_name": "リーチザクラウン",
+      "broodmare_sire_name": "タニノギムレット",
+      "fetched_at": "2026-06-19"
+    },
+    "2024100469": {
+      "sire_name": "アルアイン",
+      "broodmare_sire_name": "ルーラーシップ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106052": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "Reckless Abandon",
+      "fetched_at": "2026-06-19"
+    },
+    "2024107076": {
+      "sire_name": "インディチャンプ",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024107096": {
+      "sire_name": "グローリーヴェイズ",
+      "broodmare_sire_name": "タイキシャトル",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106657": {
+      "sire_name": "サリオス",
+      "broodmare_sire_name": "Dubawi",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106629": {
+      "sire_name": "シルバーステート",
+      "broodmare_sire_name": "Frankel",
+      "fetched_at": "2026-06-19"
+    },
+    "2024105890": {
+      "sire_name": "シスキン Siskin(米)",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024105780": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2024103626": {
+      "sire_name": "ダノンバラード",
+      "broodmare_sire_name": "スウェプトオーヴァーボード Swept Overboard(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106443": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106843": {
+      "sire_name": "ハイランドリール Highland Reel(愛)",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2024102617": {
+      "sire_name": "マジェスティックウォリアー Majestic Warrior(米)",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-19"
+    },
+    "2024100464": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Roi Normand",
+      "fetched_at": "2026-06-19"
+    },
+    "2024104561": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106585": {
+      "sire_name": "インディチャンプ",
+      "broodmare_sire_name": "Numerous",
+      "fetched_at": "2026-06-19"
+    },
+    "2024103585": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2024103650": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "アイルハヴアナザー I'll Have Another(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106670": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Kingsalsa",
+      "fetched_at": "2026-06-19"
+    },
+    "2024106436": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100767": {
+      "sire_name": "ロードカナロア",
+      "broodmare_sire_name": "ダノンシャンティ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105858": {
+      "sire_name": "ウインブライト",
+      "broodmare_sire_name": "アイルハヴアナザー I'll Have Another(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100734": {
+      "sire_name": "ロードカナロア",
+      "broodmare_sire_name": "アドマイヤベガ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103345": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "Dubai Destination",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105197": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "ゼンノロブロイ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101459": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "タニノギムレット",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106336": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103458": {
+      "sire_name": "ハービンジャー Harbinger(英)",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102799": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "アグネスタキオン",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103843": {
+      "sire_name": "グレーターロンドン",
+      "broodmare_sire_name": "タイキシャトル",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106830": {
+      "sire_name": "キタサンブラック",
+      "broodmare_sire_name": "Danehill Dancer (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106656": {
+      "sire_name": "ヴァンゴッホ",
+      "broodmare_sire_name": "エピファネイア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104351": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "エピファネイア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103238": {
+      "sire_name": "ダノンプレミアム",
+      "broodmare_sire_name": "Singspiel (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106757": {
+      "sire_name": "シルバーステート",
+      "broodmare_sire_name": "ヴィクトワールピサ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105045": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Bernstein",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107280": {
+      "sire_name": "ナダル Nadal(米)",
+      "broodmare_sire_name": "オルフェーヴル",
+      "fetched_at": "2026-06-19"
+    },
+    "2022106013": {
+      "sire_name": "ポアゾンブラック",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105337": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "Dance Brightly",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105585": {
+      "sire_name": "ナダル Nadal(米)",
+      "broodmare_sire_name": "City Zip (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105249": {
+      "sire_name": "ナダル Nadal(米)",
+      "broodmare_sire_name": "Orb",
+      "fetched_at": "2026-06-19"
+    },
+    "2022103150": {
+      "sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "broodmare_sire_name": "フレンチデピュティ French Deputy(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101723": {
+      "sire_name": "キセキ",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105685": {
+      "sire_name": "ナダル Nadal(米)",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105325": {
+      "sire_name": "アルアイン",
+      "broodmare_sire_name": "Pleasantly Perfect (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105811": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101616": {
+      "sire_name": "ルヴァンスレーヴ",
+      "broodmare_sire_name": "ルーラーシップ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101107": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "ディープスカイ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105982": {
+      "sire_name": "ドゥラメンテ",
+      "broodmare_sire_name": "スウェプトオーヴァーボード Swept Overboard(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104808": {
+      "sire_name": "ニューイヤーズデイ",
+      "broodmare_sire_name": "Kitten's Joy (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105813": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "ディープブリランテ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023100453": {
+      "sire_name": "アジアエクスプレス",
+      "broodmare_sire_name": "ゴールドヘイロー",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105078": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "ヴィクトワールピサ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104875": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107021": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "サンデーサイレンス Sunday Silence(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021110075": {
+      "sire_name": "Practical Joke (米)",
+      "broodmare_sire_name": "Haynesfield",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107078": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "チチカステナンゴ Chichicastenango(仏)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022106150": {
+      "sire_name": "ミッキースワロー",
+      "broodmare_sire_name": "フレンチデピュティ French Deputy(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2020106817": {
+      "sire_name": "ダイワメジャー",
+      "broodmare_sire_name": "キングヘイロー",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103917": {
+      "sire_name": "ミッキーアイル",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-19"
+    },
+    "2020103539": {
+      "sire_name": "キタサンブラック",
+      "broodmare_sire_name": "Anabaa",
+      "fetched_at": "2026-06-19"
+    },
+    "2023106484": {
+      "sire_name": "ベンバトル Benbatl(英)",
+      "broodmare_sire_name": "ステイゴールド",
+      "fetched_at": "2026-06-19"
+    },
+    "2022100700": {
+      "sire_name": "モズアスコット",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103413": {
+      "sire_name": "キタサンブラック",
+      "broodmare_sire_name": "Refuse to Bend (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022101517": {
+      "sire_name": "グレーターロンドン",
+      "broodmare_sire_name": "アグネスデジタル",
+      "fetched_at": "2026-06-19"
+    },
+    "2023107277": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "Fastnet Rock (豪)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105184": {
+      "sire_name": "サトノダイヤモンド",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103818": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Power",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102026": {
+      "sire_name": "シニスターミニスター Sinister Minister(米)",
+      "broodmare_sire_name": "キングヘイロー",
+      "fetched_at": "2026-06-19"
+    },
+    "2021101905": {
+      "sire_name": "ビッグアーサー",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022110129": {
+      "sire_name": "Tapit (米)",
+      "broodmare_sire_name": "Medaglia d'Oro",
+      "fetched_at": "2026-06-19"
+    },
+    "2023101542": {
+      "sire_name": "マジェスティックウォリアー Majestic Warrior(米)",
+      "broodmare_sire_name": "サクラバクシンオー",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104627": {
+      "sire_name": "マジェスティックウォリアー Majestic Warrior(米)",
+      "broodmare_sire_name": "サクラバクシンオー",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102380": {
+      "sire_name": "ディーマジェスティ",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023110103": {
+      "sire_name": "Mor Spirit (米)",
+      "broodmare_sire_name": "Liam's Map",
+      "fetched_at": "2026-06-19"
+    },
+    "2022101863": {
+      "sire_name": "カレンブラックヒル",
+      "broodmare_sire_name": "フリオーソ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104674": {
+      "sire_name": "サトノアラジン",
+      "broodmare_sire_name": "フレンチデピュティ French Deputy(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105242": {
+      "sire_name": "ジャスタウェイ",
+      "broodmare_sire_name": "ヴィクトワールピサ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022100018": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Charm Spirit",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105092": {
+      "sire_name": "マインドユアビスケッツ Mind Your Biscuits(米)",
+      "broodmare_sire_name": "バトルプラン Battle Plan(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021102399": {
+      "sire_name": "マクフィ Makfi(英)",
+      "broodmare_sire_name": "エスポワールシチー",
+      "fetched_at": "2026-06-19"
+    },
+    "2021101449": {
+      "sire_name": "アジアエクスプレス",
+      "broodmare_sire_name": "スペシャルウィーク",
+      "fetched_at": "2026-06-19"
+    },
+    "2023103087": {
+      "sire_name": "City of Light (米)",
+      "broodmare_sire_name": "War Front",
+      "fetched_at": "2026-06-19"
+    },
+    "2018104030": {
+      "sire_name": "リオンディーズ",
+      "broodmare_sire_name": "Dylan Thomas (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2020105217": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "フジキセキ",
+      "fetched_at": "2026-06-19"
+    },
+    "2019107016": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "サンデーサイレンス Sunday Silence(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021100564": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102391": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "スクリーンヒーロー",
+      "fetched_at": "2026-06-19"
+    },
+    "2020104753": {
+      "sire_name": "デクラレーションオブウォー",
+      "broodmare_sire_name": "フジキセキ",
+      "fetched_at": "2026-06-19"
+    },
+    "2019103815": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "クロフネ",
+      "fetched_at": "2026-06-19"
+    },
+    "2021104941": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104893": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2020100906": {
+      "sire_name": "ビッグアーサー",
+      "broodmare_sire_name": "キングズベスト King's Best(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022110014": {
+      "sire_name": "Blue Point",
+      "broodmare_sire_name": "Winker Watson",
+      "fetched_at": "2026-06-19"
+    },
+    "2021101422": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105054": {
+      "sire_name": "ミッキーアイル",
+      "broodmare_sire_name": "Thewayyouare",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105830": {
+      "sire_name": "ワールドエース",
+      "broodmare_sire_name": "クロフネ",
+      "fetched_at": "2026-06-19"
+    },
+    "2020110039": {
+      "sire_name": "Frankel",
+      "broodmare_sire_name": "タニノギムレット",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105011": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Pure Prize",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105991": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Smart Strike (加)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104764": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022106232": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-19"
+    },
+    "2022101192": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Offlee Wild",
+      "fetched_at": "2026-06-19"
+    },
+    "2021106823": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "ロージズインメイ Roses in May(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021103975": {
+      "sire_name": "デクラレーションオブウォー",
+      "broodmare_sire_name": "Footstepsinthesand (英)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021104894": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104812": {
+      "sire_name": "シスキン Siskin(米)",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104885": {
+      "sire_name": "アドマイヤマーズ",
+      "broodmare_sire_name": "Nathaniel (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2021100244": {
+      "sire_name": "ドゥラメンテ",
+      "broodmare_sire_name": "コンデュイット Conduit(愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022103546": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Closing Argument",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105192": {
+      "sire_name": "サトノダイヤモンド",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022104994": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Congrats (米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2020110060": {
+      "sire_name": "Lope de Vega",
+      "broodmare_sire_name": "Golan (愛)",
+      "fetched_at": "2026-06-19"
+    },
+    "2022100019": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "タニノギムレット",
+      "fetched_at": "2026-06-19"
+    },
+    "2021105801": {
+      "sire_name": "ドゥラメンテ",
+      "broodmare_sire_name": "Pulpit",
+      "fetched_at": "2026-06-19"
+    },
+    "2022105157": {
+      "sire_name": "ロードカナロア",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-19"
+    },
+    "2021103332": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-19"
+    },
+    "2021100540": {
+      "sire_name": "パイロ Pyro(米)",
+      "broodmare_sire_name": "スペシャルウィーク",
+      "fetched_at": "2026-06-19"
+    },
+    "2023110007": {
+      "sire_name": "カラヴァッジオ",
+      "broodmare_sire_name": "アグネスゴールド",
+      "fetched_at": "2026-06-19"
+    },
+    "2021109016": {
+      "sire_name": "ゴールデンバローズ",
+      "broodmare_sire_name": "サンカルロ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105558": {
+      "sire_name": "シスキン Siskin(米)",
+      "broodmare_sire_name": "ヴィクトワールピサ",
+      "fetched_at": "2026-06-19"
+    },
+    "2021103651": {
+      "sire_name": "リアルインパクト",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-19"
+    },
+    "2022101198": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105841": {
+      "sire_name": "ヴァンゴッホ",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102181": {
+      "sire_name": "モズアスコット",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-19"
+    },
+    "2023104232": {
+      "sire_name": "タワーオブロンドン",
+      "broodmare_sire_name": "ディープブリランテ",
+      "fetched_at": "2026-06-19"
+    },
+    "2021104618": {
+      "sire_name": "タリスマニック Talismanic(英)",
+      "broodmare_sire_name": "スパイキュール",
+      "fetched_at": "2026-06-19"
+    },
+    "2021102707": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-19"
+    },
+    "2022102530": {
+      "sire_name": "デクラレーションオブウォー",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-19"
+    },
+    "2021103283": {
+      "sire_name": "シルバーステート",
+      "broodmare_sire_name": "Red Ransom",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105081": {
+      "sire_name": "カリフォルニアクローム California Chrome(米)",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-19"
+    },
+    "2023102171": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-19"
+    },
+    "2023105555": {
+      "sire_name": "ルヴァンスレーヴ",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102403": {
+      "sire_name": "ミッキーグローリー",
+      "broodmare_sire_name": "タイキシャトル",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105800": {
+      "sire_name": "ロードカナロア",
+      "broodmare_sire_name": "Frankel",
+      "fetched_at": "2026-06-20"
+    },
+    "2023107207": {
+      "sire_name": "ミッキーアイル",
+      "broodmare_sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105428": {
+      "sire_name": "アルアイン",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105062": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102676": {
+      "sire_name": "キセキ",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103475": {
+      "sire_name": "エイシンフラッシュ",
+      "broodmare_sire_name": "アグネスタキオン",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101778": {
+      "sire_name": "ビーチパトロール Beach Patrol(米)",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101046": {
+      "sire_name": "モズアスコット",
+      "broodmare_sire_name": "サムライハート",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102033": {
+      "sire_name": "ホークビル Hawkbill(米)",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-20"
+    },
+    "2023107464": {
+      "sire_name": "ミスチヴィアスアレックス Mischevious Alex(米)",
+      "broodmare_sire_name": "ストーミングホーム Storming Home(英)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106369": {
+      "sire_name": "パイロ Pyro(米)",
+      "broodmare_sire_name": "オルフェーヴル",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101845": {
+      "sire_name": "ヴァンゴッホ",
+      "broodmare_sire_name": "ゼンノロブロイ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102651": {
+      "sire_name": "タワーオブロンドン",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104846": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105208": {
+      "sire_name": "モズアスコット",
+      "broodmare_sire_name": "フジキセキ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103161": {
+      "sire_name": "ルヴァンスレーヴ",
+      "broodmare_sire_name": "スペシャルウィーク",
+      "fetched_at": "2026-06-20"
+    },
+    "2023100252": {
+      "sire_name": "フォーウィールドライブ Four Wheel Drive(米)",
+      "broodmare_sire_name": "ジェイドロバリー Jade Robbery(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104893": {
+      "sire_name": "ベストウォーリア",
+      "broodmare_sire_name": "タイキシャトル",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104042": {
+      "sire_name": "サンダースノー Thunder Snow(愛)",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-20"
+    },
+    "2023107225": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "Gemologist",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102590": {
+      "sire_name": "ルヴァンスレーヴ",
+      "broodmare_sire_name": "シニスターミニスター Sinister Minister(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106407": {
+      "sire_name": "ダノンバラード",
+      "broodmare_sire_name": "アグネスデジタル",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102220": {
+      "sire_name": "オルフェーヴル",
+      "broodmare_sire_name": "ゼンノロブロイ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104288": {
+      "sire_name": "ミスチヴィアスアレックス Mischevious Alex(米)",
+      "broodmare_sire_name": "スピルバーグ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102964": {
+      "sire_name": "リオンディーズ",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105733": {
+      "sire_name": "グランプリボス",
+      "broodmare_sire_name": "Speightstown (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103010": {
+      "sire_name": "タニノフランケル",
+      "broodmare_sire_name": "オペラハウス Opera House(英)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102338": {
+      "sire_name": "ベストウォーリア",
+      "broodmare_sire_name": "アポロキングダム",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102958": {
+      "sire_name": "モズアスコット",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102328": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105439": {
+      "sire_name": "シュヴァルグラン",
+      "broodmare_sire_name": "シニスターミニスター Sinister Minister(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023110022": {
+      "sire_name": "Volatile",
+      "broodmare_sire_name": "Uncle Mo (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023107184": {
+      "sire_name": "ナダル Nadal(米)",
+      "broodmare_sire_name": "キンシャサノキセキ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105474": {
+      "sire_name": "アジアエクスプレス",
+      "broodmare_sire_name": "フジキセキ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105077": {
+      "sire_name": "ダノンキングリー",
+      "broodmare_sire_name": "クロフネ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105650": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106747": {
+      "sire_name": "ダノンバラード",
+      "broodmare_sire_name": "A.P. Indy",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105849": {
+      "sire_name": "ベンバトル Benbatl(英)",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105622": {
+      "sire_name": "ヘンリーバローズ",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103668": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106829": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102134": {
+      "sire_name": "イスラボニータ",
+      "broodmare_sire_name": "アドマイヤムーン",
+      "fetched_at": "2026-06-20"
+    },
+    "2023107003": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-20"
+    },
+    "2023100787": {
+      "sire_name": "アドマイヤマーズ",
+      "broodmare_sire_name": "ディープブリランテ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103583": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "タニノギムレット",
+      "fetched_at": "2026-06-20"
+    },
+    "2023100161": {
+      "sire_name": "インディチャンプ",
+      "broodmare_sire_name": "ゼンノロブロイ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101530": {
+      "sire_name": "シルバーステート",
+      "broodmare_sire_name": "アドマイヤムーン",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104493": {
+      "sire_name": "ダノンバラード",
+      "broodmare_sire_name": "グラスワンダー",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101048": {
+      "sire_name": "アドマイヤマーズ",
+      "broodmare_sire_name": "アドマイヤムーン",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104018": {
+      "sire_name": "ダノンスマッシュ",
+      "broodmare_sire_name": "ヴィクトワールピサ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103694": {
+      "sire_name": "サングレーザー",
+      "broodmare_sire_name": "Scat Daddy (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103369": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106872": {
+      "sire_name": "シュヴァルグラン",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104200": {
+      "sire_name": "ダノンプレミアム",
+      "broodmare_sire_name": "American Pharoah (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103584": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "Bellamy Road",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106801": {
+      "sire_name": "ハービンジャー Harbinger(英)",
+      "broodmare_sire_name": "ホワイトマズル White Muzzle(英)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103372": {
+      "sire_name": "コントレイル",
+      "broodmare_sire_name": "Rainbow Quest (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105413": {
+      "sire_name": "ゴールドドリーム",
+      "broodmare_sire_name": "ボーナスフィーバー",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101328": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105573": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101151": {
+      "sire_name": "ファインニードル",
+      "broodmare_sire_name": "Elusive Quality",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104227": {
+      "sire_name": "ラブリーデイ",
+      "broodmare_sire_name": "アドマイヤオーラ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105892": {
+      "sire_name": "ウインブライト",
+      "broodmare_sire_name": "ナリタトップロード",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105260": {
+      "sire_name": "ダノンキングリー",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101852": {
+      "sire_name": "バゴ Bago(仏)",
+      "broodmare_sire_name": "クロフネ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102602": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "スズカマンボ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103823": {
+      "sire_name": "ルヴァンスレーヴ",
+      "broodmare_sire_name": "ステイゴールド",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104816": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023100741": {
+      "sire_name": "カリフォルニアクローム California Chrome(米)",
+      "broodmare_sire_name": "Monarchos",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105784": {
+      "sire_name": "ダノンプレミアム",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-20"
+    },
+    "2023100533": {
+      "sire_name": "マテラスカイ",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105748": {
+      "sire_name": "モーニン",
+      "broodmare_sire_name": "ゼンノロブロイ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023104545": {
+      "sire_name": "ディーマジェスティ",
+      "broodmare_sire_name": "アルデバランII Aldebaran(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103751": {
+      "sire_name": "ナダル Nadal(米)",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102646": {
+      "sire_name": "サンダースノー Thunder Snow(愛)",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105083": {
+      "sire_name": "オーヴァルエース",
+      "broodmare_sire_name": "フジキセキ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103764": {
+      "sire_name": "シスキン Siskin(米)",
+      "broodmare_sire_name": "フジキセキ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103263": {
+      "sire_name": "アメリカンペイトリオット",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105429": {
+      "sire_name": "Vino Rosso (米)",
+      "broodmare_sire_name": "ユートピア",
+      "fetched_at": "2026-06-20"
+    },
+    "2023101727": {
+      "sire_name": "ビッグアーサー",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-20"
+    },
+    "2021104285": {
+      "sire_name": "シャンハイボビー Shanghai Bobby(米)",
+      "broodmare_sire_name": "ステイゴールド",
+      "fetched_at": "2026-06-20"
+    },
+    "2022100497": {
+      "sire_name": "オーヴァルエース",
+      "broodmare_sire_name": "ワイルドラッシュ Wild Rush(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2017104815": {
+      "sire_name": "ディープインパクト",
+      "broodmare_sire_name": "Acatenango",
+      "fetched_at": "2026-06-20"
+    },
+    "2022101438": {
+      "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-20"
+    },
+    "2022106545": {
+      "sire_name": "デクラレーションオブウォー",
+      "broodmare_sire_name": "ホワイトマズル White Muzzle(英)",
+      "fetched_at": "2026-06-20"
+    },
+    "2021103342": {
+      "sire_name": "カリフォルニアクローム California Chrome(米)",
+      "broodmare_sire_name": "スズカマンボ",
+      "fetched_at": "2026-06-20"
+    },
+    "2022105076": {
+      "sire_name": "ナダル Nadal(米)",
+      "broodmare_sire_name": "ハーツクライ",
+      "fetched_at": "2026-06-20"
+    },
+    "2022102880": {
+      "sire_name": "ハッピースプリント",
+      "broodmare_sire_name": "シニスターミニスター Sinister Minister(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2022102769": {
+      "sire_name": "ゴールドドリーム",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-20"
+    },
+    "2022104897": {
+      "sire_name": "レイデオロ",
+      "broodmare_sire_name": "Union Rags",
+      "fetched_at": "2026-06-20"
+    },
+    "2021107052": {
+      "sire_name": "ドゥラメンテ",
+      "broodmare_sire_name": "キングヘイロー",
+      "fetched_at": "2026-06-20"
+    },
+    "2022101684": {
+      "sire_name": "サンダースノー Thunder Snow(愛)",
+      "broodmare_sire_name": "スクリーンヒーロー",
+      "fetched_at": "2026-06-20"
+    },
+    "2022102529": {
+      "sire_name": "マクフィ Makfi(英)",
+      "broodmare_sire_name": "ワイルドラッシュ Wild Rush(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2022102397": {
+      "sire_name": "シニスターミニスター Sinister Minister(米)",
+      "broodmare_sire_name": "コマンズ Commands(豪)",
+      "fetched_at": "2026-06-20"
+    },
+    "2022107284": {
+      "sire_name": "パイロ Pyro(米)",
+      "broodmare_sire_name": "クロフネ",
+      "fetched_at": "2026-06-20"
     },
     "2021105716": {
       "sire_name": "シルバーステート",
       "broodmare_sire_name": "ウォーエンブレム War Emblem(米)",
-      "fetched_at": "2026-06-10"
-    },
-    "2023100504": {
-      "sire_name": "フォーウィールドライブ Four Wheel Drive(米)",
-      "broodmare_sire_name": "ウォーエンブレム War Emblem(米)",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-20"
     },
     "2022105318": {
       "sire_name": "ブリックスアンドモルタル Bricks and Mortar(米)",
       "broodmare_sire_name": "Le Havre",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-20"
     },
-    "2023105241": {
-      "sire_name": "アルアイン",
-      "broodmare_sire_name": "Siyouni",
-      "fetched_at": "2026-06-10"
+    "2022104939": {
+      "sire_name": "バゴ Bago(仏)",
+      "broodmare_sire_name": "ディープインパクト",
+      "fetched_at": "2026-06-20"
     },
-    "2022102532": {
-      "sire_name": "リアルスティール",
-      "broodmare_sire_name": "メイショウサムソン",
-      "fetched_at": "2026-06-10"
-    },
-    "2019106700": {
-      "sire_name": "ダノンレジェンド",
-      "broodmare_sire_name": "ゴールドアリュール",
-      "fetched_at": "2026-06-10"
-    },
-    "2023101566": {
-      "sire_name": "ミスターメロディ",
-      "broodmare_sire_name": "サクラプレジデント",
-      "fetched_at": "2026-06-10"
+    "2020105183": {
+      "sire_name": "ゴールドシップ",
+      "broodmare_sire_name": "ボストンハーバー Boston Harbor(米)",
+      "fetched_at": "2026-06-20"
     },
     "2021100008": {
       "sire_name": "ホークビル Hawkbill(米)",
       "broodmare_sire_name": "タイキシャトル",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-20"
     },
-    "2022110038": {
-      "sire_name": "Iffraaj",
-      "broodmare_sire_name": "Kodiac",
-      "fetched_at": "2026-06-10"
+    "2022105281": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "ワークフォース Workforce(英)",
+      "fetched_at": "2026-06-20"
     },
-    "2022105317": {
-      "sire_name": "リアルインパクト",
-      "broodmare_sire_name": "フジキセキ",
-      "fetched_at": "2026-06-10"
+    "2021104581": {
+      "sire_name": "カリフォルニアクローム California Chrome(米)",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-20"
     },
-    "2022104784": {
-      "sire_name": "キズナ",
-      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
-      "fetched_at": "2026-06-10"
+    "2021105609": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-20"
     },
-    "2020106413": {
-      "sire_name": "リオンディーズ",
-      "broodmare_sire_name": "ディープインパクト",
-      "fetched_at": "2026-06-10"
+    "2020103066": {
+      "sire_name": "ラブリーデイ",
+      "broodmare_sire_name": "スウェプトオーヴァーボード Swept Overboard(米)",
+      "fetched_at": "2026-06-20"
     },
-    "2020106415": {
-      "sire_name": "シルバーステート",
-      "broodmare_sire_name": "タイキシャトル",
-      "fetched_at": "2026-06-10"
+    "2019100790": {
+      "sire_name": "オルフェーヴル",
+      "broodmare_sire_name": "ロージズインメイ Roses in May(米)",
+      "fetched_at": "2026-06-20"
     },
-    "2020105206": {
+    "2022101329": {
+      "sire_name": "ウインブライト",
+      "broodmare_sire_name": "ロードカナロア",
+      "fetched_at": "2026-06-20"
+    },
+    "2022105202": {
+      "sire_name": "キタサンブラック",
+      "broodmare_sire_name": "Ready's Image",
+      "fetched_at": "2026-06-20"
+    },
+    "2020103486": {
+      "sire_name": "ドゥラメンテ",
+      "broodmare_sire_name": "Tapit (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2021102800": {
       "sire_name": "ゴールドシップ",
-      "broodmare_sire_name": "ルールオブロー Rule of Law(米)",
-      "fetched_at": "2026-06-10"
+      "broodmare_sire_name": "アグネスデジタル",
+      "fetched_at": "2026-06-20"
     },
-    "2021103976": {
-      "sire_name": "アメリカンペイトリオット",
-      "broodmare_sire_name": "ディープインパクト",
-      "fetched_at": "2026-06-10"
+    "2022104765": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "Global Hunter",
+      "fetched_at": "2026-06-20"
     },
-    "2022105456": {
-      "sire_name": "スクリーンヒーロー",
-      "broodmare_sire_name": "キンシャサノキセキ",
-      "fetched_at": "2026-06-10"
+    "2021110088": {
+      "sire_name": "Saxon Warrior (安平町)",
+      "broodmare_sire_name": "Giant's Causeway (米)",
+      "fetched_at": "2026-06-20"
     },
     "2022104959": {
       "sire_name": "シルバーステート",
       "broodmare_sire_name": "Royal Anthem",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-20"
     },
-    "2019103885": {
-      "sire_name": "ゴールドシップ",
-      "broodmare_sire_name": "ボストンハーバー Boston Harbor(米)",
-      "fetched_at": "2026-06-10"
+    "2022105769": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "Dynaformer",
+      "fetched_at": "2026-06-20"
     },
-    "2022105454": {
-      "sire_name": "オルフェーヴル",
-      "broodmare_sire_name": "クロフネ",
-      "fetched_at": "2026-06-10"
+    "2022104845": {
+      "sire_name": "ドゥラメンテ",
+      "broodmare_sire_name": "ストリートセンス Street Sense(米)",
+      "fetched_at": "2026-06-20"
     },
-    "2022103787": {
+    "2020103794": {
+      "sire_name": "ハーツクライ",
+      "broodmare_sire_name": "スウェプトオーヴァーボード Swept Overboard(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2020107121": {
+      "sire_name": "ワールドエース",
+      "broodmare_sire_name": "ブライアンズタイム Brian's Time(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2021105662": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-20"
+    },
+    "2021105384": {
+      "sire_name": "ハービンジャー Harbinger(英)",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-20"
+    },
+    "2021103678": {
+      "sire_name": "サトノダイヤモンド",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-20"
+    },
+    "2020106535": {
+      "sire_name": "ビーチパトロール Beach Patrol(米)",
+      "broodmare_sire_name": "マンハッタンカフェ",
+      "fetched_at": "2026-06-20"
+    },
+    "2018106571": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "シニスターミニスター Sinister Minister(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2022100154": {
+      "sire_name": "ホッコータルマエ",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2018100830": {
+      "sire_name": "マジェスティックウォリアー Majestic Warrior(米)",
+      "broodmare_sire_name": "アグネスタキオン",
+      "fetched_at": "2026-06-20"
+    },
+    "2020104760": {
+      "sire_name": "モーリス",
+      "broodmare_sire_name": "ネオユニヴァース",
+      "fetched_at": "2026-06-20"
+    },
+    "2020105639": {
+      "sire_name": "サトノダイヤモンド",
+      "broodmare_sire_name": "タートルボウル Turtle Bowl(愛)",
+      "fetched_at": "2026-06-20"
+    },
+    "2021104159": {
+      "sire_name": "リアルスティール",
+      "broodmare_sire_name": "Distorted Humor (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2019104089": {
+      "sire_name": "ディスクリートキャット Discreet Cat(米)",
+      "broodmare_sire_name": "スペシャルウィーク",
+      "fetched_at": "2026-06-20"
+    },
+    "2020102750": {
+      "sire_name": "キズナ",
+      "broodmare_sire_name": "シンボリクリスエス",
+      "fetched_at": "2026-06-20"
+    },
+    "2022103115": {
+      "sire_name": "エスケンデレヤ",
+      "broodmare_sire_name": "エンパイアメーカー Empire Maker(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103957": {
+      "sire_name": "シルバーステート",
+      "broodmare_sire_name": "Candy Ride",
+      "fetched_at": "2026-06-20"
+    },
+    "2023107227": {
+      "sire_name": "コントレイル",
+      "broodmare_sire_name": "Giant's Causeway (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105943": {
+      "sire_name": "トーセンレーヴ",
+      "broodmare_sire_name": "アグネスデジタル",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105280": {
+      "sire_name": "キタサンブラック",
+      "broodmare_sire_name": "Congaree",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106981": {
+      "sire_name": "ラブリーデイ",
+      "broodmare_sire_name": "フレンチデピュティ French Deputy(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106410": {
+      "sire_name": "ベンバトル Benbatl(英)",
+      "broodmare_sire_name": "アグネスデジタル",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105334": {
+      "sire_name": "エピファネイア",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105337": {
       "sire_name": "レイデオロ",
       "broodmare_sire_name": "ダイワメジャー",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-20"
     },
-    "2021105438": {
+    "2023104676": {
+      "sire_name": "リオンリオン",
+      "broodmare_sire_name": "ハービンジャー Harbinger(英)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103370": {
+      "sire_name": "コントレイル",
+      "broodmare_sire_name": "Curlin (米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2023102039": {
+      "sire_name": "ロジャーバローズ",
+      "broodmare_sire_name": "アグネスデジタル",
+      "fetched_at": "2026-06-20"
+    },
+    "2023106924": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "キングカメハメハ",
+      "fetched_at": "2026-06-20"
+    },
+    "2023105274": {
+      "sire_name": "サートゥルナーリア",
+      "broodmare_sire_name": "E Dubai",
+      "fetched_at": "2026-06-20"
+    },
+    "2023103897": {
+      "sire_name": "スワーヴリチャード",
+      "broodmare_sire_name": "ジャングルポケット",
+      "fetched_at": "2026-06-20"
+    },
+    "2020106987": {
+      "sire_name": "ディスクリートキャット Discreet Cat(米)",
+      "broodmare_sire_name": "サウスヴィグラス",
+      "fetched_at": "2026-06-20"
+    },
+    "2021104576": {
+      "sire_name": "ヘニーヒューズ Henny Hughes(米)",
+      "broodmare_sire_name": "ゼンノロブロイ",
+      "fetched_at": "2026-06-20"
+    },
+    "2019101753": {
+      "sire_name": "ラブリーデイ",
+      "broodmare_sire_name": "ブライアンズタイム Brian's Time(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2021101077": {
       "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "Tiznow",
+      "fetched_at": "2026-06-20"
+    },
+    "2022105381": {
+      "sire_name": "リオンディーズ",
+      "broodmare_sire_name": "スウェプトオーヴァーボード Swept Overboard(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2021104874": {
+      "sire_name": "ドレフォン Drefong(米)",
+      "broodmare_sire_name": "ワークフォース Workforce(英)",
+      "fetched_at": "2026-06-20"
+    },
+    "2021105849": {
+      "sire_name": "ニューイヤーズデイ",
       "broodmare_sire_name": "ハーツクライ",
-      "fetched_at": "2026-06-10"
+      "fetched_at": "2026-06-20"
     },
-    "2021105639": {
-      "sire_name": "ミッキーロケット",
-      "broodmare_sire_name": "ディープインパクト",
-      "fetched_at": "2026-06-10"
+    "2019102163": {
+      "sire_name": "パイロ Pyro(米)",
+      "broodmare_sire_name": "アドマイヤマックス",
+      "fetched_at": "2026-06-20"
     },
-    "2021102577": {
-      "sire_name": "メイショウサムソン",
-      "broodmare_sire_name": "マンハッタンカフェ",
-      "fetched_at": "2026-06-10"
+    "2021103145": {
+      "sire_name": "レッドファルクス",
+      "broodmare_sire_name": "ダイワメジャー",
+      "fetched_at": "2026-06-20"
     },
-    "2021104976": {
-      "sire_name": "ハーツクライ",
-      "broodmare_sire_name": "To Honor and Serve (米)",
-      "fetched_at": "2026-06-10"
+    "2021103706": {
+      "sire_name": "レッドファルクス",
+      "broodmare_sire_name": "ゴールドアリュール",
+      "fetched_at": "2026-06-20"
+    },
+    "2020104864": {
+      "sire_name": "シニスターミニスター Sinister Minister(米)",
+      "broodmare_sire_name": "ダノンシャンティ",
+      "fetched_at": "2026-06-20"
+    },
+    "2022110001": {
+      "sire_name": "Into Mischief",
+      "broodmare_sire_name": "マジェスティックウォリアー Majestic Warrior(米)",
+      "fetched_at": "2026-06-20"
+    },
+    "2022103183": {
+      "sire_name": "パイロ Pyro(米)",
+      "broodmare_sire_name": "アグネスタキオン",
+      "fetched_at": "2026-06-20"
     }
   }
 }

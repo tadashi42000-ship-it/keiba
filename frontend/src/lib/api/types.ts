@@ -168,7 +168,27 @@ export type BetRankingItem = {
   score: number;
   baseline_score?: number | null;
   bias_bonus?: number;
+  axis_score?: number;
+  value_score?: number;
+  danger_flags?: ShoshoFlag[];
+  value_flags?: ShoshoFlag[];
+  axis_demerits?: AxisDemerit[];
+  axis_demerit_total?: number;
+  danger_penalty_applied?: boolean;
+  is_value_top5?: boolean;
   reason: string;
+};
+
+export type ShoshoFlag = {
+  code: string;
+  label: string;
+  weight: number;
+};
+
+export type AxisDemerit = {
+  code: string;
+  label: string;
+  points: number;
 };
 
 export type BetTicket = {
@@ -177,6 +197,15 @@ export type BetTicket = {
   horse_names: string[];
   amount_yen: number;
   reason: string;
+  strategy?: string;
+  point_note?: string;
+  max_points?: number | null;
+};
+
+export type BetRecommendationResponse = {
+  race_shape: Record<string, unknown>;
+  tickets: BetTicket[];
+  note: string;
 };
 
 export type BetPlanResponse = {
@@ -185,6 +214,8 @@ export type BetPlanResponse = {
   provisional_only: boolean;
   ranking: BetRankingItem[];
   tickets: BetTicket[];
+  recommendations?: BetRecommendationResponse | null;
+  shosho_schema_version?: string;
   warnings: string[];
 };
 
@@ -257,7 +288,7 @@ export type TrackBias = {
   sample_size: number;
   fallback_used: boolean;
   summary_label: string;
-  confidence: "high" | "medium" | "low";
+  confidence: "high" | "medium" | "provisional" | "low";
 };
 
 export type SameDaySheetRace = {
@@ -275,6 +306,7 @@ export type SameDaySheetResponse = {
   venue: string;
   race_count: number;
   track_bias_schema_version?: string;
+  shosho_schema_version?: string;
   races: SameDaySheetRace[];
 };
 

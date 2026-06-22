@@ -48,7 +48,36 @@ def _top3_rate(top3: int, total: int) -> float:
     return round(top3 / total, 4) if total else 0.0
 
 
-def _summarize(rows: list[dict[str, Any]], *, fallback_used: bool, min_samples: int) -> dict[str, Any]:
+def _summary_labels(frame_bias: dict[str, float], style_bias: dict[str, float]) -> list[str]:
+    labels: list[str] = []
+    frame_gap = frame_bias["inner"] - frame_bias["outer"]
+    if frame_gap >= 0.08:
+        labels.append("内枠有利")
+    elif frame_gap <= -0.08:
+        labels.append("外枠有利")
+
+    best_style = ""
+    best_rate = 0.0
+    for style in STYLE_ORDER:
+        rate = style_bias.get(style, 0.0)
+        if rate > best_rate:
+            best_style = style
+            best_rate = rate
+    if best_style and best_rate >= 0.35:
+        labels.append(f"{best_style}有利")
+
+    if not labels:
+        labels.append("大きな偏りなし")
+    return labels
+
+
+def _summarize(
+    rows: list[dict[str, Any]],
+    *,
+    fallback_used: bool,
+    min_samples: int,
+    provisional: bool = False,
+) -> dict[str, Any]:
     race_ids = {str(row.get("race_id") or "") for row in rows if row.get("race_id")}
     sample_size = len(race_ids)
     frame_total = {"inner": 0, "outer": 0}
@@ -78,7 +107,7 @@ def _summarize(rows: list[dict[str, Any]], *, fallback_used: bool, min_samples: 
     }
     style_bias = {style: _top3_rate(style_top3[style], style_total[style]) for style in STYLE_ORDER}
 
-    if sample_size < min_samples:
+    if sample_size < min_samples and not provisional:
         return {
             "frame_bias": frame_bias,
             "style_bias": style_bias,
@@ -88,32 +117,17 @@ def _summarize(rows: list[dict[str, Any]], *, fallback_used: bool, min_samples: 
             "confidence": "low",
         }
 
-    labels: list[str] = []
-    frame_gap = frame_bias["inner"] - frame_bias["outer"]
-    if frame_gap >= 0.08:
-        labels.append("内枠有利")
-    elif frame_gap <= -0.08:
-        labels.append("外枠有利")
-
-    best_style = ""
-    best_rate = 0.0
-    for style in STYLE_ORDER:
-        rate = style_bias.get(style, 0.0)
-        if rate > best_rate:
-            best_style = style
-            best_rate = rate
-    if best_style and best_rate >= 0.35:
-        labels.append(f"{best_style}有利")
-
-    if not labels:
-        labels.append("大きな偏りなし")
+    labels = _summary_labels(frame_bias, style_bias)
+    summary_label = " / ".join(labels)
+    if provisional:
+        summary_label = f"暫定（{sample_size}R）: {summary_label}"
     return {
         "frame_bias": frame_bias,
         "style_bias": style_bias,
         "sample_size": sample_size,
         "fallback_used": fallback_used,
-        "summary_label": " / ".join(labels),
-        "confidence": "high" if sample_size >= 8 else "medium",
+        "summary_label": summary_label,
+        "confidence": "provisional" if provisional else ("high" if sample_size >= 8 else "medium"),
     }
 
 
@@ -125,15 +139,34 @@ def compute_track_bias(
     min_samples: int = 5,
     target_race_number: str | None = None,
 ) -> dict[str, Any]:
+    provisional_min_samples = 3
     today_same_surface_before = [
         row for row in today_results if _same_surface(row, surface) and _before_target(row, target_race_number)
     ]
     same_course = [row for row in today_same_surface_before if _same_distance_band(row, distance_m)]
-    if len({str(row.get("race_id") or "") for row in same_course if row.get("race_id")}) >= min_samples:
+    same_course_count = len({str(row.get("race_id") or "") for row in same_course if row.get("race_id")})
+    today_same_surface_count = len({str(row.get("race_id") or "") for row in today_same_surface_before if row.get("race_id")})
+    if same_course_count >= min_samples:
         return _summarize(same_course, fallback_used=False, min_samples=min_samples)
 
-    if len({str(row.get("race_id") or "") for row in today_same_surface_before if row.get("race_id")}) >= min_samples:
+    if today_same_surface_count >= min_samples:
         return _summarize(today_same_surface_before, fallback_used=True, min_samples=min_samples)
+
+    if same_course_count >= provisional_min_samples:
+        return _summarize(
+            same_course,
+            fallback_used=False,
+            min_samples=provisional_min_samples,
+            provisional=True,
+        )
+
+    if today_same_surface_count >= provisional_min_samples:
+        return _summarize(
+            today_same_surface_before,
+            fallback_used=True,
+            min_samples=provisional_min_samples,
+            provisional=True,
+        )
 
     combined = today_same_surface_before + [row for row in yesterday_results if _same_surface(row, surface)]
     return _summarize(combined, fallback_used=bool(today_same_surface_before or yesterday_results), min_samples=min_samples)

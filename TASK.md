@@ -1235,3 +1235,67 @@
 - 次回着手:
   - 6/14当日はPCで `python scripts\run_same_day_updater.py --date 2026-06-14 --venue tokyo --loop` を起動し、スマホ側はキャッシュ読込を中心に使う。
   - Claude Code側で `tmp/verify_phase1_realtime.py` / `tmp/verify_samedaymode_full.py` 相当のCLI Playwright検証を再実行し、直前オッズ公開後の急変表示を確認する。
+
+### 2026-06-10 / Session-MOBILE-SD-032
+- 実施内容:
+  - Windows常駐/自動起動化の初期実装として `scripts/start_same_day_updater.ps1` / `scripts/stop_same_day_updater.ps1` / `scripts/register_same_day_updater_task.ps1` を追加。
+  - `run_same_day_updater.py` に `--status-file` を追加し、`ok` / `idle` / `warn` / `stopped` のステータスJSONを書き出すようにした。
+  - 同一ブラウザ複数タブ対策として `useRaceAutoRefresh` に `BroadcastChannel` + localStorage lease のleader制御を追加。1タブだけが定期キャッシュ読込を担当し、他タブは更新通知を受けてキャッシュを読み直す。
+- 結果:
+  - 家PC側はワンコマンドでupdaterを常駐起動でき、PID/log/statusを `tmp/` に残す構成になった。
+  - タスクスケジューラ登録コマンドで当日朝の自動起動を予約できる。
+  - スマホ/PCの複数タブは同一ブラウザ内ならポーリング主体を1つに抑えられる。複数端末間はPC updaterを唯一のlive fetch係にする運用を継続。
+- Verification:
+  - Frontend: `cd frontend; npm run lint` passed。
+  - Frontend: `cd frontend; npm run build` passed。
+  - Python: `python -m py_compile scripts\run_same_day_updater.py` passed。
+  - PowerShell: 追加3スクリプトを `[scriptblock]::Create(...)` で構文確認。
+  - Updater smoke: `powershell -File scripts\start_same_day_updater.ps1 -Date 2026-06-14 -Venue tokyo -LookaheadMin 10000 -Once` で1サイクル成功し、`tmp/same_day_updater.status.json` に `9R 芦ノ湖特別` / `status=ok` を出力。
+  - `-Once` 実行時は短時間終了を正常完了として扱い、終了後に `tmp/same_day_updater.pid` を削除することを確認（`EXITCODE=0`, `PID_EXISTS=0`）。
+- 発生課題:
+  - PowerShellの通常表示ではUTF-8 JSON/logが文字化けする場合がある。確認時は `Get-Content -Encoding UTF8 tmp\same_day_updater.status.json` を使う。
+  - `BroadcastChannel` は同一ブラウザ/同一origin内のみ有効。別スマホ端末間の調停はできないため、重い更新はPC updaterへ寄せる。
+- 次回着手:
+  - PWA画面上に `same_day_updater.status.json` を読む「PC更新状態」表示を追加すると、現地で稼働確認しやすくなる。
+  - 6/14前にタスクスケジューラ登録を本番時刻で一度リハーサルする。
+
+### 2026-06-10 / Session-MOBILE-SD-033
+- 実施内容:
+  - 6/14東京で不足していた血統適性DBを追加。`Iffraaj` / `メイショウサムソン` / `Kodiac` / `Pulpit` / `Grand Slam` など16件を `backend/app/data/sire_aptitude.json` にマージ。
+  - 血統評価が買い目スコアに効きすぎる問題への短期対応として、父・母父のボーナス係数を中庸化。
+  - 父は基本最大 `+0.070`、母父は基本最大 `+0.025`。`△` は微減点、`×` は明確な減点、`max_score` が低い場合は係数を減衰。
+  - 新馬戦など近走材料が薄いケースでは血統ファクターを最大1.2倍にし、近走が豊富な馬では通常係数にする。
+  - 6/14東京の同日シートキャッシュを血統DB追加後・中庸係数後の内容で再計算。
+  - ChatGPT再検証後の `sire_aptitude_soft_adjusted.json` を採用し、`backend/app/data/sire_aptitude.json` を300件版に更新。
+  - 採用後、6/14東京の同日シートキャッシュを再計算（`generated_at=2026-06-10T23:55:14`）。
+- 結果:
+  - 6/14東京の血統適性DB不足は `0件`。
+  - 同日シート内の父/母父評価空欄も `0件`。
+  - 採用DBの分布は `confidence: high=147 / medium=125 / low=28`。`soft ×` も11件あり、道悪を全員○以上にする偏りは解消。
+  - 血統は理由文に残しつつ、近走材料が薄い馬では判断材料として残る程度に調整した。
+- Verification:
+  - Backend: `$env:PYTHONPATH='.'; pytest tests/test_same_day_api.py -q` passed（34/34）。
+  - Python: `python -m py_compile backend\app\services\same_day_service.py` passed。
+  - JSON: `backend/app/data/sire_aptitude.json` のスキーマ検証 passed（300件、mark/confidence不正なし）。
+  - 6/14東京キャッシュ再計算後、9R/10R/11Rのbet_plan rankingを確認。
+- 発生課題:
+  - 種牡馬DB自体はまだ好意的な評価が多い。必要なら後続でGeminiに辛口レビューさせ、`confidence` / `caution` のような補助フィールド追加を検討する。
+
+### 2026-06-14 / Session-MOBILE-SD-034
+- 実施内容:
+  - 6/14東京競馬場の当日シートを5R以降に絞って再生成。
+  - 対象は `5R`〜`12R` の8レース。`1R`〜`4R` は同日シートキャッシュから除外。
+  - 生成後、各Rの揮発更新を実行し、単勝オッズをキャッシュへ反映。
+  - ローカル確認用に backend/frontend を `start_mobile_pwa.ps1 -SkipBuild -NoTunnel` で起動。
+- 結果:
+  - `data/same_day_sheets/2026-06-14_tokyo_same_day_sheet.json` は `race_count=8`。
+  - 5R〜12Rの出走頭数は `8/16/8/16/11/14/14/12`、全頭で単勝オッズ取得済み。
+  - 馬体重は現時点で `0件`。公開後はPC updaterの揮発更新で反映する。
+  - `start_same_day_updater.ps1 -Once -LookaheadMin 10000` は5Rを対象に `status=ok`、`odds_count=8`、`EXITCODE=0`、PID残留なし。
+- Verification:
+  - API: `/api/v1/races/same-day-sheet?date=2026-06-14&venue=東京` が5R〜12Rのみ返すことを確認。
+  - Playwright CLI: `python tmp\verify_0614_tokyo_cache.py` passed（PASS=9 / FAIL=0 / WARN=0）。
+  - 390px mobile viewportで一覧・5R詳細とも横スクロールなし。
+- 発生課題:
+  - 起動は `-NoTunnel` のためローカル確認のみ。現地スマホから見る場合は別途トンネル起動が必要。
+  - 5R時点では馬体重が未取得。公開後に `scripts\start_same_day_updater.ps1 -Date 2026-06-14 -Venue tokyo -LookaheadMin 10000 -Once` または `--loop` 相当で更新する。

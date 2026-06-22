@@ -156,6 +156,18 @@ class BetPlanRequest(BaseModel):
     budget_yen: int = Field(default=3000, ge=100, le=100000)
 
 
+class ShoshoFlag(BaseModel):
+    code: str = ""
+    label: str = ""
+    weight: float = 0.0
+
+
+class AxisDemerit(BaseModel):
+    code: str = ""
+    label: str = ""
+    points: int = 0
+
+
 class BetRankingItem(BaseModel):
     horse_name: str
     umaban: str = ""
@@ -165,6 +177,14 @@ class BetRankingItem(BaseModel):
     score: float
     baseline_score: float | None = None
     bias_bonus: float = 0.0
+    axis_score: float = 0.0
+    value_score: float = 0.0
+    danger_flags: list[ShoshoFlag] = Field(default_factory=list)
+    value_flags: list[ShoshoFlag] = Field(default_factory=list)
+    axis_demerits: list[AxisDemerit] = Field(default_factory=list)
+    axis_demerit_total: int = 0
+    danger_penalty_applied: bool = False
+    is_value_top5: bool = False
     reason: str = ""
 
 
@@ -174,6 +194,15 @@ class BetTicket(BaseModel):
     horse_names: list[str] = Field(default_factory=list)
     amount_yen: int
     reason: str = ""
+    strategy: str = ""
+    point_note: str = ""
+    max_points: int | None = None
+
+
+class BetRecommendationResponse(BaseModel):
+    race_shape: dict[str, Any] = Field(default_factory=dict)
+    tickets: list[BetTicket] = Field(default_factory=list)
+    note: str = ""
 
 
 class BetPlanResponse(BaseModel):
@@ -182,6 +211,8 @@ class BetPlanResponse(BaseModel):
     provisional_only: bool
     ranking: list[BetRankingItem]
     tickets: list[BetTicket]
+    recommendations: BetRecommendationResponse | None = None
+    shosho_schema_version: str = ""
     warnings: list[str] = Field(default_factory=list)
 
 
@@ -333,6 +364,7 @@ class SameDaySheetResponse(BaseModel):
     venue: str
     race_count: int
     track_bias_schema_version: str = "v1"
+    shosho_schema_version: str = "v1"
     races: list[SameDaySheetRace]
 
 

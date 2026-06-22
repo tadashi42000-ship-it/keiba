@@ -40,6 +40,7 @@ from app.services.same_day_service import (
     get_course_stats_snapshot,
     get_entry_snapshot,
     get_same_day_races,
+    normalize_venue,
     refresh_same_day_sheet_volatile,
 )
 
@@ -67,6 +68,7 @@ def api_same_day_races(
     target_date: Date = Query(..., alias="date"),
     venue: str | None = Query(default=None),
 ) -> SameDayRacesResponse:
+    venue = normalize_venue(venue) if venue else None
     result = get_same_day_races(target_date=target_date, venue=venue)
     return SameDayRacesResponse(**result)
 
@@ -78,6 +80,7 @@ def api_same_day_sheet(
     budget_yen: int = Query(default=3000, ge=100, le=100000),
     refresh: bool = Query(default=False),
 ) -> SameDaySheetResponse:
+    venue = normalize_venue(venue)
     result = build_same_day_sheet_snapshot(
         target_date=target_date,
         venue=venue,
@@ -95,6 +98,7 @@ def api_same_day_sheet_refresh_volatile(
     race_id: str | None = Query(default=None),
     race_number: str | None = Query(default=None),
 ) -> SameDaySheetResponse:
+    venue = normalize_venue(venue)
     result = refresh_same_day_sheet_volatile(
         target_date=target_date,
         venue=venue,

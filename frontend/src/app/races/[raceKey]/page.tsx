@@ -74,6 +74,8 @@ type RaceMeta = {
 
 type RaceDetailCachePayload = {
   savedAt: string;
+  savedAtIso?: string;
+  serverGeneratedAt?: string;
   race: RaceMeta;
   entry: RaceEntryResponse | null;
   courseStats: RaceCourseStatsResponse | null;
@@ -100,6 +102,38 @@ function formatOdds(value: number | null): string {
 function formatCandidateIndex(value: number): string {
   if (!Number.isFinite(value)) return "-";
   return `${Math.round(value * 100)}`;
+}
+
+function formatOptionalIndex(value?: number | null): string {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+  return formatCandidateIndex(value);
+}
+
+function shoshoFlagLabels(flags?: { label: string }[]): string {
+  return flags?.map((flag) => flag.label).filter(Boolean).join("・") || "-";
+}
+
+function raceShapeLabel(shape?: Record<string, unknown>): string {
+  const label = shape?.label;
+  return typeof label === "string" && label ? label : "標準";
+}
+
+function shapeNumber(shape: Record<string, unknown> | undefined, key: string): number | null {
+  const value = shape?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function raceShapeMetrics(shape?: Record<string, unknown>): string[] {
+  const hatsuran = shapeNumber(shape, "hatsuran_do");
+  const axisPlace = shapeNumber(shape, "axis_place_prob");
+  const pace = shape?.pace_pattern;
+  const confidence = shape?.aite_confidence;
+  return [
+    hatsuran === null ? "" : `波乱度 ${Math.round(hatsuran * 100)}%`,
+    axisPlace === null ? "" : `軸連対 ${Math.round(axisPlace * 100)}%`,
+    typeof confidence === "string" && confidence ? `相手 ${confidence}` : "",
+    typeof pace === "string" && pace ? `展開 ${pace}` : "",
+  ].filter(Boolean);
 }
 
 function formatBodyWeightBucket(value?: string | null): string {
@@ -230,13 +264,14 @@ function readDetailCache(meta: RaceMeta, raceKey: string): RaceDetailCachePayloa
   }
 }
 
-function writeDetailCache(meta: RaceMeta, payload: Omit<RaceDetailCachePayload, "savedAt">): string | null {
+function writeDetailCache(meta: RaceMeta, payload: Omit<RaceDetailCachePayload, "savedAt" | "savedAtIso">): string | null {
   if (typeof window === "undefined") return null;
-  const savedAt = new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+  const now = new Date();
+  const savedAt = now.toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
   try {
     window.localStorage.setItem(
       detailCacheKey(meta, meta.race_key),
-      JSON.stringify({ ...payload, savedAt }),
+      JSON.stringify({ ...payload, savedAt, savedAtIso: now.toISOString() }),
     );
     window.dispatchEvent(new Event(DETAIL_CACHE_EVENT));
     return savedAt;
@@ -270,9 +305,10 @@ function cleanupOldDetailCaches(): void {
   }
 }
 
-function detailPayloadFromSheetItem(item: SameDaySheetRace): Omit<RaceDetailCachePayload, "savedAt"> {
+function detailPayloadFromSheetItem(item: SameDaySheetRace, serverGeneratedAt?: string): Omit<RaceDetailCachePayload, "savedAt" | "savedAtIso"> {
   const meta = metaFromUpcoming(item.race);
   return {
+    serverGeneratedAt,
     race: meta,
     entry: item.entry,
     courseStats: item.course_stats,
@@ -282,7 +318,7 @@ function detailPayloadFromSheetItem(item: SameDaySheetRace): Omit<RaceDetailCach
   };
 }
 
-async function readDetailFromSheetCache(meta: RaceMeta, raceKey: string): Promise<Omit<RaceDetailCachePayload, "savedAt"> | null> {
+async function readDetailFromSheetCache(meta: RaceMeta, raceKey: string): Promise<Omit<RaceDetailCachePayload, "savedAt" | "savedAtIso"> | null> {
   if (!meta.date_iso || !meta.venue) return null;
   try {
     const sheet = await getSameDaySheet(meta.date_iso, meta.venue, 3000, false);
@@ -296,10 +332,55 @@ async function readDetailFromSheetCache(meta: RaceMeta, raceKey: string): Promis
     });
     if (!item || !item.entry) return null;
     if (!entryHasRecentRunDetailShape(item.entry)) return null;
-    return detailPayloadFromSheetItem(item);
+    return detailPayloadFromSheetItem(item, sheet.generated_at);
   } catch {
     return null;
   }
+}
+
+function detailFreshnessMs(payload: Partial<RaceDetailCachePayload> | null): number {
+  if (!payload) return 0;
+  const candidates = [payload.serverGeneratedAt, payload.savedAtIso];
+  for (const value of candidates) {
+    if (!value) continue;
+    const parsed = Date.parse(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return 0;
+}
+
+function chooseDetailPayload(
+  localPayload: RaceDetailCachePayload | null,
+  sheetPayload: Omit<RaceDetailCachePayload, "savedAt" | "savedAtIso"> | null,
+): { payload: RaceDetailCachePayload | Omit<RaceDetailCachePayload, "savedAt" | "savedAtIso">; source: "local" | "sheet" } | null {
+  if (!localPayload && !sheetPayload) return null;
+  if (!localPayload) return sheetPayload ? { payload: sheetPayload, source: "sheet" } : null;
+  if (!sheetPayload) return { payload: localPayload, source: "local" };
+  if (sheetPayload.serverGeneratedAt && !localPayload.serverGeneratedAt) {
+    return { payload: sheetPayload, source: "sheet" };
+  }
+  return detailFreshnessMs(sheetPayload) > detailFreshnessMs(localPayload)
+    ? { payload: sheetPayload, source: "sheet" }
+    : { payload: localPayload, source: "local" };
+}
+
+function oddsRecalcText(entry: RaceEntryResponse | null): string {
+  const updatedAt = entry?.odds_updated_at || entry?.body_updated_at;
+  return updatedAt ? `買い目は最新オッズで再計算 ${updatedAt}` : "買い目はキャッシュ済みオッズで計算";
+}
+
+function biasConfidenceLabel(confidence?: string): string {
+  if (confidence === "high") return "高";
+  if (confidence === "medium") return "中";
+  if (confidence === "provisional") return "暫定";
+  return "サンプル不足";
+}
+
+function biasConfidenceClass(confidence?: string): string {
+  if (confidence === "high") return "bg-emerald-100 text-emerald-800";
+  if (confidence === "medium") return "bg-sky-100 text-sky-800";
+  if (confidence === "provisional") return "bg-amber-100 text-amber-800";
+  return "bg-slate-100 text-slate-600";
 }
 
 function findRaceItemInSheet(races: SameDaySheetRace[], meta: RaceMeta, raceKey: string): SameDaySheetRace | null {
@@ -529,11 +610,16 @@ function buildRaceResearchMarkdown({
 
   lines.push("## 候補馬ランキング");
   if (betPlan?.ranking.length) {
-    lines.push("| 順位 | 馬番 | 馬名 | 単勝 | 脚質 | 候補指数 | 理由 |");
-    lines.push("|---:|---:|---|---:|---|---:|---|");
+    lines.push("| 順位 | ★ | 馬番 | 馬名 | 単勝 | 脚質 | 候補指数 | 軸信頼 | 妙味 | フラグ | 理由 |");
+    lines.push("|---:|---|---:|---|---:|---|---:|---:|---:|---|---|");
     betPlan.ranking.forEach((item, idx) => {
+      const flags = [
+        item.danger_flags?.length ? `危険:${shoshoFlagLabels(item.danger_flags)}` : "",
+        item.value_flags?.length ? `妙味:${shoshoFlagLabels(item.value_flags)}` : "",
+        item.axis_demerit_total ? `軸減点${item.axis_demerit_total}` : "",
+      ].filter(Boolean).join(" / ");
       lines.push(
-        `| ${idx + 1} | ${mdCell(item.umaban)} | ${mdCell(item.horse_name)} | ${mdCell(formatOdds(item.odds))} | ${mdCell(item.style)} | ${mdCell(formatCandidateIndex(item.score))} | ${mdCell(item.reason)} |`,
+        `| ${idx + 1} | ${item.is_value_top5 ? "★" : ""} | ${mdCell(item.umaban)} | ${mdCell(item.horse_name)} | ${mdCell(formatOdds(item.odds))} | ${mdCell(item.style)} | ${mdCell(formatCandidateIndex(item.score))} | ${mdCell(formatOptionalIndex(item.axis_score))} | ${mdCell(formatOptionalIndex(item.value_score))} | ${mdCell(flags || "-")} | ${mdCell(item.reason)} |`,
       );
     });
   } else {
@@ -542,6 +628,24 @@ function buildRaceResearchMarkdown({
   lines.push("");
 
   lines.push("## 買い目");
+  if (betPlan?.recommendations) {
+    lines.push(`- レース判定: ${mdText(raceShapeLabel(betPlan.recommendations.race_shape))}`);
+    const metrics = raceShapeMetrics(betPlan.recommendations.race_shape);
+    if (metrics.length) {
+      lines.push(`- 新指標: ${mdText(metrics.join(" / "))}`);
+    }
+    if (betPlan.recommendations.note) {
+      lines.push(`- 推奨メモ: ${mdText(betPlan.recommendations.note)}`);
+    }
+    if (betPlan.recommendations.tickets.length) {
+      lines.push("| 推奨券種 | 買い目 | 金額 | 点数 | 理由 |");
+      lines.push("|---|---|---:|---|---|");
+      betPlan.recommendations.tickets.forEach((ticket) => {
+        lines.push(`| ${mdCell(ticket.type)} | ${mdCell(ticket.selection)} | ${mdCell(`${ticket.amount_yen}円`)} | ${mdCell(ticket.point_note || "-")} | ${mdCell(ticket.reason)} |`);
+      });
+    }
+    lines.push("");
+  }
   if (betPlan?.tickets.length) {
     lines.push(`- 予算: ${betPlan.budget_yen.toLocaleString("ja-JP")}円`);
     lines.push(`- 暫定表示: ${betPlan.provisional_only ? "はい" : "いいえ"}`);
@@ -686,7 +790,7 @@ export default function RaceDetailPage() {
     }
   }, [entry, pushOddsSnapshot, race]);
 
-  const applySameDaySheet = useCallback((sheet: { races: SameDaySheetRace[] }) => {
+  const applySameDaySheet = useCallback((sheet: { generated_at?: string; races: SameDaySheetRace[] }) => {
     if (!race) return false;
     const item = findRaceItemInSheet(sheet.races, race, raceKey);
     if (!item || !item.entry) return;
@@ -704,6 +808,7 @@ export default function RaceDetailPage() {
     setTrackBias(nextTrackBias);
     setLoadedFromCache(false);
     const savedAt = writeDetailCache(nextRace, {
+      serverGeneratedAt: sheet.generated_at,
       race: nextRace,
       entry: item.entry,
       courseStats: nextCourseStats,
@@ -809,6 +914,36 @@ export default function RaceDetailPage() {
     });
   }, [raceIdForMarks, researchDrift, toast]);
 
+  const applyDetailPayload = useCallback(
+    (
+      payload: RaceDetailCachePayload | Omit<RaceDetailCachePayload, "savedAt" | "savedAtIso">,
+      source: "local" | "sheet",
+    ) => {
+      setRace(payload.race);
+      setEntry(payload.entry);
+      setCourseStats(payload.courseStats);
+      setBetPlan(payload.betPlan);
+      setTrackBias(payload.trackBias ?? null);
+      setExternalSnapshot(payload.externalSnapshot ?? null);
+      if (source === "sheet") {
+        const savedAt = writeDetailCache(payload.race, {
+          serverGeneratedAt: payload.serverGeneratedAt,
+          race: payload.race,
+          entry: payload.entry,
+          courseStats: payload.courseStats,
+          betPlan: payload.betPlan,
+          trackBias: payload.trackBias ?? null,
+          externalSnapshot: payload.externalSnapshot ?? null,
+        });
+        setCacheSavedAt(savedAt);
+      } else {
+        setCacheSavedAt((payload as RaceDetailCachePayload).savedAt ?? null);
+      }
+      setLoadedFromCache(true);
+    },
+    [],
+  );
+
   async function loadAll(forceRefresh = false, baseMeta?: RaceMeta) {
     const meta = baseMeta ?? race ?? metaFromQuery(raceKey, searchParams);
     if (forceRefresh) setRefreshing(true);
@@ -818,30 +953,10 @@ export default function RaceDetailPage() {
       let resolvedMeta = meta;
       if (!forceRefresh) {
         const cached = readDetailCache(resolvedMeta, raceKey);
-        if (cached) {
-          setRace(cached.race);
-          setEntry(cached.entry);
-          setCourseStats(cached.courseStats);
-          setBetPlan(cached.betPlan);
-          setTrackBias(cached.trackBias ?? null);
-          setExternalSnapshot(cached.externalSnapshot ?? null);
-          setCacheSavedAt(cached.savedAt);
-          setLoadedFromCache(true);
-          setLoading(false);
-          setRefreshing(false);
-          return;
-        }
         const sheetCached = await readDetailFromSheetCache(resolvedMeta, raceKey);
-        if (sheetCached) {
-          setRace(sheetCached.race);
-          setEntry(sheetCached.entry);
-          setCourseStats(sheetCached.courseStats);
-          setBetPlan(sheetCached.betPlan);
-          setTrackBias(sheetCached.trackBias ?? null);
-          setExternalSnapshot(sheetCached.externalSnapshot ?? null);
-          const savedAt = writeDetailCache(sheetCached.race, sheetCached);
-          setCacheSavedAt(savedAt);
-          setLoadedFromCache(true);
+        const choice = chooseDetailPayload(cached, sheetCached);
+        if (choice) {
+          applyDetailPayload(choice.payload, choice.source);
           setLoading(false);
           setRefreshing(false);
           return;
@@ -853,30 +968,10 @@ export default function RaceDetailPage() {
       }
       if (!forceRefresh) {
         const cached = readDetailCache(resolvedMeta, raceKey);
-        if (cached) {
-          setRace(cached.race);
-          setEntry(cached.entry);
-          setCourseStats(cached.courseStats);
-          setBetPlan(cached.betPlan);
-          setTrackBias(cached.trackBias ?? null);
-          setExternalSnapshot(cached.externalSnapshot ?? null);
-          setCacheSavedAt(cached.savedAt);
-          setLoadedFromCache(true);
-          setLoading(false);
-          setRefreshing(false);
-          return;
-        }
         const sheetCached = await readDetailFromSheetCache(resolvedMeta, raceKey);
-        if (sheetCached) {
-          setRace(sheetCached.race);
-          setEntry(sheetCached.entry);
-          setCourseStats(sheetCached.courseStats);
-          setBetPlan(sheetCached.betPlan);
-          setTrackBias(sheetCached.trackBias ?? null);
-          setExternalSnapshot(sheetCached.externalSnapshot ?? null);
-          const savedAt = writeDetailCache(sheetCached.race, sheetCached);
-          setCacheSavedAt(savedAt);
-          setLoadedFromCache(true);
+        const choice = chooseDetailPayload(cached, sheetCached);
+        if (choice) {
+          applyDetailPayload(choice.payload, choice.source);
           setLoading(false);
           setRefreshing(false);
           return;
@@ -975,8 +1070,8 @@ export default function RaceDetailPage() {
         return;
       }
       try {
-        const response = await getSameDayRaces(race.date_iso, race.venue);
-        const races = [...response.races].sort((a, b) => {
+        const sheet = await getSameDaySheet(race.date_iso, race.venue, 3000, false);
+        const races = sheet.races.map((item) => item.race).sort((a, b) => {
           const aNo = Number.parseInt(String(a.race_number || "").replace(/\D/g, ""), 10) || 0;
           const bNo = Number.parseInt(String(b.race_number || "").replace(/\D/g, ""), 10) || 0;
           return aNo - bNo;
@@ -992,9 +1087,28 @@ export default function RaceDetailPage() {
         setPrevRace(index > 0 ? races[index - 1] : null);
         setNextRace(index >= 0 && index < races.length - 1 ? races[index + 1] : null);
       } catch {
-        if (!mounted) return;
-        setPrevRace(null);
-        setNextRace(null);
+        try {
+          const response = await getSameDayRaces(race.date_iso, race.venue);
+          const races = [...response.races].sort((a, b) => {
+            const aNo = Number.parseInt(String(a.race_number || "").replace(/\D/g, ""), 10) || 0;
+            const bNo = Number.parseInt(String(b.race_number || "").replace(/\D/g, ""), 10) || 0;
+            return aNo - bNo;
+          });
+          const index = races.findIndex((item) => {
+            return (
+              (race.race_id && item.race_id === race.race_id) ||
+              item.race_key === race.race_key ||
+              (item.race_number && item.race_number === race.race_number)
+            );
+          });
+          if (!mounted) return;
+          setPrevRace(index > 0 ? races[index - 1] : null);
+          setNextRace(index >= 0 && index < races.length - 1 ? races[index + 1] : null);
+        } catch {
+          if (!mounted) return;
+          setPrevRace(null);
+          setNextRace(null);
+        }
       }
     }
     void loadSiblingRaces();
@@ -1030,7 +1144,7 @@ export default function RaceDetailPage() {
         </button>
       </div>
 
-      {(prevRace || nextRace) ? (
+      {race?.date_iso && race.venue ? (
         <div className="mt-3 grid grid-cols-2 gap-2">
           {prevRace ? (
             <Link
@@ -1771,6 +1885,9 @@ function EntryTab({
         <p className="mt-1 text-lg font-black text-slate-900">{entry.style_distribution_label || "-"}</p>
         {trackBias?.summary_label ? (
           <div className="mt-2 rounded-2xl bg-indigo-50 px-3 py-2 text-xs text-indigo-800">
+            <span className={`mr-2 rounded-full px-2 py-0.5 text-[10px] font-black ${biasConfidenceClass(trackBias.confidence)}`}>
+              {biasConfidenceLabel(trackBias.confidence)}
+            </span>
             <span className="font-black">バイアス:</span> {trackBias.summary_label}
             <span className="ml-2 text-[10px] opacity-70">
               ({trackBias.sample_size}R{trackBias.fallback_used ? " / 同会場他コース" : ""})
@@ -2299,6 +2416,8 @@ type PaddockAdjustedRankingItem = BetRankingItem & {
   paddock_reason: string;
 };
 
+type BetRankingSort = "score" | "axis" | "value";
+
 function adjustRankingWithPaddockNotes(
   ranking: BetRankingItem[],
   entry: RaceEntryResponse | null,
@@ -2345,10 +2464,18 @@ function BetTab({
   researchDrift: ResearchDrift;
   isRestoringResearch: boolean;
 }) {
+  const [rankingSort, setRankingSort] = useState<BetRankingSort>("score");
   if (!betPlan) {
     return <EmptyCard message="買い目候補を取得中です。" />;
   }
   const adjustedRanking = adjustRankingWithPaddockNotes(betPlan.ranking, entry, paddockNotes);
+  const displayedRanking = [...adjustedRanking].sort((a, b) => {
+    if (rankingSort === "axis") return (b.axis_score ?? -999) - (a.axis_score ?? -999);
+    if (rankingSort === "value") return (b.value_score ?? -999) - (a.value_score ?? -999);
+    if (b.adjusted_score !== a.adjusted_score) return b.adjusted_score - a.adjusted_score;
+    return b.score - a.score;
+  });
+  const rankingMetricLabel = rankingSort === "axis" ? "軸信頼" : rankingSort === "value" ? "妙味" : "候補指数";
   return (
     <section className="mt-3 space-y-3">
       {betPlan.provisional_only ? (
@@ -2361,15 +2488,88 @@ function BetTab({
           {warning}
         </p>
       ))}
+      {betPlan.recommendations ? (
+        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-emerald-100">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-black text-slate-900">買い推奨</p>
+              <p className="mt-1 text-xs font-bold text-emerald-700">{raceShapeLabel(betPlan.recommendations.race_shape)}</p>
+              {raceShapeMetrics(betPlan.recommendations.race_shape).length ? (
+                <p className="mt-1 text-[11px] font-bold text-slate-500">
+                  {raceShapeMetrics(betPlan.recommendations.race_shape).join(" / ")}
+                </p>
+              ) : null}
+            </div>
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-800">丞相メソッド</span>
+          </div>
+          <p className="mt-2 text-[11px] font-black text-emerald-700">{oddsRecalcText(entry)}</p>
+          {betPlan.recommendations.note ? (
+            <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">{betPlan.recommendations.note}</p>
+          ) : null}
+          {betPlan.recommendations.tickets.length ? (
+            <div className="mt-3 space-y-2">
+              {betPlan.recommendations.tickets.map((ticket, idx) => (
+                <div key={`${ticket.type}-${ticket.selection}-${idx}`} className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-950">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-black">{ticket.type}</span>
+                    <span className="text-xs font-bold">{ticket.point_note || ""}</span>
+                  </div>
+                  <p className="mt-1 font-semibold">{ticket.selection}</p>
+                  <p className="mt-1 text-xs">{ticket.reason}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
       <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-        <p className="text-sm font-black text-slate-900">候補馬ランキング</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-sm font-black text-slate-900">候補馬ランキング</p>
+            <p className="mt-1 text-[11px] font-semibold text-slate-500">3指数は役割別です。負値は割引評価を示します。</p>
+          </div>
+          <div className="inline-flex rounded-xl bg-slate-100 p-1 text-[11px] font-black text-slate-600">
+            {[
+              ["score", "候補"],
+              ["axis", "軸信頼"],
+              ["value", "妙味"],
+            ].map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setRankingSort(key as BetRankingSort)}
+                className={`rounded-lg px-2 py-1 ${rankingSort === key ? "bg-white text-slate-950 shadow-sm" : ""}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="mt-3 space-y-2">
-          {adjustedRanking.slice(0, 8).map((item, idx) => (
+          {displayedRanking.slice(0, 8).map((item, idx) => (
             <div key={`${item.horse_name}-${idx}`} className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2">
               <div>
                 <p className="text-sm font-black text-slate-900">
+                  {item.is_value_top5 ? <span className="mr-1 text-amber-500">★</span> : null}
                   {idx + 1}. {item.horse_name}
                 </p>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {item.danger_flags?.length ? (
+                    <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-700">
+                      ⚠ {shoshoFlagLabels(item.danger_flags)}
+                    </span>
+                  ) : null}
+                  {item.value_flags?.length ? (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black text-amber-800">
+                      🎯 {shoshoFlagLabels(item.value_flags)}
+                    </span>
+                  ) : null}
+                  {item.axis_demerit_total ? (
+                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-black text-slate-700">
+                      軸減点 {item.axis_demerit_total}
+                    </span>
+                  ) : null}
+                </div>
                 <p className="text-xs text-slate-500">
                   {item.umaban || "-"}番 / {item.style || "-"} / {item.reason}
                   {item.paddock_reason ? ` / 現地${item.paddock_reason}` : ""}
@@ -2382,8 +2582,13 @@ function BetTab({
                     {Math.round(item.paddock_bonus * 100)}
                   </p>
                 ) : null}
-                <p className="text-sm font-black text-emerald-700">{formatCandidateIndex(item.adjusted_score)}</p>
-                <p className="text-[10px] font-bold text-slate-400">候補指数</p>
+                <p className="text-sm font-black text-emerald-700">
+                  {rankingSort === "axis" ? formatOptionalIndex(item.axis_score) : rankingSort === "value" ? formatOptionalIndex(item.value_score) : formatCandidateIndex(item.adjusted_score)}
+                </p>
+                <p className="text-[10px] font-bold text-slate-400">{rankingMetricLabel}</p>
+                <p className="text-[10px] font-semibold text-slate-400">
+                  軸 {formatOptionalIndex(item.axis_score)} / 妙 {formatOptionalIndex(item.value_score)}
+                </p>
               </div>
             </div>
           ))}
